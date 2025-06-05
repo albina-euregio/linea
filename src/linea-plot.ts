@@ -61,6 +61,14 @@ export class LineaPlot extends HTMLElement {
       );
     }
   }
+
+  static observedAttributes = ["src"];
+
+  attributeChangedCallback(name: string) {
+    if (name === "src") {
+      this.connectedCallback();
+    }
+  }
 }
 
 customElements.define("linea-plot", LineaPlot);
