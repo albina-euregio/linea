@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import "uplot/dist/uPlot.min.css";
+import css from "uplot/dist/uPlot.min.css?raw";
 import { dewPoint } from "./linea-plot/dewPoint";
 import { opts_HS_PSUM } from "./linea-plot/opts_HS_PSUM";
 import { opts_RH_GR } from "./linea-plot/opts_RH_GR";
@@ -14,11 +14,14 @@ export class LineaPlot extends HTMLElement {
       this.getAttribute("src") ?? "",
       timeRangeMilli
     );
+    const style = document.createElement("style");
+    style.textContent = css;
     const plot_TA_TD_TSS = document.createElement("div");
     const plot_VW_VWG_DW = document.createElement("div");
     const plot_HS_PSUM = document.createElement("div");
     const plot_RH_GR = document.createElement("div");
     this.replaceChildren(
+      style,
       plot_TA_TD_TSS,
       plot_VW_VWG_DW,
       plot_HS_PSUM,
