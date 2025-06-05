@@ -1,5 +1,6 @@
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
+import { dewPoint } from "./linea-plot/dewPoint";
 import { opts_HS_PSUM } from "./linea-plot/opts_HS_PSUM";
 import { opts_RH_GR } from "./linea-plot/opts_RH_GR";
 import { opts_TA_TD_TSS } from "./linea-plot/opts_TA_TD_TSS";
@@ -26,7 +27,12 @@ export class LineaPlot extends HTMLElement {
     if (values.TA) {
       new uPlot(
         opts_TA_TD_TSS,
-        [timestamps, values.TA, values.TD ?? [], values.TSS ?? []],
+        [
+          timestamps,
+          values.TA,
+          values.TD ?? values.TA.map((temp, i) => dewPoint(temp, values.RH[i])),
+          values.TSS ?? [],
+        ],
         plot_TA_TD_TSS
       );
     }
