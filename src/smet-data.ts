@@ -1,0 +1,103 @@
+import uPlot from "uplot";
+
+// P Air pressure, in Pa
+// TA Temperature Air, in Kelvin
+// TD Temperature Dew Point, in Kelvin
+// TSS Temperature Snow Surface, in Kelvin
+// TSG Temperature Surface Ground, in Kelvin
+// RH Relative Humidity, between 0 and 1
+// VW_MAX Maximum wind velocity, in m/s
+// VW Velocity Wind, in m/s
+// DW Direction Wind, in degrees, clockwise and north being zero degrees
+// ISWR Incoming Short Wave Radiation, in W/m2
+// RSWR Reflected Short Wave Radiation, in W/m2 (previously OSWR)
+// ILWR Incoming Long Wave Radiation, in W/m2
+// OLWR Outgoing Long Wave Radiation, in W/m2
+// PINT Precipitation Intensity, in mm/h, as an average over the timestep
+// PSUM Precipitation accumulation, in mm, summed over the last timestep
+// HS Height Snow, in m
+type ParameterType =
+  | "P"
+  | "TA"
+  | "TD"
+  | "TSS"
+  | "TSG"
+  | "RH"
+  | "VW_MAX"
+  | "VW"
+  | "DW"
+  | "ISWR"
+  | "RSWR"
+  | "ILWR"
+  | "OLWR"
+  | "PINT"
+  | "PSUM"
+  | "HS";
+
+const UNIT_MAPPING: Record<
+  string,
+  { to: string; convert: (v: number) => number }
+> = {
+  K: { to: "°C", convert: (v) => v - 273.15 },
+  m: { to: "cm", convert: (v) => v * 100 },
+  "1": { to: "%", convert: (v) => v * 100 },
+  "m/s": { to: "km/h", convert: (v) => v * 3.6 },
+};
+
+export async function fetchSMET(
+  url: string,
+  parameters: { id: ParameterType }[],
+  timeRangeMilli: number
+): Promise<uPlot.AlignedData> {
+  const response = await fetch(url);
+  const smet = await response.text();
+  return parseSMET(smet, parameters, timeRangeMilli, () => {});
+}
+
+export function parseSMET(
+  smet: string,
+  parameters: { id: ParameterType }[],
+  timeRangeMilli: number,
+  setUnit: (unit: string) => void
+): uPlot.AlignedData {
+  // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
+  let index = [] as number[];
+  let units = [] as string[];
+  let nodata = "-777";
+  const timestamps: number[] = [];
+  const values: number[][] = parameters.map(() => []);
+  smet.split(/\r?\n/).forEach((line) => {
+    if (line.startsWith("fields =")) {
+      const fields = line.slice("fields =".length).trim().split(" ");
+      index = parameters.map((p) => fields.indexOf(p.id));
+      return;
+    } else if (line.startsWith("#units =") && index[0] >= 0) {
+      units = line.slice("#units =".length).trim().split(" ");
+      return;
+    } else if (line.startsWith("nodata =")) {
+      nodata = line.slice("nodata =".length).trim();
+      return;
+    } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
+      return;
+    } else if (index[0] < 0) {
+      return;
+    }
+    const cells = line.split(" ");
+    const date = Date.parse(cells[0]);
+    if (Date.now() - date > timeRangeMilli) return;
+    // uPlot uses epoch seconds (instead of milliseconds)
+    timestamps.push(date / 1000);
+    index.forEach((i, k) => {
+      if (i < 0) return;
+      const value = cells[i] === nodata ? NaN : +cells[i].replace(",", ".");
+      values[k].push(UNIT_MAPPING[units[i]]?.convert(value) ?? value);
+    });
+  });
+  setUnit(
+    units
+      .map((u) => UNIT_MAPPING[u]?.to ?? u)
+      .filter((u, i, array) => index.includes(i) && array.indexOf(u) === i)
+      .join()
+  );
+  return [timestamps, ...values];
+}

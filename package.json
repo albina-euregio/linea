@@ -13,6 +13,9 @@
   "lint-staged": {
     "*.{css,md,scss}": "prettier --write"
   },
+  "dependencies": {
+    "uplot": "^1.6.32"
+  },
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
