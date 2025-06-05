@@ -64,9 +64,11 @@ export function parseSMET(
   let index = [] as number[];
   let units = [] as string[];
   let nodata = "-777";
-  const timestamps: number[] = [];
-  const values: number[][] = parameters.map(() => []);
-  smet.split(/\r?\n/).forEach((line) => {
+  const lines = smet.split(/\r?\n/);
+  const timestamps = new Uint32Array(lines.length);
+  const values = parameters.map(() => new Float32Array(lines.length));
+  let dataIndex = 0;
+  lines.forEach((line) => {
     if (line.startsWith("fields =")) {
       const fields = line.slice("fields =".length).trim().split(" ");
       index = parameters.map((p) => fields.indexOf(p.id));
@@ -86,18 +88,23 @@ export function parseSMET(
     const date = Date.parse(cells[0]);
     if (Date.now() - date > timeRangeMilli) return;
     // uPlot uses epoch seconds (instead of milliseconds)
-    timestamps.push(date / 1000);
+    timestamps[dataIndex] = date / 1000;
     index.forEach((i, k) => {
       if (i < 0) return;
       const value = cells[i] === nodata ? NaN : +cells[i].replace(",", ".");
-      values[k].push(UNIT_MAPPING[units[i]]?.convert(value) ?? value);
+      values[k][dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
     });
+    dataIndex++;
   });
+
   setUnit(
     units
       .map((u) => UNIT_MAPPING[u]?.to ?? u)
       .filter((u, i, array) => index.includes(i) && array.indexOf(u) === i)
       .join()
   );
-  return [timestamps, ...values];
+  return [
+    timestamps.slice(0, dataIndex),
+    ...values.map((v) => v.slice(0, dataIndex)),
+  ];
 }
