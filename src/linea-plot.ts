@@ -8,7 +8,19 @@ import { opts_VW_VWG_DW } from "./linea-plot/opts_VW_VWG_DW";
 import { fetchSMET } from "./smet-data";
 
 export class LineaPlot extends HTMLElement {
-  async connectedCallback() {
+  static observedAttributes = ["src"];
+
+  connectedCallback() {
+    this.renderPlots().catch((e) => console.error(e));
+  }
+
+  attributeChangedCallback(name: string) {
+    if (name === "src") {
+      this.renderPlots().catch((e) => console.error(e));
+    }
+  }
+
+  async renderPlots() {
     const timeRangeMilli = Infinity;
     const { station, altitude, timestamps, values } = await fetchSMET(
       this.getAttribute("src") ?? "",
@@ -59,14 +71,6 @@ export class LineaPlot extends HTMLElement {
         [timestamps, values.RH ?? [], values.ISWR ?? []],
         plot_RH_GR
       );
-    }
-  }
-
-  static observedAttributes = ["src"];
-
-  attributeChangedCallback(name: string) {
-    if (name === "src") {
-      this.connectedCallback();
     }
   }
 }
