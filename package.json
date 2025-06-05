@@ -10,6 +10,11 @@
     "build": "vite build",
     "dev": "vite"
   },
+  "files": [
+    "demo.html",
+    "src/",
+    "dist/"
+  ],
   "lint-staged": {
     "*.{css,md,scss}": "prettier --write"
   },

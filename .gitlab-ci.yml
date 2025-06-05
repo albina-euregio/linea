@@ -1,0 +1,15 @@
+---
+build:
+  image: node:22
+  stage: build
+  script:
+    - corepack enable
+    - yarn install --immutable
+    - yarn build
+    - yarn pack
+  artifacts:
+    paths:
+      - demo.html
+      - dist/
+      - package.tgz
+      - README.md
