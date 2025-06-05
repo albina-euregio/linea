@@ -44,36 +44,38 @@ const UNIT_MAPPING: Record<
   "m/s": { to: "km/h", convert: (v) => v * 3.6 },
 };
 
+type Units = Record<ParameterType, string>;
+type Values = Record<ParameterType, Float32Array>;
+type Result = {
+  timestamps: Uint32Array;
+  units: Units;
+  values: Values;
+};
+
 export async function fetchSMET(
   url: string,
-  parameters: { id: ParameterType }[],
   timeRangeMilli: number
-): Promise<uPlot.AlignedData> {
+): Promise<Result> {
   const response = await fetch(url);
   const smet = await response.text();
-  return parseSMET(smet, parameters, timeRangeMilli, () => {});
+  return parseSMET(smet, timeRangeMilli);
 }
 
-export function parseSMET(
-  smet: string,
-  parameters: { id: ParameterType }[],
-  timeRangeMilli: number,
-  setUnit: (unit: string) => void
-): uPlot.AlignedData {
+export function parseSMET(smet: string, timeRangeMilli: number): Result {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
-  let index = [] as number[];
-  let units = [] as string[];
+  let values: Float32Array[] = [];
+  let fields: string[] = [];
+  let units: string[] = [];
   let nodata = "-777";
   const lines = smet.split(/\r?\n/);
   const timestamps = new Uint32Array(lines.length);
-  const values = parameters.map(() => new Float32Array(lines.length));
   let dataIndex = 0;
   lines.forEach((line) => {
     if (line.startsWith("fields =")) {
-      const fields = line.slice("fields =".length).trim().split(" ");
-      index = parameters.map((p) => fields.indexOf(p.id));
+      fields = line.slice("fields =".length).trim().split(" ");
+      values = fields.map(() => new Float32Array(lines.length));
       return;
-    } else if (line.startsWith("#units =") && index[0] >= 0) {
+    } else if (line.startsWith("#units =")) {
       units = line.slice("#units =".length).trim().split(" ");
       return;
     } else if (line.startsWith("nodata =")) {
@@ -81,30 +83,24 @@ export function parseSMET(
       return;
     } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
       return;
-    } else if (index[0] < 0) {
-      return;
     }
     const cells = line.split(" ");
     const date = Date.parse(cells[0]);
     if (Date.now() - date > timeRangeMilli) return;
     // uPlot uses epoch seconds (instead of milliseconds)
     timestamps[dataIndex] = date / 1000;
-    index.forEach((i, k) => {
-      if (i < 0) return;
+    values.forEach((values0, i) => {
+      if (i == 0) return;
       const value = cells[i] === nodata ? NaN : +cells[i].replace(",", ".");
-      values[k][dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
+      values0[dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
     });
     dataIndex++;
   });
 
-  setUnit(
-    units
-      .map((u) => UNIT_MAPPING[u]?.to ?? u)
-      .filter((u, i, array) => index.includes(i) && array.indexOf(u) === i)
-      .join()
-  );
-  return [
-    timestamps.slice(0, dataIndex),
-    ...values.map((v) => v.slice(0, dataIndex)),
-  ];
+  units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
+  return {
+    timestamps: timestamps.slice(0, dataIndex),
+    units: Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
+    values: Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,
+  };
 }
