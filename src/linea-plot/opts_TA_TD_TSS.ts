@@ -2,6 +2,9 @@ import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 
+// Create state variable to control shading
+export let showShadedAreas = true;
+
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
  */
