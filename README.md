@@ -13,5 +13,5 @@ Visualizations of avalanche data, such as automated weather stations.
 ## Deployment
 
 1. Build project
-2. Or download the build artifacts from GitLab CI
+2. Or download the [build artifacts from GitLab CI](https://gitlab.com/albina-euregio/linea/-/jobs/artifacts/master/file/package.tgz?job=build)
 3. Transfer `demo.html` and `dist/` to the webserver
