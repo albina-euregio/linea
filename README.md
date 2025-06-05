@@ -7,7 +7,7 @@ Visualizations of avalanche data, such as automated weather stations.
 1. Install [NodeJS](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/)
 2. Run `yarn`
 3. Run `yarn dev`
-4. Open browser at https://0.0.0.0:5173/
+4. Open browser at http://localhost:5173/
 5. Run `yarn build`
 
 ## Deployment
