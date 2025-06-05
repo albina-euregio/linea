@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>linea</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        font-family: Helvetica, sans-serif;
+        margin: 20px;
+      }
+      linea-plot {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      linea-plot > div:empty {
+        display: none;
+      }
+      linea-plot > div {
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <linea-plot
+      src="https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz"
+    >
+      <img
+        src="https://wiski.tirol.gv.at/lawine/grafiken/1100/standard/woche/gallreideschrofen.png"
+      />
+    </linea-plot>
+    <linea-plot
+      src="https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"
+    >
+    </linea-plot>
+    <script type="module" src="/dist/linea.js"></script>
+  </body>
+</html>
