@@ -1,5 +1,6 @@
 import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
+import { timeAxis } from "./timeAxisOpts";
 
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
@@ -124,49 +125,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   },
 
   axes: [
-    {
-      values: [
-        [31536000, "{YYYY}", null, null, null, null, null, null, 1],
-        [2419200, "{MMM}", "\n{YYYY}", null, null, null, null, null, 1],
-        [86400, "{DD}. {MMM}", "\n{YYYY}", null, null, null, null, null, 1],
-        [
-          3600,
-          "{HH}:{mm}",
-          "\n{DD}. {MMM} {YY}",
-          null,
-          "\n{DD}. {MMM}",
-          null,
-          null,
-          null,
-          1,
-        ],
-        [
-          60,
-          "{HH}:{mm}",
-          "\n{DD}. {MMM} {YY}",
-          null,
-          "\n{DD}. {MMM}",
-          null,
-          null,
-          null,
-          1,
-        ],
-        [
-          1,
-          ":{ss}",
-          "\n{DD}. {MMM} {YY} {HH}:{mm}",
-          null,
-          "\n{DD}. {MMM} {HH}:{mm}",
-          null,
-          "\n{HHh}:{mm}",
-          null,
-          1,
-        ],
-      ],
-      grid: {
-        show: false,
-      },
-    },
+    timeAxis,
     {
       scale: "y",
       side: 3,
