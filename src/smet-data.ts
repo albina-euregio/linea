@@ -47,6 +47,8 @@ const UNIT_MAPPING: Record<
 type Units = Record<ParameterType, string>;
 type Values = Record<ParameterType, Float32Array>;
 type Result = {
+  station: string;
+  altitude: number;
   timestamps: Uint32Array;
   units: Units;
   values: Values;
@@ -67,6 +69,8 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
   let fields: string[] = [];
   let units: string[] = [];
   let nodata = "-777";
+  let station = "";
+  let altitude = NaN;
   const lines = smet.split(/\r?\n/);
   const timestamps = new Uint32Array(lines.length);
   let dataIndex = 0;
@@ -80,6 +84,12 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
       return;
     } else if (line.startsWith("nodata =")) {
       nodata = line.slice("nodata =".length).trim();
+      return;
+    } else if (line.startsWith("station_name =")) {
+      station = line.slice("station_name =".length).trim();
+      return;
+    } else if (line.startsWith("altitude =")) {
+      altitude = +line.slice("altitude =".length).trim();
       return;
     } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
       return;
@@ -99,6 +109,8 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
 
   units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
   return {
+    station,
+    altitude,
     timestamps: timestamps.slice(0, dataIndex),
     units: Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
     values: Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,

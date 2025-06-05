@@ -10,7 +10,7 @@ import { fetchSMET } from "./smet-data";
 export class LineaPlot extends HTMLElement {
   async connectedCallback() {
     const timeRangeMilli = Infinity;
-    const { timestamps, values } = await fetchSMET(
+    const { station, altitude, timestamps, values } = await fetchSMET(
       this.getAttribute("src") ?? "",
       timeRangeMilli
     );
@@ -26,7 +26,7 @@ export class LineaPlot extends HTMLElement {
     );
     if (values.TA) {
       new uPlot(
-        opts_TA_TD_TSS,
+        { ...opts_TA_TD_TSS, title: `${station} (${altitude.toFixed(0)}m)` },
         [
           timestamps,
           values.TA,
