@@ -17,3 +17,9 @@ Visualizations of avalanche data, such as automated weather stations.
 1. Build project
 2. Or download the [build artifacts from GitLab CI](https://gitlab.com/albina-euregio/linea/-/jobs/artifacts/master/file/package.tgz?job=build)
 3. Transfer `demo.html` and `dist/` to the webserver
+
+## Translation
+
+This project uses Transifex for its translations: https://app.transifex.com/albina-euregio/albina-website/linea/
+
+To interact with Transifex, install the official [transifex-client](https://github.com/transifex/cli).

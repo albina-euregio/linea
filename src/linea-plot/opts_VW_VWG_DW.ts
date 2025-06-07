@@ -1,6 +1,7 @@
 import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
+import { i18n } from "../i18n";
 
 /**
  * uPlot options for Windgeschwindigkeit [km/h] & Windrichtung [˚]
@@ -34,12 +35,20 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         // horizontal label for y-axis
         const xPosY = canvasWidth * 0.075;
         ctx.fillStyle = "#00E2B6";
-        ctx.fillText("km/h", xPosY, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
+          xPosY,
+          yPos
+        );
 
         // horizontal label for y2-axis
         const xPosY2 = canvasWidth * 0.9;
         ctx.fillStyle = "#084D40";
-        ctx.fillText("Windrichtung", xPosY2, yPos);
+        ctx.fillText(
+          i18n.message("dialog:weather-station-diagram:parameter:DW"),
+          xPosY2,
+          yPos
+        );
 
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
@@ -97,25 +106,25 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   ],
   series: [
     {
-      name: "Time",
+      label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
     {
-      label: "Wind",
+      label: i18n.message("dialog:weather-station-diagram:parameter:VW"),
       stroke: "#00E2B6",
       scale: "y",
       width: 2,
       value: (u, v) => (v != null ? v.toFixed(1) + " km/h" : "-"),
     },
     {
-      label: "Böen",
+      label: i18n.message("dialog:weather-station-diagram:parameter:VW_MAX"),
       stroke: "#00A484",
       scale: "y",
       width: 2,
       value: (u, v) => (v != null ? v.toFixed(1) + " km/h" : "-"),
     },
     {
-      label: "Richtung",
+      label: i18n.message("dialog:weather-station-diagram:parameter:DW"),
       stroke: "#084D40",
       paths: (u) => null,
       points: {

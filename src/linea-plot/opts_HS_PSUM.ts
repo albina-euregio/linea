@@ -1,6 +1,7 @@
 import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
+import { i18n } from "../i18n";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
@@ -34,12 +35,20 @@ export const opts_HS_PSUM: uPlot.Options = {
         // horizontal label for y-axis
         const xPosY = canvasWidth * 0.1;
         ctx.fillStyle = "#08519C";
-        ctx.fillText("Schneehöhe (cm)", xPosY, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
+          xPosY,
+          yPos
+        );
 
         // horizontal label for y2-axis
         const xPosY2 = canvasWidth * 0.9;
         ctx.fillStyle = "#6aafd5";
-        ctx.fillText("Niederschlag (mm)", xPosY2, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
+          xPosY2,
+          yPos
+        );
 
         ctx.restore();
       },
@@ -82,18 +91,18 @@ export const opts_HS_PSUM: uPlot.Options = {
 
   series: [
     {
-      name: "Time",
+      label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
     {
-      label: "Schneehöhe",
+      label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
       stroke: "#08519C",
       scale: "y",
       width: 2,
       value: (u, v) => (v != null ? v.toFixed(1) + " mm" : "-"),
     },
     {
-      label: "Niederschlag",
+      label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),
       stroke: "#6aafd5",
       fill: "rgba(106, 175, 213, 0.3)",
       scale: "y2",

@@ -1,6 +1,7 @@
 import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
+import { i18n } from "../i18n";
 
 // Create state variable to control shading
 export let showShadedAreas = true;
@@ -50,12 +51,20 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         // Horizontal label for y-axis
         const xPosY = canvasWidth * 0.1;
         ctx.fillStyle = "#DE2D26";
-        ctx.fillText("Temperatur (°C)", xPosY, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
+          xPosY,
+          yPos
+        );
 
         // Horizontal label for y2-axis
         const xPosY2 = canvasWidth * 0.9;
         ctx.fillStyle = "#6aafd5";
-        ctx.fillText("Taupunkt (°C)", xPosY2, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
+          xPosY2,
+          yPos
+        );
 
         // Draw reference line at 0°C
         const width = 1;
@@ -178,25 +187,25 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
   series: [
     {
-      name: "Time",
+      label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
     {
-      label: "Lufttemperatur",
+      label: i18n.message("dialog:weather-station-diagram:unit:temperature"),
       stroke: "#DE2D26",
       scale: "y",
       width: 2,
       value: (u, v) => (v != null ? v.toFixed(1) + " °C" : "-"),
     },
     {
-      label: "Taupunkt",
+      label: i18n.message("dialog:weather-station-diagram:parameter:TD"),
       stroke: "#6aafd5",
       scale: "y2",
       width: 2,
       value: (u, v) => (v != null ? v.toFixed(1) + " °C" : "-"),
     },
     {
-      label: "Temperatur der Schneeoberfläche",
+      label: i18n.message("dialog:weather-station-diagram:parameter:TSS"),
       stroke: "#FC9272",
       scale: "y",
       width: 2,

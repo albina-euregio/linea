@@ -1,6 +1,7 @@
 import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
+import { i18n } from "../i18n";
 
 /**
  * uPlot options for Relative Luftfeuchtigkeit [%] & Globalstrahlung [W/m²]
@@ -34,12 +35,20 @@ export const opts_RH_GR: uPlot.Options = {
         // horizontal label for y-axis
         const xPosY = canvasWidth * 0.1;
         ctx.fillStyle = "#6aafd5";
-        ctx.fillText("Luftfeuchtigkeit (%)", xPosY, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
+          xPosY,
+          yPos
+        );
 
         // horizontal label for y2-axis
         const xPosY2 = canvasWidth * 0.9;
         ctx.fillStyle = "#DE2D26";
-        ctx.fillText("Globalstrahlung (W/m²)", xPosY2, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
+          xPosY2,
+          yPos
+        );
 
         ctx.restore();
       },
@@ -75,19 +84,18 @@ export const opts_RH_GR: uPlot.Options = {
   ],
   series: [
     {
-      name: "Time",
+      label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
     {
-      label: "Relative Luftfeuchtigkeit",
+      label: i18n.message("dialog:weather-station-diagram:parameter:RH"),
       stroke: "#6aafd5",
       scale: "y",
       width: 2,
       value: (u, v) => (v != null ? v.toFixed(1) + " %" : "-"),
     },
     {
-      label: "Globalstrahlung",
-      unit: "W/m²",
+      label: i18n.message("dialog:weather-station-diagram:parameter:ISWR"),
       stroke: "#DE2D26",
       fill: "rgba(255,0,0,0.1)",
       scale: "y2",

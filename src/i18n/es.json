@@ -1,0 +1,14 @@
+{
+  "dialog:weather-station-diagram:parameter:HS": "Espesor de nieve",
+  "dialog:weather-station-diagram:parameter:PSUM": "Precipitation",
+  "dialog:weather-station-diagram:parameter:TA": "Air Temperature",
+  "dialog:weather-station-diagram:parameter:TD": "Dew Point",
+  "dialog:weather-station-diagram:parameter:TSS": "Snow Surface Temperature",
+  "dialog:weather-station-diagram:parameter:RH": "Humedad relativa",
+  "dialog:weather-station-diagram:parameter:ISWR": "Radiación global",
+  "dialog:weather-station-diagram:parameter:VW": "Velocidad del viento",
+  "dialog:weather-station-diagram:parameter:VW_MAX": "Gust",
+  "dialog:weather-station-diagram:parameter:DW": "Dirección del viento",
+  "dialog:weather-station-diagram:unit:temperature": "Temperatura",
+  "dialog:weather-station-diagram:unit:time": "Hora"
+}

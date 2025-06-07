@@ -1,0 +1,14 @@
+{
+  "dialog:weather-station-diagram:parameter:HS": "Gruix de Neu",
+  "dialog:weather-station-diagram:parameter:PSUM": "Precipitation",
+  "dialog:weather-station-diagram:parameter:TA": "Air Temperature",
+  "dialog:weather-station-diagram:parameter:TD": "Dew Point",
+  "dialog:weather-station-diagram:parameter:TSS": "Snow Surface Temperature",
+  "dialog:weather-station-diagram:parameter:RH": "Humitat relativa",
+  "dialog:weather-station-diagram:parameter:ISWR": "Radiació global",
+  "dialog:weather-station-diagram:parameter:VW": "Velocitat del vent",
+  "dialog:weather-station-diagram:parameter:VW_MAX": "Gust",
+  "dialog:weather-station-diagram:parameter:DW": "Direcció del vent",
+  "dialog:weather-station-diagram:unit:temperature": "Temperatura",
+  "dialog:weather-station-diagram:unit:time": "Hora"
+}
