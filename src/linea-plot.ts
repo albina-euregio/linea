@@ -45,7 +45,10 @@ export class LineaPlot extends HTMLElement {
         [
           timestamps,
           values.TA,
-          values.TD ?? values.TA.map((temp, i) => dewPoint(temp, values.RH[i])),
+          values.TD ??
+            (values.TA && values.RH
+              ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
+              : undefined),
           values.TSS ?? [],
         ],
         plot_TA_TD_TSS
