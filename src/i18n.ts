@@ -19,8 +19,20 @@ class I18n {
     return this.messages?.[id] ?? messagesEN[id] ?? id;
   }
 
-  number(num: number, opts: Intl.NumberFormatOptions) {
-    return new Intl.NumberFormat(this.lang, opts).format(num);
+  number(
+    num: number | null | undefined,
+    opts?: Intl.NumberFormatOptions,
+    unit = ""
+  ): string {
+    if (typeof num !== "number" || !isFinite(num)) return "–";
+    let s = new Intl.NumberFormat(this.lang, {
+      useGrouping: num >= 10000,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+      ...opts,
+    }).format(num);
+    if (unit) s += ` ${unit}`;
+    return s;
   }
 
   time(date: Date | number | string, opts?: Intl.DateTimeFormatOptions) {

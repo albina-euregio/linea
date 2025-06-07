@@ -1,5 +1,6 @@
 import uPlot from "uplot";
 import css from "uplot/dist/uPlot.min.css?raw";
+import { i18n } from "./i18n";
 import { dewPoint } from "./linea-plot/dewPoint";
 import { opts_HS_PSUM } from "./linea-plot/opts_HS_PSUM";
 import { opts_RH_GR } from "./linea-plot/opts_RH_GR";
@@ -41,7 +42,10 @@ export class LineaPlot extends HTMLElement {
     );
     if (values.TA) {
       new uPlot(
-        { ...opts_TA_TD_TSS, title: `${station} (${altitude.toFixed(0)}m)` },
+        {
+          ...opts_TA_TD_TSS,
+          title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
+        },
         [
           timestamps,
           values.TA,

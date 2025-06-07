@@ -99,7 +99,7 @@ export const opts_HS_PSUM: uPlot.Options = {
       stroke: "#08519C",
       scale: "y",
       width: 2,
-      value: (u, v) => (v != null ? v.toFixed(1) + " mm" : "-"),
+      value: (u, v) => i18n.number(v, {}, "cm"),
     },
     {
       label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),
@@ -107,7 +107,7 @@ export const opts_HS_PSUM: uPlot.Options = {
       fill: "rgba(106, 175, 213, 0.3)",
       scale: "y2",
       width: 1,
-      value: (u, v) => (v != null ? v.toFixed(1) + " cm" : "-"),
+      value: (u, v) => i18n.number(v, {}, "mm"),
     },
   ],
 };

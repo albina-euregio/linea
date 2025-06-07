@@ -92,7 +92,7 @@ export const opts_RH_GR: uPlot.Options = {
       stroke: "#6aafd5",
       scale: "y",
       width: 2,
-      value: (u, v) => (v != null ? v.toFixed(1) + " %" : "-"),
+      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
     },
     {
       label: i18n.message("dialog:weather-station-diagram:parameter:ISWR"),
@@ -100,7 +100,7 @@ export const opts_RH_GR: uPlot.Options = {
       fill: "rgba(255,0,0,0.1)",
       scale: "y2",
       width: 1,
-      value: (u, v) => (v != null ? v.toFixed(1) + " W/m²" : "-"),
+      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
     },
   ],
 };

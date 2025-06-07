@@ -114,14 +114,14 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       stroke: "#00E2B6",
       scale: "y",
       width: 2,
-      value: (u, v) => (v != null ? v.toFixed(1) + " km/h" : "-"),
+      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
     },
     {
       label: i18n.message("dialog:weather-station-diagram:parameter:VW_MAX"),
       stroke: "#00A484",
       scale: "y",
       width: 2,
-      value: (u, v) => (v != null ? v.toFixed(1) + " km/h" : "-"),
+      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
     },
     {
       label: i18n.message("dialog:weather-station-diagram:parameter:DW"),
@@ -133,7 +133,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         size: 4,
       },
       scale: "y2",
-      value: (u, v) => (v != null ? v.toFixed(1) + "°" : "-"),
+      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "°"),
     },
   ],
 };
