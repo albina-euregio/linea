@@ -91,9 +91,8 @@ export class LineaPlot extends HTMLElement {
   }
 
   #addSeries(plot: uPlot, series: uPlot.Series, data: Float32Array) {
-    if (!series || !data || !data.length) return;
-    plot.addSeries(series);
-    plot.data.push(data);
+    plot.addSeries({ ...series, show: !!data?.length });
+    plot.data.push(data ?? []);
   }
 }
 
