@@ -2,10 +2,20 @@ import uPlot from "uplot";
 import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "./i18n";
 import { dewPoint } from "./linea-plot/dewPoint";
-import { opts_HS_PSUM } from "./linea-plot/opts_HS_PSUM";
-import { opts_RH_GR } from "./linea-plot/opts_RH_GR";
-import { opts_TA_TD_TSS } from "./linea-plot/opts_TA_TD_TSS";
-import { opts_VW_VWG_DW } from "./linea-plot/opts_VW_VWG_DW";
+import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./linea-plot/opts_HS_PSUM";
+import { opts_ISWR, opts_RH, opts_RH_GR } from "./linea-plot/opts_RH_GR";
+import {
+  opts_TA,
+  opts_TA_TD_TSS,
+  opts_TD,
+  opts_TSS,
+} from "./linea-plot/opts_TA_TD_TSS";
+import {
+  opts_DW,
+  opts_VW,
+  opts_VW_MAX,
+  opts_VW_VWG_DW,
+} from "./linea-plot/opts_VW_VWG_DW";
 import { fetchSMET } from "./smet-data";
 
 export class LineaPlot extends HTMLElement {
@@ -40,45 +50,50 @@ export class LineaPlot extends HTMLElement {
       plot_HS_PSUM,
       plot_RH_GR
     );
+
     if (values.TA) {
-      new uPlot(
+      const TD =
+        values.TD ??
+        (values.TA && values.RH
+          ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
+          : undefined);
+      const p = new uPlot(
         {
           ...opts_TA_TD_TSS,
           title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
         },
-        [
-          timestamps,
-          values.TA,
-          values.TD ??
-            (values.TA && values.RH
-              ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
-              : undefined),
-          values.TSS ?? [],
-        ],
+        [timestamps],
         plot_TA_TD_TSS
       );
+      this.#addSeries(p, opts_TA, values.TA);
+      this.#addSeries(p, opts_TD, TD);
+      this.#addSeries(p, opts_TSS, values.TSS);
     }
+
     if (values.VW && values.DW) {
-      new uPlot(
-        opts_VW_VWG_DW,
-        [timestamps, values.VW, values.VW_MAX ?? [], values.DW],
-        plot_VW_VWG_DW
-      );
+      const p = new uPlot(opts_VW_VWG_DW, [timestamps], plot_VW_VWG_DW);
+      this.#addSeries(p, opts_VW, values.VW);
+      this.#addSeries(p, opts_VW_MAX, values.VW_MAX);
+      this.#addSeries(p, opts_DW, values.DW);
     }
+
     if (values.HS || values.PSUM) {
-      new uPlot(
-        opts_HS_PSUM,
-        [timestamps, values.HS ?? [], values.PSUM ?? []],
-        plot_HS_PSUM
-      );
+      const p = new uPlot(opts_HS_PSUM, [timestamps], plot_HS_PSUM);
+      this.#addSeries(p, opts_HS, values.HS);
+      this.#addSeries(p, opts_PSUM, values.PSUM);
     }
+
     if (values.RH || values.ISWR) {
-      new uPlot(
-        opts_RH_GR,
-        [timestamps, values.RH ?? [], values.ISWR ?? []],
-        plot_RH_GR
-      );
+      const p = new uPlot(opts_RH_GR, [timestamps], plot_RH_GR);
+      this.#addSeries(p, opts_RH, values.RH);
+      this.#addSeries(p, opts_ISWR, values.ISWR);
     }
+  }
+
+  #addSeries(plot: uPlot, series: uPlot.Series, data: Float32Array) {
+    if (!series || !data || !data.length) return;
+    plot.addSeries(series);
+    plot.data.push(data);
   }
 }
 

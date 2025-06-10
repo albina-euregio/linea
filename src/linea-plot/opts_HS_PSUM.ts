@@ -94,20 +94,22 @@ export const opts_HS_PSUM: uPlot.Options = {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
-    {
-      label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
-      stroke: "#08519C",
-      scale: "y",
-      width: 2,
-      value: (u, v) => i18n.number(v, {}, "cm"),
-    },
-    {
-      label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),
-      stroke: "#6aafd5",
-      fill: "rgba(106, 175, 213, 0.3)",
-      scale: "y2",
-      width: 1,
-      value: (u, v) => i18n.number(v, {}, "mm"),
-    },
   ],
+};
+
+export const opts_HS: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
+  stroke: "#08519C",
+  scale: "y",
+  width: 2,
+  value: (u, v) => i18n.number(v, {}, "cm"),
+};
+
+export const opts_PSUM: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),
+  stroke: "#6aafd5",
+  fill: "rgba(106, 175, 213, 0.3)",
+  scale: "y2",
+  width: 1,
+  value: (u, v) => i18n.number(v, {}, "mm"),
 };

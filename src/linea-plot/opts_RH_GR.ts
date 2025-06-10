@@ -87,20 +87,22 @@ export const opts_RH_GR: uPlot.Options = {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
-    {
-      label: i18n.message("dialog:weather-station-diagram:parameter:RH"),
-      stroke: "#6aafd5",
-      scale: "y",
-      width: 2,
-      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
-    },
-    {
-      label: i18n.message("dialog:weather-station-diagram:parameter:ISWR"),
-      stroke: "#DE2D26",
-      fill: "rgba(255,0,0,0.1)",
-      scale: "y2",
-      width: 1,
-      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
-    },
   ],
+};
+
+export const opts_RH: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:RH"),
+  stroke: "#6aafd5",
+  scale: "y",
+  width: 2,
+  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
+};
+
+export const opts_ISWR: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:ISWR"),
+  stroke: "#DE2D26",
+  fill: "rgba(255,0,0,0.1)",
+  scale: "y2",
+  width: 1,
+  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
 };

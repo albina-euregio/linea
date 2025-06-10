@@ -109,31 +109,34 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
-    {
-      label: i18n.message("dialog:weather-station-diagram:parameter:VW"),
-      stroke: "#00E2B6",
-      scale: "y",
-      width: 2,
-      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
-    },
-    {
-      label: i18n.message("dialog:weather-station-diagram:parameter:VW_MAX"),
-      stroke: "#00A484",
-      scale: "y",
-      width: 2,
-      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
-    },
-    {
-      label: i18n.message("dialog:weather-station-diagram:parameter:DW"),
-      stroke: "#084D40",
-      paths: (u) => null,
-      points: {
-        space: 0,
-        fill: "#084D40",
-        size: 4,
-      },
-      scale: "y2",
-      value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "°"),
-    },
   ],
+};
+
+export const opts_VW: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:VW"),
+  stroke: "#00E2B6",
+  scale: "y",
+  width: 2,
+  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
+};
+
+export const opts_VW_MAX: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:VW_MAX"),
+  stroke: "#00A484",
+  scale: "y",
+  width: 2,
+  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
+};
+
+export const opts_DW: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:DW"),
+  stroke: "#084D40",
+  paths: (u) => null,
+  points: {
+    space: 0,
+    fill: "#084D40",
+    size: 4,
+  },
+  scale: "y2",
+  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "°"),
 };
