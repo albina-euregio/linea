@@ -20,6 +20,8 @@ import { fetchSMET } from "./smet-data";
 
 export class LineaPlot extends HTMLElement {
   static observedAttributes = ["src"];
+  #plots: uPlot[] = [];
+  #resizeObserver = new ResizeObserver(() => this.#resizePlots());
 
   connectedCallback() {
     this.renderPlots().catch((e) => console.error(e));
@@ -32,6 +34,7 @@ export class LineaPlot extends HTMLElement {
   }
 
   async renderPlots() {
+    this.#resizeObserver.unobserve(this);
     const timeRangeMilli = Infinity;
     const { station, altitude, timestamps, values } = await fetchSMET(
       this.getAttribute("src") ?? "",
@@ -88,11 +91,30 @@ export class LineaPlot extends HTMLElement {
       this.#addSeries(p, opts_RH, values.RH);
       this.#addSeries(p, opts_ISWR, values.ISWR);
     }
+
+    this.#resizePlots();
+    this.#resizeObserver.observe(this);
+  }
+
+  disconnectedCallback() {
+    this.#resizeObserver.unobserve(this);
   }
 
   #addSeries(plot: uPlot, series: uPlot.Series, data: Float32Array) {
+    if (!this.#plots.includes(plot)) {
+      this.#plots.push(plot);
+    }
     plot.addSeries({ ...series, show: !!data?.length });
     plot.data.push(data ?? []);
+  }
+
+  #resizePlots() {
+    this.#plots.forEach((p) =>
+      p.setSize({
+        width: this.clientWidth,
+        height: p.height,
+      })
+    );
   }
 }
 
