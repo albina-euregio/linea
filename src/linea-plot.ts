@@ -67,7 +67,11 @@ export class LineaPlot extends HTMLElement {
       const p = new uPlot(
         {
           ...opts_TA_TD_TSS,
-          title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
+          ...(this.hasAttribute("showTitle")
+            ? {
+                title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
         },
         [timestamps],
         plot_TA_TD_TSS
