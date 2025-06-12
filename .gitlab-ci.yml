@@ -24,7 +24,7 @@ publish-npm:
     - npm config set -- "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=\${CI_JOB_TOKEN}"
     - npm config set -- "${CI_API_V4_URL#https?}/groups/${CI_PROJECT_ROOT_NAMESPACE}/-/packages/npm/:_authToken=\${CI_JOB_TOKEN}"
   script:
-    - npm version $CI_COMMIT_TAG
+    - npm version --no-git-tag-version $CI_COMMIT_TAG
     - npm publish
   only:
     - tags
