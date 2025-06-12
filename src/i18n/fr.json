@@ -9,6 +9,9 @@
   "dialog:weather-station-diagram:parameter:VW": "Vitesse du vent",
   "dialog:weather-station-diagram:parameter:VW_MAX": "Gust",
   "dialog:weather-station-diagram:parameter:DW": "Direction du vent",
+  "dialog:weather-station-diagram:parameter:SH": "Givre de surface",
+  "dialog:weather-station-diagram:parameter:SH:hide": "Hide Surface hoar potential",
+  "dialog:weather-station-diagram:parameter:SH:show": "Show Surface hoar potential",
   "dialog:weather-station-diagram:unit:temperature": "Température",
   "dialog:weather-station-diagram:unit:time": "Heure"
 }

@@ -9,6 +9,7 @@ import {
   opts_TA_TD_TSS,
   opts_TD,
   opts_TSS,
+  showSurfaceHoar,
 } from "./linea-plot/opts_TA_TD_TSS";
 import {
   opts_DW,
@@ -42,12 +43,15 @@ export class LineaPlot extends HTMLElement {
     );
     const style = document.createElement("style");
     style.textContent = css;
+    const controls = document.createElement("div");
+    controls.classList.add("controls");
     const plot_TA_TD_TSS = document.createElement("div");
     const plot_VW_VWG_DW = document.createElement("div");
     const plot_HS_PSUM = document.createElement("div");
     const plot_RH_GR = document.createElement("div");
     this.replaceChildren(
       style,
+      controls,
       plot_TA_TD_TSS,
       plot_VW_VWG_DW,
       plot_HS_PSUM,
@@ -71,6 +75,22 @@ export class LineaPlot extends HTMLElement {
       this.#addSeries(p, opts_TA, values.TA);
       this.#addSeries(p, opts_TD, TD);
       this.#addSeries(p, opts_TSS, values.TSS);
+
+      const button = document.createElement("button");
+      button.classList.add("toggle-btn");
+      button.innerText = i18n.message(
+        "dialog:weather-station-diagram:parameter:SH:hide"
+      );
+      controls.append(button);
+      button.onclick = () => {
+        showSurfaceHoar.value = !showSurfaceHoar.value;
+        button.innerText = i18n.message(
+          showSurfaceHoar.value
+            ? "dialog:weather-station-diagram:parameter:SH:hide"
+            : "dialog:weather-station-diagram:parameter:SH:show"
+        );
+        p.redraw();
+      };
     }
 
     if (values.VW && values.DW) {

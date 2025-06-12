@@ -4,7 +4,7 @@ import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 
 // Create state variable to control shading
-export let showShadedAreas = true;
+export const showSurfaceHoar = { value: true };
 
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
@@ -84,8 +84,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
         ctx.restore();
 
-        // Only draw shaded regions if showShadedAreas is true
-        if (showShadedAreas) {
+        // Only draw shaded regions if showSurfaceHoar is true
+        if (showSurfaceHoar.value) {
           ctx.save();
           ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
           ctx.clip();

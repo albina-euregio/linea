@@ -1,14 +1,17 @@
 {
   "dialog:weather-station-diagram:parameter:HS": "Altezza neve",
-  "dialog:weather-station-diagram:parameter:PSUM": "Precipitation",
-  "dialog:weather-station-diagram:parameter:TA": "Air Temperature",
-  "dialog:weather-station-diagram:parameter:TD": "Dew Point",
-  "dialog:weather-station-diagram:parameter:TSS": "Snow Surface Temperature",
+  "dialog:weather-station-diagram:parameter:PSUM": "Precipitazioni",
+  "dialog:weather-station-diagram:parameter:TA": "Temperatura dell'aria",
+  "dialog:weather-station-diagram:parameter:TD": "Punto di rugiada",
+  "dialog:weather-station-diagram:parameter:TSS": "Temperatura superficiale neve",
   "dialog:weather-station-diagram:parameter:RH": "Umidità relativa",
   "dialog:weather-station-diagram:parameter:ISWR": "Radiazioni globali",
   "dialog:weather-station-diagram:parameter:VW": "Vento",
-  "dialog:weather-station-diagram:parameter:VW_MAX": "Gust",
+  "dialog:weather-station-diagram:parameter:VW_MAX": "Raffica di vento",
   "dialog:weather-station-diagram:parameter:DW": "Vento Direzione",
+  "dialog:weather-station-diagram:parameter:SH": "Brina di superficie",
+  "dialog:weather-station-diagram:parameter:SH:hide": "Hide Surface hoar potential",
+  "dialog:weather-station-diagram:parameter:SH:show": "Show Surface hoar potential",
   "dialog:weather-station-diagram:unit:temperature": "Temperatura",
   "dialog:weather-station-diagram:unit:time": "Ora"
 }
