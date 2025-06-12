@@ -5,6 +5,18 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
+"@albina-euregio/linea@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@albina-euregio/linea@workspace:."
+  dependencies:
+    husky: "npm:^9.1.7"
+    lint-staged: "npm:^15.2.10"
+    prettier: "npm:^3.3.3"
+    uplot: "npm:^1.6.32"
+    vite: "npm:rolldown-vite@^6.3.17"
+  languageName: unknown
+  linkType: soft
+
 "@emnapi/core@npm:^1.4.3":
   version: 1.4.3
   resolution: "@emnapi/core@npm:1.4.3"
@@ -851,18 +863,6 @@ __metadata:
   checksum: 10c0/f5604e7240c5c275743561442fbc5abf2a84ad94da0f5adc71d25e31fa8483048de3dcedcb7a44112a942fed305fd75841cdf6c9681c7f640c63f1049e9a5dcc
   languageName: node
   linkType: hard
-
-"linea@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "linea@workspace:."
-  dependencies:
-    husky: "npm:^9.1.7"
-    lint-staged: "npm:^15.2.10"
-    prettier: "npm:^3.3.3"
-    uplot: "npm:^1.6.32"
-    vite: "npm:rolldown-vite@^6.3.17"
-  languageName: unknown
-  linkType: soft
 
 "lint-staged@npm:^15.2.10":
   version: 15.5.2
