@@ -126,12 +126,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   scales: {
     y: {
       range: (u, dataMin, dataMax) => {
-        return dataMin < -35 || dataMax > 15 ? [-40, 30] : [-35, 15];
+      return (dataMin < -40 || dataMax > 10) ? [-40, 30] : [-40, 10];
       },
     },
     y2: {
       range: (u, dataMin, dataMax) => {
-        return dataMin < -35 || dataMax > 15 ? [-40, 30] : [-35, 15];
+      return (dataMin < -40 || dataMax > 10) ? [-40, 30] : [-40, 10];
       },
     },
   },
@@ -145,21 +145,14 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       grid: {
         show: true,
       },
-      splits: (u) => {
-        const min = u.scales.y.min;
-        const max = u.scales.y.max;
-        return min <= -40 && max >= 30
-          ? [-40, -30, -20, -10, 0, 10, 20, 30]
-          : [-35, -30, -20, -10, 0, 10, 15];
-      },
-      values: (u, splits) => {
-        const min = u.scales.y.min;
-        const max = u.scales.y.max;
-        return min <= -40 && max >= 30
-          ? ["", "-30", "-20", "-10", "0", "10", "20", ""]
-          : ["", "-30", "-20", "-10", "0", "10", ""];
-      },
+       splits: (u) => {
+      const min = u.scales.y.min;
+      const max = u.scales.y.max;
+      return (min <= -40 && max >= 30) 
+        ? [-40, -30, -20, -10, 0, 10, 20, 30]
+        : [-40, -30, -20, -10, -5, 0, 5, 10];
     },
+  },
 
     {
       scale: "y2",
@@ -169,20 +162,13 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         show: false,
       },
       splits: (u) => {
-        const min = u.scales.y.min;
-        const max = u.scales.y.max;
-        return min <= -40 && max >= 30
+      const min = u.scales.y.min;
+      const max = u.scales.y.max;
+      return (min <= -40 && max >= 30) 
           ? [-40, -30, -20, -10, 0, 10, 20, 30]
-          : [-35, -30, -20, -10, 0, 10, 15];
-      },
-      values: (u, splits) => {
-        const min = u.scales.y.min;
-        const max = u.scales.y.max;
-        return min <= -40 && max >= 30
-          ? ["", "-30", "-20", "-10", "0", "10", "20", ""]
-          : ["", "-30", "-20", "-10", "0", "10", ""];
-      },
+          : [-40, -30, -20, -10, -5, 0, 5, 10];
     },
+  }
   ],
 
   series: [
