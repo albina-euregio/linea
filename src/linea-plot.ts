@@ -36,10 +36,10 @@ export class LineaPlot extends HTMLElement {
 
   async renderPlots() {
     this.#resizeObserver.unobserve(this);
-    const timeRangeMilli = Infinity;
+    const timeRangeMilli = this.getAttribute("timeRangeMilli");
     const { station, altitude, timestamps, values } = await fetchSMET(
       this.getAttribute("src") ?? "",
-      timeRangeMilli
+      timeRangeMilli ? +timeRangeMilli : Infinity
     );
     const style = document.createElement("style");
     style.textContent = css;
