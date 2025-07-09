@@ -2,7 +2,7 @@
   "name": "@albina-euregio/linea",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.9.2",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "prepare": "husky",
@@ -24,6 +24,6 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
-    "vite": "npm:rolldown-vite@^6.3.17"
+    "vite": "npm:rolldown-vite@^7.0.6"
   }
 }
