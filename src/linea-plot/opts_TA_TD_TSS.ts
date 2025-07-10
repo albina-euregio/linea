@@ -190,7 +190,7 @@ export const opts_TA: uPlot.Series = {
 export const opts_TD: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:TD"),
   stroke: "#6aafd5",
-  scale: "y2",
+  scale: "y",
   width: 2,
   value: (u, v) => i18n.number(v, {}, "°C"),
 };
