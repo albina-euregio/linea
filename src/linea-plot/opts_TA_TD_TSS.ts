@@ -139,37 +139,42 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   axes: [
     timeAxis,
     {
-      scale: "y",
-      side: 3,
-      stroke: "#DE2D26",
-      grid: {
-        show: true,
-      },
-       splits: (u) => {
-      const min = u.scales.y.min;
-      const max = u.scales.y.max;
-      return (min <= -40 && max >= 30) 
-        ? [-40, -30, -20, -10, 0, 10, 20, 30]
-        : [-40, -30, -20, -10, -5, 0, 5, 10];
-    },
+  scale: "y",
+  side: 3,
+  stroke: "#DE2D26",
+  grid: {
+    show: true,
   },
-
-    {
-      scale: "y2",
-      side: 1,
-      stroke: "#6aafd5",
-      grid: {
-        show: false,
-      },
-      splits: (u) => {
-      const min = u.scales.y.min;
-      const max = u.scales.y.max;
-      return (min <= -40 && max >= 30) 
-          ? [-40, -30, -20, -10, 0, 10, 20, 30]
-          : [-40, -30, -20, -10, -5, 0, 5, 10];
-    },
-  }
-  ],
+  sync: {
+    linked: "y2",
+  },
+  splits: (u) => {
+    const min = u.scales.y.min;
+    const max = u.scales.y.max;
+    return (min <= -40 && max >= 30) 
+      ? [-40, -30, -20, -10, 0, 10, 20, 30]
+      : [-40, -30, -20, -10, -5, 0, 5, 10];
+  },
+},
+{
+  scale: "y2",
+  side: 1,
+  stroke: "#6aafd5",
+  grid: {
+    show: false,
+  },
+  sync: {
+    linked: "y",
+  },
+  splits: (u) => {
+    const min = u.scales.y2.min;
+    const max = u.scales.y2.max;
+    return (min <= -40 && max >= 30) 
+      ? [-40, -30, -20, -10, 0, 10, 20, 30]
+      : [-40, -30, -20, -10, -5, 0, 5, 10];
+  },
+}
+],
 
   series: [
     {
@@ -190,7 +195,7 @@ export const opts_TA: uPlot.Series = {
 export const opts_TD: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:TD"),
   stroke: "#6aafd5",
-  scale: "y",
+  scale: "y2",
   width: 2,
   value: (u, v) => i18n.number(v, {}, "°C"),
 };
