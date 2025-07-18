@@ -29,7 +29,7 @@ export class LineaPlot extends HTMLElement {
   }
 
   attributeChangedCallback(name: string) {
-    if (name === "src") {
+    if (name === "src" || name == "timeRangeMilli") {
       this.renderPlots().catch((e) => console.error(e));
     }
   }
