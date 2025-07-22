@@ -22,35 +22,32 @@ export const opts_RH_GR: uPlot.Options = {
   hooks: {
     drawAxes: [
       (u) => {
-        const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
+                const ctx = u.ctx;
+                ctx.save();
+                ctx.font = "bold 1.4vw sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "bottom";
+                        
+                const canvasHeight = u.ctx.canvas.height;
+                const yPos = canvasHeight * 0.1;
 
-        const canvasWidth = u.ctx.canvas.width;
-        const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
+                const plotLeft = u.bbox.left;
+                const plotRight = u.bbox.left + u.bbox.width;
 
-        // horizontal label for y-axis
-        const xPosY = canvasWidth * 0.1;
-        ctx.fillStyle = "#6aafd5";
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
-          xPosY,
-          yPos
-        );
+        // Horizontal label for y-axis (align with left axis)
+                        ctx.fillStyle = "#6aafd5";
+                        ctx.textAlign = "left"; // Ensure left alignment
+                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
+                         plotLeft, yPos);
 
-        // horizontal label for y2-axis
-        const xPosY2 = canvasWidth * 0.9;
-        ctx.fillStyle = "#DE2D26";
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
-          xPosY2,
-          yPos
-        );
 
-        ctx.restore();
+ 
+        // Horizontal label for y2-axis (align with right axis)  
+                        ctx.fillStyle = "#DE2D26";
+                        ctx.textAlign = "right"; // Ensure right alignment
+                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
+                        plotRight, yPos);
+                        ctx.restore();
       },
     ],
   },
