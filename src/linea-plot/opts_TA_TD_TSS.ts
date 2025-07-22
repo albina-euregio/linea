@@ -124,56 +124,40 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   },
 
   scales: {
-    y: {
-      range: (u, dataMin, dataMax) => {
-      return (dataMin < -40 || dataMax > 10) ? [-40, 30] : [-40, 10];
-      },
+  y: {
+    range: (u, dataMin, dataMax) => {
+      return (dataMin < -30 || dataMax > 10) ? [-30, 30] : [-30, 10];
     },
-    y2: {
-      range: (u, dataMin, dataMax) => {
-      return (dataMin < -40 || dataMax > 10) ? [-40, 30] : [-40, 10];
-      },
-    },
-  },
+  }
+},
 
   axes: [
     timeAxis,
     {
-  scale: "y",
-  side: 3,
-  stroke: "#DE2D26",
-  grid: {
+    scale: "y",
+    side: 3,
+    stroke: "#DE2D26",
+    grid: { show: true },
+    splits: (u) => {
+      const min = u.scales.y.min;
+      const max = u.scales.y.max;
+      const useExtended = max > 15;
+      const baseTicks = useExtended
+        ? [-30, -20, -10, 0, 10, 20, 30]
+        : [-30, -20, -10, 0, 10];
+      return baseTicks;
+    },
+      values: (u, vals) => vals.map(v => v.toString()),
+  },
+  {
+    scale: "y",
+    side: 1,
+    stroke: "#6aafd5",
+    grid: { show: false },
     show: true,
-  },
-  sync: {
-    linked: "y2",
-  },
-  splits: (u) => {
-    const min = u.scales.y.min;
-    const max = u.scales.y.max;
-    return (min <= -40 && max >= 30) 
-      ? [-40, -30, -20, -10, 0, 10, 20, 30]
-      : [-40, -30, -20, -10, -5, 0, 5, 10];
-  },
-},
-{
-  scale: "y2",
-  side: 1,
-  stroke: "#6aafd5",
-  grid: {
-    show: false,
-  },
-  sync: {
-    linked: "y",
-  },
-  splits: (u) => {
-    const min = u.scales.y2.min;
-    const max = u.scales.y2.max;
-    return (min <= -40 && max >= 30) 
-      ? [-40, -30, -20, -10, 0, 10, 20, 30]
-      : [-40, -30, -20, -10, -5, 0, 5, 10];
-  },
-}
+    // mirror axis
+      values: (u, vals) => vals.map(v => v.toString()),
+  }
 ],
 
   series: [
