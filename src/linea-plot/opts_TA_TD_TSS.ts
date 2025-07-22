@@ -52,12 +52,14 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         // Horizontal label for y-axis (align with left axis)
         ctx.fillStyle = "#DE2D26";
         ctx.textAlign = "left"; // Ensure left alignment
-        ctx.fillText("Temperatur (°C)", plotLeft, yPos);
+        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`, 
+              plotLeft, yPos);
 
         // Horizontal label for y2-axis (align with right axis)  
         ctx.fillStyle = "#6aafd5";
         ctx.textAlign = "right"; // Ensure right alignment
-        ctx.fillText("Taupunkt (°C)", plotRight, yPos);
+        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
+              plotRight, yPos);
 
         // Draw reference line at 0°C
         const width = 1;
