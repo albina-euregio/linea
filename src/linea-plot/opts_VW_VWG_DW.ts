@@ -24,31 +24,27 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       (u) => {
         const ctx = u.ctx;
         ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
+        ctx.font = "bold 1.4vw sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
-
-        const canvasWidth = u.ctx.canvas.width;
+                        
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
+        const yPos = canvasHeight * 0.1;
 
-        // horizontal label for y-axis
-        const xPosY = canvasWidth * 0.075;
-        ctx.fillStyle = "#00E2B6";
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
-          xPosY,
-          yPos
-        );
+        const plotLeft = u.bbox.left;
+        const plotRight = u.bbox.left + u.bbox.width;
 
-        // horizontal label for y2-axis
-        const xPosY2 = canvasWidth * 0.9;
-        ctx.fillStyle = "#084D40";
-        ctx.fillText(
-          i18n.message("dialog:weather-station-diagram:parameter:DW"),
-          xPosY2,
-          yPos
-        );
+
+        // Horizontal label for y-axis (align with left axis)
+                        ctx.fillStyle = "#00E2B6";
+                        ctx.textAlign = "left"; // Ensure left alignment
+                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
+                         plotLeft, yPos);
+
+        // Horizontal label for y2-axis (align with right axis)  
+                        ctx.fillStyle = "#084D40";
+                        ctx.textAlign = "right"; // Ensure right alignment
+                        ctx.fillText(i18n.message("dialog:weather-station-diagram:parameter:DW"), plotRight, yPos);
 
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
