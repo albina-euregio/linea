@@ -24,7 +24,7 @@ export const opts_HS_PSUM: uPlot.Options = {
       (u) => {
          const ctx = u.ctx;
          ctx.save();
-         ctx.font = "bold 1.4vw sans-serif";
+         ctx.font = "bold 1.2vw sans-serif";
          ctx.textAlign = "center";
          ctx.textBaseline = "bottom";
                         
