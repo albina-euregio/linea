@@ -43,23 +43,29 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
                         
+        const plotWidth = u.bbox.width;
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.1;
-
-        const plotLeft = u.ctx.canvas.left;
-        const plotRight = u.ctx.canvas.left + u.ctx.canvas.width;
+        const plotLeft = u.bbox.left;
+        const plotRight = u.bbox.left + u.bbox.width;
 
         // Horizontal label for y-axis (align with left axis)
         ctx.fillStyle = "#DE2D26";
         ctx.textAlign = "left"; // Ensure left alignment
-        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`, 
-              plotLeft, yPos);
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
+          xPosY,
+          yPos
+        );
 
         // Horizontal label for y2-axis (align with right axis)  
         ctx.fillStyle = "#6aafd5";
         ctx.textAlign = "right"; // Ensure right alignment
-        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
-              plotRight, yPos);
+         ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
+          xPosY2,
+          yPos
+        );
 
         // Draw reference line at 0°C
         const width = 1;
