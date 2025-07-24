@@ -54,7 +54,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.textAlign = "left"; // Ensure left alignment
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
-          xPosY,
+          plotLeft,
           yPos
         );
 
@@ -63,7 +63,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.textAlign = "right"; // Ensure right alignment
          ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
-          xPosY2,
+          plotRight,
           yPos
         );
 
