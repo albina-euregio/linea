@@ -19,47 +19,39 @@ export const opts_RH_GR: uPlot.Options = {
       fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
     },
   },
-  hooks: {
-    drawAxes: [
-      (u) => {
+   (u) => {
                 const ctx = u.ctx;
                 ctx.save();
-                ctx.font = "bold 1.2vw sans-serif";
+                ctx.font = "bold 1vm sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "bottom";
                         
-                const plotWidth = u.bbox.width;
+        const canvasWidth = u.ctx.canvas.width;
                 const canvasHeight = u.ctx.canvas.height;
-                const yPos = canvasHeight * 0.1;
-                const plotLeft = u.bbox.left;
-                const plotRight = u.bbox.left + u.bbox.width;
+        const yPos = canvasHeight * 0.05;
 
-
-        // Horizontal label for y-axis (align with left axis)
+        // horizontal label for y-axis
+        const xPosY = canvasWidth * 0.1;
                         ctx.fillStyle = "#6aafd5";
-                        ctx.textAlign = "left"; // Ensure left alignment
-                        ctx.fillText(
-                          `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
-                              xPosY,
-                              plotLeft
-                        );
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
+          xPosY,
+          yPos
+        );
 
-
-
- 
-        // Horizontal label for y2-axis (align with right axis)  
-                        ctx.fillStyle = "#DE2D26";
-                        ctx.textAlign = "right"; // Ensure right alignment
-                       ctx.fillText(
-                          `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
-                              xPosY2,
-                              plotRight
-                        );
+        // horizontal label for y2-axis
+        const xPosY2 = canvasWidth * 0.9;
+        ctx.fillStyle = "#DE2D26";
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
+          xPosY2,
+          yPos
+        );
 
                         ctx.restore();
       },
     ],
-  },
+
   scales: {
     y: {
       range: [0, 100],
