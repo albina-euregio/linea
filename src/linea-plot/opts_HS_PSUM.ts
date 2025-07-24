@@ -28,24 +28,33 @@ export const opts_HS_PSUM: uPlot.Options = {
          ctx.textAlign = "center";
          ctx.textBaseline = "bottom";
                         
-         const canvasHeight = u.ctx.canvas.height;
-         const yPos = canvasHeight * 0.1;
-
-         const plotLeft = u.ctx.canvas.left;
-         const plotRight = u.ctx.canvas.left + u.ctx.canvas.width;
+        const plotWidth = u.bbox.width;
+        const canvasHeight = u.ctx.canvas.height;
+        const yPos = canvasHeight * 0.1;
+        const plotLeft = u.bbox.left;
+        const plotRight = u.bbox.left + u.bbox.width;
 
        // Horizontal label for y-axis (align with left axis)
                         ctx.fillStyle = "#08519C";
                         ctx.textAlign = "left"; // Ensure left alignment
-                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-                        plotLeft, yPos);
+                        ctx.fillText(
+                          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
+                            plotLeft,
+                            yPos
+                          );
+
 
       // Horizontal label for y2-axis (align with right axis)  
                         ctx.fillStyle = "#6aafd5";
                         ctx.textAlign = "right"; // Ensure right alignment
-                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
-                        plotRight, yPos);
-                        ctx.restore();
+                       ctx.fillText(
+                          `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
+                            plotRight,
+                            yPos
+                          );
+
+        ctx.restore();
+
       },
     ],
   },
