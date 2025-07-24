@@ -28,23 +28,31 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
                         
+        const plotWidth = u.bbox.width;
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.1;
-
-        const plotLeft = u.ctx.canvas.left;
-        const plotRight = u.ctx.canvas.left + u.ctx.canvas.width;
-
+        const plotLeft = u.bbox.left;
+        const plotRight = u.bbox.left + u.bbox.width;
 
         // Horizontal label for y-axis (align with left axis)
                         ctx.fillStyle = "#00E2B6";
                         ctx.textAlign = "left"; // Ensure left alignment
-                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
-                         plotLeft, yPos);
+                        ctx.fillText(
+                          `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
+                              xPosY,
+                              plotLeft
+                          );
+
 
         // Horizontal label for y2-axis (align with right axis)  
                         ctx.fillStyle = "#084D40";
                         ctx.textAlign = "right"; // Ensure right alignment
-                        ctx.fillText(i18n.message("dialog:weather-station-diagram:parameter:DW"), plotRight, yPos);
+                        ctx.fillText(
+                          i18n.message("dialog:weather-station-diagram:parameter:DW"),
+                              xPosY2,
+                              plotRight
+                          );
+
 
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
