@@ -28,25 +28,34 @@ export const opts_RH_GR: uPlot.Options = {
                 ctx.textAlign = "center";
                 ctx.textBaseline = "bottom";
                         
+                const plotWidth = u.bbox.width;
                 const canvasHeight = u.ctx.canvas.height;
                 const yPos = canvasHeight * 0.1;
+                const plotLeft = u.bbox.left;
+                const plotRight = u.bbox.left + u.bbox.width;
 
-                const plotLeft = u.ctx.canvas.left;
-                const plotRight = u.ctx.canvas.left + u.ctx.canvas.width;
 
         // Horizontal label for y-axis (align with left axis)
                         ctx.fillStyle = "#6aafd5";
                         ctx.textAlign = "left"; // Ensure left alignment
-                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
-                         plotLeft, yPos);
+                        ctx.fillText(
+                          `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
+                              xPosY,
+                              plotLeft
+                        );
+
 
 
  
         // Horizontal label for y2-axis (align with right axis)  
                         ctx.fillStyle = "#DE2D26";
                         ctx.textAlign = "right"; // Ensure right alignment
-                        ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
-                        plotRight, yPos);
+                       ctx.fillText(
+                          `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
+                              xPosY2,
+                              plotRight
+                        );
+
                         ctx.restore();
       },
     ],
