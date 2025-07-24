@@ -39,33 +39,33 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       (u) => {
         const ctx = u.ctx;
         ctx.save();
-        ctx.font = "bold 1.2vw sans-serif";
+        ctx.font = "bold 1vm sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
                         
         const plotWidth = u.bbox.width;
+        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.1;
-        const plotLeft = u.bbox.left;
-        const plotRight = u.bbox.left + u.bbox.width;
+        const yPos = canvasHeight * 0.05;
 
-        // Horizontal label for y-axis (align with left axis)
+        // Horizontal label for y-axis
+        const xPosY = canvasWidth * 0.1;
         ctx.fillStyle = "#DE2D26";
-        ctx.textAlign = "left"; // Ensure left alignment
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
-          plotLeft,
+          xPosY,
           yPos
         );
 
-        // Horizontal label for y2-axis (align with right axis)  
+        // Horizontal label for y2-axis
+        const xPosY2 = canvasWidth * 0.9;
         ctx.fillStyle = "#6aafd5";
-        ctx.textAlign = "right"; // Ensure right alignment
-         ctx.fillText(
+        ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
-          plotRight,
+          xPosY2,
           yPos
         );
+
 
         // Draw reference line at 0°C
         const width = 1;
