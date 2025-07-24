@@ -24,40 +24,36 @@ export const opts_HS_PSUM: uPlot.Options = {
       (u) => {
          const ctx = u.ctx;
          ctx.save();
-         ctx.font = "bold 1.2vw sans-serif";
+        ctx.font = "bold 1vm sans-serif";
          ctx.textAlign = "center";
          ctx.textBaseline = "bottom";
                         
-        const plotWidth = u.bbox.width;
-        const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.1;
-        const plotLeft = u.bbox.left;
-        const plotRight = u.bbox.left + u.bbox.width;
+        const canvasWidth = u.ctx.canvas.width;
+         const canvasHeight = u.ctx.canvas.height;
+        const yPos = canvasHeight * 0.05;
 
-       // Horizontal label for y-axis (align with left axis)
+        // horizontal label for y-axis
+        const xPosY = canvasWidth * 0.1;
                         ctx.fillStyle = "#08519C";
-                        ctx.textAlign = "left"; // Ensure left alignment
-                        ctx.fillText(
-                          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-                            plotLeft,
-                            yPos
-                          );
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
+          xPosY,
+          yPos
+        );
 
-
-      // Horizontal label for y2-axis (align with right axis)  
+        // horizontal label for y2-axis
+        const xPosY2 = canvasWidth * 0.9;
                         ctx.fillStyle = "#6aafd5";
-                        ctx.textAlign = "right"; // Ensure right alignment
-                       ctx.fillText(
-                          `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
-                            plotRight,
-                            yPos
-                          );
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
+          xPosY2,
+          yPos
+        );
 
-        ctx.restore();
-
+                        ctx.restore();
       },
     ],
-  },
+
   scales: {
     y: {
       range: (u, dataMin, dataMax) => {
