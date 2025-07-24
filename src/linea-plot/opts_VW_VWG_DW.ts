@@ -24,35 +24,31 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       (u) => {
         const ctx = u.ctx;
         ctx.save();
-        ctx.font = "bold 1.2vw sans-serif";
+        ctx.font = "bold 1vm sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
                         
-        const plotWidth = u.bbox.width;
+        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.1;
-        const plotLeft = u.bbox.left;
-        const plotRight = u.bbox.left + u.bbox.width;
+        const yPos = canvasHeight * 0.05;
 
-        // Horizontal label for y-axis (align with left axis)
+        // horizontal label for y-axis
+        const xPosY = canvasWidth * 0.075;
                         ctx.fillStyle = "#00E2B6";
-                        ctx.textAlign = "left"; // Ensure left alignment
-                        ctx.fillText(
-                          `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
-                              xPosY,
-                              plotLeft
-                          );
+        ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
+          xPosY,
+          yPos
+        );
 
-
-        // Horizontal label for y2-axis (align with right axis)  
+        // horizontal label for y2-axis
+        const xPosY2 = canvasWidth * 0.9;
                         ctx.fillStyle = "#084D40";
-                        ctx.textAlign = "right"; // Ensure right alignment
-                        ctx.fillText(
-                          i18n.message("dialog:weather-station-diagram:parameter:DW"),
-                              xPosY2,
-                              plotRight
-                          );
-
+        ctx.fillText(
+          i18n.message("dialog:weather-station-diagram:parameter:DW"),
+          xPosY2,
+          yPos
+        );
 
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
