@@ -46,8 +46,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.1;
 
-        const plotLeft = u.bbox.left;
-        const plotRight = u.bbox.left + u.bbox.width;
+        const plotLeft = u.ctx.canvas.left;
+        const plotRight = u.ctx.canvas.left + u.ctx.canvas.width;
 
         // Horizontal label for y-axis (align with left axis)
         ctx.fillStyle = "#DE2D26";
