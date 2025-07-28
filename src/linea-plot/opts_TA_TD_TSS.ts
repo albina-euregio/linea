@@ -43,7 +43,6 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
                         
-        const plotWidth = u.bbox.width;
         const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.05;
@@ -140,7 +139,6 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     stroke: "#DE2D26",
     grid: { show: true },
     splits: (u) => {
-      const min = u.scales.y.min;
       const max = u.scales.y.max;
       const useExtended = max > 15;
       const baseTicks = useExtended

@@ -1,5 +1,3 @@
-import uPlot from "uplot";
-
 // P Air pressure, in Pa
 // TA Temperature Air, in Kelvin
 // TD Temperature Dew Point, in Kelvin

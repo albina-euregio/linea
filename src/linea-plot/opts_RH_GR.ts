@@ -19,6 +19,8 @@ export const opts_RH_GR: uPlot.Options = {
       fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
     },
   },
+  hooks: {
+    drawAxes: [
    (u) => {
                 const ctx = u.ctx;
                 ctx.save();
@@ -51,6 +53,7 @@ export const opts_RH_GR: uPlot.Options = {
                         ctx.restore();
       },
     ],
+  },
 
   scales: {
     y: {

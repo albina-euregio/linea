@@ -53,11 +53,12 @@ export const opts_HS_PSUM: uPlot.Options = {
                         ctx.restore();
       },
     ],
+  },
 
   scales: {
     y: {
       range: (u, dataMin, dataMax) => {
-        return dataMin < -0 || dataMax > 250 ? [0, 500] : [0, 250];
+        return dataMin < 0 || dataMax > 250 ? [0, 500] : [0, 250];
       },
     },
     y2: {

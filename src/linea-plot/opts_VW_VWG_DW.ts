@@ -131,7 +131,7 @@ export const opts_VW_MAX: uPlot.Series = {
 export const opts_DW: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:DW"),
   stroke: "#084D40",
-  paths: (u) => null,
+  paths: () => null,
   points: {
     space: 0,
     fill: "#084D40",
