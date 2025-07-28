@@ -6,6 +6,7 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "prepare": "husky",
+    "test": "oxlint --max-warnings 0",
     "build": "vite build",
     "dev": "vite"
   },
@@ -23,6 +24,7 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
+    "oxlint": "^1.8.0",
     "prettier": "^3.3.3",
     "vite": "npm:rolldown-vite@^7.0.6"
   }
