@@ -45,7 +45,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   ctx.textAlign = "right";
   ctx.fillStyle = "#084D40";
   ctx.fillText(
-      `${i18n.message("dialog:weather-station-diagram:parameter:DW")}`,
+      i18n.message("dialog:weather-station-diagram:parameter:DW"),
         xPosY2, 
         yPos
         );
