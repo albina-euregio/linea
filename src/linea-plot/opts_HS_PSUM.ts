@@ -21,35 +21,34 @@ export const opts_HS_PSUM: uPlot.Options = {
   },
   hooks: {
     drawAxes: [
-      (u) => {
-         const ctx = u.ctx;
-         ctx.save();
-        ctx.font = "bold 1vm sans-serif";
-         ctx.textAlign = "center";
-         ctx.textBaseline = "bottom";
-                        
-        const canvasWidth = u.ctx.canvas.width;
-         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
+       (u) => {
+  const ctx = u.ctx;
+  ctx.save();
+  ctx.textBaseline = "top"; 
 
-        // horizontal label for y-axis
-        const xPosY = canvasWidth * 0.1;
-                        ctx.fillStyle = "#08519C";
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-          xPosY,
-          yPos
-        );
+  const bboxHeight = u.bbox.height;
+  const yPos = bboxHeight * 0.08;
 
-        // horizontal label for y2-axis
-        const xPosY2 = canvasWidth * 0.9;
-                        ctx.fillStyle = "#6aafd5";
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
-          xPosY2,
-          yPos
-        );
+  // Left Y-axis label
+  const xPosY = u.bbox.left;
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#08519C";
+  ctx.fillText( 
+    `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
+      xPosY, 
+      yPos
+      );
 
+
+  // Right Y-axis label 
+  const xPosY2 = u.bbox.left + u.bbox.width;
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#6aafd5";
+  ctx.fillText(
+    `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
+      xPosY2, 
+      yPos
+      );
                         ctx.restore();
       },
     ],
