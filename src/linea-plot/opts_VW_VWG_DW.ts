@@ -21,34 +21,35 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   },
   hooks: {
     drawAxes: [
-      (u) => {
-        const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 1vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-                        
-        const canvasWidth = u.ctx.canvas.width;
-        const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
+       (u) => {
+  const ctx = u.ctx;
+  ctx.save();
+  ctx.textBaseline = "top"; 
 
-        // horizontal label for y-axis
-        const xPosY = canvasWidth * 0.075;
-                        ctx.fillStyle = "#00E2B6";
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
-          xPosY,
-          yPos
+  const bboxHeight = u.bbox.height;
+  const yPos = bboxHeight * 0.08;
+
+  // Left Y-axis label
+  const xPosY = u.bbox.left;
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#00E2B6";
+  ctx.fillText( 
+     `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
+        xPosY, 
+        yPos
         );
 
-        // horizontal label for y2-axis
-        const xPosY2 = canvasWidth * 0.9;
-                        ctx.fillStyle = "#084D40";
-        ctx.fillText(
-          i18n.message("dialog:weather-station-diagram:parameter:DW"),
-          xPosY2,
-          yPos
+
+  // Right Y-axis label 
+  const xPosY2 = u.bbox.left + u.bbox.width;
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#084D40";
+  ctx.fillText(
+      `${i18n.message("dialog:weather-station-diagram:parameter:DW")}`,
+        xPosY2, 
+        yPos
         );
+
 
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
