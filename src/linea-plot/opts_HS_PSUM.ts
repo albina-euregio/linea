@@ -26,8 +26,9 @@ export const opts_HS_PSUM: uPlot.Options = {
   ctx.save();
   ctx.textBaseline = "top"; 
 
-  const bboxHeight = u.bbox.height;
-  const yPos = bboxHeight * 0.08;
+    const canvasWidth = u.ctx.canvas.width;
+    const canvasHeight = u.ctx.canvas.height;
+    const yPos = canvasHeight * 0.05;
 
   // Left Y-axis label
   const xPosY = u.bbox.left;

@@ -26,15 +26,16 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   ctx.save();
   ctx.textBaseline = "top"; 
 
-  const bboxHeight = u.bbox.height;
-  const yPos = bboxHeight * 0.08;
+  const canvasWidth = u.ctx.canvas.width;
+  const canvasHeight = u.ctx.canvas.height;
+  const yPos = canvasHeight * 0.05;
 
   // Left Y-axis label
   const xPosY = u.bbox.left;
   ctx.textAlign = "left";
   ctx.fillStyle = "#00E2B6";
   ctx.fillText( 
-     `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
+    `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
         xPosY, 
         yPos
         );
@@ -45,7 +46,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   ctx.textAlign = "right";
   ctx.fillStyle = "#084D40";
   ctx.fillText(
-      i18n.message("dialog:weather-station-diagram:parameter:DW"),
+       i18n.message("dialog:weather-station-diagram:parameter:DW"),
         xPosY2, 
         yPos
         );

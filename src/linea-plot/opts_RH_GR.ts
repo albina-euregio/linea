@@ -26,8 +26,8 @@ export const opts_RH_GR: uPlot.Options = {
   ctx.save();
   ctx.textBaseline = "top"; 
 
-  const bboxHeight = u.bbox.height;
-  const yPos = bboxHeight * 0.08;
+  const canvasHeight = u.ctx.canvas.height;
+  const yPos = canvasHeight * 0.05;
 
   // Left Y-axis label
   const xPosY = u.bbox.left;
@@ -45,7 +45,7 @@ export const opts_RH_GR: uPlot.Options = {
   ctx.textAlign = "right";
   ctx.fillStyle = "#DE2D26";
   ctx.fillText(
-      `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
+       `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
         xPosY2, 
         yPos
         );

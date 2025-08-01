@@ -37,33 +37,32 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   hooks: {
     drawAxes: [
       (u) => {
-  const ctx = u.ctx;
-  ctx.save();
-  ctx.textBaseline = "top"; 
+        const ctx = u.ctx;
+        ctx.save();
+        ctx.textBaseline = "top"; 
 
-  const bboxHeight = u.bbox.height;
-  const yPos = bboxHeight * 0.08;
-
-  // Left Y-axis label
-  const xPosY = u.bbox.left;
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#DE2D26";
-  ctx.fillText( 
-    `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
-      xPosY, 
-      yPos
-      );
+        const canvasHeight = u.ctx.canvas.height;
+        const yPos = canvasHeight * 0.05;
 
 
-  // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width;
-  ctx.textAlign = "right";
-  ctx.fillStyle = "#6aafd5";
-  ctx.fillText(`${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
-      xPosY2, 
-      yPos
-      );
+        // Horizontal label for y-axis
+          const xPosY = u.bbox.left;
+          ctx.textAlign = "left";
+          ctx.fillStyle = "#DE2D26";
+          ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
+              xPosY, 
+              yPos
+        );
 
+        // Horizontal label for y2-axis
+          const xPosY2 = u.bbox.left + u.bbox.width;
+          ctx.textAlign = "right";        ctx.fillStyle = "#6aafd5";
+          ctx.fillText(
+          `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
+          xPosY2, 
+        yPos
+        );
 
         // Draw reference line at 0°C
         const width = 1;
@@ -130,14 +129,15 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   }
 },
 
+
   axes: [
     timeAxis,
     {
-    scale: "y",
-    side: 3,
-    stroke: "#DE2D26",
-    grid: { show: true },
-    splits: (u) => {
+      scale: "y",
+      side: 3,
+      stroke: "#DE2D26",
+      grid: {show: true},
+      splits: (u) => {
       const max = u.scales.y.max;
       const useExtended = max > 15;
       const baseTicks = useExtended
@@ -145,18 +145,19 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         : [-30, -20, -10, 0, 10];
       return baseTicks;
     },
+
       values: (u, vals) => vals.map(v => v.toString()),
   },
-  {
-    scale: "y",
-    side: 1,
-    stroke: "#6aafd5",
-    grid: { show: false },
-    show: true,
-    // mirror axis
-      values: (u, vals) => vals.map(v => v.toString()),
+    {
+      scale: "y",
+      side: 1,
+      stroke: "#6aafd5",
+      grid: {
+        show: false},
+       values: (u, vals) => vals.map(v => v.toString()),
   }
 ],
+
 
   series: [
     {
