@@ -139,7 +139,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       grid: {show: true},
       splits: (u) => {
       const max = u.scales.y.max;
-      const useExtended = max > 15;
+      const useExtended = max > 10;
       const baseTicks = useExtended
         ? [-30, -20, -10, 0, 10, 20, 30]
         : [-30, -20, -10, 0, 10];
