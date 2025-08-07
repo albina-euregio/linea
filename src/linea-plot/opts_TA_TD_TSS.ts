@@ -124,6 +124,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   scales: {
   y: {
     range: (u, dataMin, dataMax) => {
+      console.log('Actual data range:', dataMin, 'to', dataMax);
       return (dataMin < -30 || dataMax > 10) ? [-30, 30] : [-30, 10];
     },
   }
