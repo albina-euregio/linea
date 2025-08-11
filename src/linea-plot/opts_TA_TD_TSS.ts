@@ -124,8 +124,26 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   scales: {
   y: {
     range: (u, dataMin, dataMax) => {
-      console.log('Actual data range:', dataMin, 'to', dataMax);
-      return (dataMin < -30 || dataMax > 10) ? [-30, 30] : [-30, 10];
+      let validMin = Infinity;
+      let validMax = -Infinity;
+      
+      for (let i = 1; i < u.data.length; i++) {
+        const series = u.data[i];
+        for (let j = 0; j < series.length; j++) {
+          const val = series[j];
+          if (!isNaN(val) && val !== null) {
+            validMin = Math.min(validMin, val);
+            validMax = Math.max(validMax, val);
+          }
+        }
+      }
+      
+      if (validMin === Infinity || validMax === -Infinity) {
+        return [-30, 10]; 
+      }
+      
+      console.log('Valid data range:', validMin, 'to', validMax);
+      return (validMin < -30 || validMax > 10) ? [-30, 30] : [-30, 10];
     },
   }
 },
