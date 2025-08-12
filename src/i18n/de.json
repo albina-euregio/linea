@@ -10,8 +10,8 @@
   "dialog:weather-station-diagram:parameter:VW_MAX": "Windböe",
   "dialog:weather-station-diagram:parameter:DW": "Wind-Richtung",
   "dialog:weather-station-diagram:parameter:SH": "Oberflächenreif",
-  "dialog:weather-station-diagram:parameter:SH:hide": "Hide Surface hoar potential",
-  "dialog:weather-station-diagram:parameter:SH:show": "Show Surface hoar potential",
+  "dialog:weather-station-diagram:parameter:SH:hide": "Potential zur Oberflächenreifbildung ausblenden",
+  "dialog:weather-station-diagram:parameter:SH:show": "Potential zur Oberflächenreifbildung einblenden",
   "dialog:weather-station-diagram:unit:temperature": "Temperatur",
   "dialog:weather-station-diagram:unit:time": "Zeit"
 }
