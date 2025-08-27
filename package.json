@@ -19,6 +19,7 @@
     "*.{css,md,scss}": "prettier --write"
   },
   "dependencies": {
+    "temporal-polyfill": "^0.3.0",
     "uplot": "^1.6.32"
   },
   "devDependencies": {
