@@ -69,6 +69,7 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
   let nodata = "-777";
   let station = "";
   let altitude = NaN;
+  const now = Date.now();
   const lines = smet.split(/\r?\n/);
   const timestamps = new Uint32Array(lines.length);
   let dataIndex = 0;
@@ -94,11 +95,11 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
     }
     const cells = line.split(" ");
     const date = Date.parse(cells[0]);
-    if (Date.now() - date > timeRangeMilli) return;
+    if (now - date > timeRangeMilli) return;
     // uPlot uses epoch seconds (instead of milliseconds)
     timestamps[dataIndex] = date / 1000;
     values.forEach((values0, i) => {
-      if (i == 0) return;
+      if (i == 0) return; // timestamp
       const value = cells[i] === nodata ? NaN : +cells[i].replace(",", ".");
       values0[dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
     });
