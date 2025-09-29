@@ -73,39 +73,66 @@ export const opts_VW_VWG_DW: uPlot.Options = {
     ],
   },
   scales: {
-    y: {
-      range: (u, dataMin, dataMax) => {
-        return dataMin < 0 || dataMax > 100 ? [0, 120] : [0, 100];
-      },
-    },
-    y2: {
-      range: [0, 360],
+  y: {
+    range: (u, dataMin, dataMax) => {
+      let validMin = Infinity;
+      let validMax = -Infinity;
+      
+      // Only check series that use the 'y' scale
+      for (let i = 1; i < u.data.length; i++) {
+        // Skip series that don't use this scale
+        if (u.series[i].scale !== 'y') continue;
+        
+        const series = u.data[i];
+        for (let j = 0; j < series.length; j++) {
+          const val = series[j];
+          if (!isNaN(val) && val !== null) {
+            validMin = Math.min(validMin, val);
+            validMax = Math.max(validMax, val);
+          }
+        }
+      }
+      
+      if (validMin === Infinity || validMax === -Infinity) {
+        return [0, 100]; 
+      }
+      
+      console.log('Valid data range:', validMin, 'to', validMax);
+      return validMax > 100 ? [0, 120] : [0, 100];
     },
   },
-  axes: [
-    timeAxis,
-    {
-      splits: (u) => {
-        const min = u.scales.y.min;
-        const max = u.scales.y.max;
-        return min <= 0 && max >= 120
-          ? [0, 30, 60, 90, 120]
-          : [0, 25, 50, 75, 100];
-      },
-      stroke: "#00E2B6",
-      scale: "y",
+  y2: {
+    range: [0, 360],
+  },
+},
+axes: [
+  timeAxis,
+  {
+    scale: "y",
+    side: 3,
+    stroke: "#00E2B6",
+    grid: {show: true},
+    splits: (u) => {
+      const max = u.scales.y.max;
+      const useExtended = max > 100;
+      const baseTicks = useExtended
+        ? [0, 30, 60, 90, 120]
+        : [0, 25, 50, 75, 100];
+      return baseTicks;
     },
-    {
-      splits: [0, 90, 180, 270, 360],
-      stroke: "#084D40",
-      values: ["N", "E", "S", "W", "N"],
-      scale: "y2",
-      side: 1,
-      grid: {
-        show: false,
-      },
+    values: (u, vals) => vals.map(v => v.toString()),
+  },
+  {
+    splits: [0, 90, 180, 270, 360],
+    stroke: "#084D40",
+    values: ["N", "E", "S", "W", "N"],
+    scale: "y2",
+    side: 1,
+    grid: {
+      show: false,
     },
-  ],
+  },
+],
   series: [
     {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),
