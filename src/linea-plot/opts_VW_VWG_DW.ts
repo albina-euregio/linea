@@ -72,7 +72,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       },
     ],
   },
-  scales: {
+   scales: {
   y: {
     range: (u, dataMin, dataMax) => {
       let validMin = Infinity;
