@@ -78,7 +78,11 @@ export class LineaPlot extends HTMLElement {
       );
       this.#addSeries(p, opts_TA, values.TA);
       this.#addSeries(p, opts_TD, TD);
-      this.#addSeries(p, opts_TSS, values.TSS);
+      
+      if(values.TSG) {
+        this.#addSeries(p, opts_TSS, values.TSG);
+      }
+      
 
       if (this.hasAttribute("showSurfaceHoarButton")) {
         const button = document.createElement("button");
