@@ -82,8 +82,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
         ctx.restore();
 
-        // Only draw shaded regions if showSurfaceHoar is true
-        if (showSurfaceHoar.value) {
+        // Only draw shaded regions if showSurfaceHoar is true and the snow surface temperature is available
+        if (showSurfaceHoar.value && u.data.length == 4) {
           ctx.save();
           ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
           ctx.clip();
