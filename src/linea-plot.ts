@@ -130,6 +130,7 @@ export class LineaPlot extends HTMLElement {
     if (!this.#plots.includes(plot)) {
       this.#plots.push(plot);
     }
+    data = Array.from(data, v => Number.isNaN(v) ? null : v);
     plot.addSeries({ ...series, show: !!data?.length });
     plot.data.push(data ?? []);
   }

@@ -190,6 +190,7 @@ const createSeries = (labelKey: string, color: string): uPlot.Series => ({
   stroke: color,
   scale: "y",
   width: 2,
+  spanGaps: false,
   value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "°C")),
 });
 
