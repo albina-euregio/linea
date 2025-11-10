@@ -182,30 +182,17 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
-    },
-  ],
+    }
+  ]
 };
-
-export const opts_TA: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:unit:temperature"),
-  stroke: "#DE2D26",
+const createSeries = (labelKey: string, color: string): uPlot.Series => ({
+  label: i18n.message(labelKey),
+  stroke: color,
   scale: "y",
   width: 2,
-  value: (u, v) => i18n.number(v, {}, "°C"),
-};
+  value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "°C")),
+});
 
-export const opts_TD: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:TD"),
-  stroke: "#6aafd5",
-  scale: "y",
-  width: 2,
-  value: (u, v) => i18n.number(v, {}, "°C"),
-};
-
-export const opts_TSS: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:TSS"),
-  stroke: "#FC9272",
-  scale: "y",
-  width: 2,
-  value: (u, v) => i18n.number(v, {}, "°C"),
-};
+export const opts_TA = createSeries("dialog:weather-station-diagram:unit:temperature", "#DE2D26");
+export const opts_TD = createSeries("dialog:weather-station-diagram:parameter:TD", "#6aafd5");
+export const opts_TSS = createSeries("dialog:weather-station-diagram:parameter:TSS", "#FC9272");
