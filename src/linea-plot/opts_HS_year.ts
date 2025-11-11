@@ -144,5 +144,5 @@ export const opts_HS_year_PSUM: uPlot.Series = {
   stroke: "#6aafd5",
   fill: "#6aafd5",
   scale: "y2",
-  value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "mm")),
+  value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v*10)/10, {}, "mm")),
 };
