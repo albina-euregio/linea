@@ -80,8 +80,8 @@ export class LineaPlot extends HTMLElement {
       this.#addSeries(p, opts_TD, TD);
       
       // show snow surface temperature and therefore surface hoar only if available
-      if(values.TSG) {
-        this.#addSeries(p, opts_TSS, values.TSG);
+      if(values.TSS) {
+        this.#addSeries(p, opts_TSS, values.TSS);
         //show surface hoar button
         if (this.hasAttribute("showSurfaceHoarButton")) {
           const button = document.createElement("button");
