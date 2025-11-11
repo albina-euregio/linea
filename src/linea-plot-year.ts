@@ -162,6 +162,8 @@ export class LineaPlotYear extends HTMLElement {
     this.#addSeries(p, opts_HS_year_current, yearData.HS);
     if(values.PSUM){
       this.#addSeries(p, opts_HS_year_PSUM, yearData.PSUM);
+    } else {
+      this.#addSeries(p, opts_HS_year_PSUM, new Float32Array([]));
     }
 
     this.#resizePlots();
