@@ -1,4 +1,4 @@
-import type uPlot from "uplot";
+import uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
@@ -47,7 +47,7 @@ hooks: {
         const xPosY2 = canvasWidth * 0.9;
         ctx.fillStyle = "#000000";
         ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
+          `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
           xPosY2,
           yPos
         );
@@ -62,7 +62,7 @@ scales: {
         range: [0, 500]
       },
       y2: {
-        range: [0, 500]
+        range: [0, 50]
       },
     },
 
@@ -75,7 +75,7 @@ axes: [
     },
      {
       scale: "y2",
-      splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
+      splits: [0, 10, 20, 30, 40, 50],
       stroke: "#000000",
       side: 1,
       grid: {
@@ -103,7 +103,7 @@ axes: [
 ],  
 };
 
-export const opts_HS_min: uPlot.Series = {
+export const opts_HS_year_min: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:HS_min"),
   stroke: "#d9dcdc",
   width: 2,
@@ -112,7 +112,7 @@ export const opts_HS_min: uPlot.Series = {
   value: (u, v) => i18n.number(v, {}, "cm"),
 };
 
-export const opts_HS_max: uPlot.Series = {
+export const opts_HS_year_max: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:HS_max"),
   stroke: "#d9dcdc",
   width: 0,
@@ -121,7 +121,7 @@ export const opts_HS_max: uPlot.Series = {
   value: (u, v) => i18n.number(v, {}, "cm"),
 };
 
-export const opts_HS_median: uPlot.Series = {
+export const opts_HS_year_median: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:HS_median"),
   stroke: "#878787",
   width: 2,
@@ -129,10 +129,19 @@ export const opts_HS_median: uPlot.Series = {
   value: (u, v) => i18n.number(v, {}, "cm"),
 };
 
-export const opts_HS_current: uPlot.Series = {
+export const opts_HS_year_current: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
   stroke: "#ff0000",
   width: 2,
   scale: "y",
   value: (u, v) => i18n.number(v, {}, "cm"),
+};
+
+export const opts_HS_year_PSUM: uPlot.Series = {
+  label: "Niederschlag [mm]",
+  paths: uPlot.paths.bars(),
+  points: { show: false },
+  stroke: "#6aafd5",
+  fill: "#6aafd5",
+  scale: "y2",
 };

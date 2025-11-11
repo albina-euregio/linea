@@ -2,10 +2,11 @@ import uPlot from "uplot";
 import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "./i18n";
 import {
-  opts_HS_current,
-  opts_HS_max,
-  opts_HS_median,
-  opts_HS_min,
+  opts_HS_year_current,
+  opts_HS_year_max,
+  opts_HS_year_median,
+  opts_HS_year_min,
+  opts_HS_year_PSUM,
   opts_HS_year,
 } from "./linea-plot/opts_HS_year";
 import { fetchSMET } from "./smet-data";
@@ -141,10 +142,24 @@ export class LineaPlotYear extends HTMLElement {
       [yearData.timestamps],
       plot_HS_year
     );
-    this.#addSeries(p, opts_HS_min, yearData.HS_min);
-    this.#addSeries(p, opts_HS_max, yearData.HS_max);
-    this.#addSeries(p, opts_HS_median, yearData.HS_median);
-    this.#addSeries(p, opts_HS_current, yearData.HS);
+    let test = [
+        0, 0, 17.85, 5.6299, 0, 0, 0, 0.2569, 0, 0, 3.2709, 0.0694, 0, 0.5138,
+        1.8403, 0.0972, 1.9931, 0, 0.9861, 2.5375, 3.375, 0, 0, 0, 0, 0, 0,
+        2.3056, 0.8056, 0, 0, 0.4097, 0, 2.6111, 5.4584, 2.4826, 0, 1.7709,
+        3.2569, 3.2986, 2.0972, 1.125, 1.4444, 0, 0, 0.85, 5.6299, 0, 0, 0,
+        0.2569, 0, 0, 3.2709, 0.0694, 0, 0.5138, 1.8403, 0.0972, 1.9931, 0,
+        0.9861, 2.5375, 3.375, 0, 0, 0, 0, 0, 0, 2.3056, 0.8056, 0, 0, 0.4097,
+        0, 2.6111, 5.4584, 2.4826, 0, 1.7709, 3.2569, 3.2986, 2.0972, 1.125,
+        1.4444, 0, 0, 0.85, 5.6299, 0, 0, 0, 0.2569, 0, 0, 3.2709, 0.0694, 0,
+        0.5138, 1.8403, 0.0972, 1.9931, 0, 0.9861, 2.5375, 3.375, 0, 0, 0, 0,
+        0, 0, 2.3056, 0.8056, 0, 0, 0.4097, 0, 2.6111, 5.4584, 2.4826, 0,
+        1.7709, 3.2569, 3.2986, 2.0972, 1.125, 1.4444, 0, 0, 0, 0, 0, 3, 4,
+      ]
+    this.#addSeries(p, opts_HS_year_min, yearData.HS_min);
+    this.#addSeries(p, opts_HS_year_max, yearData.HS_max);
+    this.#addSeries(p, opts_HS_year_median, yearData.HS_median);
+    this.#addSeries(p, opts_HS_year_current, yearData.HS);
+    this.#addSeries(p, opts_HS_year_PSUM, new Float32Array(test));
 
     this.#resizePlots();
     this.#resizeObserver.observe(this);
