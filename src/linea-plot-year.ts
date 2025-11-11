@@ -130,7 +130,7 @@ export class LineaPlotYear extends HTMLElement {
 
           //can lead to problem if only one is not finite, because both will no be parsed
           //shouldn't be so often
-          if (!isFinite(hs) && !isFinite(psum)) {
+          if (!isFinite(hs)) {
             continue;
           }
 
