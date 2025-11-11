@@ -56,8 +56,9 @@ export class LineaPlotYear extends HTMLElement {
       >();
       dates: Temporal.PlainDate[] = [];
       valuesHS: number[] = [];
+      valuesPSUM: number[] = [];
 
-      add(date: Temporal.PlainDate, hs: number) {
+      add(date: Temporal.PlainDate, hs: number, psum: number) {
         const monthDay = date.toPlainMonthDay().toString();
         if (!this.plainMonthData.has(monthDay)) {
           this.plainMonthData.set(monthDay, []);
@@ -69,6 +70,7 @@ export class LineaPlotYear extends HTMLElement {
         ) {
           this.dates.push(date);
           this.valuesHS.push(hs);
+          this.valuesPSUM.push(psum);
         }
       }
 
@@ -94,6 +96,10 @@ export class LineaPlotYear extends HTMLElement {
         );
       }
 
+      get PSUM(): Float32Array {
+        return new Float32Array(this.valuesPSUM);
+      }
+
       get HS(): Float32Array {
         return new Float32Array(this.valuesHS);
       }
@@ -112,24 +118,32 @@ export class LineaPlotYear extends HTMLElement {
         );
       }
 
-      static from(timestamps: Uint32Array, HS: Float32Array): YearData {
+      static from(timestamps: Uint32Array, HS: Float32Array, PSUM: Float32Array): YearData {
         const yearData = new YearData();
         for (let i = 0; i < timestamps.length; i++) {
           const hs = HS[i];
-          if (!isFinite(hs)) {
+          let psum = 0;
+          if(PSUM){
+            psum = PSUM[i];
+          }
+          
+
+          //can lead to problem if only one is not finite, because both will no be parsed
+          //shouldn't be so often
+          if (!isFinite(hs) && !isFinite(psum)) {
             continue;
           }
 
           const timestamp = timestamps[i] * 1000;
           const instant = Temporal.Instant.fromEpochMilliseconds(timestamp);
           const date = instant.toZonedDateTimeISO(timeZone).toPlainDate();
-          yearData.add(date, hs);
+          yearData.add(date, hs, psum);
         }
         return yearData;
       }
     }
-
-    const yearData = YearData.from(timestamps, values.HS);
+    
+    const yearData = YearData.from(timestamps, values.HS, values.PSUM);
     const p = new uPlot(
       {
         ...opts_HS_year,
@@ -142,7 +156,7 @@ export class LineaPlotYear extends HTMLElement {
       [yearData.timestamps],
       plot_HS_year
     );
-    let test = [
+    let test = new Float32Array([
         0, 0, 17.85, 5.6299, 0, 0, 0, 0.2569, 0, 0, 3.2709, 0.0694, 0, 0.5138,
         1.8403, 0.0972, 1.9931, 0, 0.9861, 2.5375, 3.375, 0, 0, 0, 0, 0, 0,
         2.3056, 0.8056, 0, 0, 0.4097, 0, 2.6111, 5.4584, 2.4826, 0, 1.7709,
@@ -154,12 +168,14 @@ export class LineaPlotYear extends HTMLElement {
         0.5138, 1.8403, 0.0972, 1.9931, 0, 0.9861, 2.5375, 3.375, 0, 0, 0, 0,
         0, 0, 2.3056, 0.8056, 0, 0, 0.4097, 0, 2.6111, 5.4584, 2.4826, 0,
         1.7709, 3.2569, 3.2986, 2.0972, 1.125, 1.4444, 0, 0, 0, 0, 0, 3, 4,
-      ]
+      ]);
     this.#addSeries(p, opts_HS_year_min, yearData.HS_min);
     this.#addSeries(p, opts_HS_year_max, yearData.HS_max);
     this.#addSeries(p, opts_HS_year_median, yearData.HS_median);
     this.#addSeries(p, opts_HS_year_current, yearData.HS);
-    this.#addSeries(p, opts_HS_year_PSUM, new Float32Array(test));
+    if(values.PSUM){
+      this.#addSeries(p, opts_HS_year_PSUM, yearData.PSUM);
+    }
 
     this.#resizePlots();
     this.#resizeObserver.observe(this);
