@@ -138,10 +138,11 @@ export const opts_HS_year_current: uPlot.Series = {
 };
 
 export const opts_HS_year_PSUM: uPlot.Series = {
-  label: "Niederschlag [mm]",
+  label: "Niederschlag",
   paths: uPlot.paths.bars(),
   points: { show: false },
   stroke: "#6aafd5",
   fill: "#6aafd5",
   scale: "y2",
+  value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "mm")),
 };
