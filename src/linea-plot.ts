@@ -79,8 +79,8 @@ export class LineaPlot extends HTMLElement {
       this.#addSeries(p, opts_TA, values.TA);
       this.#addSeries(p, opts_TD, TD);
       
-      if(values.TSG) {
-        this.#addSeries(p, opts_TSS, values.TSG);
+      if(values.TSS) {
+        this.#addSeries(p, opts_TSS, values.TSS);
       }
       
 
