@@ -35,6 +35,26 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  #makeAxes(scale: number) {
+    const baseAxisSize = 50;
+    const axisSize = baseAxisSize * scale;
+    const smallAxisSize = 5 * scale;
+    return [
+      {
+        side: 2, // bottom x-axis
+        size: axisSize,
+      },
+      {
+        side: 3, // left y-axis
+        size: smallAxisSize,
+      },
+      {
+        side: 1, // right y-axis
+        size: smallAxisSize,
+      }
+    ];
+  }
+
   async renderPlots() {
     this.#resizeObserver.unobserve(this);
     const timeRangeMilli = this.getAttribute("timeRangeMilli");
@@ -47,7 +67,7 @@ export class LineaPlot extends HTMLElement {
     /*this.style.overflow = "visible";*/
     const controls = document.createElement("div");
     controls.classList.add("controls");
-    this.#controls = controls;
+    this.#controls = controls;   
     const plot_TA_TD_TSS = document.createElement("div");
     const plot_VW_VWG_DW = document.createElement("div");
     const plot_HS_PSUM = document.createElement("div");
@@ -60,6 +80,13 @@ export class LineaPlot extends HTMLElement {
       plot_HS_PSUM,
       plot_RH_GR
     );
+
+    const baseWidth = 360;
+    const minScale = 0.6;
+    const scale = Math.max(minScale, Math.min(1, this.clientWidth / baseWidth));
+    const baseAxisSize = 50;
+    const axisSize = baseAxisSize * scale;
+    const smallAxisSize = 5 * scale;
 
     if (values.TA) {
       const TD =
@@ -75,6 +102,7 @@ export class LineaPlot extends HTMLElement {
                 title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
               }
             : {}),
+            axes: this.#makeAxes(scale)
         },
         [timestamps],
         plot_TA_TD_TSS
@@ -103,20 +131,20 @@ export class LineaPlot extends HTMLElement {
     }
 
     if (values.VW && values.DW) {
-      const p = new uPlot(opts_VW_VWG_DW, [timestamps], plot_VW_VWG_DW);
+      const p = new uPlot({...opts_VW_VWG_DW, axes: this.#makeAxes(scale/10)}, [timestamps], plot_VW_VWG_DW);
       this.#addSeries(p, opts_VW, values.VW);
       this.#addSeries(p, opts_VW_MAX, values.VW_MAX);
       this.#addSeries(p, opts_DW, values.DW);
     }
 
     if (values.HS || values.PSUM) {
-      const p = new uPlot(opts_HS_PSUM, [timestamps], plot_HS_PSUM);
+      const p = new uPlot({...opts_HS_PSUM, axes: this.#makeAxes(scale)}, [timestamps], plot_HS_PSUM);
       this.#addSeries(p, opts_HS, values.HS);
       this.#addSeries(p, opts_PSUM, values.PSUM);
     }
 
     if (values.RH || values.ISWR) {
-      const p = new uPlot(opts_RH_GR, [timestamps], plot_RH_GR);
+      const p = new uPlot({...opts_RH_GR, axes: this.#makeAxes(scale/5)}, [timestamps], plot_RH_GR);
       this.#addSeries(p, opts_RH, values.RH);
       this.#addSeries(p, opts_ISWR, values.ISWR);
     }
@@ -147,8 +175,10 @@ export class LineaPlot extends HTMLElement {
     // compute a scale factor based on element width so text shrinks on narrow layouts
     const baseWidth = 360; // width at which scale == 1
     const minScale = 0.6; // don't shrink below this
-    const scale = Math.max(minScale, Math.min(1, this.clientWidth / baseWidth));
-    this.style.setProperty("--plot-scale", String(scale));
+    const scale =  Math.max(minScale, Math.min(1, this.clientWidth / baseWidth));
+    //this.style.setProperty("--plot-scale", String(scale));
+    this.style.fontSize =`${12 * scale}px`;
+    this.style.padding =`${6 * scale}px ${10 * scale}px`;
     if (this.#controls) {
      const btns = this.#controls.querySelectorAll<HTMLButtonElement>(".toggle-btn");
      btns.forEach((b) => {
