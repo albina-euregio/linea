@@ -22,6 +22,7 @@ import { fetchSMET } from "./smet-data";
 export class LineaPlot extends HTMLElement {
   static observedAttributes = ["src"];
   #plots: uPlot[] = [];
+  #controls?: HTMLElement;
   #resizeObserver = new ResizeObserver(() => this.#resizePlots());
 
   connectedCallback() {
@@ -43,8 +44,10 @@ export class LineaPlot extends HTMLElement {
     );
     const style = document.createElement("style");
     style.textContent = css;
+    /*this.style.overflow = "visible";*/
     const controls = document.createElement("div");
     controls.classList.add("controls");
+    this.#controls = controls;
     const plot_TA_TD_TSS = document.createElement("div");
     const plot_VW_VWG_DW = document.createElement("div");
     const plot_HS_PSUM = document.createElement("div");
@@ -135,6 +138,24 @@ export class LineaPlot extends HTMLElement {
   }
 
   #resizePlots() {
+   this.#plots.forEach((p) =>
+     p.setSize({
+        width: this.clientWidth,
+        height: p.height,
+      })
+    );
+    // compute a scale factor based on element width so text shrinks on narrow layouts
+    const baseWidth = 360; // width at which scale == 1
+    const minScale = 0.6; // don't shrink below this
+    const scale = Math.max(minScale, Math.min(1, this.clientWidth / baseWidth));
+    this.style.setProperty("--plot-scale", String(scale));
+    if (this.#controls) {
+     const btns = this.#controls.querySelectorAll<HTMLButtonElement>(".toggle-btn");
+     btns.forEach((b) => {
+       b.style.fontSize = `${12 * scale}px`;
+       b.style.padding = `${6 * scale}px ${10 * scale}px`;
+     });
+   }
     this.#plots.forEach((p) =>
       p.setSize({
         width: this.clientWidth,
