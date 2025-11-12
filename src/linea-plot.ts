@@ -39,18 +39,22 @@ export class LineaPlot extends HTMLElement {
     const baseAxisSize = 50;
     const axisSize = baseAxisSize * scale;
     const smallAxisSize = 5 * scale;
+    const fontSize = Math.min(32 * scale, 12);
     return [
       {
         side: 2, // bottom x-axis
         size: axisSize,
+        font: `${fontSize}px sans-serif`,
       },
       {
         side: 3, // left y-axis
         size: smallAxisSize,
+        font: `${fontSize}px sans-serif`,
       },
       {
         side: 1, // right y-axis
         size: smallAxisSize,
+        font: `${fontSize}px sans-serif`,
       }
     ];
   }
@@ -131,7 +135,7 @@ export class LineaPlot extends HTMLElement {
     }
 
     if (values.VW && values.DW) {
-      const p = new uPlot({...opts_VW_VWG_DW, axes: this.#makeAxes(scale/10)}, [timestamps], plot_VW_VWG_DW);
+      const p = new uPlot({...opts_VW_VWG_DW, axes: this.#makeAxes(scale*2/3)}, [timestamps], plot_VW_VWG_DW);
       this.#addSeries(p, opts_VW, values.VW);
       this.#addSeries(p, opts_VW_MAX, values.VW_MAX);
       this.#addSeries(p, opts_DW, values.DW);
@@ -144,7 +148,7 @@ export class LineaPlot extends HTMLElement {
     }
 
     if (values.RH || values.ISWR) {
-      const p = new uPlot({...opts_RH_GR, axes: this.#makeAxes(scale/5)}, [timestamps], plot_RH_GR);
+      const p = new uPlot({...opts_RH_GR, axes: this.#makeAxes(scale*2/3)}, [timestamps], plot_RH_GR);
       this.#addSeries(p, opts_RH, values.RH);
       this.#addSeries(p, opts_ISWR, values.ISWR);
     }
