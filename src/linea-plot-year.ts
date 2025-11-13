@@ -19,6 +19,7 @@ import {
  } from "./linea-plot/opts_TEMP_year.ts";
 import { fetchSMET } from "./smet-data";
 import { Temporal } from "temporal-polyfill";
+import { YearData } from "./linea-plot/yeardata.ts";
 
 /**
  * uPlot diagram for yearly overview of snow height.
@@ -57,102 +58,8 @@ export class LineaPlotYear extends HTMLElement {
     const startDate = Temporal.PlainDate.from(this.getAttribute("startDate")!);
     const endDate = Temporal.PlainDate.from(this.getAttribute("endDate")!);
     const timeZone = this.getAttribute("timeZone") || "CET";
-
-    class YearData {
-      plainMonthData = new Map<
-        ReturnType<Temporal.PlainMonthDay["toString"]>,
-        number[]
-      >();
-      dates: Temporal.PlainDate[] = [];
-      valuesHS: number[] = [];
-      valuesPSUM: number[] = [];
-
-      add(date: Temporal.PlainDate, hs: number, psum: number) {
-        const monthDay = date.toPlainMonthDay().toString();
-        if (!this.plainMonthData.has(monthDay)) {
-          this.plainMonthData.set(monthDay, []);
-        }
-        this.plainMonthData.get(monthDay)?.push(hs);
-        if (
-          startDate.toString() <= date.toString() &&
-          date.toString() <= endDate.toString()
-        ) {
-          this.dates.push(date);
-          this.valuesHS.push(hs);
-          this.valuesPSUM.push(psum);
-        }
-      }
-
-      get timestamps(): Uint32Array {
-        return new Uint32Array(
-          this.dates.map(
-            (d) =>
-              d.toZonedDateTime({ plainTime: "00:00:00", timeZone })
-                .epochMilliseconds / 1000
-          )
-        );
-      }
-
-      #agg(f: (...values: number[]) => number): Float32Array {
-        return new Float32Array(
-          this.dates.map((d) =>
-            f(
-              ...(this.plainMonthData.get(d.toPlainMonthDay().toString()) ?? [
-                NaN,
-              ])
-            )
-          )
-        );
-      }
-
-      get PSUM(): Float32Array {
-        return new Float32Array(this.valuesPSUM);
-      }
-
-      get HS(): Float32Array {
-        return new Float32Array(this.valuesHS);
-      }
-
-      get HS_max(): Float32Array {
-        return this.#agg(Math.max);
-      }
-
-      get HS_min(): Float32Array {
-        return this.#agg(Math.min);
-      }
-
-      get HS_median(): Float32Array {
-        return this.#agg(
-          (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)]
-        );
-      }
-
-      static from(timestamps: Uint32Array, HS: Float32Array, PSUM: Float32Array): YearData {
-        const yearData = new YearData();
-        for (let i = 0; i < timestamps.length; i++) {
-          const hs = HS[i];
-          let psum = 0;
-          if(PSUM){
-            psum = PSUM[i];
-          }
-          
-
-          //can lead to problem if only one is not finite, because both will no be parsed
-          //shouldn't be so often
-          if (!isFinite(hs)) {
-            continue;
-          }
-
-          const timestamp = timestamps[i] * 1000;
-          const instant = Temporal.Instant.fromEpochMilliseconds(timestamp);
-          const date = instant.toZonedDateTimeISO(timeZone).toPlainDate();
-          yearData.add(date, hs, psum);
-        }
-        return yearData;
-      }
-    }
     
-    const yearData = YearData.from(timestamps, values.HS, values.PSUM);
+    const yearData = YearData.from(timeZone, startDate, endDate, timestamps, values);
     const p = new uPlot(
       {
         ...opts_HS_year,

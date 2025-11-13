@@ -43,7 +43,7 @@ const UNIT_MAPPING: Record<
 };
 
 type Units = Record<ParameterType, string>;
-type Values = Record<ParameterType, Float32Array>;
+export type Values = Record<ParameterType, Float32Array>;
 type Result = {
   station: string;
   altitude: number;
