@@ -104,6 +104,7 @@ export class LineaPlotYear extends HTMLElement {
     this.#addSeries(pTemp, opts_DEW_year_current, yearData.TD);
 
     const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
+    this.#addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
 
     this.#resizePlots();
     this.#resizeObserver.observe(this);

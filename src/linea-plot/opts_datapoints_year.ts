@@ -36,7 +36,7 @@ hooks: {
 
         // horizontal label for y-axis
         const xPosY = canvasWidth * 0.1;
-        ctx.fillStyle = "#000000";
+        ctx.fillStyle = "#00ff55ff";
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`,
           xPosY,
@@ -50,7 +50,7 @@ hooks: {
   
 scales: {
       y: {
-        range: [0, 28]
+        range: [0, 58]
       },
     },
 
@@ -58,8 +58,8 @@ axes: [
     timeAxis,
     {
       scale: "y",
-      stroke: "#000000",
-      splits: [0, 5, 10, 15, 20, 25],
+      stroke: "#00ff55ff",
+      splits: [0, 10, 20, 30, 40, 50],
     },
   ],
   
@@ -73,7 +73,7 @@ axes: [
 
 export const opts_DATAPOINTS_amount_year: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount"),
-  stroke: "#ffa500",
+  stroke: "#00ff55ff",
   width: 2,
   points: { show: false },
   scale: "y",

@@ -73,6 +73,10 @@ export class YearData {
          );
       }
 
+      get N(): Float32Array {
+        return this.#aggFor(this.plainMonthData, (...v) => v.filter(Number.isFinite).length);
+      }
+
       get PSUM(): Float32Array {
         return new Float32Array(this.valuesPSUM);
       }
@@ -126,7 +130,7 @@ export class YearData {
         const yearData = new YearData();
         yearData.timeZone = timeZone;
         for (let i = 0; i < timestamps.length; i++) {
-          const hs = values.HS[i];
+          const hs = values.HS[i] ? values.HS[i] : NaN;
           const ta = values.TA ? values.TA[i] : NaN;
           const td = values.TD ? values.TD[i] : NaN;
           const psum = values.PSUM ? values.PSUM[i] : NaN;
