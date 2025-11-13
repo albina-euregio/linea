@@ -117,7 +117,7 @@ export const opts_HS_year_median  = baseHsSeries("HS_median", "#878787", 2);
 export const opts_HS_year_current = baseHsSeries("HS", "#ff0000", 2);
 
 export const opts_HS_year_PSUM: uPlot.Series = {
-  label: "Niederschlag",
+  label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),
   paths: uPlot.paths.bars(),
   points: { show: false },
   stroke: "#6aafd5",
