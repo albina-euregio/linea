@@ -6,12 +6,20 @@ export class YearData {
         ReturnType<Temporal.PlainMonthDay["toString"]>,
         number[]
       >();
+
+      plainMonthTempData = new Map<
+        ReturnType<Temporal.PlainMonthDay["toString"]>,
+        number[]
+     >();
+
       dates: Temporal.PlainDate[] = [];
       valuesHS: number[] = [];
       valuesPSUM: number[] = [];
+      valuesTA: number[] = [];
+      valuesTD: number[] = [];
       timeZone: string = "";
 
-      add(startDate: Temporal.PlainDate, endDate: Temporal.PlainDate, date: Temporal.PlainDate, hs: number, psum: number) {
+      add(startDate: Temporal.PlainDate, endDate: Temporal.PlainDate, date: Temporal.PlainDate, hs: number, psum: number, ta: number, td: number) {
         const monthDay = date.toPlainMonthDay().toString();
         if (!this.plainMonthData.has(monthDay)) {
           this.plainMonthData.set(monthDay, []);
@@ -24,6 +32,8 @@ export class YearData {
           this.dates.push(date);
           this.valuesHS.push(hs);
           this.valuesPSUM.push(psum);
+          this.valuesTA.push(ta);
+          this.valuesTD.push(td);
         }
       }
 
@@ -38,15 +48,13 @@ export class YearData {
         );
       }
 
-      #agg(f: (...values: number[]) => number): Float32Array {
+      #aggFor(map: Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>, f: (...values: number[]) => number): Float32Array {
         return new Float32Array(
-          this.dates.map((d) =>
-            f(
-              ...(this.plainMonthData.get(d.toPlainMonthDay().toString()) ?? [
-                NaN,
-              ])
+            this.dates.map((d) =>
+                f(
+                    ...(map.get(d.toPlainMonthDay().toString()) ?? [NaN])
+                )
             )
-          )
         );
       }
 
@@ -58,41 +66,56 @@ export class YearData {
         return new Float32Array(this.valuesHS);
       }
 
+      get TA(): Float32Array {
+        return new Float32Array(this.valuesTA);
+      }
+
+      get TD(): Float32Array {
+        return new Float32Array(this.valuesTD);
+      }
+
       get HS_max(): Float32Array {
-        return this.#agg(Math.max);
+        return this.#aggFor(this.plainMonthData, Math.max);
       }
 
       get HS_min(): Float32Array {
-        return this.#agg(Math.min);
+        return this.#aggFor(this.plainMonthData, Math.min);
       }
 
       get HS_median(): Float32Array {
-        return this.#agg(
+        return this.#aggFor(this.plainMonthData,
           (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)]
         );
       }
+
+      get TA_min(): Float32Array {
+        return this.#aggFor(this.plainMonthTempData, Math.min);
+      }
+
+      get TA_max(): Float32Array {
+        return this.#aggFor(this.plainMonthTempData, Math.max);
+      }
+      
+      get TA_median(): Float32Array {
+        return this.#aggFor(this.plainMonthTempData,
+          (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)]
+        );
+      }
+
 
       static from(timeZone: string, startDate: Temporal.PlainDate, endDate: Temporal.PlainDate, timestamps: Uint32Array, values: Values): YearData {
         const yearData = new YearData();
         yearData.timeZone = timeZone;
         for (let i = 0; i < timestamps.length; i++) {
           const hs = values.HS[i];
-          let psum = 0;
-          if(values.PSUM){
-            psum = values.PSUM[i];
-          }
-          
-
-          //can lead to problem if only one is not finite, because both will no be parsed
-          //shouldn't be so often
-          if (!isFinite(hs)) {
-            continue;
-          }
+          const ta = values.TA ? values.TA[i] : NaN;
+          const td = values.TD ? values.TD[i] : NaN;
+          const psum = values.PSUM ? values.PSUM[i] : NaN;
 
           const timestamp = timestamps[i] * 1000;
           const instant = Temporal.Instant.fromEpochMilliseconds(timestamp);
           const date = instant.toZonedDateTimeISO(timeZone).toPlainDate();
-          yearData.add(startDate, endDate, date, hs, psum);
+          yearData.add(startDate, endDate, date, hs, psum, ta, td);
         }
         return yearData;
       }

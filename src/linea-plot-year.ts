@@ -83,11 +83,11 @@ export class LineaPlotYear extends HTMLElement {
     }
 
     const pTemp = new uPlot(opts_TEMP_year, [yearData.timestamps], plot_TEMP_year);
-    this.#addSeries(pTemp, opts_TEMP_year_min, yearData.HS_min);
-    this.#addSeries(pTemp, opts_TEMP_year_max, yearData.HS_max);
-    this.#addSeries(pTemp, opts_TEMP_year_median, yearData.HS_median);
-    this.#addSeries(pTemp, opts_TEMP_year_current, yearData.HS);
-    this.#addSeries(pTemp, opts_DEW_year_current, yearData.HS);
+    this.#addSeries(pTemp, opts_TEMP_year_min, yearData.TA_min);
+    this.#addSeries(pTemp, opts_TEMP_year_max, yearData.TA_max);
+    this.#addSeries(pTemp, opts_TEMP_year_median, yearData.TA_median);
+    this.#addSeries(pTemp, opts_TEMP_year_current, yearData.TA);
+    this.#addSeries(pTemp, opts_DEW_year_current, yearData.TD);
 
     this.#resizePlots();
     this.#resizeObserver.observe(this);
