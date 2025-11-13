@@ -30,7 +30,8 @@ type ParameterType =
   | "OLWR"
   | "PINT"
   | "PSUM"
-  | "HS";
+  | "HS"
+  | "NS";
 
 const UNIT_MAPPING: Record<
   string,
