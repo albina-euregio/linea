@@ -31,26 +31,35 @@ export const opts_HS_PSUM: uPlot.Options = {
     const yPos = canvasHeight * 0.05;
 
   // Left Y-axis label
-  const xPosY = u.bbox.left;
-  ctx.textAlign = "left";
+  const tickPadding = 100; // space between tick labels and axis label
+  const labelOffset = 60;
+  const xPosY = u.bbox.left - labelOffset - tickPadding;
+  ctx.textAlign = "center";
   ctx.fillStyle = "#08519C";
+  ctx.save();
+  ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
   ctx.fillText( 
     `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
       xPosY, 
       yPos
       );
+ctx.restore();
 
 
   // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width;
-  ctx.textAlign = "right";
+  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 30;
+  ctx.textAlign = "center";
   ctx.fillStyle = "#6aafd5";
+  ctx.save();
+  ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise 
   ctx.fillText(
     `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
-      xPosY2, 
-      yPos
+      0, 
+      0
       );
-                        ctx.restore();
+      ctx.restore();
       },
     ],
   },
