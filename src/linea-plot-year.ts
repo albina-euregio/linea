@@ -21,6 +21,7 @@ import {
 import { 
   opts_NS_year, 
   opts_NS_year_series,
+  opts_NS_year_snow_cover,
  } from "./linea-plot/opts_NS_year";
 
  import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year} from "./linea-plot/opts_datapoints_year.ts";
@@ -93,6 +94,7 @@ export class LineaPlotYear extends HTMLElement {
 
     const pNewSnow = new uPlot(opts_NS_year, [yearData.timestamps], plot_NS_year);
     this.#addSeries(pNewSnow, opts_NS_year_series, yearData.NS);
+    this.#addSeries(pNewSnow, opts_NS_year_snow_cover, yearData.HS.map(v => (v == 0 ? 1000 : -1000)));
 
     const pTemp = new uPlot(opts_TEMP_year, [yearData.timestamps], plot_TEMP_year);
     this.#addSeries(pTemp, opts_TEMP_year_min, yearData.TA_min);

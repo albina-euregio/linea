@@ -83,3 +83,12 @@ export const opts_NS_year_series: uPlot.Series = {
       ? "-"
       : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
 };
+
+export const opts_NS_year_snow_cover: uPlot.Series = {
+  label: "Schneebedeckung",
+  stroke: "#rgba(222, 45, 38, 0.2)",
+  width: 2,
+  scale: "y",
+  fill: "rgba(222, 45, 38, 0.2)",
+  value: (u, v) => "",
+};
