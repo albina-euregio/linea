@@ -18,8 +18,9 @@ export class YearData {
       valuesTA: number[] = [];
       valuesTD: number[] = [];
       timeZone: string = "";
+      valuesNS: number[] = [];
 
-      add(startDate: Temporal.PlainDate, endDate: Temporal.PlainDate, date: Temporal.PlainDate, hs: number, psum: number, ta: number, td: number) {
+      add(startDate: Temporal.PlainDate, endDate: Temporal.PlainDate, date: Temporal.PlainDate, hs: number, psum: number, ta: number, td: number, ns: number = NaN) {
         const monthDay = date.toPlainMonthDay().toString();
 
         // sanitize inputs: undefined / non-finite -> NaN
@@ -27,6 +28,7 @@ export class YearData {
         ta = Number.isFinite(ta) ? ta : NaN;
         psum = Number.isFinite(psum) ? psum : NaN;
         td = Number.isFinite(td) ? td : NaN;
+        ns = Number.isFinite(ns) ? ns : NaN;
 
         if (!this.plainMonthData.has(monthDay)) {
           this.plainMonthData.set(monthDay, []);
@@ -45,6 +47,7 @@ export class YearData {
           this.valuesPSUM.push(psum);
           this.valuesTA.push(ta);
           this.valuesTD.push(td);
+          this.valuesNS.push(ns);
         }
       }
 
@@ -86,6 +89,10 @@ export class YearData {
         return new Float32Array(this.valuesTD);
       }
 
+      get NS(): Float32Array {
+        return new Float32Array(this.valuesNS);
+      }
+
       get HS_max(): Float32Array {
         return this.#aggFor(this.plainMonthData, Math.max);
       }
@@ -123,11 +130,12 @@ export class YearData {
           const ta = values.TA ? values.TA[i] : NaN;
           const td = values.TD ? values.TD[i] : NaN;
           const psum = values.PSUM ? values.PSUM[i] : NaN;
+          const ns = values.NS ? values.NS[i] : NaN;
 
           const timestamp = timestamps[i] * 1000;
           const instant = Temporal.Instant.fromEpochMilliseconds(timestamp);
           const date = instant.toZonedDateTimeISO(timeZone).toPlainDate();
-          yearData.add(startDate, endDate, date, hs, psum, ta, td);
+          yearData.add(startDate, endDate, date, hs, psum, ta, td, ns);
         }
         return yearData;
       }

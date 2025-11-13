@@ -17,6 +17,11 @@ import {
   opts_TEMP_year_median,
   opts_TEMP_year_min,
  } from "./linea-plot/opts_TEMP_year.ts";
+ 
+import { 
+  opts_NS_year, 
+  opts_NS_year_series,
+ } from "./linea-plot/opts_NS_year";
 
  import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year} from "./linea-plot/opts_datapoints_year.ts";
 import { fetchSMET } from "./smet-data";
@@ -54,9 +59,10 @@ export class LineaPlotYear extends HTMLElement {
     const style = document.createElement("style");
     style.textContent = css;
     const plot_HS_year = document.createElement("div");
+    const plot_NS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
     const plot_DATAPOINTS_year = document.createElement("div");
-    this.replaceChildren(style, plot_HS_year, plot_TEMP_year, plot_DATAPOINTS_year);
+    this.replaceChildren(style, plot_HS_year, plot_NS_year, plot_TEMP_year, plot_DATAPOINTS_year);
 
     const startDate = Temporal.PlainDate.from(this.getAttribute("startDate")!);
     const endDate = Temporal.PlainDate.from(this.getAttribute("endDate")!);
@@ -84,6 +90,9 @@ export class LineaPlotYear extends HTMLElement {
     } else {
       this.#addSeries(p, opts_HS_year_PSUM, new Float32Array([]));
     }
+
+    const pNewSnow = new uPlot(opts_NS_year, [yearData.timestamps], plot_NS_year);
+    this.#addSeries(pNewSnow, opts_NS_year_series, yearData.NS);
 
     const pTemp = new uPlot(opts_TEMP_year, [yearData.timestamps], plot_TEMP_year);
     this.#addSeries(pTemp, opts_TEMP_year_min, yearData.TA_min);
