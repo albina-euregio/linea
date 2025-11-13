@@ -85,7 +85,7 @@ export const opts_NS_year_series: uPlot.Series = {
 };
 
 export const opts_NS_year_snow_cover: uPlot.Series = {
-  label: "Schneebedeckung",
+  label: i18n.message("dialog:weather-station-diagram:parameter:snowcover"),
   stroke: "#rgba(222, 45, 38, 0.2)",
   width: 2,
   scale: "y",

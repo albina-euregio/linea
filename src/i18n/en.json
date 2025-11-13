@@ -21,6 +21,7 @@
   "dialog:weather-station-diagram:parameter:SH:show": "Show Surface hoar potential",
   "dialog:weather-station-diagram:parameter:DATAPOINTS:amount": "Amount Measured Years",
   "dialog:weather-station-diagram:parameter:newsnow": "New Snow",
+  "dialog:weather-station-diagram:parameter:snowcover": "Snow Cover",
   "dialog:weather-station-diagram:unit:temperature": "Temperature",
   "dialog:weather-station-diagram:unit:time": "Time"
 }
