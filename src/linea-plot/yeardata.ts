@@ -21,6 +21,13 @@ export class YearData {
 
       add(startDate: Temporal.PlainDate, endDate: Temporal.PlainDate, date: Temporal.PlainDate, hs: number, psum: number, ta: number, td: number) {
         const monthDay = date.toPlainMonthDay().toString();
+
+        // sanitize inputs: undefined / non-finite -> NaN
+        hs = Number.isFinite(hs) ? hs : NaN;
+        ta = Number.isFinite(ta) ? ta : NaN;
+        psum = Number.isFinite(psum) ? psum : NaN;
+        td = Number.isFinite(td) ? td : NaN;
+
         if (!this.plainMonthData.has(monthDay)) {
           this.plainMonthData.set(monthDay, []);
         }
@@ -54,12 +61,13 @@ export class YearData {
 
       #aggFor(map: Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>, f: (...values: number[]) => number): Float32Array {
         return new Float32Array(
-            this.dates.map((d) =>
-                f(
-                    ...(map.get(d.toPlainMonthDay().toString()) ?? [NaN])
-                )
-            )
-        );
+            this.dates.map((d) => {
+                const arr = map.get(d.toPlainMonthDay().toString()) ?? [];
+                const finite = arr.filter(Number.isFinite);
+                if (finite.length === 0) return NaN;
+                return f(...finite);
+            })
+         );
       }
 
       get PSUM(): Float32Array {
