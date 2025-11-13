@@ -36,10 +36,11 @@ const UNIT_MAPPING: Record<
   string,
   { to: string; convert: (v: number) => number }
 > = {
-  K: { to: "°C", convert: (v) => v - 273.15 },
-  m: { to: "cm", convert: (v) => v * 100 },
+  "K": { to: "°C", convert: (v) => v - 273.15 },
+  "m": { to: "cm", convert: (v) => v * 100 },
   "1": { to: "%", convert: (v) => v * 100 },
   "m/s": { to: "km/h", convert: (v) => v * 3.6 },
+  "mm": { to: "mm", convert: (v) => v },
 };
 
 type Units = Record<ParameterType, string>;
