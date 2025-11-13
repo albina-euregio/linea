@@ -4,6 +4,7 @@ import { i18n } from "./i18n";
 import { dewPoint } from "./linea-plot/dewPoint";
 import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./linea-plot/opts_HS_PSUM";
 import { opts_ISWR, opts_RH, opts_RH_GR } from "./linea-plot/opts_RH_GR";
+import { PlotHelper } from "./plot-helper";
 import {
   opts_TA,
   opts_TA_TD_TSS,
@@ -35,30 +36,6 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
-  #makeAxes(scale: number) {
-    const baseAxisSize = 50;
-    const axisSize = baseAxisSize * scale;
-    const smallAxisSize = 5 * scale;
-    const fontSize = Math.min(32 * scale, 12);
-    return [
-      {
-        side: 2, // bottom x-axis
-        size: axisSize,
-        font: `${fontSize}px sans-serif`,
-      },
-      {
-        side: 3, // left y-axis
-        size: smallAxisSize,
-        font: `${fontSize}px sans-serif`,
-      },
-      {
-        side: 1, // right y-axis
-        size: smallAxisSize,
-        font: `${fontSize}px sans-serif`,
-      }
-    ];
-  }
-
   async renderPlots() {
     this.#resizeObserver.unobserve(this);
     const timeRangeMilli = this.getAttribute("timeRangeMilli");
@@ -68,6 +45,14 @@ export class LineaPlot extends HTMLElement {
     );
     const style = document.createElement("style");
     style.textContent = css;
+    style.textContent = `
+      .vw-max-plot .u-axis-label {
+        transform: rotate(-90deg);
+        transform-origin: left top;
+        white-space: nowrap;
+      }
+    `;
+    document.head.appendChild(style);
     /*this.style.overflow = "visible";*/
     const controls = document.createElement("div");
     controls.classList.add("controls");
@@ -84,13 +69,8 @@ export class LineaPlot extends HTMLElement {
       plot_HS_PSUM,
       plot_RH_GR
     );
-
-    const baseWidth = 360;
-    const minScale = 0.6;
-    const scale = Math.max(minScale, Math.min(1, this.clientWidth / baseWidth));
-    const baseAxisSize = 50;
-    const axisSize = baseAxisSize * scale;
-    const smallAxisSize = 5 * scale;
+    const plotHelper = new PlotHelper();
+    const scale = plotHelper.GetScale(this.clientWidth);
 
     if (values.TA) {
       const TD =
@@ -106,7 +86,7 @@ export class LineaPlot extends HTMLElement {
                 title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
               }
             : {}),
-            axes: this.#makeAxes(scale)
+            axes: plotHelper.makeAxes(scale)
         },
         [timestamps],
         plot_TA_TD_TSS
@@ -135,20 +115,21 @@ export class LineaPlot extends HTMLElement {
     }
 
     if (values.VW && values.DW) {
-      const p = new uPlot({...opts_VW_VWG_DW, axes: this.#makeAxes(scale*2/3)}, [timestamps], plot_VW_VWG_DW);
+      const p = new uPlot({...opts_VW_VWG_DW, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_VW_VWG_DW);           
       this.#addSeries(p, opts_VW, values.VW);
       this.#addSeries(p, opts_VW_MAX, values.VW_MAX);
       this.#addSeries(p, opts_DW, values.DW);
+      plotHelper.UpdatePlot(p);
     }
 
     if (values.HS || values.PSUM) {
-      const p = new uPlot({...opts_HS_PSUM, axes: this.#makeAxes(scale)}, [timestamps], plot_HS_PSUM);
+      const p = new uPlot({...opts_HS_PSUM, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_HS_PSUM);
       this.#addSeries(p, opts_HS, values.HS);
       this.#addSeries(p, opts_PSUM, values.PSUM);
     }
 
     if (values.RH || values.ISWR) {
-      const p = new uPlot({...opts_RH_GR, axes: this.#makeAxes(scale*2/3)}, [timestamps], plot_RH_GR);
+      const p = new uPlot({...opts_RH_GR, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_RH_GR);
       this.#addSeries(p, opts_RH, values.RH);
       this.#addSeries(p, opts_ISWR, values.ISWR);
     }

@@ -35,21 +35,32 @@ hooks: {
         const yPos = canvasHeight * 0.05;
 
         // horizontal label for y-axis
+        const tickPadding = 100; // space between tick labels and axis label
+        const labelOffset = 60; // additional offset for label position
         const xPosY = canvasWidth * 0.1;
         ctx.fillStyle = "#000000";
+        ctx.textAlign = "center";
+        ctx.save();
+        ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
           xPosY,
           yPos
         );
+        ctx.restore();
 
         // horizontal label for y2-axis
-        const xPosY2 = canvasWidth * 0.9;
+        const xPosY2 = canvasWidth * 0.9 + labelOffset + 30;
         ctx.fillStyle = "#000000";
+        ctx.textAlign = "center";
+        ctx.save();
+        ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-          xPosY2,
-          yPos
+          0,
+          0
         );
 
         ctx.restore();

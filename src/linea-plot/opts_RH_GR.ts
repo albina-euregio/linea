@@ -30,26 +30,34 @@ export const opts_RH_GR: uPlot.Options = {
   const yPos = canvasHeight * 0.05;
 
   // Left Y-axis label
-  const xPosY = u.bbox.left;
-  ctx.textAlign = "left";
+  const tickPadding = 100; // space between tick labels and axis label
+  const labelOffset = 60; // additional offset for label position
+  const xPosY = u.bbox.left - labelOffset - tickPadding;
+  ctx.textAlign = "center";
   ctx.fillStyle = "#6aafd5";
+  ctx.save();
+  ctx.translate(xPosY, canvasHeight/2 );
+  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
   ctx.fillText( 
     `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
         xPosY, 
         yPos
         );
-
+ctx.restore();
 
   // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width;
-  ctx.textAlign = "right";
+  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 30;
+  ctx.textAlign = "center";
   ctx.fillStyle = "#DE2D26";
+  ctx.save();
+  ctx.translate(xPosY2, canvasHeight/2 );
+  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
   ctx.fillText(
        `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
-        xPosY2, 
-        yPos
+        0, 
+        0
         );
-                        ctx.restore();
+        ctx.restore();
       },
     ],
   },

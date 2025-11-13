@@ -45,24 +45,35 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         const yPos = canvasHeight * 0.05;
 
 
-        // Horizontal label for y-axis
-          const xPosY = u.bbox.left;
-          ctx.textAlign = "left";
+        // vertical label for y-axis
+          const tickPadding = 100; // space between tick labels and axis label
+          const labelOffset = 60; // additional offset for label position
+          const xPosY = u.bbox.left - labelOffset - tickPadding;;
+          ctx.textAlign = "center";
           ctx.fillStyle = "#DE2D26";
+          ctx.save();
+          ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+          ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
           ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
               xPosY, 
               yPos
         );
+        ctx.restore();
 
-        // Horizontal label for y2-axis
-          const xPosY2 = u.bbox.left + u.bbox.width;
-          ctx.textAlign = "right";        ctx.fillStyle = "#6aafd5";
+        // vertical label for y2-axis
+          const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 30;
+          ctx.textAlign = "center";        
+          ctx.fillStyle = "#6aafd5";
+          ctx.save();
+          ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+          ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
           ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
-          xPosY2, 
-        yPos
+          0, 
+          0
         );
+        ctx.restore();
 
         // Draw reference line at 0°C
         const width = 1;

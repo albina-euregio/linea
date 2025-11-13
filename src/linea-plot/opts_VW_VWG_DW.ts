@@ -31,26 +31,34 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   const yPos = canvasHeight * 0.05;
 
   // Left Y-axis label
-  const xPosY = u.bbox.left;
-  ctx.textAlign = "left";
+  const tickPadding = 100; // space between tick labels and axis label
+const labelOffset = 60; // additional offset for label position
+  const xPosY = u.bbox.left - labelOffset - tickPadding;
+  ctx.save();
+  ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
+  ctx.textAlign = "center";
   ctx.fillStyle = "#00E2B6";
   ctx.fillText( 
     `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`,
         xPosY, 
         yPos
         );
-
+ctx.restore();
 
   // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width;
-  ctx.textAlign = "right";
+  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 30;
+  ctx.save();
+  ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
+  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
+  ctx.textAlign = "center";
   ctx.fillStyle = "#084D40";
   ctx.fillText(
        i18n.message("dialog:weather-station-diagram:parameter:DW"),
-        xPosY2, 
-        yPos
+        0, 
+        0
         );
-
+  ctx.restore();
 
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
