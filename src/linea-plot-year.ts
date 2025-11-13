@@ -8,7 +8,7 @@ import {
   opts_HS_year_min,
   opts_HS_year_PSUM,
   opts_HS_year,
-} from "./linea-plot/opts_HS_year";
+} from "./linea-plot/opts_year";
 import { fetchSMET } from "./smet-data";
 import { Temporal } from "temporal-polyfill";
 
