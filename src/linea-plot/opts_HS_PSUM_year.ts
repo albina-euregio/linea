@@ -102,40 +102,19 @@ axes: [
   }
 ],  
 };
-
-export const opts_HS_year_min: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS_min"),
-  stroke: "#d9dcdc",
-  width: 2,
-  points: {show: false},
+const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
+  label: i18n.message(`dialog:weather-station-diagram:parameter:${key}`),
+  stroke: color,
+  width,
+  points: { show: false },
   scale: "y",
   value: (u, v) => i18n.number(v, {}, "cm"),
-};
+});
 
-export const opts_HS_year_max: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS_max"),
-  stroke: "#d9dcdc",
-  width: 0,
-  points: {show: false},
-  scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
-};
-
-export const opts_HS_year_median: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS_median"),
-  stroke: "#878787",
-  width: 2,
-  scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
-};
-
-export const opts_HS_year_current: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
-  stroke: "#ff0000",
-  width: 2,
-  scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
-};
+export const opts_HS_year_min     = baseHsSeries("HS_min", "#d9dcdc", 2);
+export const opts_HS_year_max     = baseHsSeries("HS_max", "#d9dcdc", 0);
+export const opts_HS_year_median  = baseHsSeries("HS_median", "#878787", 2);
+export const opts_HS_year_current = baseHsSeries("HS", "#ff0000", 2);
 
 export const opts_HS_year_PSUM: uPlot.Series = {
   label: "Niederschlag",
@@ -144,5 +123,9 @@ export const opts_HS_year_PSUM: uPlot.Series = {
   stroke: "#6aafd5",
   fill: "#6aafd5",
   scale: "y2",
-  value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v*10)/10, {}, "mm")),
+  value: (u, v) =>
+    v == null || Number.isNaN(v)
+      ? "-"
+      : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
 };
+
