@@ -17,6 +17,8 @@ import {
   opts_TEMP_year_median,
   opts_TEMP_year_min,
  } from "./linea-plot/opts_TEMP_year.ts";
+
+ import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year} from "./linea-plot/opts_datapoints_year.ts";
 import { fetchSMET } from "./smet-data";
 import { Temporal } from "temporal-polyfill";
 import { YearData } from "./linea-plot/yeardata.ts";
@@ -53,7 +55,8 @@ export class LineaPlotYear extends HTMLElement {
     style.textContent = css;
     const plot_HS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
-    this.replaceChildren(style, plot_HS_year, plot_TEMP_year);
+    const plot_DATAPOINTS_year = document.createElement("div");
+    this.replaceChildren(style, plot_HS_year, plot_TEMP_year, plot_DATAPOINTS_year);
 
     const startDate = Temporal.PlainDate.from(this.getAttribute("startDate")!);
     const endDate = Temporal.PlainDate.from(this.getAttribute("endDate")!);
@@ -88,6 +91,8 @@ export class LineaPlotYear extends HTMLElement {
     this.#addSeries(pTemp, opts_TEMP_year_median, yearData.TA_median);
     this.#addSeries(pTemp, opts_TEMP_year_current, yearData.TA);
     this.#addSeries(pTemp, opts_DEW_year_current, yearData.TD);
+
+    const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
 
     this.#resizePlots();
     this.#resizeObserver.observe(this);
