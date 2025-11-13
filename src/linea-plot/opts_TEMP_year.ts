@@ -36,7 +36,7 @@ hooks: {
 
         // horizontal label for y-axis
         const xPosY = canvasWidth * 0.1;
-        ctx.fillStyle = "#000000";
+        ctx.fillStyle = "#DE2D26";
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (cm)`,
           xPosY,
@@ -58,7 +58,7 @@ axes: [
     timeAxis,
     {
       scale: "y",
-      stroke: "#000000",
+      stroke: "#DE2D26",
       splits: [-25, -20, -15, -10, -5, 0, 5, 10],
     },
   ],

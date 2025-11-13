@@ -57,7 +57,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
         // Horizontal label for y2-axis
           const xPosY2 = u.bbox.left + u.bbox.width;
-          ctx.textAlign = "right";        ctx.fillStyle = "#6aafd5";
+          ctx.textAlign = "right";        
+          ctx.fillStyle = "#6aafd5";
           ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
           xPosY2, 

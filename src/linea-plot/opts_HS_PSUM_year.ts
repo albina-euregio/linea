@@ -36,7 +36,7 @@ hooks: {
 
         // horizontal label for y-axis
         const xPosY = canvasWidth * 0.1;
-        ctx.fillStyle = "#000000";
+        ctx.fillStyle = "#DE2D26";
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
           xPosY,
@@ -45,7 +45,7 @@ hooks: {
 
         // horizontal label for y2-axis
         const xPosY2 = canvasWidth * 0.9;
-        ctx.fillStyle = "#000000";
+        ctx.fillStyle = "#6aafd5";
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
           xPosY2,
@@ -70,13 +70,13 @@ axes: [
     timeAxis,
     {
       scale: "y",
-      stroke: "#000000",
+      stroke: "#DE2D26",
       splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
     },
      {
       scale: "y2",
       splits: [0, 10, 20, 30, 40, 50],
-      stroke: "#000000",
+      stroke: "#6aafd5",
       side: 1,
       grid: {
         show: false,
