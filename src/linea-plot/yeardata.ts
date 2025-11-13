@@ -25,6 +25,10 @@ export class YearData {
           this.plainMonthData.set(monthDay, []);
         }
         this.plainMonthData.get(monthDay)?.push(hs);
+        if (!this.plainMonthTempData.has(monthDay)) {
+          this.plainMonthTempData.set(monthDay, []);
+        }
+        this.plainMonthTempData.get(monthDay)?.push(ta);
         if (
           startDate.toString() <= date.toString() &&
           date.toString() <= endDate.toString()
