@@ -46,12 +46,12 @@ export const opts_RH_GR: uPlot.Options = {
 ctx.restore();
 
   // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 30;
+  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;
   ctx.textAlign = "center";
   ctx.fillStyle = "#DE2D26";
   ctx.save();
   ctx.translate(xPosY2, canvasHeight/2 );
-  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
+  ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise
   ctx.fillText(
        `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
         0, 

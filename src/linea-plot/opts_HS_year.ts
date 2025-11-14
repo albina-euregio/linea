@@ -51,12 +51,12 @@ hooks: {
         ctx.restore();
 
         // horizontal label for y2-axis
-        const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 80;//canvasWidth * 0.9 + labelOffset + 30;
+        const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;//canvasWidth * 0.9 + labelOffset + 30;
         ctx.fillStyle = "#000000";
         ctx.textAlign = "center";
         ctx.save();
         ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise 
+        ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise 
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
           0,

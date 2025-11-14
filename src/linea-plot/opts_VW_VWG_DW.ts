@@ -47,10 +47,10 @@ const labelOffset = 60; // additional offset for label position
 ctx.restore();
 
   // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 30;
+  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;
   ctx.save();
   ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
+  ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise
   ctx.textAlign = "center";
   ctx.fillStyle = "#084D40";
   ctx.fillText(

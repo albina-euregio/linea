@@ -48,12 +48,12 @@ ctx.restore();
 
 
   // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 30;
+  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;
   ctx.textAlign = "center";
   ctx.fillStyle = "#6aafd5";
   ctx.save();
   ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise 
+  ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise 
   ctx.fillText(
     `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
       0, 
