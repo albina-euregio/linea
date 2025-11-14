@@ -89,8 +89,6 @@ export class LineaPlotYear extends HTMLElement {
       this.#addSeries(p, opts_HS_year_current, yearData.HS);
       if(values.PSUM){
         this.#addSeries(p, opts_HS_year_PSUM, yearData.PSUM);
-      } else {
-        this.#addSeries(p, opts_HS_year_PSUM, new Float32Array([]));
       }
       const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
       this.#addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
@@ -127,8 +125,13 @@ export class LineaPlotYear extends HTMLElement {
     if (!this.#plots.includes(plot)) {
       this.#plots.push(plot);
     }
+    if (!data) {
+      console.warn("addSeries called with undefined data", series.label);
+      return;
+    }
     plot.addSeries({ ...series, show: !!data?.length });
-    plot.data.push(data ?? []);
+    //replace Nans with nulls for uPlot missing data handling
+    plot.data.push(Array.from(data, v => Number.isNaN(v) ? null : v));
   }
 
   #resizePlots() {

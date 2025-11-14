@@ -121,21 +121,20 @@ export class LineaPlot extends HTMLElement {
 
   disconnectedCallback() {
     this.#resizeObserver.unobserve(this);
-  }
-
+  }  
+  
   #addSeries(plot: uPlot, series: uPlot.Series, data: Float32Array) {
-    if (!this.#plots.includes(plot)) {
-      this.#plots.push(plot);
+      if (!this.#plots.includes(plot)) {
+        this.#plots.push(plot);
+      }
+      if (!data) {
+        console.warn("addSeries called with undefined data", series.label);
+        return;
+      }
+      plot.addSeries({ ...series, show: !!data?.length });
+    //replace Nans with nulls for uPlot missing data handling
+      plot.data.push(Array.from(data, v => Number.isNaN(v) ? null : v));
     }
-    if (!data) {
-      console.warn("addSeries called with undefined data", series.label);
-      data = new Float32Array([]);
-    } else {
-      data = Array.from(data, v => Number.isNaN(v) ? null : v);
-    }
-    plot.addSeries({ ...series, show: !!data?.length });
-    plot.data.push(data);
-  }
 
   #resizePlots() {
     this.#plots.forEach((p) =>
