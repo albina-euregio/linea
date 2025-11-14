@@ -129,9 +129,10 @@ export class LineaPlotYear extends HTMLElement {
       console.warn("addSeries called with undefined data", series.label);
       return;
     }
-    plot.addSeries({ ...series, show: !!data?.length });
     //replace Nans with nulls for uPlot missing data handling
-    plot.data.push(Array.from(data, v => Number.isNaN(v) ? null : v));
+    data = Array.from(data, v => Number.isNaN(v) ? null : v)
+    plot.addSeries({ ...series, show: !!data?.length });
+    plot.data.push(data);
   }
 
   #resizePlots() {

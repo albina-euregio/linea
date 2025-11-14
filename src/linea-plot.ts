@@ -131,9 +131,10 @@ export class LineaPlot extends HTMLElement {
         console.warn("addSeries called with undefined data", series.label);
         return;
       }
+      //replace Nans with nulls for uPlot missing data handling
+      data = Array.from(data, v => Number.isNaN(v) ? null : v)
       plot.addSeries({ ...series, show: !!data?.length });
-    //replace Nans with nulls for uPlot missing data handling
-      plot.data.push(Array.from(data, v => Number.isNaN(v) ? null : v));
+      plot.data.push(data);
     }
 
   #resizePlots() {
