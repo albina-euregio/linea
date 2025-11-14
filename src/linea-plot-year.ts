@@ -70,41 +70,50 @@ export class LineaPlotYear extends HTMLElement {
     const timeZone = this.getAttribute("timeZone") || "CET";
     
     const yearData = YearData.from(timeZone, startDate, endDate, timestamps, values);
-    const p = new uPlot(
-      {
-        ...opts_HS_year,
-        ...(this.hasAttribute("showTitle")
-          ? {
-              title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
-            }
-          : {}),
-      },
-      [yearData.timestamps],
-      plot_HS_year
-    );
-    this.#addSeries(p, opts_HS_year_min, yearData.HS_min);
-    this.#addSeries(p, opts_HS_year_max, yearData.HS_max);
-    this.#addSeries(p, opts_HS_year_median, yearData.HS_median);
-    this.#addSeries(p, opts_HS_year_current, yearData.HS);
-    if(values.PSUM){
-      this.#addSeries(p, opts_HS_year_PSUM, yearData.PSUM);
-    } else {
-      this.#addSeries(p, opts_HS_year_PSUM, new Float32Array([]));
+    if(values.HS) {
+      const p = new uPlot(
+        {
+          ...opts_HS_year,
+          ...(this.hasAttribute("showTitle")
+            ? {
+                title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [yearData.timestamps],
+        plot_HS_year
+      );
+      this.#addSeries(p, opts_HS_year_min, yearData.HS_min);
+      this.#addSeries(p, opts_HS_year_max, yearData.HS_max);
+      this.#addSeries(p, opts_HS_year_median, yearData.HS_median);
+      this.#addSeries(p, opts_HS_year_current, yearData.HS);
+      if(values.PSUM){
+        this.#addSeries(p, opts_HS_year_PSUM, yearData.PSUM);
+      } else {
+        this.#addSeries(p, opts_HS_year_PSUM, new Float32Array([]));
+      }
+      const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
+      this.#addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
     }
 
-    const pNewSnow = new uPlot(opts_NS_year, [yearData.timestamps], plot_NS_year);
-    this.#addSeries(pNewSnow, opts_NS_year_series, yearData.NS);
-    this.#addSeries(pNewSnow, opts_NS_year_snow_cover, yearData.HS.map(v => (v == 0 ? 1000 : -1000)));
 
-    const pTemp = new uPlot(opts_TEMP_year, [yearData.timestamps], plot_TEMP_year);
-    this.#addSeries(pTemp, opts_TEMP_year_min, yearData.TA_min);
-    this.#addSeries(pTemp, opts_TEMP_year_max, yearData.TA_max);
-    this.#addSeries(pTemp, opts_TEMP_year_median, yearData.TA_median);
-    this.#addSeries(pTemp, opts_TEMP_year_current, yearData.TA);
-    this.#addSeries(pTemp, opts_DEW_year_current, yearData.TD);
-
-    const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
-    this.#addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
+    if(values.NS){
+      let pNewSnow = new uPlot(opts_NS_year, [yearData.timestamps], plot_NS_year);
+      this.#addSeries(pNewSnow, opts_NS_year_snow_cover, yearData.HS.map(v => ((v == 0 || Number.isNaN(v)) ? 1000 : -1000)));
+      this.#addSeries(pNewSnow, opts_NS_year_series, yearData.NS);
+    }
+    if(values.TA || values.TD){
+      const pTemp = new uPlot(opts_TEMP_year, [yearData.timestamps], plot_TEMP_year);
+      if(values.TA){ 
+        this.#addSeries(pTemp, opts_TEMP_year_min, yearData.TA_min);
+        this.#addSeries(pTemp, opts_TEMP_year_max, yearData.TA_max);
+        this.#addSeries(pTemp, opts_TEMP_year_median, yearData.TA_median);
+        this.#addSeries(pTemp, opts_TEMP_year_current, yearData.TA);
+      }
+      if(values.TD) {
+        this.#addSeries(pTemp, opts_DEW_year_current, yearData.TD);
+      }
+    }
 
     this.#resizePlots();
     this.#resizeObserver.observe(this);
