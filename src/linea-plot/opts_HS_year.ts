@@ -36,8 +36,8 @@ hooks: {
 
         // horizontal label for y-axis
         const tickPadding = 100; // space between tick labels and axis label
-        const labelOffset = 60; // additional offset for label position
-        const xPosY = canvasWidth * 0.1;
+        const labelOffset = 40; // additional offset for label position
+        const xPosY = u.bbox.left - labelOffset - tickPadding;//canvasWidth * 0.1;
         ctx.fillStyle = "#000000";
         ctx.textAlign = "center";
         ctx.save();
@@ -51,7 +51,7 @@ hooks: {
         ctx.restore();
 
         // horizontal label for y2-axis
-        const xPosY2 = canvasWidth * 0.9 + labelOffset + 30;
+        const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 80;//canvasWidth * 0.9 + labelOffset + 30;
         ctx.fillStyle = "#000000";
         ctx.textAlign = "center";
         ctx.save();

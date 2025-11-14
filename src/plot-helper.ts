@@ -1,4 +1,5 @@
 export class PlotHelper {
+  #m_style?: HTMLStyleElement;
   /**
    * this method creates axes configuration for uPlot based on the given scale.
    * @param scale 
@@ -63,24 +64,14 @@ export class PlotHelper {
     return Math.max(minScale, Math.min(1, clientWidth / baseWidth));
   }
 
-  UpdatePlot(plot: uPlot) {
-    //console.log("Plot options:", plot.opts);
-    var axes = plot.axes;
-    const series = plot.series;
-    series.forEach((s, index) => {
-      if (typeof s.scale === "string" && s.scale.includes("y")){
-        console.log(`Series[${index}] uses 'y' scale with stroke color:`, s.label, s.stroke);
-        console.log(s);
-      }
-    });
-    
-    //const options = plot.opts.axes;
-    //plot.axes[0].size = options[0].size as number;
-    //plot.axes[1].stroke = options[1].stroke as string;
-  }
-
-
-    resizePlots(plots: uPlot[], clientWidth: number, style: CSSStyleDeclaration, controls: HTMLElement | null) {
+  /**
+   * resize all plots and adjust styles based on client width
+   * @param plots 
+   * @param clientWidth 
+   * @param style 
+   * @param controls 
+   */
+  resizePlots(plots: uPlot[], clientWidth: number, style: CSSStyleDeclaration, controls: HTMLElement | null) {
    plots.forEach((p) =>
      p.setSize({
         width: clientWidth,
@@ -109,14 +100,48 @@ export class PlotHelper {
     );
   }
 
-    addSeries(plots: uPlot[], plot: uPlot, series: uPlot.Series, data: Float32Array) {
+    /**
+     * adds a series to the specified plot and tracks the plot in the plots array if not already present.
+     * @param plots 
+     * @param plot 
+     * @param series 
+     * @param data 
+     */
+  addSeries(plots: uPlot[], plot: uPlot, series: uPlot.Series, data: Float32Array) {
       if (!plots.includes(plot)) {
         plots.push(plot);
       }
       plot.addSeries({ ...series, show: !!data?.length });
       plot.data.push(data ?? []);
     }
-  //#region Private Methods
 
+    GetStyle(document: Document, css: string): HTMLStyleElement{
+      if (!this.#m_style) {
+        this.#CreateStyle(document, css);
+      }
+      return this.#m_style;
+    }
+  //#region Private Methods
+    #CreateStyle(document: Document, css: string): HTMLStyleElement {
+    //const s = document.getElementsByTagName("style");
+    const style = document.createElement("style");
+    style.textContent = css;
+    style.textContent = `
+      .vw-max-plot .u-axis-label {
+        transform: rotate(-90deg);
+        transform-origin: left top;
+        white-space: nowrap;
+      }
+
+      .hs-year-plot .u-axis-label {
+        transform: rotate(-90deg);
+        transform-origin: left top;
+        white-space: nowrap;
+      }
+    `;
+    document.head.appendChild(style);
+    this.#m_style = style;
+      return style;
+    }
   //#endregion
 }

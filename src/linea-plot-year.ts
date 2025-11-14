@@ -42,19 +42,9 @@ export class LineaPlotYear extends HTMLElement {
     );
     const plotHelper = new PlotHelper();
     const scale = plotHelper.GetScale(this.clientWidth);
-    const style = document.createElement("style");
-    style.textContent = css;
-    /*    style.textContent = `
-      .vw-max-plot .u-axis-label {
-        transform: rotate(-90deg);
-        transform-origin: left top;
-        white-space: nowrap;
-      }
-    `;*/
-    //document.head.appendChild(style);
+    const style = plotHelper.GetStyle(document, css);
     const plot_HS_year = document.createElement("div");
     this.replaceChildren(style, plot_HS_year);
-
     const startDate = Temporal.PlainDate.from(this.getAttribute("startDate")!);
     const endDate = Temporal.PlainDate.from(this.getAttribute("endDate")!);
     const timeZone = this.getAttribute("timeZone") || "CET";
@@ -143,12 +133,12 @@ export class LineaPlotYear extends HTMLElement {
     const p = new uPlot(
       {
         ...opts_HS_year,      
-        axes: plotHelper.makeAxes(scale),
         ...(this.hasAttribute("showTitle")
           ? {
               title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
             }
           : {}),
+            axes: plotHelper.makeAxes(scale),
       },
       [yearData.timestamps],
       plot_HS_year

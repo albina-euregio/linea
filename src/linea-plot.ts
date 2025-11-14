@@ -45,15 +45,6 @@ export class LineaPlot extends HTMLElement {
     );
     const style = document.createElement("style");
     style.textContent = css;
-    style.textContent = `
-      .vw-max-plot .u-axis-label {
-        transform: rotate(-90deg);
-        transform-origin: left top;
-        white-space: nowrap;
-      }
-    `;
-    document.head.appendChild(style);
-    /*this.style.overflow = "visible";*/
     const controls = document.createElement("div");
     controls.classList.add("controls");
     this.#controls = controls;   
