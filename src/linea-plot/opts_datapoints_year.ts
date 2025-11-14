@@ -32,11 +32,12 @@ hooks: {
 
         const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
+        const yPos = canvasHeight * 0.12
 
         // horizontal label for y-axis
-        const xPosY = canvasWidth * 0.1;
+        const xPosY = u.bbox.left*0.73;
         ctx.fillStyle = "#00ff55ff";
+        ctx.textAlign = "left";
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`,
           xPosY,
