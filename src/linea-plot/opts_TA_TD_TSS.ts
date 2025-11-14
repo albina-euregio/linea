@@ -84,7 +84,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.restore();
 
         // Only draw shaded regions if showSurfaceHoar is true and the snow surface temperature is available
-        if (showSurfaceHoar.value && u.data.length == 4) {
+        if (false && showSurfaceHoar.value && u.data.length == 4) {
           ctx.save();
           ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
           ctx.clip();
@@ -146,6 +146,10 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       console.log('Valid data range:', validMin, 'to', validMax);
       return (validMin < -30 || validMax > 10) ? [-30, 30] : [-30, 10];
     },
+  },
+  
+  yhidden: {
+    range: [0, 1]
   }
 },
 
@@ -175,8 +179,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       grid: {
         show: false},
        values: (u, vals) => vals.map(v => v.toString()),
-  }
-],
+  },
+    {
+      scale: "yhidden",
+      show: false,
+    }
+],  
 
 
   series: [
@@ -198,3 +206,13 @@ const createSeries = (labelKey: string, color: string): uPlot.Series => ({
 export const opts_TA = createSeries("dialog:weather-station-diagram:unit:temperature", "#DE2D26");
 export const opts_TD = createSeries("dialog:weather-station-diagram:parameter:TD", "#6aafd5");
 export const opts_TSS = createSeries("dialog:weather-station-diagram:parameter:TSS", "#FC9272");
+
+export const opts_SurfaceHoar: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:SH:potential"),
+  width: 2,
+  scale: "yhidden",
+  spanGaps: false,
+  fill: "rgba(1, 0, 0, 0.1)",
+  stroke: "rgba(0, 0, 0, 0.3)",
+  value: (u, v) => v > 0 ? i18n.message("dialog:weather-station-diagram:parameter:SH:present") : i18n.message("dialog:weather-station-diagram:parameter:SH:present:not"),
+};

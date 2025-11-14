@@ -9,6 +9,7 @@ import {
   opts_TA_TD_TSS,
   opts_TD,
   opts_TSS,
+  opts_SurfaceHoar,
   showSurfaceHoar,
 } from "./linea-plot/opts_TA_TD_TSS";
 import {
@@ -82,8 +83,14 @@ export class LineaPlot extends HTMLElement {
       // show snow surface temperature and therefore surface hoar only if available
       if(values.TSS) {
         this.#addSeries(p, opts_TSS, values.TSS);
+        const surfacehoar = values.TA.map((ta, i) => {
+          const td = values.TD[i];
+          const tss = values.TSS[i];
+          return (td < 0 && tss < td) ? 1000 : NaN;
+        });
+        this.#addSeries(p, opts_SurfaceHoar, surfacehoar)
         //show surface hoar button
-        if (this.hasAttribute("showSurfaceHoarButton")) {
+        if (false && this.hasAttribute("showSurfaceHoarButton")) {
           const button = document.createElement("button");
           button.classList.add("toggle-btn");
           button.innerText = i18n.message(
