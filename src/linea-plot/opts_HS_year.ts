@@ -42,7 +42,7 @@ hooks: {
         ctx.textAlign = "center";
         ctx.save();
         ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
+        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise 
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
           xPosY,
@@ -56,7 +56,7 @@ hooks: {
         ctx.textAlign = "center";
         ctx.save();
         ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
+        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise 
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
           0,

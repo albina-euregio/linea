@@ -78,6 +78,44 @@ export class PlotHelper {
     //plot.axes[0].size = options[0].size as number;
     //plot.axes[1].stroke = options[1].stroke as string;
   }
+
+
+    resizePlots(plots: uPlot[], clientWidth: number, style: CSSStyleDeclaration, controls: HTMLElement | null) {
+   plots.forEach((p) =>
+     p.setSize({
+        width: clientWidth,
+        height: p.height,
+      })
+    );
+    // compute a scale factor based on element width so text shrinks on narrow layouts
+    const baseWidth = 360; // width at which scale == 1
+    const minScale = 0.6; // don't shrink below this
+    const scale =  Math.max(minScale, Math.min(1, clientWidth / baseWidth));
+    //this.style.setProperty("--plot-scale", String(scale));
+    style.fontSize =`${12 * scale}px`;
+    style.padding =`${6 * scale}px ${10 * scale}px`;
+    if (controls) {
+     const btns = controls.querySelectorAll<HTMLButtonElement>(".toggle-btn");
+     btns.forEach((b) => {
+       b.style.fontSize = `${12 * scale}px`;
+       b.style.padding = `${6 * scale}px ${10 * scale}px`;
+     });
+   }
+    plots.forEach((p) =>
+      p.setSize({
+        width: clientWidth,
+        height: p.height,
+      })
+    );
+  }
+
+    addSeries(plots: uPlot[], plot: uPlot, series: uPlot.Series, data: Float32Array) {
+      if (!plots.includes(plot)) {
+        plots.push(plot);
+      }
+      plot.addSeries({ ...series, show: !!data?.length });
+      plot.data.push(data ?? []);
+    }
   //#region Private Methods
 
   //#endregion

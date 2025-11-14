@@ -91,9 +91,9 @@ export class LineaPlot extends HTMLElement {
         [timestamps],
         plot_TA_TD_TSS
       );
-      this.#addSeries(p, opts_TA, values.TA);
-      this.#addSeries(p, opts_TD, TD);
-      this.#addSeries(p, opts_TSS, values.TSS);
+      plotHelper.addSeries(this.#plots, p, opts_TA, values.TA);
+      plotHelper.addSeries(this.#plots, p, opts_TD, TD);
+      plotHelper.addSeries(this.#plots, p, opts_TSS, values.TSS);
 
       if (this.hasAttribute("showSurfaceHoarButton")) {
         const button = document.createElement("button");
@@ -116,25 +116,24 @@ export class LineaPlot extends HTMLElement {
 
     if (values.VW && values.DW) {
       const p = new uPlot({...opts_VW_VWG_DW, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_VW_VWG_DW);           
-      this.#addSeries(p, opts_VW, values.VW);
-      this.#addSeries(p, opts_VW_MAX, values.VW_MAX);
-      this.#addSeries(p, opts_DW, values.DW);
-      plotHelper.UpdatePlot(p);
+      plotHelper.addSeries(this.#plots, p, opts_VW, values.VW);
+      plotHelper.addSeries(this.#plots, p, opts_VW_MAX, values.VW_MAX);
+      plotHelper.addSeries(this.#plots,p, opts_DW, values.DW);
     }
 
     if (values.HS || values.PSUM) {
       const p = new uPlot({...opts_HS_PSUM, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_HS_PSUM);
-      this.#addSeries(p, opts_HS, values.HS);
-      this.#addSeries(p, opts_PSUM, values.PSUM);
+      plotHelper.addSeries(this.#plots, p, opts_HS, values.HS);
+      plotHelper.addSeries(this.#plots, p, opts_PSUM, values.PSUM);
     }
 
     if (values.RH || values.ISWR) {
       const p = new uPlot({...opts_RH_GR, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_RH_GR);
-      this.#addSeries(p, opts_RH, values.RH);
-      this.#addSeries(p, opts_ISWR, values.ISWR);
+      plotHelper.addSeries(this.#plots, p, opts_RH, values.RH);
+      plotHelper.addSeries(this.#plots, p, opts_ISWR, values.ISWR);
     }
 
-    this.#resizePlots();
+    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, this.#controls);
     this.#resizeObserver.observe(this);
   }
 
@@ -142,41 +141,9 @@ export class LineaPlot extends HTMLElement {
     this.#resizeObserver.unobserve(this);
   }
 
-  #addSeries(plot: uPlot, series: uPlot.Series, data: Float32Array) {
-    if (!this.#plots.includes(plot)) {
-      this.#plots.push(plot);
-    }
-    plot.addSeries({ ...series, show: !!data?.length });
-    plot.data.push(data ?? []);
-  }
-
   #resizePlots() {
-   this.#plots.forEach((p) =>
-     p.setSize({
-        width: this.clientWidth,
-        height: p.height,
-      })
-    );
-    // compute a scale factor based on element width so text shrinks on narrow layouts
-    const baseWidth = 360; // width at which scale == 1
-    const minScale = 0.6; // don't shrink below this
-    const scale =  Math.max(minScale, Math.min(1, this.clientWidth / baseWidth));
-    //this.style.setProperty("--plot-scale", String(scale));
-    this.style.fontSize =`${12 * scale}px`;
-    this.style.padding =`${6 * scale}px ${10 * scale}px`;
-    if (this.#controls) {
-     const btns = this.#controls.querySelectorAll<HTMLButtonElement>(".toggle-btn");
-     btns.forEach((b) => {
-       b.style.fontSize = `${12 * scale}px`;
-       b.style.padding = `${6 * scale}px ${10 * scale}px`;
-     });
-   }
-    this.#plots.forEach((p) =>
-      p.setSize({
-        width: this.clientWidth,
-        height: p.height,
-      })
-    );
+    const plotHelper = new PlotHelper();
+    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, null);
   }
 }
 

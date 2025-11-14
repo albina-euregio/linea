@@ -10,6 +10,7 @@ import {
 } from "./linea-plot/opts_HS_year";
 import { fetchSMET } from "./smet-data";
 import { Temporal } from "temporal-polyfill";
+import { PlotHelper } from "./plot-helper";
 
 /**
  * uPlot diagram for yearly overview of snow height.
@@ -39,8 +40,18 @@ export class LineaPlotYear extends HTMLElement {
       this.getAttribute("src") ?? "",
       Infinity
     );
+    const plotHelper = new PlotHelper();
+    const scale = plotHelper.GetScale(this.clientWidth);
     const style = document.createElement("style");
     style.textContent = css;
+    /*    style.textContent = `
+      .vw-max-plot .u-axis-label {
+        transform: rotate(-90deg);
+        transform-origin: left top;
+        white-space: nowrap;
+      }
+    `;*/
+    //document.head.appendChild(style);
     const plot_HS_year = document.createElement("div");
     this.replaceChildren(style, plot_HS_year);
 
@@ -131,7 +142,8 @@ export class LineaPlotYear extends HTMLElement {
     const yearData = YearData.from(timestamps, values.HS);
     const p = new uPlot(
       {
-        ...opts_HS_year,
+        ...opts_HS_year,      
+        axes: plotHelper.makeAxes(scale),
         ...(this.hasAttribute("showTitle")
           ? {
               title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
@@ -141,12 +153,12 @@ export class LineaPlotYear extends HTMLElement {
       [yearData.timestamps],
       plot_HS_year
     );
-    this.#addSeries(p, opts_HS_min, yearData.HS_min);
-    this.#addSeries(p, opts_HS_max, yearData.HS_max);
-    this.#addSeries(p, opts_HS_median, yearData.HS_median);
-    this.#addSeries(p, opts_HS_current, yearData.HS);
+    plotHelper.addSeries(this.#plots, p, opts_HS_min, yearData.HS_min);
+    plotHelper.addSeries(this.#plots, p, opts_HS_max, yearData.HS_max);
+    plotHelper.addSeries(this.#plots, p, opts_HS_median, yearData.HS_median);
+    plotHelper.addSeries(this.#plots, p, opts_HS_current, yearData.HS);
 
-    this.#resizePlots();
+    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, null);
     this.#resizeObserver.observe(this);
   }
 
@@ -154,22 +166,11 @@ export class LineaPlotYear extends HTMLElement {
     this.#resizeObserver.unobserve(this);
   }
 
-  #addSeries(plot: uPlot, series: uPlot.Series, data: Float32Array) {
-    if (!this.#plots.includes(plot)) {
-      this.#plots.push(plot);
-    }
-    plot.addSeries({ ...series, show: !!data?.length });
-    plot.data.push(data ?? []);
+  #resizePlots() {
+    const plotHelper = new PlotHelper();
+    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, null);
   }
 
-  #resizePlots() {
-    this.#plots.forEach((p) =>
-      p.setSize({
-        width: this.clientWidth,
-        height: p.height,
-      })
-    );
-  }
 }
 
 customElements.define("linea-plot-year", LineaPlotYear);
