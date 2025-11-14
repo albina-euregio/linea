@@ -23,6 +23,7 @@
   "dialog:weather-station-diagram:parameter:DATAPOINTS:amount": "Amount Measured Days",
   "dialog:weather-station-diagram:parameter:newsnow": "New Snow",
   "dialog:weather-station-diagram:parameter:snowcover": "Snow Cover",
+  "dialog:weather-station-diagram:unit:DATAPOINTS": "Days",
   "dialog:weather-station-diagram:unit:temperature": "Temperature",
   "dialog:weather-station-diagram:unit:time": "Time"
 }
