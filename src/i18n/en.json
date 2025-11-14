@@ -18,8 +18,6 @@
   "dialog:weather-station-diagram:parameter:DW": "Wind Direction",
   "dialog:weather-station-diagram:parameter:SH": "Surface Hoar",
   "dialog:weather-station-diagram:parameter:SH:potential": "Surface Hoar Potential",
-  "dialog:weather-station-diagram:parameter:SH:hide": "Hide Surface hoar potential",
-  "dialog:weather-station-diagram:parameter:SH:show": "Show Surface hoar potential",
   "dialog:weather-station-diagram:parameter:SH:present": "Yes",
   "dialog:weather-station-diagram:parameter:SH:present:not": "No",
   "dialog:weather-station-diagram:parameter:DATAPOINTS:amount": "Amount Measured Days",
