@@ -117,7 +117,7 @@ export class PlotHelper {
 
     GetStyle(document: Document, css: string): HTMLStyleElement{
       if (!this.#m_style) {
-        this.#CreateStyle(document, css);
+        return this.#CreateStyle(document, css);
       }
       return this.#m_style;
     }
