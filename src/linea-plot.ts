@@ -144,6 +144,7 @@ export class LineaPlot extends HTMLElement {
     }
     plot.addSeries({ ...series, show: !!data?.length });
     plot.data.push(data);
+
   }
 
   #resizePlots() {

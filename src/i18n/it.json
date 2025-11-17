@@ -1,5 +1,8 @@
 {
   "dialog:weather-station-diagram:parameter:HS": "Altezza neve",
+  "dialog:weather-station-diagram:parameter:HS_max": "Max Snow Height",
+  "dialog:weather-station-diagram:parameter:HS_median": "Median Snow Height",
+  "dialog:weather-station-diagram:parameter:HS_min": "Min Snow Height",
   "dialog:weather-station-diagram:parameter:PSUM": "Precipitazioni",
   "dialog:weather-station-diagram:parameter:TA": "Temperatura dell'aria",
   "dialog:weather-station-diagram:parameter:TD": "Punto di rugiada",
