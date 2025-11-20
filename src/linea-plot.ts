@@ -100,6 +100,8 @@ export class LineaPlot extends HTMLElement {
             p.redraw();
           };
         }
+      } else {
+        this.#addSeries(p, opts_TSS, new Float32Array([]));
       }
     }
 

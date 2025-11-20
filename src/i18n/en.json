@@ -3,6 +3,10 @@
   "dialog:weather-station-diagram:parameter:HS_max": "Max Snow Height",
   "dialog:weather-station-diagram:parameter:HS_median": "Median Snow Height",
   "dialog:weather-station-diagram:parameter:HS_min": "Min Snow Height",
+  "dialog:weather-station-diagram:parameter:TEMP": "Temperature",
+  "dialog:weather-station-diagram:parameter:TEMP_max": "Max Temperature",
+  "dialog:weather-station-diagram:parameter:TEMP_median": "Median Temperature",
+  "dialog:weather-station-diagram:parameter:TEMP_min": "Min Temperature",
   "dialog:weather-station-diagram:parameter:PSUM": "Precipitation",
   "dialog:weather-station-diagram:parameter:TA": "Air Temperature",
   "dialog:weather-station-diagram:parameter:TD": "Dew Point",
@@ -15,6 +19,9 @@
   "dialog:weather-station-diagram:parameter:SH": "Surface Hoar",
   "dialog:weather-station-diagram:parameter:SH:hide": "Hide Surface hoar potential",
   "dialog:weather-station-diagram:parameter:SH:show": "Show Surface hoar potential",
+  "dialog:weather-station-diagram:parameter:DATAPOINTS:amount": "Amount Measured Days",
+  "dialog:weather-station-diagram:parameter:newsnow": "New Snow",
+  "dialog:weather-station-diagram:parameter:snowcover": "Snow Cover",
   "dialog:weather-station-diagram:unit:temperature": "Temperature",
   "dialog:weather-station-diagram:unit:time": "Time"
 }

@@ -1,4 +1,4 @@
-import type uPlot from "uplot";
+import uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
@@ -36,7 +36,7 @@ hooks: {
 
         // horizontal label for y-axis
         const xPosY = canvasWidth * 0.1;
-        ctx.fillStyle = "#000000";
+        ctx.fillStyle = "#DE2D26";
         ctx.fillText(
           `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
           xPosY,
@@ -45,9 +45,9 @@ hooks: {
 
         // horizontal label for y2-axis
         const xPosY2 = canvasWidth * 0.9;
-        ctx.fillStyle = "#000000";
+        ctx.fillStyle = "#6aafd5";
         ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
+          `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
           xPosY2,
           yPos
         );
@@ -62,7 +62,7 @@ scales: {
         range: [0, 500]
       },
       y2: {
-        range: [0, 500]
+        range: [0, 50]
       },
     },
 
@@ -70,13 +70,13 @@ axes: [
     timeAxis,
     {
       scale: "y",
-      stroke: "#000000",
+      stroke: "#DE2D26",
       splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
     },
      {
       scale: "y2",
-      splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
-      stroke: "#000000",
+      splits: [0, 10, 20, 30, 40, 50],
+      stroke: "#6aafd5",
       side: 1,
       grid: {
         show: false,
@@ -102,37 +102,30 @@ axes: [
   }
 ],  
 };
-
-export const opts_HS_min: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS_min"),
-  stroke: "#d9dcdc",
-  width: 2,
-  points: {show: false},
+const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
+  label: i18n.message(`dialog:weather-station-diagram:parameter:${key}`),
+  stroke: color,
+  width,
+  points: { show: false },
   scale: "y",
   value: (u, v) => i18n.number(v, {}, "cm"),
+});
+
+export const opts_HS_year_min     = baseHsSeries("HS_min", "#d9dcdc", 2);
+export const opts_HS_year_max     = baseHsSeries("HS_max", "#d9dcdc", 0);
+export const opts_HS_year_median  = baseHsSeries("HS_median", "#878787", 2);
+export const opts_HS_year_current = baseHsSeries("HS", "#ff0000", 2);
+
+export const opts_HS_year_PSUM: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),
+  paths: uPlot.paths.bars(),
+  points: { show: false },
+  stroke: "#6aafd5",
+  fill: "#6aafd5",
+  scale: "y2",
+  value: (u, v) =>
+    v == null || Number.isNaN(v)
+      ? "-"
+      : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
 };
 
-export const opts_HS_max: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS_max"),
-  stroke: "#d9dcdc",
-  width: 0,
-  points: {show: false},
-  scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
-};
-
-export const opts_HS_median: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS_median"),
-  stroke: "#878787",
-  width: 2,
-  scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
-};
-
-export const opts_HS_current: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
-  stroke: "#ff0000",
-  width: 2,
-  scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
-};
