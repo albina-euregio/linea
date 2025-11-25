@@ -41,7 +41,7 @@ hooks: {
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
         var labelColor1 = "#DE2D26";
         var labelColor2 = "#6aafd5";
-        optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
+        optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
       },
     ],
   },

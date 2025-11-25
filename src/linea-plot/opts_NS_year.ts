@@ -37,7 +37,7 @@ hooks: {
         var optionsHelper = new OptsHelper();
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:newsnow")} (cm)`;
         const yPos = canvasHeight * 0.05;
-        optionsHelper.UpdateAxisLabels(ctx, labely1,"", u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, "#DE2D26", "");
+        optionsHelper.UpdateAxisLabels(ctx, labely1,"", u.bbox.left, u.bbox.width, canvasHeight, "#DE2D26", "");
         ctx.restore();
       },
     ],

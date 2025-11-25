@@ -5,8 +5,8 @@ export class OptsHelper {
         labely1: string, 
         labely2:string, 
         boxLeft: number, boxwidth: number,
-        canvasWidth: number, canvasHeight: number,
-        screenwidth: number, fillStyle1: string | CanvasGradient | CanvasPattern, fillStyle2: string | CanvasGradient | CanvasPattern
+        canvasHeight: number,
+        fillStyle1: string | CanvasGradient | CanvasPattern, fillStyle2: string | CanvasGradient | CanvasPattern
     ) : CanvasRenderingContext2D {
         const labelOffset = labely1.length*3; // additional offset for label position
         const xPosY = boxLeft +labelOffset;
@@ -26,8 +26,12 @@ export class OptsHelper {
         // Right Y-axis label
         const label2Offset = labely2.length*3; // additional offset for label position
         const xPosY2 = boxLeft + boxwidth - label2Offset;
+        var pixSize = labely1.length*10;//ctx.measureText(labely1).width;
+        var pixSize2 = labely2.length*10;//ctx.measureText(labely2).width;
+        var overlap = xPosY2 - xPosY-pixSize - pixSize2;
+        console.log("Canvas width inside UpdateAxisLabels:" +labely1, overlap, pixSize, pixSize2);
         let minFontSize = 12; // minimum font size for small screens
-        if ( canvasWidth>=1040 || screenwidth>=1040 )
+        if ( overlap >= 0)//canvasWidth>=1040 || screenwidth>=1040 )
             minFontSize = 0; //don't adjust for large screens
         const yPos2 = yPos + minFontSize*3;
         ctx.save();

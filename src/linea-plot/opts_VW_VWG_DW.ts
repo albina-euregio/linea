@@ -38,7 +38,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   var labely2 = i18n.message("dialog:weather-station-diagram:parameter:DW");
   var labelColor1 = "#00E2B6";
   var labelColor2 = "#084D40";
-  optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
+  optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
   
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
