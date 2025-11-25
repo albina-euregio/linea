@@ -16,7 +16,7 @@ export const opts_HS_year: uPlot.Options = {
   legend: {
     show: true,
     live: true,
-    fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
+    fill: (u: any, seriesIdx: any) => u.series[seriesIdx].stroke(u, seriesIdx),
     markers: {
       fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
     },
@@ -39,8 +39,8 @@ hooks: {
         var optionsHelper = new OptsHelper();
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
-        var labelColor1 = "#000000";
-        var labelColor2 = "#000000";
+        var labelColor1 = "#DE2D26";
+        var labelColor2 = "#6aafd5";
         optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
       },
     ],

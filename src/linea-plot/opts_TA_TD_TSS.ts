@@ -23,7 +23,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
       values: (u, seriesIdx, values) => {
         let result = {};
-        u.series.forEach((s, i) => {
+        u.series.forEach((s: any, i: any) => {
           if (i === 0) {
             result[s.label || s.name] = values[i];
           } else {
