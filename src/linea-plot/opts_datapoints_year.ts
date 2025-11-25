@@ -2,6 +2,7 @@ import uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
+import { OptsHelper } from "./optsHelper";
 
 /**
  * uPlot options for snow-height/year [cm] 
@@ -32,19 +33,14 @@ hooks: {
 
         const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.12
 
-        // horizontal label for y-axis
-        const xPosY = u.bbox.left*0.73;
-        ctx.fillStyle = "#00ff55ff";
-        ctx.textAlign = "left";
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`,
-          xPosY,
-          yPos
-        );
-
-        ctx.restore();
+          const screenwidth = window.innerWidth;
+          var optionsHelper = new OptsHelper();
+            var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`;
+            var labely2 = "";
+            var labelColor1 = "#00ff55ff";
+            var labelColor2 = "";
+            optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
       },
     ],
   },

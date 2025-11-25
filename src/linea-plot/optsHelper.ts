@@ -21,6 +21,8 @@ export class OptsHelper {
                 );
         ctx.restore();
 
+        if (labely2=="")
+            return ctx;
         // Right Y-axis label
         const label2Offset = labely2.length*3; // additional offset for label position
         const xPosY2 = boxLeft + boxwidth - label2Offset;
