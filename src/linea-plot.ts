@@ -84,24 +84,30 @@ export class LineaPlot extends HTMLElement {
       );
       plotHelper.addSeries(this.#plots, p, opts_TA, values.TA);
       plotHelper.addSeries(this.#plots, p, opts_TD, TD);
-      plotHelper.addSeries(this.#plots, p, opts_TSS, values.TSS);
-
-      if (this.hasAttribute("showSurfaceHoarButton")) {
-        const button = document.createElement("button");
-        button.classList.add("toggle-btn");
-        button.innerText = i18n.message(
-          "dialog:weather-station-diagram:parameter:SH:hide"
-        );
-        controls.append(button);
-        button.onclick = () => {
-          showSurfaceHoar.value = !showSurfaceHoar.value;
+      
+      // show snow surface temperature and therefore surface hoar only if available
+      if(values.TSS) {
+        plotHelper.addSeries(this.#plots, p, opts_TSS, values.TSS);
+        //show surface hoar button
+        if (this.hasAttribute("showSurfaceHoarButton")) {
+          const button = document.createElement("button");
+          button.classList.add("toggle-btn");
           button.innerText = i18n.message(
-            showSurfaceHoar.value
-              ? "dialog:weather-station-diagram:parameter:SH:hide"
-              : "dialog:weather-station-diagram:parameter:SH:show"
+            "dialog:weather-station-diagram:parameter:SH:hide"
           );
-          p.redraw();
-        };
+          controls.append(button);
+          button.onclick = () => {
+            showSurfaceHoar.value = !showSurfaceHoar.value;
+            button.innerText = i18n.message(
+              showSurfaceHoar.value
+                ? "dialog:weather-station-diagram:parameter:SH:hide"
+                : "dialog:weather-station-diagram:parameter:SH:show"
+            );
+            p.redraw();
+          };
+        }
+      } else {
+        plotHelper.addSeries(this.#plots, p, opts_TSS, new Float32Array([]));
       }
     }
 
