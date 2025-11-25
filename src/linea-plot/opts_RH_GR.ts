@@ -2,6 +2,7 @@ import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
+import { OptsHelper } from "./optsHelper";
 
 /**
  * uPlot options for Relative Luftfeuchtigkeit [%] & Globalstrahlung [W/m²]
@@ -26,38 +27,16 @@ export const opts_RH_GR: uPlot.Options = {
   ctx.save();
   ctx.textBaseline = "top"; 
 
+  const screenwidth = window.innerWidth;
+  const canvasWidth = u.ctx.canvas.width;
   const canvasHeight = u.ctx.canvas.height;
   const yPos = canvasHeight * 0.05;
-
-  // Left Y-axis label
-  const tickPadding = 100; // space between tick labels and axis label
-  const labelOffset = 60; // additional offset for label position
-  const xPosY = u.bbox.left - labelOffset - tickPadding;
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#6aafd5";
-  ctx.save();
-  ctx.translate(xPosY, canvasHeight/2 );
-  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
-  ctx.fillText( 
-    `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
-        xPosY, 
-        yPos
-        );
-ctx.restore();
-
-  // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#DE2D26";
-  ctx.save();
-  ctx.translate(xPosY2, canvasHeight/2 );
-  ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise
-  ctx.fillText(
-       `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
-        0, 
-        0
-        );
-        ctx.restore();
+  var optionsHelper = new OptsHelper();
+    var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`;
+    var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`;
+    var labelColor1 = "#6aafd5";
+    var labelColor2 = "#DE2D26";
+    optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
       },
     ],
   },

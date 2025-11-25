@@ -2,6 +2,7 @@ import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
+import { OptsHelper } from "./optsHelper";
 
 /**
  * uPlot options for snow-height/year [cm] 
@@ -34,36 +35,13 @@ hooks: {
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.05;
 
-        // horizontal label for y-axis
-        const tickPadding = 100; // space between tick labels and axis label
-        const labelOffset = 40; // additional offset for label position
-        const xPosY = u.bbox.left - labelOffset - tickPadding;//canvasWidth * 0.1;
-        ctx.fillStyle = "#000000";
-        ctx.textAlign = "center";
-        ctx.save();
-        ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise 
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-          xPosY,
-          yPos
-        );
-        ctx.restore();
-
-        // horizontal label for y2-axis
-        const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;//canvasWidth * 0.9 + labelOffset + 30;
-        ctx.fillStyle = "#000000";
-        ctx.textAlign = "center";
-        ctx.save();
-        ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-        ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise 
-        ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-          0,
-          0
-        );
-
-        ctx.restore();
+        const screenwidth = window.innerWidth;
+        var optionsHelper = new OptsHelper();
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
+        var labelColor1 = "#000000";
+        var labelColor2 = "#000000";
+        optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
       },
     ],
   },

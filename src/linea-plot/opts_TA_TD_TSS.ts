@@ -2,6 +2,7 @@ import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
+import { OptsHelper } from "./optsHelper";
 
 // Create state variable to control shading
 export const showSurfaceHoar = { value: true };
@@ -41,39 +42,17 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.save();
         ctx.textBaseline = "top"; 
 
+        const screenwidth = window.innerWidth;
+        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.05;
 
-
-        // vertical label for y-axis
-          const tickPadding = 100; // space between tick labels and axis label
-          const labelOffset = 60; // additional offset for label position
-          const xPosY = u.bbox.left - labelOffset - tickPadding;;
-          ctx.textAlign = "center";
-          ctx.fillStyle = "#DE2D26";
-          ctx.save();
-          ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-          ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
-          ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`,
-              xPosY, 
-              yPos
-        );
-        ctx.restore();
-
-        // vertical label for y2-axis
-          const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;
-          ctx.textAlign = "center";        
-          ctx.fillStyle = "#6aafd5";
-          ctx.save();
-          ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-          ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise
-          ctx.fillText(
-          `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`,
-          0, 
-          0
-        );
-        ctx.restore();
+        var optionsHelper = new OptsHelper();
+          var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`;
+          var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`;
+          var labelColor1 = "#DE2D26";
+          var labelColor2 = "#6aafd5";
+          optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
 
         // Draw reference line at 0°C
         const width = 1;

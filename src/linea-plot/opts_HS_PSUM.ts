@@ -2,6 +2,7 @@ import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
+import { OptsHelper } from "./optsHelper";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
@@ -22,44 +23,21 @@ export const opts_HS_PSUM: uPlot.Options = {
   hooks: {
     drawAxes: [
        (u) => {
-  const ctx = u.ctx;
-  ctx.save();
-  ctx.textBaseline = "top"; 
+      const ctx = u.ctx;
+      ctx.save();
+      ctx.textBaseline = "top"; 
 
-    const canvasWidth = u.ctx.canvas.width;
-    const canvasHeight = u.ctx.canvas.height;
-    const yPos = canvasHeight * 0.05;
+      const canvasWidth = u.ctx.canvas.width;
+      const canvasHeight = u.ctx.canvas.height;
+      const yPos = canvasHeight * 0.05;
 
-  // Left Y-axis label
-  const tickPadding = 100; // space between tick labels and axis label
-  const labelOffset = 60;
-  const xPosY = u.bbox.left - labelOffset - tickPadding;
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#08519C";
-  ctx.save();
-  ctx.translate(xPosY, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-  ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise
-  ctx.fillText( 
-    `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-      xPosY, 
-      yPos
-      );
-ctx.restore();
-
-
-  // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width + labelOffset + 60;
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#6aafd5";
-  ctx.save();
-  ctx.translate(xPosY2, canvasHeight/2 ); // Adjust +10 for padding, center vertically
-  ctx.rotate(Math.PI / 2); // Rotate 90 degrees counterclockwise 
-  ctx.fillText(
-    `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
-      0, 
-      0
-      );
-      ctx.restore();
+      const screenwidth = window.innerWidth;
+      var optionsHelper = new OptsHelper();
+      var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
+      var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (cm)`;
+      var labelColor1 = "#08519C";
+      var labelColor2 = "#6aafd5";
+      optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasWidth, canvasHeight, screenwidth, labelColor1, labelColor2);
       },
     ],
   },
