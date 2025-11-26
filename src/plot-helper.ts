@@ -127,20 +127,18 @@ export class PlotHelper {
       }
       return this.#m_style;
     }
+
   //#region Private Methods
     #CreateStyle(document: Document, css: string): HTMLStyleElement {
-    //const s = document.getElementsByTagName("style");
     const style = document.createElement("style");
     style.textContent = css;
     style.textContent = `
       .vw-max-plot .u-axis-label {
-        transform: rotate(-90deg);
         transform-origin: left top;
         white-space: nowrap;
       }
 
       .hs-year-plot .u-axis-label {
-        transform: rotate(-90deg);
         transform-origin: left top;
         white-space: nowrap;
       }

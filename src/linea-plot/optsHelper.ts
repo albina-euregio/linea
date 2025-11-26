@@ -20,20 +20,20 @@ export class OptsHelper {
                 yPos
                 );
         ctx.restore();
+        const width1 = ctx.measureText(labely1).width;
+        const endX1 = xPosY + width1/2;
 
         if (labely2=="")
             return ctx;
         // Right Y-axis label
         const label2Offset = labely2.length*3; // additional offset for label position
         const xPosY2 = boxLeft + boxwidth - label2Offset;
-        var pixSize = labely1.length*10;//ctx.measureText(labely1).width;
-        var pixSize2 = labely2.length*10;//ctx.measureText(labely2).width;
-        var overlap = xPosY2 - xPosY-pixSize - pixSize2;
-        console.log("Canvas width inside UpdateAxisLabels:" +labely1, overlap, pixSize, pixSize2);
-        let minFontSize = 12; // minimum font size for small screens
-        if ( overlap >= 0)//canvasWidth>=1040 || screenwidth>=1040 )
+        let minFontSize = ctx.font ? parseInt(ctx.font.split(' ')[0]) : 12;
+        const width2 = ctx.measureText(labely2).width;
+        const startx2 = xPosY2 - width2/2;
+        if ( endX1 < startx2) // check if overlapping text
             minFontSize = 0; //don't adjust for large screens
-        const yPos2 = yPos + minFontSize*3;
+        const yPos2 = yPos + minFontSize;//*3;
         ctx.save();
         ctx.textAlign = "center";
         ctx.fillStyle = fillStyle2;
@@ -45,4 +45,19 @@ export class OptsHelper {
         ctx.restore();
         return ctx;
     }
+
+    getTextWidth(text: string, fontSize: number, fontFamily: string = "sans-serif"): number {
+    // Create a canvas element (off-screen)
+    const canvas = document.createElement("canvas");
+    const style = document.createElement("style");
+    const context = canvas.getContext("2d");
+    if (!context) return 0;
+
+    // Set the font style
+    context.font = `${fontSize}px ${fontFamily}`;
+
+    // Measure the text
+    const metrics = context.measureText(text);
+    return metrics.width;
+}
 }
