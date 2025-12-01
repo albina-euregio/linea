@@ -23,16 +23,18 @@ export class OptsHelper {
         const width1 = ctx.measureText(labely1).width;
         const endX1 = xPosY + width1/2;
 
-        if (labely2=="")
+        if (labely2==""){
             return ctx;
+        }
         // Right Y-axis label
         const label2Offset = labely2.length*3; // additional offset for label position
         const xPosY2 = boxLeft + boxwidth - label2Offset;
         let minFontSize = ctx.font ? parseInt(ctx.font.split(' ')[0]) : 12;
         const width2 = ctx.measureText(labely2).width;
         const startx2 = xPosY2 - width2/2;
-        if ( endX1 < startx2) // check if overlapping text
+        if ( endX1 < startx2){ // check if overlapping text
             minFontSize = 0; //don't adjust for large screens
+        }
         const yPos2 = yPos + minFontSize;//*3;
         ctx.save();
         ctx.textAlign = "center";
@@ -47,17 +49,19 @@ export class OptsHelper {
     }
 
     getTextWidth(text: string, fontSize: number, fontFamily: string = "sans-serif"): number {
-    // Create a canvas element (off-screen)
-    const canvas = document.createElement("canvas");
-    const style = document.createElement("style");
-    const context = canvas.getContext("2d");
-    if (!context) return 0;
+        // Create a canvas element (off-screen)
+        const canvas = document.createElement("canvas");
+        const style = document.createElement("style");
+        const context = canvas.getContext("2d");
+        if (!context){
+            return 0;
+        }
 
-    // Set the font style
-    context.font = `${fontSize}px ${fontFamily}`;
+        // Set the font style
+        context.font = `${fontSize}px ${fontFamily}`;
 
-    // Measure the text
-    const metrics = context.measureText(text);
-    return metrics.width;
-}
+        // Measure the text
+        const metrics = context.measureText(text);
+        return metrics.width;
+    }
 }

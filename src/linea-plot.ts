@@ -78,7 +78,6 @@ export class LineaPlot extends HTMLElement {
                 title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
               }
             : {}),
-            axes: plotHelper.makeAxes(scale)
         },
         [timestamps],
         plot_TA_TD_TSS
@@ -103,20 +102,20 @@ export class LineaPlot extends HTMLElement {
     }
 
     if (values.VW && values.DW) {
-      const p = new uPlot({...opts_VW_VWG_DW, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_VW_VWG_DW);           
+      const p = new uPlot({...opts_VW_VWG_DW}, [timestamps], plot_VW_VWG_DW);           
       plotHelper.addSeries(this.#plots, p, opts_VW, values.VW);
       plotHelper.addSeries(this.#plots, p, opts_VW_MAX, values.VW_MAX);
       plotHelper.addSeries(this.#plots,p, opts_DW, values.DW);
     }
 
     if (values.HS || values.PSUM) {
-      const p = new uPlot({...opts_HS_PSUM, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_HS_PSUM);
+      const p = new uPlot({...opts_HS_PSUM}, [timestamps], plot_HS_PSUM);
       plotHelper.addSeries(this.#plots, p, opts_HS, values.HS);
       plotHelper.addSeries(this.#plots, p, opts_PSUM, values.PSUM);
     }
 
     if (values.RH || values.ISWR) {
-      const p = new uPlot({...opts_RH_GR, axes: plotHelper.makeAxes(scale)}, [timestamps], plot_RH_GR);
+      const p = new uPlot({...opts_RH_GR}, [timestamps], plot_RH_GR);
       plotHelper.addSeries(this.#plots, p, opts_RH, values.RH);
       plotHelper.addSeries(this.#plots, p, opts_ISWR, values.ISWR);
     }
