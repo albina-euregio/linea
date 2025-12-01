@@ -91,8 +91,6 @@ export class LineaPlotYear extends HTMLElement {
       plotHelper.addSeries(this.#plots, p, opts_HS_year_current, yearData.HS);
       if(values.PSUM){
         plotHelper.addSeries(this.#plots, p, opts_HS_year_PSUM, yearData.PSUM);
-      } else {
-        plotHelper.addSeries(this.#plots, p, opts_HS_year_PSUM, new Float32Array([]));
       }
       const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
       plotHelper.addSeries(this.#plots, pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
