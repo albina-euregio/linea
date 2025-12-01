@@ -101,7 +101,7 @@ export class LineaPlot extends HTMLElement {
       }
     }
 
-    if (values.VW && values.DW) {
+    if (values.VW || values.VW_MAX || values.DW) {
       const p = new uPlot({...opts_VW_VWG_DW}, [timestamps], plot_VW_VWG_DW);           
       plotHelper.addSeries(this.#plots, p, opts_VW, values.VW);
       plotHelper.addSeries(this.#plots, p, opts_VW_MAX, values.VW_MAX);
