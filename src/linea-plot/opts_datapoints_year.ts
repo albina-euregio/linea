@@ -78,5 +78,5 @@ export const opts_DATAPOINTS_amount_year: uPlot.Series = {
   width: 2,
   points: { show: false },
   scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
+  value: (u, v) => i18n.number(v, {}, i18n.message("dialog:weather-station-diagram:unit:DATAPOINTS")),
 };

@@ -17,12 +17,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   legend: {
     show: true,
     live: true,
-    fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
+    fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
     markers: {
-      fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
-      values: (u, seriesIdx, values) => {
-        let result = {};
-        u.series.forEach((s, i) => {
+      fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
+      values: (u: any, seriesIdx: number, values: any) => {
+        let result: any = {};
+        u.series.forEach((s:any, i: number) => {
           if (i === 0) {
             result[s.label || s.name] = values[i];
           } else {
@@ -82,42 +82,6 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.setLineDash([]);
 
         ctx.restore();
-
-        // Only draw shaded regions if showSurfaceHoar is true and the snow surface temperature is available
-        if (showSurfaceHoar.value && u.data.length == 4) {
-          ctx.save();
-          ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
-          ctx.clip();
-          ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-
-          let from = 0,
-            to = 0;
-
-          for (let i = 0; i < u.data[0].length; i++) {
-            let td = u.data[2][i];
-            let tss = u.data[3][i];
-
-            if (td < 0 && tss < td) {
-              let xVal = u.data[0][i];
-              if (from === 0) from = xVal;
-              to = xVal;
-            } else if (from !== 0) {
-              let x0 = u.valToPos(from, "x", true);
-              let x1 = u.valToPos(to, "x", true);
-              ctx.fillRect(x0, u.bbox.top, x1 - x0, u.bbox.height);
-              from = 0;
-            }
-          }
-
-          // If region extends to end
-          if (from !== 0) {
-            let x0 = u.valToPos(from, "x", true);
-            let x1 = u.valToPos(to, "x", true);
-            ctx.fillRect(x0, u.bbox.top, x1 - x0, u.bbox.height);
-          }
-
-          ctx.restore();
-        }
       },
     ],
   },
@@ -131,7 +95,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       for (let i = 1; i < u.data.length; i++) {
         const series = u.data[i];
         for (let j = 0; j < series.length; j++) {
-          const val = series[j];
+          const val = series[j] as number;
           if (!isNaN(val) && val !== null) {
             validMin = Math.min(validMin, val);
             validMax = Math.max(validMax, val);
@@ -146,6 +110,10 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       console.log('Valid data range:', validMin, 'to', validMax);
       return (validMin < -30 || validMax > 10) ? [-30, 30] : [-30, 10];
     },
+  },
+  
+  yhidden: {
+    range: [0, 1]
   }
 },
 
@@ -158,7 +126,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       stroke: "#DE2D26",
       grid: {show: true},
       splits: (u) => {
-      const max = u.scales.y.max;
+      const max = u.scales.y.max ?? 0;
       const useExtended = max > 10;
       const baseTicks = useExtended
         ? [-30, -20, -10, 0, 10, 20, 30]
@@ -175,8 +143,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       grid: {
         show: false},
        values: (u, vals) => vals.map(v => v.toString()),
-  }
-],
+  },
+    {
+      scale: "yhidden",
+      show: false,
+    }
+],  
 
 
   series: [
@@ -198,3 +170,13 @@ const createSeries = (labelKey: string, color: string): uPlot.Series => ({
 export const opts_TA = createSeries("dialog:weather-station-diagram:unit:temperature", "#DE2D26");
 export const opts_TD = createSeries("dialog:weather-station-diagram:parameter:TD", "#6aafd5");
 export const opts_TSS = createSeries("dialog:weather-station-diagram:parameter:TSS", "#FC9272");
+
+export const opts_SurfaceHoar: uPlot.Series = {
+  label: i18n.message("dialog:weather-station-diagram:parameter:SH:potential"),
+  width: 2,
+  scale: "yhidden",
+  spanGaps: false,
+  fill: "rgba(1, 0, 0, 0.1)",
+  stroke: "rgba(0, 0, 0, 0.3)",
+  value: (u, v) => v > 0 ? i18n.message("dialog:weather-station-diagram:parameter:SH:present") : i18n.message("dialog:weather-station-diagram:parameter:SH:present:not"),
+};
