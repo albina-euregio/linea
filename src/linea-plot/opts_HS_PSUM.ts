@@ -32,12 +32,11 @@ export const opts_HS_PSUM: uPlot.Options = {
       const yPos = canvasHeight * 0.05;
 
       const screenwidth = window.innerWidth;
-      var optionsHelper = new OptsHelper();
       var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
       var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (cm)`;
       var labelColor1 = "#DE2D26";
       var labelColor2 = "#6aafd5";
-      optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+      OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
       },
     ],
   },

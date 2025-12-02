@@ -34,10 +34,9 @@ hooks: {
         const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
         const screenwidth = window.innerWidth;
-        var optionsHelper = new OptsHelper();
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:newsnow")} (cm)`;
         const yPos = canvasHeight * 0.05;
-        optionsHelper.UpdateAxisLabels(ctx, labely1,"", u.bbox.left, u.bbox.width, canvasHeight, "#DE2D26", "");
+        OptsHelper.UpdateAxisLabels(ctx, labely1,"", u.bbox.left, u.bbox.width, canvasHeight, "#DE2D26", "");
         ctx.restore();
       },
     ],

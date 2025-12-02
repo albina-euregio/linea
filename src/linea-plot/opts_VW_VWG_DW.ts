@@ -23,22 +23,21 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   hooks: {
     drawAxes: [
        (u) => {
-  const ctx = u.ctx;
-  ctx.save();
-  ctx.textBaseline = "top"; 
-  const screenwidth = window.innerWidth;
-  console.log("Screenwidth:", screenwidth);
-  console.log("Canvas width:", u.ctx.canvas.width);
-  const canvasWidth = u.ctx.canvas.width;
-  const canvasHeight = u.ctx.canvas.height;
-  const yPos = canvasHeight * 0.05;
+        const ctx = u.ctx;
+        ctx.save();
+        ctx.textBaseline = "top"; 
+        const screenwidth = window.innerWidth;
+        console.log("Screenwidth:", screenwidth);
+        console.log("Canvas width:", u.ctx.canvas.width);
+        const canvasWidth = u.ctx.canvas.width;
+        const canvasHeight = u.ctx.canvas.height;
+        const yPos = canvasHeight * 0.05;
 
-  var optionsHelper = new OptsHelper();
-  var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`;
-  var labely2 = i18n.message("dialog:weather-station-diagram:parameter:DW");
-  var labelColor1 = "#00E2B6";
-  var labelColor2 = "#084D40";
-  optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`;
+        var labely2 = i18n.message("dialog:weather-station-diagram:parameter:DW");
+        var labelColor1 = "#00E2B6";
+        var labelColor2 = "#084D40";
+        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
   
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
@@ -61,66 +60,45 @@ export const opts_VW_VWG_DW: uPlot.Options = {
     ],
   },
    scales: {
-  y: {
-    range: (u, dataMin, dataMax) => {
-      let validMin = Infinity;
-      let validMax = -Infinity;
-      
-      // Only check series that use the 'y' scale
-      for (let i = 1; i < u.data.length; i++) {
-        // Skip series that don't use this scale
-        if (u.series[i].scale !== 'y') continue;
-        
-        const series = u.data[i];
-        for (let j = 0; j < series.length; j++) {
-          const val = series[j];
-          if (!isNaN(val) && val !== null) {
-            validMin = Math.min(validMin, val);
-            validMax = Math.max(validMax, val);
-          }
-        }
-      }
-      
-      if (validMin === Infinity || validMax === -Infinity) {
-        return [0, 100]; 
-      }
-      
-      console.log('Valid data range:', validMin, 'to', validMax);
-      return validMax > 100 ? [0, 120] : [0, 100];
+      y: {
+        range: (u, dataMin, dataMax) => {
+          let validMin = dataMin;
+          let validMax = dataMax;
+          return validMax > 100 ? [0, 120] : [0, 100];
+        },
+      },
+      y2: {
+        range: [0, 360],
+      },
+  },
+  axes: [
+    timeAxis,
+    {
+      scale: "y",
+      side: 3,
+      stroke: "#00E2B6",
+      grid: {show: true},
+      splits: (u) => {
+        const max = u.scales.y.max;
+        const useExtended = max > 100;
+        const baseTicks = useExtended
+          ? [0, 30, 60, 90, 120]
+          : [0, 25, 50, 75, 100];
+        return baseTicks;
+      },
+      values: (u, vals) => vals.map(v => v.toString()),
     },
-  },
-  y2: {
-    range: [0, 360],
-  },
-},
-axes: [
-  timeAxis,
-  {
-    scale: "y",
-    side: 3,
-    stroke: "#00E2B6",
-    grid: {show: true},
-    splits: (u) => {
-      const max = u.scales.y.max;
-      const useExtended = max > 100;
-      const baseTicks = useExtended
-        ? [0, 30, 60, 90, 120]
-        : [0, 25, 50, 75, 100];
-      return baseTicks;
+    {
+      splits: [0, 90, 180, 270, 360],
+      stroke: "#084D40",
+      values: ["N", "E", "S", "W", "N"],
+      scale: "y2",
+      side: 1,
+      grid: {
+        show: false,
+      },
     },
-    values: (u, vals) => vals.map(v => v.toString()),
-  },
-  {
-    splits: [0, 90, 180, 270, 360],
-    stroke: "#084D40",
-    values: ["N", "E", "S", "W", "N"],
-    scale: "y2",
-    side: 1,
-    grid: {
-      show: false,
-    },
-  },
-],
+  ],
   series: [
     {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),

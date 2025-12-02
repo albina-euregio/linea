@@ -34,13 +34,12 @@ hooks: {
         const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
 
-          const screenwidth = window.innerWidth;
-          var optionsHelper = new OptsHelper();
-            var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`;
-            var labely2 = "";
-            var labelColor1 = "#00ff55ff";
-            var labelColor2 = "";
-            optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        const screenwidth = window.innerWidth;
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`;
+        var labely2 = "";
+        var labelColor1 = "#00ff55ff";
+        var labelColor2 = "";
+        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
       },
     ],
   },

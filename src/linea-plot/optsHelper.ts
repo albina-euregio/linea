@@ -1,6 +1,6 @@
 export class OptsHelper {
 
-    UpdateAxisLabels(
+    static UpdateAxisLabels(
         ctx: CanvasRenderingContext2D, 
         labely1: string, 
         labely2:string, 

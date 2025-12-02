@@ -47,12 +47,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.05;
 
-        var optionsHelper = new OptsHelper();
-          var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`;
-          var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`;
-          var labelColor1 = "#DE2D26";
-          var labelColor2 = "#6aafd5";
-          optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`;
+        var labelColor1 = "#DE2D26";
+        var labelColor2 = "#6aafd5";
+        
+        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
 
         // Draw reference line at 0°C
         const width = 1;

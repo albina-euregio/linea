@@ -36,12 +36,10 @@ hooks: {
         const yPos = canvasHeight * 0.05;
 
         const screenwidth = window.innerWidth;
-        var optionsHelper = new OptsHelper();
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
-        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
         var labelColor1 = "#DE2D26";
-        var labelColor2 = "#6aafd5";
-        optionsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        // "" for second label since only one y-axis here
+        OptsHelper.UpdateAxisLabels(ctx, labely1, "", u.bbox.left, u.bbox.width, canvasHeight, labelColor1, "");
       },
     ],
   },
@@ -49,10 +47,7 @@ hooks: {
 scales: {
       y: {
         range: [0, 500]
-      },
-      y2: {
-        range: [0, 50]
-      },
+      }
     },
 
 axes: [
@@ -61,15 +56,6 @@ axes: [
       scale: "y",
       stroke: "#DE2D26",
       splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
-    },
-     {
-      scale: "y2",
-      splits: [0, 10, 20, 30, 40, 50],
-      stroke: "#6aafd5",
-      side: 1,
-      grid: {
-        show: false,
-      },
     },
   ],
   
