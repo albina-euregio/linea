@@ -65,6 +65,7 @@ export async function fetchSMET(
 
 export function parseSMET(smet: string, timeRangeMilli: number): Result {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
+  const separator = /\s/;
   let values: Float32Array[] = [];
   let fields: string[] = [];
   let units: string[] = [];
@@ -77,11 +78,11 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
   let dataIndex = 0;
   lines.forEach((line) => {
     if (line.startsWith("fields =")) {
-      fields = line.slice("fields =".length).trim().split(" ");
+      fields = line.slice("fields =".length).trim().split(separator);
       values = fields.map(() => new Float32Array(lines.length));
       return;
     } else if (line.startsWith("#units =")) {
-      units = line.slice("#units =".length).trim().split(" ");
+      units = line.slice("#units =".length).trim().split(separator);
       return;
     } else if (line.startsWith("nodata =")) {
       nodata = line.slice("nodata =".length).trim();
@@ -95,7 +96,7 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
     } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
       return;
     }
-    const cells = line.split(" ");
+    const cells = line.split(separator);
     const date = Date.parse(cells[0]);
     if (now - date > timeRangeMilli) return;
     // uPlot uses epoch seconds (instead of milliseconds)
