@@ -79,6 +79,27 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
   lines.forEach((line) => {
     if (line.startsWith("fields =")) {
       fields = line.slice("fields =".length).trim().split(separator);
+      units = fields.map(
+        (f) =>
+          ({
+            P: "Pa",
+            TA: "K",
+            TD: "K",
+            TSS: "K",
+            TSG: "K",
+            RH: "1",
+            VW_MAX: "m/s",
+            VW: "m/s",
+            DW: "degree",
+            ISWR: "W/m²",
+            RSWR: "W/m²",
+            ILWR: "W/m²",
+            OLWR: "W/m²",
+            PINT: "mm/h",
+            PSUM: "mm",
+            HS: "m",
+          })[f] ?? ""
+      );
       values = fields.map(() => new Float32Array(lines.length));
       return;
     } else if (line.startsWith("#units =")) {
