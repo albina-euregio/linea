@@ -35,7 +35,8 @@ export class LineaChart {
         private station: string,
         private altitude: number,
         private showTitle: boolean,
-        private showSurfaceHoarSeries: boolean
+        private showSurfaceHoarSeries: boolean,
+        private backgroundColor: string
     ) {
         this.chart = document.createElement("span") as HTMLDivElement;
         this.createPlots().catch((e) => console.error(e));
@@ -93,6 +94,8 @@ export class LineaChart {
         );
         const scale = this.#GetScale(this.chart.clientWidth);
 
+        
+
         if (this.values.TA) {
             const TD =
             this.values.TD ??
@@ -111,6 +114,7 @@ export class LineaChart {
             [this.timestamps],
             plot_TA_TD_TSS
             );
+            this.#modifyDrawHook(p);
             this.#addSeries( p, opts_TA, this.values.TA);
             this.#addSeries( p, opts_TD, TD);
             
@@ -130,7 +134,8 @@ export class LineaChart {
         }
 
         if (this.values.VW || this.values.VW_MAX || this.values.DW) {
-            const p = new uPlot({...opts_VW_VWG_DW}, [this.timestamps], plot_VW_VWG_DW);           
+            const p = new uPlot({...opts_VW_VWG_DW}, [this.timestamps], plot_VW_VWG_DW);
+            this.#modifyDrawHook(p);      
             this.#addSeries( p, opts_VW, this.values.VW);
             this.#addSeries( p, opts_VW_MAX, this.values.VW_MAX);
             this.#addSeries(p, opts_DW, this.values.DW);
@@ -138,12 +143,14 @@ export class LineaChart {
 
         if (this.values.HS || this.values.PSUM) {
             const p = new uPlot({...opts_HS_PSUM}, [this.timestamps], plot_HS_PSUM);
+            this.#modifyDrawHook(p);
             this.#addSeries( p, opts_HS, this.values.HS);
             this.#addSeries( p, opts_PSUM, this.values.PSUM);
         }
 
         if (this.values.RH || this.values.ISWR) {
             const p = new uPlot({...opts_RH_GR}, [this.timestamps], plot_RH_GR);
+            this.#modifyDrawHook(p);
             this.#addSeries( p, opts_RH, this.values.RH);
             this.#addSeries( p, opts_ISWR, this.values.ISWR);
         }
@@ -177,6 +184,18 @@ export class LineaChart {
             height: p.height,
         })
         );
+    }
+
+    #modifyDrawHook(p: uPlot){
+        p.hooks.draw = p.hooks.draw || [];
+        p.hooks.draw.unshift((u) =>  {
+            const { left, top, width, height } = u.bbox;
+            const ctx = u.ctx;
+            ctx.save();
+            ctx.fillStyle = this.backgroundColor;
+            ctx.fillRect(left, top, width, height);
+            ctx.restore();
+        });
     }
 
     #addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
