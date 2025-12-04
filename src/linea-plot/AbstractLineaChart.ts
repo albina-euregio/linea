@@ -33,8 +33,8 @@ export abstract class AbstractLineaChart extends HTMLElement{
             this.plots.push(plot);
         }        
         if (!data) {
-        console.warn("addSeries called with undefined data", series.label);
-        data = [] as number[];
+            console.warn("addSeries called with undefined data", series.label);
+            data = [] as number[];
         }
         plot.addSeries({ ...series, show: !!data?.length });
         plot.data.push(data);
