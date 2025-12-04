@@ -15,7 +15,7 @@ import { Temporal } from "temporal-polyfill";
  * @element linea-plot
  * 
  * @attributes
- * - `src` {string} - JSON-encoded array of SMET file URLs to fetch data from (required)
+ * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (required)
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
  * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
@@ -93,7 +93,10 @@ export class LineaPlot extends HTMLElement {
    * fetches the data, generalizes it and update the valid date inputs
    */
   async fetchAndStoreData(){
-    const srcs: string[] = JSON.parse(this.getAttribute("src") ?? "") as string[];
+    let srcs: string[] = JSON.parse(this.getAttribute("src") ?? "") as string[];
+    if (!(srcs instanceof Array)){
+      srcs = [srcs];
+    }
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
       if (this.minTime > result.timestamps[0]){
