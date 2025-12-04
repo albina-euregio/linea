@@ -39,6 +39,7 @@ import { YearData } from "./linea-plot/yeardata.ts";
  */
 export class LineaPlotYear extends HTMLElement {
   static observedAttributes = ["src"];
+  #m_style?: HTMLStyleElement;
   #plots: uPlot[] = [];
   #resizeObserver = new ResizeObserver(() => this.#resizePlots());
 
@@ -55,12 +56,11 @@ export class LineaPlotYear extends HTMLElement {
   async renderPlots() {
     this.#resizeObserver.unobserve(this);
     const { station, altitude, timestamps, values } = await fetchSMET(
-      this.getAttribute("src") ?? "",
-      Infinity
+      this.getAttribute("src") ?? ""
     );
-    const plotHelper = new PlotHelper();
-    const scale = plotHelper.GetScale(this.clientWidth);
-    const style = plotHelper.GetStyle(document, css);
+    const scale = this.#GetScale(this.clientWidth);
+    const style = document.createElement("style");
+    style.textContent = css;
     const plot_HS_year = document.createElement("div");
     const plot_NS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
@@ -85,35 +85,35 @@ export class LineaPlotYear extends HTMLElement {
         [yearData.timestamps],
         plot_HS_year
       );
-      plotHelper.addSeries(this.#plots, p, opts_HS_year_min, yearData.HS_min);
-      plotHelper.addSeries(this.#plots, p, opts_HS_year_max, yearData.HS_max);
-      plotHelper.addSeries(this.#plots, p, opts_HS_year_median, yearData.HS_median);
-      plotHelper.addSeries(this.#plots, p, opts_HS_year_current, yearData.HS);
+      this.#addSeries(p, opts_HS_year_min, yearData.HS_min);
+      this.#addSeries(p, opts_HS_year_max, yearData.HS_max);
+      this.#addSeries(p, opts_HS_year_median, yearData.HS_median);
+      this.#addSeries(p, opts_HS_year_current, yearData.HS);
       if(values.PSUM){
-        plotHelper.addSeries(this.#plots, p, opts_HS_year_PSUM, yearData.PSUM);
+        this.#addSeries(p, opts_HS_year_PSUM, yearData.PSUM);
       }
       const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
-      plotHelper.addSeries(this.#plots, pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
+      this.#addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
     }
     if(values.NS){
       let pNewSnow = new uPlot(opts_NS_year, [yearData.timestamps], plot_NS_year);
-      plotHelper.addSeries(this.#plots, pNewSnow, opts_NS_year_snow_cover, yearData.HS.map(v => ((v == 0 || Number.isNaN(v)) ? 1000 : -1000)));
-      plotHelper.addSeries(this.#plots, pNewSnow, opts_NS_year_series, yearData.NS);
+      this.#addSeries(pNewSnow, opts_NS_year_snow_cover, yearData.HS.map(v => ((v == 0 || Number.isNaN(v)) ? 1000 : -1000)));
+      this.#addSeries(pNewSnow, opts_NS_year_series, yearData.NS);
     }
     if(values.TA || values.TD){
       const pTemp = new uPlot(opts_TEMP_year, [yearData.timestamps], plot_TEMP_year);
       if(values.TA){ 
-        plotHelper.addSeries(this.#plots, pTemp, opts_TEMP_year_min, yearData.TA_min);
-        plotHelper.addSeries(this.#plots, pTemp, opts_TEMP_year_max, yearData.TA_max);
-        plotHelper.addSeries(this.#plots, pTemp, opts_TEMP_year_median, yearData.TA_median);
-        plotHelper.addSeries(this.#plots, pTemp, opts_TEMP_year_current, yearData.TA);
+        this.#addSeries(pTemp, opts_TEMP_year_min, yearData.TA_min);
+        this.#addSeries(pTemp, opts_TEMP_year_max, yearData.TA_max);
+        this.#addSeries(pTemp, opts_TEMP_year_median, yearData.TA_median);
+        this.#addSeries(pTemp, opts_TEMP_year_current, yearData.TA);
       }
       if(values.TD) {
-        plotHelper.addSeries(this.#plots, pTemp, opts_DEW_year_current, yearData.TD);
+        this.#addSeries(pTemp, opts_DEW_year_current, yearData.TD);
       }
     }
 
-    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, null);
+    this.#resizePlots(this.clientWidth, this.style);
     this.#resizeObserver.observe(this);
   }
 
@@ -121,9 +121,72 @@ export class LineaPlotYear extends HTMLElement {
     this.#resizeObserver.unobserve(this);
   }
 
-  #resizePlots() {
-    const plotHelper = new PlotHelper();
-    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, null);
+  #resizePlots(clientWidth: number, style: CSSStyleDeclaration) {
+    this.#plots.forEach((p) =>
+      p.setSize({
+        width: clientWidth,
+        height: p.height,
+      }));
+    // compute a scale factor based on element width so text shrinks on narrow layouts
+    const baseWidth = 360; // width at which scale == 1
+    const minScale = 0.6; // don't shrink below this
+    const scale =  Math.max(minScale, Math.min(1, clientWidth / baseWidth));
+    //this.style.setProperty("--plot-scale", String(scale));
+    if(style){
+      style.fontSize =`${12 * scale}px`;
+      style.padding =`${6 * scale}px ${10 * scale}px`;
+    }
+    this.#plots.forEach((p) =>
+      p.setSize({
+        width: clientWidth,
+        height: p.height,
+      })
+    );
+  }
+
+  #addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
+    if (!this.#plots.includes(plot)) {
+      this.#plots.push(plot);
+    }        
+    if (!data) {
+      console.warn("addSeries called with undefined data", series.label);
+      data = [] as number[];
+    }
+    plot.addSeries({ ...series, show: !!data?.length });
+    plot.data.push(data);
+  }
+
+  #GetScale(clientWidth: number): number {
+    const baseWidth = 360;
+    const minScale = 0.6;
+    return Math.max(minScale, Math.min(1, clientWidth / baseWidth));
+  }
+  
+  #GetStyle(document: Document, css: string): HTMLStyleElement{
+    if(!this.#m_style){
+      this.#CreateStyle(document, css);
+    }
+    return this.#m_style;
+  }
+
+  //#region Private Methods
+  #CreateStyle(document: Document, css: string): HTMLStyleElement {
+    const style = document.createElement("style");
+    style.textContent = css;
+    style.textContent = `
+      .vw-max-plot .u-axis-label {
+        transform-origin: left top;
+        white-space: nowrap;
+      }
+
+      .hs-year-plot .u-axis-label {
+        transform-origin: left top;
+        white-space: nowrap;
+      }
+    `;
+    document.head.appendChild(style);
+    this.#m_style = style;
+    return style;
   }
 
 }
