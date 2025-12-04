@@ -55,12 +55,11 @@ type Result = {
 };
 
 export async function fetchSMET(
-  url: string,
-  timeRangeMilli: number
+  url: string
 ): Promise<Result> {
   const response = await fetch(url);
   const smet = await response.text();
-  return parseSMET(smet, timeRangeMilli);
+  return parseSMET(smet);
 }
 
 export function parseSMET(smet: string): Result {
