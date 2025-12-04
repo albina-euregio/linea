@@ -41,13 +41,14 @@ export class LineaPlot extends HTMLElement {
 
     this.fetchData().then(() => {
       this.#updateValidDateInputs();
-      this.#setStartEndDateToMinMax();
       this.render();
-      
-      if(!this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))){
-        console.warn("Start and Endate are not chosen, all data is presented!");
-      } else if(!this.hasAttribute("showdatepicker")){
-        this.filterAndUpdateData(Temporal.ZonedDateTime.from(this.getAttribute("startdate")), Temporal.ZonedDateTime.from(this.getAttribute("enddate")));
+      if(this.hasAttribute("showdatepicker") && this.hasAttribute("startdate") && this.hasAttribute("enddate")){
+        this.#setStartEndDateToAttributes();
+      } else {
+        this.#setStartEndDateToMinMax();
+      }
+      if(!this.hasAttribute("showdatepicker")){
+        this.#handleFixedDateView();
       }
     });
   }
@@ -98,6 +99,14 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  #handleFixedDateView(){
+    if(!this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))){
+      console.warn("Start and Endate are not chosen, all data is presented!");
+    } else if(!this.hasAttribute("showdatepicker")){
+      this.filterAndUpdateData(Temporal.ZonedDateTime.from(this.getAttribute("startdate")), Temporal.ZonedDateTime.from(this.getAttribute("enddate")));
+    }
+  }
+
   #generalizeData(){
     if (this.results.length === 0){
       return;
@@ -132,6 +141,17 @@ export class LineaPlot extends HTMLElement {
     this.startInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
     this.endInput.min = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
     this.endInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
+  }
+
+  #setStartEndDateToAttributes(){
+    if(!this.startInput || !this.endInput){
+      return;
+    }
+    let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate"));
+    let enddate = Temporal.ZonedDateTime.from(this.getAttribute("enddate"));
+    this.startInput.value = this.#zonedDateTimeToLocalInputValue(startdate);
+    this.endInput.value = this.#zonedDateTimeToLocalInputValue(enddate);
+    this.filterAndUpdateData(startdate, enddate);
   }
 
   #setStartEndDateToMinMax(){
