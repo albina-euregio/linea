@@ -1,137 +1,101 @@
 import uPlot from "uplot";
 import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "./i18n";
-import { dewPoint } from "./linea-plot/dewPoint";
-import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./linea-plot/opts_HS_PSUM";
-import { opts_ISWR, opts_RH, opts_RH_GR } from "./linea-plot/opts_RH_GR";
-import { PlotHelper } from "./plot-helper";
-import {
-  opts_TA,
-  opts_TA_TD_TSS,
-  opts_TD,
-  opts_TSS,
-  opts_SurfaceHoar,
-  showSurfaceHoar,
-} from "./linea-plot/opts_TA_TD_TSS";
-import {
-  opts_DW,
-  opts_VW,
-  opts_VW_MAX,
-  opts_VW_VWG_DW,
-} from "./linea-plot/opts_VW_VWG_DW";
-import { fetchSMET } from "./smet-data";
+import { fetchSMET, Result } from "./smet-data";
+import { LineaChart } from "./linea-plot/LineaChart";
+import { Temporal } from "temporal-polyfill";
 
 export class LineaPlot extends HTMLElement {
-  static observedAttributes = ["src"];
-  #plots: uPlot[] = [];
-  #controls?: HTMLElement;
-  #resizeObserver = new ResizeObserver(() => this.#resizePlots());
+
+
+  private startInput!: HTMLInputElement;
+  private endInput!: HTMLInputElement;
+
+  private lineacharts: LineaChart[] = [] as LineaChart[];
+  private results: Result[] = [] as Result[];
+
+  private timeZone:string = "Europe/Berlin";
+  private minTime: number = +Infinity;
+  private maxTime: number = -Infinity;
 
   connectedCallback() {
-    this.renderPlots().catch((e) => console.error(e));
-  }
-
-  attributeChangedCallback(name: string) {
-    if (name === "src" || name == "timeRangeMilli") {
-      this.renderPlots().catch((e) => console.error(e));
-    }
-  }
-
-  async renderPlots() {
-    this.#resizeObserver.unobserve(this);
-    const timeRangeMilli = this.getAttribute("timeRangeMilli");
-    const { station, altitude, timestamps, values } = await fetchSMET(
-      this.getAttribute("src") ?? "",
-      timeRangeMilli ? +timeRangeMilli : Infinity
-    );
-    const style = document.createElement("style");
-    style.textContent = css;
     const controls = document.createElement("div");
     controls.classList.add("controls");
-    this.#controls = controls;   
-    const plot_TA_TD_TSS = document.createElement("div");
-    const plot_VW_VWG_DW = document.createElement("div");
-    const plot_HS_PSUM = document.createElement("div");
-    const plot_RH_GR = document.createElement("div");
-    this.replaceChildren(
-      style,
-      controls,
-      plot_TA_TD_TSS,
-      plot_VW_VWG_DW,
-      plot_HS_PSUM,
-      plot_RH_GR
-    );
-    const plotHelper = new PlotHelper();
-    const scale = plotHelper.GetScale(this.clientWidth);
+    this.startInput = document.createElement("input");
+    this.startInput.type = "datetime-local";
+    this.endInput = document.createElement("input");
+    this.endInput.type = "datetime-local";
+    controls.appendChild(document.createTextNode("Start Date" + ": "));
+    controls.appendChild(this.startInput);
+    controls.appendChild(document.createTextNode("End Date" + ": "));
+    controls.appendChild(this.endInput);
+    this.appendChild(controls);
+    this.fetchData().then(() => {
+      this.#updateValidDateInputs();
+      this.#setStartEndDateToMinMax();
+      this.render();
+    });
+  }
 
-    if (values.TA) {
-      const TD =
-        values.TD ??
-        (values.TA && values.RH
-          ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
-          : undefined);
-      const p = new uPlot(
-        {
-          ...opts_TA_TD_TSS,
-          ...(this.hasAttribute("showTitle")
-            ? {
-                title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
-        },
-        [timestamps],
-        plot_TA_TD_TSS
-      );
-      plotHelper.addSeries(this.#plots, p, opts_TA, values.TA);
-      plotHelper.addSeries(this.#plots, p, opts_TD, TD);
-      
-      // show snow surface temperature and therefore surface hoar only if available
-      if(values.TSS) {
-        plotHelper.addSeries(this.#plots, p, opts_TSS, values.TSS);
-        if(this.hasAttribute("showSurfaceHoarButton")){
-          const surfacehoar = values.TA.map((ta, i) => {
-            const td = values.TD[i];
-            const tss = values.TSS[i];
-            return (td < 0 && tss < td) ? 1000 : NaN;
-          });
-          plotHelper.addSeries(this.#plots, p, opts_SurfaceHoar, surfacehoar)
-        }
-      } else {
-        plotHelper.addSeries(this.#plots, p, opts_TSS, new Float32Array([]));
+  async fetchData(){
+    const srcs: string[] = JSON.parse(this.getAttribute("src") ?? "") as string[];
+    for (const src in srcs) {
+      let result = await fetchSMET(srcs[src]);
+      if (this.minTime > result.timestamps[0]){
+        this.minTime = result.timestamps[0];
       }
+      if (this.maxTime < result.timestamps[result.timestamps.length-1]){
+        this.maxTime = result.timestamps[result.timestamps.length-1];
+      }
+      this.results.push(result);
     }
-
-    if (values.VW || values.VW_MAX || values.DW) {
-      const p = new uPlot({...opts_VW_VWG_DW}, [timestamps], plot_VW_VWG_DW);           
-      plotHelper.addSeries(this.#plots, p, opts_VW, values.VW);
-      plotHelper.addSeries(this.#plots, p, opts_VW_MAX, values.VW_MAX);
-      plotHelper.addSeries(this.#plots,p, opts_DW, values.DW);
-    }
-
-    if (values.HS || values.PSUM) {
-      const p = new uPlot({...opts_HS_PSUM}, [timestamps], plot_HS_PSUM);
-      plotHelper.addSeries(this.#plots, p, opts_HS, values.HS);
-      plotHelper.addSeries(this.#plots, p, opts_PSUM, values.PSUM);
-    }
-
-    if (values.RH || values.ISWR) {
-      const p = new uPlot({...opts_RH_GR}, [timestamps], plot_RH_GR);
-      plotHelper.addSeries(this.#plots, p, opts_RH, values.RH);
-      plotHelper.addSeries(this.#plots, p, opts_ISWR, values.ISWR);
-    }
-
-    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, this.#controls);
-    this.#resizeObserver.observe(this);
+    this.#updateValidDateInputs();
   }
 
-  disconnectedCallback() {
-    this.#resizeObserver.unobserve(this);
+  render(){
+    const backgroundColors = ["rgba(0, 0, 0, 0.05)"]
+
+    for (const i in this.results) {
+      const result = this.results[i];
+      let lc = new LineaChart(result.timestamps, result.values, result.station, result.altitude, true, true, backgroundColors[i] ?? "#00000000");
+      this.lineacharts.push(lc);
+      this.appendChild(lc.chart);
+    }
+    
   }
 
-  #resizePlots() {
-    const plotHelper = new PlotHelper();
-    plotHelper.resizePlots(this.#plots, this.clientWidth, this.style, null);
+  #updateValidDateInputs(){
+    this.startInput.min = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
+    this.startInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
+    this.endInput.min = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
+    this.endInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
   }
+
+  #setStartEndDateToMinMax(){
+    this.startInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
+    this.endInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
+  }
+    
+  #zonedDateTimeToLocalInputValue(zdt: Temporal.ZonedDateTime): string {
+    // Convert to a PlainDateTime in the same time zone
+    const pdt = zdt.toPlainDateTime();
+
+    const yyyy = pdt.year.toString().padStart(4, "0");
+    const mm = pdt.month.toString().padStart(2, "0");
+    const dd = pdt.day.toString().padStart(2, "0");
+    const hh = pdt.hour.toString().padStart(2, "0");
+    const min = pdt.minute.toString().padStart(2, "0");
+
+    // Format required for <input type="datetime-local">
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  }
+
+  #inputValueToZonedDateTime(value: string, timeZone: string) {
+    // value = "2025-06-04T10:24"
+    const pdt = Temporal.PlainDateTime.from(value);
+    return pdt.toZonedDateTime(timeZone);
+  }
+  
 }
 
 customElements.define("linea-plot", LineaPlot);
