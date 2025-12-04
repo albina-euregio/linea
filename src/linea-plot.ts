@@ -21,26 +21,34 @@ export class LineaPlot extends HTMLElement {
   connectedCallback() {
     const controls = document.createElement("div");
     controls.classList.add("controls");
-    this.startInput = document.createElement("input");
-    this.startInput.type = "datetime-local";
-    this.startInput.addEventListener('change', () => {
-      this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
-    });
-    this.endInput = document.createElement("input");
-    this.endInput.type = "datetime-local";
-    this.endInput.addEventListener('change', () => {
-      this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
-    });
-    controls.appendChild(document.createTextNode("Start Date" + ": "));
-    controls.appendChild(this.startInput);
-    controls.appendChild(document.createTextNode("End Date" + ": "));
-    controls.appendChild(this.endInput);
+    if(this.hasAttribute("showdatepicker")){
+      this.startInput = document.createElement("input");
+      this.startInput.type = "datetime-local";
+      this.startInput.addEventListener('change', () => {
+        this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+      });
+      this.endInput = document.createElement("input");
+      this.endInput.type = "datetime-local";
+      this.endInput.addEventListener('change', () => {
+        this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+      });
+      controls.appendChild(document.createTextNode("Start Date" + ": "));
+      controls.appendChild(this.startInput);
+      controls.appendChild(document.createTextNode("End Date" + ": "));
+      controls.appendChild(this.endInput);
+    }
     this.appendChild(controls);
 
     this.fetchData().then(() => {
       this.#updateValidDateInputs();
       this.#setStartEndDateToMinMax();
       this.render();
+      
+      if(!this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))){
+        console.warn("Start and Endate are not chosen, all data is presented!");
+      } else if(!this.hasAttribute("showdatepicker")){
+        this.filterAndUpdateData(Temporal.ZonedDateTime.from(this.getAttribute("startdate")), Temporal.ZonedDateTime.from(this.getAttribute("enddate")));
+      }
     });
   }
 
@@ -117,6 +125,9 @@ export class LineaPlot extends HTMLElement {
   }
 
   #updateValidDateInputs(){
+    if(!this.startInput || !this.endInput){
+      return;
+    }
     this.startInput.min = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
     this.startInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
     this.endInput.min = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
@@ -124,6 +135,9 @@ export class LineaPlot extends HTMLElement {
   }
 
   #setStartEndDateToMinMax(){
+    if(!this.startInput || !this.endInput){
+      return;
+    }
     this.startInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
     this.endInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
   }
