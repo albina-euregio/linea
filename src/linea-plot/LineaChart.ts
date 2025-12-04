@@ -45,20 +45,32 @@ export class LineaChart {
     setData(timestamps: Uint32Array, values: Values){
         this.timestamps = timestamps;
         this.values = values;
-        if(this.showSurfaceHoarSeries && this.values.TD && this.values.TSS){
-            this.#updateData(this.#plots[0], [this.values.TA, this.values.TD ?? (this.values.TA && this.values.RH
-                    ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
-                    : undefined), this.values.TSS, this.values.TD.map((td, i) => {
-                    return (td < 0 && this.values.TSS[i] < td) ? 1000 : -100;
-                    })]);
-        } else {
-            this.#updateData(this.#plots[0], [this.values.TA, this.values.TD ?? (this.values.TA && this.values.RH
-                    ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
-                    : undefined), this.values.TSS]);
+        let i = 0
+        if (this.values.TA || this.values.TD || this.values.TSS){
+            if(this.showSurfaceHoarSeries && this.values.TD && this.values.TSS){
+                this.#updateData(this.#plots[i], [this.values.TA, this.values.TD ?? (this.values.TA && this.values.RH
+                        ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+                        : undefined), this.values.TSS, this.values.TD.map((td, i) => {
+                        return (td < 0 && this.values.TSS[i] < td) ? 1000 : -100;
+                        })]);
+            } else {
+                this.#updateData(this.#plots[i], [this.values.TA, this.values.TD ?? (this.values.TA && this.values.RH
+                        ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+                        : undefined), this.values.TSS]);
+            }
+            i += 1;
         }
-        this.#updateData(this.#plots[1], [this.values.VW, this.values.VW_MAX, this.values.DW]);
-        this.#updateData(this.#plots[2], [this.values.HS, this.values.PSUM]);
-        this.#updateData(this.#plots[3], [this.values.RH, this.values.ISWR]);
+        if(this.values.VW || this.values.VW_MAX || this.values.DW){
+            this.#updateData(this.#plots[i], [this.values.VW, this.values.VW_MAX, this.values.DW]);
+            i += 1;
+        }
+        if(this.values.HS ||this.values.PSUM){
+            this.#updateData(this.#plots[i], [this.values.HS, this.values.PSUM]);
+            i += 1;
+        }
+        if(this.values.RH || this.values.ISWR){
+            this.#updateData(this.#plots[i], [this.values.RH, this.values.ISWR]);
+        }
         this.#resizePlots(this.chart.clientWidth, this.chart.style);
     }
 
@@ -151,8 +163,8 @@ export class LineaChart {
         if (this.values.RH || this.values.ISWR) {
             const p = new uPlot({...opts_RH_GR}, [this.timestamps], plot_RH_GR);
             this.#modifyDrawHook(p);
-            this.#addSeries( p, opts_RH, this.values.RH);
-            this.#addSeries( p, opts_ISWR, this.values.ISWR);
+            this.#addSeries(p, opts_RH, this.values.RH);
+            this.#addSeries(p, opts_ISWR, this.values.ISWR);
         }
 
         this.#resizePlots(this.chart.clientWidth, this.chart.style);
@@ -200,7 +212,7 @@ export class LineaChart {
 
     #addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
         if (!this.#plots.includes(plot)) {
-        this.#plots.push(plot);
+            this.#plots.push(plot);
         }        
         if (!data) {
         console.warn("addSeries called with undefined data", series.label);
