@@ -46,7 +46,7 @@ const UNIT_MAPPING: Record<
 
 type Units = Record<ParameterType, string>;
 export type Values = Record<ParameterType, number[]>;
-type Result = {
+export type Result = {
   station: string;
   altitude: number;
   timestamps: Uint32Array;
