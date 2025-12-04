@@ -101,7 +101,7 @@ export function parseSMET(smet: string): Result {
     timestamps[dataIndex] = date / 1000;
     values.forEach((values0, i) => {
       if (i == 0) return; // timestamp
-      const value = cells[i] === nodata ? NaN : +cells[i].replace(",", ".");
+      const value = cells[i] === nodata ? null : +cells[i].replace(",", ".");
       values0[dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
     });
     dataIndex++;
