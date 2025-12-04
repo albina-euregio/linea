@@ -18,6 +18,8 @@ import { Temporal } from "temporal-polyfill";
  * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (required)
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
+ * - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
+ *    If there are more SMET files than colorcodes for the other stations there is no background color set. Per default the first station is set in light grey, if there is more than one.
  * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
  * - `startdate` {string} - Initial start date in ISO 8601 format (e.g., "2025-06-04T10:24[Europe/Berlin]"). 
  *    If used with `showdatepicker` and `enddate` it will set the initial date range.
@@ -33,6 +35,7 @@ import { Temporal } from "temporal-polyfill";
  * <!-- Display all data with date picker -->
  * <linea-plot 
  *   src='["data/station1.smet", "data/station2.smet"]'
+ *   backgroundcolors = '["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
  *   showdatepicker
  *   showsurfacehoarseries
  *   showtitle
@@ -67,6 +70,7 @@ export class LineaPlot extends HTMLElement {
   private results: Result[] = [] as Result[];
 
   private timeZone:string = "Europe/Berlin";
+  private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
   private minTime: number = +Infinity;
   private maxTime: number = -Infinity;
 
@@ -163,6 +167,7 @@ export class LineaPlot extends HTMLElement {
     let srcs: string[] = JSON.parse(this.getAttribute("src") ?? "") as string[];
     if (!(srcs instanceof Array)){
       srcs = [srcs];
+      this.backgroundColors = [];
     }
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
@@ -182,12 +187,14 @@ export class LineaPlot extends HTMLElement {
    * creates all LineaCharts and initializate them
    */
   render(){
-    const backgroundColors = ["rgba(0, 0, 0, 0.05)"]
+    if(this.hasAttribute("backgroundcolors")){
+      this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors")?? "");
+    }
 
     for (const i in this.results) {
       const result = this.results[i];
       let lc = new LineaChart(result.timestamps, result.values, result.station, result.altitude,
-         this.hasAttribute("showtitle"), this.hasAttribute("showsurfacehoarseries"), backgroundColors[i] ?? "#00000000");
+         this.hasAttribute("showtitle"), this.hasAttribute("showsurfacehoarseries"), this.backgroundColors[i] ?? "#00000000");
       this.lineacharts.push(lc);
       this.appendChild(lc);
     }
