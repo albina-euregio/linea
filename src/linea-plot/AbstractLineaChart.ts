@@ -7,9 +7,9 @@ export abstract class AbstractLineaChart extends HTMLElement{
     
     resizePlots(clientWidth: number, style: CSSStyleDeclaration) {
         this.plots.forEach((p) =>
-        p.setSize({
-            width: clientWidth,
-            height: p.height,
+            p.setSize({
+                width: clientWidth,
+                height: p.height,
         }));
         // compute a scale factor based on element width so text shrinks on narrow layouts
         const baseWidth = 360; // width at which scale == 1
@@ -17,14 +17,14 @@ export abstract class AbstractLineaChart extends HTMLElement{
         const scale =  Math.max(minScale, Math.min(1, clientWidth / baseWidth));
         //this.style.setProperty("--plot-scale", String(scale));
         if(style){
-        style.fontSize =`${12 * scale}px`;
-        style.padding =`${6 * scale}px ${10 * scale}px`;
+            style.fontSize =`${12 * scale}px`;
+            style.padding =`${6 * scale}px ${10 * scale}px`;
         }
         this.plots.forEach((p) =>
-        p.setSize({
-            width: clientWidth,
-            height: p.height,
-        })
+            p.setSize({
+                width: clientWidth,
+                height: p.height,
+            })
         );
     }
 
@@ -48,7 +48,7 @@ export abstract class AbstractLineaChart extends HTMLElement{
     
     GetStyle(document: Document, css: string): HTMLStyleElement{
         if(!this.#m_style){
-        this.#CreateStyle(document, css);
+            this.#CreateStyle(document, css);
         }
         return this.#m_style;
     }
@@ -57,7 +57,7 @@ export abstract class AbstractLineaChart extends HTMLElement{
     #CreateStyle(document: Document, css: string): HTMLStyleElement {
         const style = document.createElement("style");
         style.textContent = css;
-        style.textContent = `
+        style.textContent += `
         .vw-max-plot .u-axis-label {
             transform-origin: left top;
             white-space: nowrap;
