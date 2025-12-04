@@ -1,3 +1,5 @@
+import uPlot from "uplot";
+
 export class PlotHelper {
   static #m_style?: HTMLStyleElement;
   /**
@@ -18,7 +20,7 @@ export class PlotHelper {
    * @param style 
    * @param controls 
    */
-  static resizePlots(plots: uPlot[], clientWidth: number, style: CSSStyleDeclaration, controls: HTMLElement | null) {
+  static resizePlots(plots: uPlot[], clientWidth: number, style: CSSStyleDeclaration) {
    plots.forEach((p) =>
      p.setSize({
         width: clientWidth,
@@ -31,13 +33,6 @@ export class PlotHelper {
     //this.style.setProperty("--plot-scale", String(scale));
     style.fontSize =`${12 * scale}px`;
     style.padding =`${6 * scale}px ${10 * scale}px`;
-    if (controls) {
-      const btns = controls.querySelectorAll<HTMLButtonElement>(".toggle-btn");
-      btns.forEach((b) => {
-        b.style.fontSize = `${12 * scale}px`;
-        b.style.padding = `${6 * scale}px ${10 * scale}px`;
-      });
-    }
     plots.forEach((p) =>
       p.setSize({
         width: clientWidth,
