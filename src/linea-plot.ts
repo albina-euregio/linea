@@ -1,3 +1,4 @@
+
 import uPlot from "uplot";
 import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "./i18n";
@@ -5,6 +6,53 @@ import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { Temporal } from "temporal-polyfill";
 
+/**
+ * LineaPlot Web Component
+ * 
+ * A custom HTML element for displaying and filtering SMET (Standard Meteorological Exchange Format) data
+ * with interactive date range selection and multi-station chart visualization. Plotting it accordingly to the EAWS workgroup.
+ * 
+ * @element linea-plot
+ * 
+ * @attributes
+ * - `src` {string} - JSON-encoded array of SMET file URLs to fetch data from (required)
+ * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
+ * - `startdate` {string} - Initial start date in ISO 8601 format (e.g., "2025-06-04T10:24[Europe/Berlin]"). 
+ *    If used with `showdatepicker` and `enddate` it will set the initial date range.
+ *    If used without `showdatepicker`, but with `enddate` it will set a fixed date range.
+ * - `enddate` {string} - Initial end date in ISO 8601 format (e.g., "2025-06-04T12:24[Europe/Berlin]").
+ *    If used with `showdatepicker` and `startdate` it will set the initial date range.
+ *    If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
+ * 
+ * If startdate or enddate is missing it will show all data from the SMET file.
+ * 
+ * @example
+ * ```html
+ * <!-- Display all data with date picker -->
+ * <linea-plot 
+ *   src='["data/station1.smet", "data/station2.smet"]'
+ *   showdatepicker
+ *   startdate="2025-06-01T00:00[Europe/Berlin]"
+ *   enddate="2025-06-30T23:59[Europe/Berlin]">
+ * </linea-plot>
+ * 
+ * <!-- Fixed date view without picker -->
+ * <linea-plot 
+ *   src='["data/station1.smet"]'
+ *   startdate="2025-06-04T10:00[Europe/Berlin]"
+ *   enddate="2025-06-04T18:00[Europe/Berlin]">
+ * </linea-plot>
+ * ```
+ * 
+ * @features
+ * - Multi-source data fetching and aggregation
+ * - Automatic data generalization across multiple stations with different time ranges
+ * - Interactive date range filtering with datetime-local inputs
+ * - Fixed date view mode for static data display
+ * - Timezone-aware date handling (default: Europe/Berlin)
+ * - uPlot-based chart rendering with customizable styling
+ * - Null value handling for missing data points
+ */
 export class LineaPlot extends HTMLElement {
 
 
