@@ -62,64 +62,62 @@ export class YearData {
         );
       }
 
-      #aggFor(map: Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>, f: (...values: number[]) => number): Float32Array {
-        return new Float32Array(
-            this.dates.map((d) => {
+      #aggFor(map: Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>, f: (...values: number[]) => number): number[] {
+        return this.dates.map((d) => {
                 const arr = map.get(d.toPlainMonthDay().toString()) ?? [];
                 const finite = arr.filter(Number.isFinite);
                 if (finite.length === 0) return NaN;
                 return f(...finite);
-            })
-         );
+            });
       }
 
-      get N(): Float32Array {
+      get N(): number[] {
         return this.#aggFor(this.plainMonthData, (...v) => v.filter(Number.isFinite).length);
       }
 
-      get PSUM(): Float32Array {
-        return new Float32Array(this.valuesPSUM);
+      get PSUM(): number[] {
+        return this.valuesPSUM;
       }
 
-      get HS(): Float32Array {
-        return new Float32Array(this.valuesHS);
+      get HS(): number[] {
+        return this.valuesHS;
       }
 
-      get TA(): Float32Array {
-        return new Float32Array(this.valuesTA);
+      get TA(): number[] {
+        return this.valuesTA;
       }
 
-      get TD(): Float32Array {
-        return new Float32Array(this.valuesTD);
+      get TD(): number[] {
+        return this.valuesTD;
       }
 
-      get NS(): Float32Array {
-        return new Float32Array(this.valuesNS);
+      get NS(): number[] {
+        return this.valuesNS;
       }
 
-      get HS_max(): Float32Array {
+      get HS_max(): number[] {
         return this.#aggFor(this.plainMonthData, Math.max);
       }
 
-      get HS_min(): Float32Array {
+      get HS_min(): number[] {
         return this.#aggFor(this.plainMonthData, Math.min);
       }
 
-      get HS_median(): Float32Array {
+      get HS_median(): number[] {
         return this.#aggFor(this.plainMonthData,
           (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)]
         );
       }
 
-      get TA_min(): Float32Array {
+      get TA_min(): number[] {
         return this.#aggFor(this.plainMonthTempData, Math.min);
       }
 
-      get TA_max(): Float32Array {
+      get TA_max(): number[] {
         return this.#aggFor(this.plainMonthTempData, Math.max);
       }
       
-      get TA_median(): Float32Array {
+      get TA_median(): number[] {
         return this.#aggFor(this.plainMonthTempData,
           (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)]
         );
