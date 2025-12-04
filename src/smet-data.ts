@@ -45,7 +45,7 @@ const UNIT_MAPPING: Record<
 };
 
 type Units = Record<ParameterType, string>;
-export type Values = Record<ParameterType, Float32Array>;
+export type Values = Record<ParameterType, number[]>;
 type Result = {
   station: string;
   altitude: number;
@@ -63,9 +63,9 @@ export async function fetchSMET(
   return parseSMET(smet, timeRangeMilli);
 }
 
-export function parseSMET(smet: string, timeRangeMilli: number): Result {
+export function parseSMET(smet: string): Result {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
-  let values: Float32Array[] = [];
+  let values: number[][] = [];
   let fields: string[] = [];
   let units: string[] = [];
   let nodata = "-777";
@@ -78,7 +78,7 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
   lines.forEach((line) => {
     if (line.startsWith("fields =")) {
       fields = line.slice("fields =".length).trim().split(" ");
-      values = fields.map(() => new Float32Array(lines.length));
+      values = fields.map(() => [] as number[]);
       return;
     } else if (line.startsWith("#units =")) {
       units = line.slice("#units =".length).trim().split(" ");
@@ -97,7 +97,6 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
     }
     const cells = line.split(" ");
     const date = Date.parse(cells[0]);
-    if (now - date > timeRangeMilli) return;
     // uPlot uses epoch seconds (instead of milliseconds)
     timestamps[dataIndex] = date / 1000;
     values.forEach((values0, i) => {
