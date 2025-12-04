@@ -48,15 +48,13 @@ export class PlotHelper {
    * @param series 
    * @param data 
    */
-  static addSeries(plots: uPlot[], plot: uPlot, series: uPlot.Series, data: Float32Array) {
+  static addSeries(plots: uPlot[], plot: uPlot, series: uPlot.Series, data: number[]) {
     if (!plots.includes(plot)) {
       plots.push(plot);
     }        
     if (!data) {
       console.warn("addSeries called with undefined data", series.label);
-      data = new Float32Array([]);
-    } else {
-      data = Array.from(data, v => Number.isNaN(v) ? null : v);
+      data = [] as number[];
     }
     plot.addSeries({ ...series, show: !!data?.length });
     plot.data.push(data);
