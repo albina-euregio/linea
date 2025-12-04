@@ -88,6 +88,51 @@ export class LineaPlot extends HTMLElement {
       controls.appendChild(this.startInput);
       controls.appendChild(document.createTextNode("End Date" + ": "));
       controls.appendChild(this.endInput);
+        
+      const previousWeek = document.createElement("button");
+      previousWeek.textContent = "<<";
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "ArrowLeft"){
+          previousWeek.click();
+        }
+      });
+      previousWeek.addEventListener("click", () => {
+        const start = this.#inputValueToZonedDateTime(this.startInput.value);
+        if (!start) return;
+        nextWeek.disabled = false;
+        let newStart = start.subtract({ days: 7 });
+        if((newStart.toInstant().epochMilliseconds / 1000) < this.minTime){
+          newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime * 1000).toZonedDateTimeISO(this.timeZone);
+          previousWeek.disabled = true;
+        }
+        const newEnd = start;
+        this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
+        this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
+        this.filterAndUpdateData(newStart, newEnd);
+      });
+      controls.appendChild(previousWeek);
+      const nextWeek = document.createElement("button");
+      nextWeek.textContent = ">>";
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "ArrowRight"){
+          nextWeek.click();
+        }
+      });
+      nextWeek.addEventListener("click", () => {
+        const end = this.#inputValueToZonedDateTime(this.endInput.value);
+        if (!end) return;
+        previousWeek.disabled = false;
+        const newStart = end;
+        let newEnd = end.add({ days: 7 });
+        if((newEnd.toInstant().epochMilliseconds / 1000) > this.maxTime){
+          newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime * 1000).toZonedDateTimeISO(this.timeZone);
+          nextWeek.disabled = true;
+        }
+        this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
+        this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
+        this.filterAndUpdateData(newStart, newEnd);
+      });
+      controls.appendChild(nextWeek);
     }
     this.appendChild(controls);
 
