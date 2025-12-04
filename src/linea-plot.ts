@@ -71,70 +71,9 @@ export class LineaPlot extends HTMLElement {
   private maxTime: number = -Infinity;
 
   connectedCallback() {
-    const controls = document.createElement("div");
-    controls.classList.add("controls");
     if(this.hasAttribute("showdatepicker")){
-      this.startInput = document.createElement("input");
-      this.startInput.type = "datetime-local";
-      this.startInput.addEventListener('change', () => {
-        this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
-      });
-      this.endInput = document.createElement("input");
-      this.endInput.type = "datetime-local";
-      this.endInput.addEventListener('change', () => {
-        this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
-      });
-      controls.appendChild(document.createTextNode("Start Date" + ": "));
-      controls.appendChild(this.startInput);
-      controls.appendChild(document.createTextNode("End Date" + ": "));
-      controls.appendChild(this.endInput);
-        
-      const previousWeek = document.createElement("button");
-      previousWeek.textContent = "<<";
-      document.addEventListener("keydown", (e) => {
-        if(e.key === "ArrowLeft"){
-          previousWeek.click();
-        }
-      });
-      previousWeek.addEventListener("click", () => {
-        const start = this.#inputValueToZonedDateTime(this.startInput.value);
-        if (!start) return;
-        nextWeek.disabled = false;
-        let newStart = start.subtract({ days: 7 });
-        if((newStart.toInstant().epochMilliseconds / 1000) < this.minTime){
-          newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime * 1000).toZonedDateTimeISO(this.timeZone);
-          previousWeek.disabled = true;
-        }
-        const newEnd = start;
-        this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
-        this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
-        this.filterAndUpdateData(newStart, newEnd);
-      });
-      controls.appendChild(previousWeek);
-      const nextWeek = document.createElement("button");
-      nextWeek.textContent = ">>";
-      document.addEventListener("keydown", (e) => {
-        if(e.key === "ArrowRight"){
-          nextWeek.click();
-        }
-      });
-      nextWeek.addEventListener("click", () => {
-        const end = this.#inputValueToZonedDateTime(this.endInput.value);
-        if (!end) return;
-        previousWeek.disabled = false;
-        const newStart = end;
-        let newEnd = end.add({ days: 7 });
-        if((newEnd.toInstant().epochMilliseconds / 1000) > this.maxTime){
-          newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime * 1000).toZonedDateTimeISO(this.timeZone);
-          nextWeek.disabled = true;
-        }
-        this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
-        this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
-        this.filterAndUpdateData(newStart, newEnd);
-      });
-      controls.appendChild(nextWeek);
+      this.#addControls();
     }
-    this.appendChild(controls);
 
     this.fetchAndStoreData().then(() => {
       this.#updateValidDateInputs();
@@ -207,6 +146,86 @@ export class LineaPlot extends HTMLElement {
       );
       this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
     }
+  }
+
+  #addControls(){
+    const controls = document.createElement("div");
+    controls.classList.add("controls");
+
+    this.startInput = document.createElement("input");
+    this.startInput.type = "datetime-local";
+    this.startInput.classList.add("toggle-btn");
+    this.startInput.style.borderRadius = "0";
+    this.startInput.style.borderLeftWidth = "1px";
+    this.startInput.style.borderRightWidth = "1px";
+    this.startInput.addEventListener('change', () => {
+      this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+    });
+    this.endInput = document.createElement("input");
+    this.endInput.classList.add("toggle-btn");
+    this.endInput.style.borderRadius = "0";
+    this.endInput.style.borderRightWidth = "1px";
+    this.endInput.style.borderLeftWidth = "1px";
+    this.endInput.type = "datetime-local";
+    this.endInput.addEventListener('change', () => {
+      this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+    });
+      
+    const previousWeek = document.createElement("button");
+    previousWeek.classList.add("toggle-btn");
+    previousWeek.style.borderTopRightRadius = "0";
+    previousWeek.style.borderBottomRightRadius = "0";
+    previousWeek.style.borderRightWidth = "1px";
+    previousWeek.innerHTML = "&larr;";
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "ArrowLeft"){
+        previousWeek.click();
+      }
+    });
+    previousWeek.addEventListener("click", () => {
+      const start = this.#inputValueToZonedDateTime(this.startInput.value);
+      if (!start) return;
+      nextWeek.disabled = false;
+      let newStart = start.subtract({ days: 7 });
+      if((newStart.toInstant().epochMilliseconds / 1000) < this.minTime){
+        newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime * 1000).toZonedDateTimeISO(this.timeZone);
+        previousWeek.disabled = true;
+      }
+      const newEnd = start;
+      this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
+      this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
+      this.filterAndUpdateData(newStart, newEnd);
+    });
+    const nextWeek = document.createElement("button");
+    nextWeek.classList.add("toggle-btn");
+    nextWeek.style.borderTopLeftRadius = "0";
+    nextWeek.style.borderBottomLeftRadius = "0";
+    nextWeek.style.borderLeftWidth = "1px";
+    nextWeek.innerHTML = "&rarr;";
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "ArrowRight"){
+        nextWeek.click();
+      }
+    });
+    nextWeek.addEventListener("click", () => {
+      const end = this.#inputValueToZonedDateTime(this.endInput.value);
+      if (!end) return;
+      previousWeek.disabled = false;
+      const newStart = end;
+      let newEnd = end.add({ days: 7 });
+      if((newEnd.toInstant().epochMilliseconds / 1000) > this.maxTime){
+        newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime * 1000).toZonedDateTimeISO(this.timeZone);
+        nextWeek.disabled = true;
+      }
+      this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
+      this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
+      this.filterAndUpdateData(newStart, newEnd);
+    });
+    controls.appendChild(previousWeek);
+    controls.appendChild(this.startInput);
+    controls.appendChild(this.endInput);
+    controls.appendChild(nextWeek);
+    this.appendChild(controls);
   }
 
   /**
