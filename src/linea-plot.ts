@@ -17,6 +17,8 @@ import { Temporal } from "temporal-polyfill";
  * @attributes
  * - `src` {string} - JSON-encoded array of SMET file URLs to fetch data from (required)
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
+ * - `showtitle` {boolean} - When present, display the station name and altitude as title
+ * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
  * - `startdate` {string} - Initial start date in ISO 8601 format (e.g., "2025-06-04T10:24[Europe/Berlin]"). 
  *    If used with `showdatepicker` and `enddate` it will set the initial date range.
  *    If used without `showdatepicker`, but with `enddate` it will set a fixed date range.
@@ -32,6 +34,8 @@ import { Temporal } from "temporal-polyfill";
  * <linea-plot 
  *   src='["data/station1.smet", "data/station2.smet"]'
  *   showdatepicker
+ *   showsurfacehoarseries
+ *   showtitle
  *   startdate="2025-06-01T00:00[Europe/Berlin]"
  *   enddate="2025-06-30T23:59[Europe/Berlin]">
  * </linea-plot>
@@ -128,7 +132,8 @@ export class LineaPlot extends HTMLElement {
 
     for (const i in this.results) {
       const result = this.results[i];
-      let lc = new LineaChart(result.timestamps, result.values, result.station, result.altitude, true, true, backgroundColors[i] ?? "#00000000");
+      let lc = new LineaChart(result.timestamps, result.values, result.station, result.altitude,
+         this.hasAttribute("showtitle"), this.hasAttribute("showsurfacehoarseries"), backgroundColors[i] ?? "#00000000");
       this.lineacharts.push(lc);
       this.appendChild(lc.chart);
     }
