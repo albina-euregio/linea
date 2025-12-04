@@ -80,7 +80,6 @@ export class LineaChart {
             data.push(element?? this.#createNullArray());
         }
         plot.setData(data);
-        plot.redraw();
     }
 
     #createNullArray(){
