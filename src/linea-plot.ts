@@ -71,6 +71,73 @@ export class LineaPlot extends HTMLElement {
   private maxTime: number = -Infinity;
 
   connectedCallback() {
+      const style = document.createElement("style");
+      style.textContent = `
+        .controls-dates {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: stretch;
+          row-gap: 4px;
+        }
+
+        .controls-break {
+          flex-basis: 0;
+          height: 0;
+        }
+
+        .controls-dates-inputs {
+          border-radius: 0;
+          border-right-width: 0px;
+        }
+
+        
+        @media (min-width: 641px) {
+          .controls-dates > *:first-child {
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+          }
+
+          .controls-dates > *:last-child {
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            border-right-width: 2px;
+          }
+        }
+        
+        @media (max-width: 640px) {
+        
+          .controls-break {
+            flex-basis: 100%; /* force wrap */
+          }
+          
+          .controls-dates > button:first-child {
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            border-right-width: 1px;
+          }
+
+          .startDateInput {
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            border-left-width: 1px;
+            border-right-width: 2px;
+          }
+
+          .endDateInput {
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            border-right-width: 1px;
+          }
+
+          .controls-dates > button:last-child {
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            border-left-width: 1px;
+            border-right-width: 2px;
+          }
+        }
+      `;
+    this.appendChild(style);
     if(this.hasAttribute("showdatepicker")){
       this.#addControls();
     }
@@ -154,21 +221,20 @@ export class LineaPlot extends HTMLElement {
   #addControls(){
     const controls = document.createElement("div");
     controls.classList.add("controls");
+    controls.classList.add("controls-dates");
 
     this.startInput = document.createElement("input");
     this.startInput.type = "datetime-local";
     this.startInput.classList.add("toggle-btn");
-    this.startInput.style.borderRadius = "0";
-    this.startInput.style.borderLeftWidth = "1px";
-    this.startInput.style.borderRightWidth = "1px";
+    this.startInput.classList.add("controls-dates-inputs");
+    this.startInput.classList.add("startDateInput");
     this.startInput.addEventListener('change', () => {
       this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
     });
     this.endInput = document.createElement("input");
     this.endInput.classList.add("toggle-btn");
-    this.endInput.style.borderRadius = "0";
-    this.endInput.style.borderRightWidth = "1px";
-    this.endInput.style.borderLeftWidth = "1px";
+    this.endInput.classList.add("controls-dates-inputs");
+    this.endInput.classList.add("endDateInput");
     this.endInput.type = "datetime-local";
     this.endInput.addEventListener('change', () => {
       this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
@@ -176,9 +242,7 @@ export class LineaPlot extends HTMLElement {
       
     const previousWeek = document.createElement("button");
     previousWeek.classList.add("toggle-btn");
-    previousWeek.style.borderTopRightRadius = "0";
-    previousWeek.style.borderBottomRightRadius = "0";
-    previousWeek.style.borderRightWidth = "1px";
+    previousWeek.classList.add("controls-dates-inputs");
     previousWeek.innerHTML = "&larr;";
     document.addEventListener("keydown", (e) => {
       if(e.key === "ArrowLeft"){
@@ -201,9 +265,7 @@ export class LineaPlot extends HTMLElement {
     });
     const nextWeek = document.createElement("button");
     nextWeek.classList.add("toggle-btn");
-    nextWeek.style.borderTopLeftRadius = "0";
-    nextWeek.style.borderBottomLeftRadius = "0";
-    nextWeek.style.borderLeftWidth = "1px";
+    nextWeek.classList.add("controls-dates-inputs");
     nextWeek.innerHTML = "&rarr;";
     document.addEventListener("keydown", (e) => {
       if(e.key === "ArrowRight"){
@@ -224,8 +286,11 @@ export class LineaPlot extends HTMLElement {
       this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
       this.filterAndUpdateData(newStart, newEnd);
     });
+    const breakElement = document.createElement("span");
+    breakElement.classList.add("controls-break");
     controls.appendChild(previousWeek);
     controls.appendChild(this.startInput);
+    controls.appendChild(breakElement);
     controls.appendChild(this.endInput);
     controls.appendChild(nextWeek);
     this.appendChild(controls);
