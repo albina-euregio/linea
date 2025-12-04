@@ -39,7 +39,7 @@ export class LineaPlot extends HTMLElement {
     }
     this.appendChild(controls);
 
-    this.fetchData().then(() => {
+    this.fetchAndStoreData().then(() => {
       this.#updateValidDateInputs();
       this.render();
       if(this.hasAttribute("showdatepicker") && this.hasAttribute("startdate") && this.hasAttribute("enddate")){
@@ -53,7 +53,10 @@ export class LineaPlot extends HTMLElement {
     });
   }
 
-  async fetchData(){
+  /**
+   * fetches the data, generalizes it and update the valid date inputs
+   */
+  async fetchAndStoreData(){
     const srcs: string[] = JSON.parse(this.getAttribute("src") ?? "") as string[];
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
@@ -69,6 +72,9 @@ export class LineaPlot extends HTMLElement {
     this.#updateValidDateInputs();
   }
 
+  /**
+   * creates all LineaCharts and initializate them
+   */
   render(){
     const backgroundColors = ["rgba(0, 0, 0, 0.05)"]
 
@@ -81,6 +87,12 @@ export class LineaPlot extends HTMLElement {
     
   }
 
+  /**
+   * Filters the Results for each LineaChart for the given timespan.
+   * Passes the filtered data to the LineaCharts
+   * @param startDate from where the data shall be shown
+   * @param endDate to when the data shall be shown
+   */
   filterAndUpdateData(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime){
     for (let i = 0; i < this.lineacharts.length; i++){
       const startTimestamp = startDate.toInstant().epochMilliseconds / 1000;
@@ -99,6 +111,9 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  /**
+   * handles the fixed date view
+   */
   #handleFixedDateView(){
     if(!this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))){
       console.warn("Start and Endate are not chosen, all data is presented!");
@@ -107,6 +122,13 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  /**
+   * Generalizes the data stored in the results list:
+   * ensures that all Results objects have the same timestamps and fill up missing data.
+   * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
+   * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
+   * so we can show all available data
+   */
   #generalizeData(){
     if (this.results.length === 0){
       return;
@@ -133,6 +155,10 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  /**
+   * sets the valid data range to the startDate and endDate inputs
+   * @returns 
+   */
   #updateValidDateInputs(){
     if(!this.startInput || !this.endInput){
       return;
@@ -143,6 +169,10 @@ export class LineaPlot extends HTMLElement {
     this.endInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
   }
 
+  /**
+   *  Set the start and end input to the values given by the attributes
+   * @returns 
+   */
   #setStartEndDateToAttributes(){
     if(!this.startInput || !this.endInput){
       return;
@@ -154,6 +184,10 @@ export class LineaPlot extends HTMLElement {
     this.filterAndUpdateData(startdate, enddate);
   }
 
+  /**
+   * 
+   * set the Input fields to the widthest available timespan
+   */
   #setStartEndDateToMinMax(){
     if(!this.startInput || !this.endInput){
       return;
@@ -161,7 +195,12 @@ export class LineaPlot extends HTMLElement {
     this.startInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
     this.endInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
   }
-    
+  
+  /**
+   * Converts dates into the format of HTML datetime-local inputs
+   * @param zdt date to convert
+   * @returns string, formated for HTML datetime-local input value
+   */
   #zonedDateTimeToLocalInputValue(zdt: Temporal.ZonedDateTime): string {
     // Convert to a PlainDateTime in the same time zone
     const pdt = zdt.toPlainDateTime();
@@ -176,6 +215,13 @@ export class LineaPlot extends HTMLElement {
     return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
   }
 
+  /**
+   * 
+   * Convert HTMl datetime-local input values into ZonedDateTime Objects
+   * 
+   * @param value a HTML datetime-local string to convert
+   * @returns a Temporal ZonedDateTime Object
+   */
   #inputValueToZonedDateTime(value: string) {
     // value = "2025-06-04T10:24"
     const pdt = Temporal.PlainDateTime.from(value);
