@@ -1,11 +1,11 @@
 export class PlotHelper {
-  #m_style?: HTMLStyleElement;
+  static #m_style?: HTMLStyleElement;
   /**
    * this method calculates a scale factor based on the client width.
    * @param clientWidth 
    * @returns 
    */
-  GetScale(clientWidth: number): number {
+  static GetScale(clientWidth: number): number {
     const baseWidth = 360;
     const minScale = 0.6;
     return Math.max(minScale, Math.min(1, clientWidth / baseWidth));
@@ -18,7 +18,7 @@ export class PlotHelper {
    * @param style 
    * @param controls 
    */
-  resizePlots(plots: uPlot[], clientWidth: number, style: CSSStyleDeclaration, controls: HTMLElement | null) {
+  static resizePlots(plots: uPlot[], clientWidth: number, style: CSSStyleDeclaration, controls: HTMLElement | null) {
    plots.forEach((p) =>
      p.setSize({
         width: clientWidth,
@@ -53,7 +53,7 @@ export class PlotHelper {
    * @param series 
    * @param data 
    */
-  addSeries(plots: uPlot[], plot: uPlot, series: uPlot.Series, data: Float32Array) {
+  static addSeries(plots: uPlot[], plot: uPlot, series: uPlot.Series, data: Float32Array) {
     if (!plots.includes(plot)) {
       plots.push(plot);
     }        
@@ -67,7 +67,7 @@ export class PlotHelper {
     plot.data.push(data);
   }
 
-  GetStyle(document: Document, css: string): HTMLStyleElement{
+  static GetStyle(document: Document, css: string): HTMLStyleElement{
     if (!this.#m_style) {
       return this.#CreateStyle(document, css);
     }
@@ -75,7 +75,7 @@ export class PlotHelper {
   }
 
   //#region Private Methods
-  #CreateStyle(document: Document, css: string): HTMLStyleElement {
+  static #CreateStyle(document: Document, css: string): HTMLStyleElement {
     const style = document.createElement("style");
     style.textContent = css;
     style.textContent = `
