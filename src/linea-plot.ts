@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "./i18n";
-import { fetchSMET, Result } from "./smet-data";
+import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { Temporal } from "temporal-polyfill";
 
@@ -23,13 +23,20 @@ export class LineaPlot extends HTMLElement {
     controls.classList.add("controls");
     this.startInput = document.createElement("input");
     this.startInput.type = "datetime-local";
+    this.startInput.addEventListener('change', () => {
+      this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+    });
     this.endInput = document.createElement("input");
     this.endInput.type = "datetime-local";
+    this.endInput.addEventListener('change', () => {
+      this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+    });
     controls.appendChild(document.createTextNode("Start Date" + ": "));
     controls.appendChild(this.startInput);
     controls.appendChild(document.createTextNode("End Date" + ": "));
     controls.appendChild(this.endInput);
     this.appendChild(controls);
+
     this.fetchData().then(() => {
       this.#updateValidDateInputs();
       this.#setStartEndDateToMinMax();
@@ -49,6 +56,7 @@ export class LineaPlot extends HTMLElement {
       }
       this.results.push(result);
     }
+    this.#generalizeData();
     this.#updateValidDateInputs();
   }
 
@@ -62,6 +70,50 @@ export class LineaPlot extends HTMLElement {
       this.appendChild(lc.chart);
     }
     
+  }
+
+  filterAndUpdateData(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime){
+    for (let i = 0; i < this.lineacharts.length; i++){
+      const startTimestamp = startDate.toInstant().epochMilliseconds / 1000;
+      const endTimestamp = endDate.toInstant().epochMilliseconds / 1000;
+      const res = this.results[i];
+
+      let filteredValues = {};
+
+      for (const key in res.values) {
+        filteredValues[key] = res.values[key].filter((t, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp);
+      }
+      const filteredTimestamps = res.timestamps.filter((t, j) => 
+        t >= startTimestamp && t <= endTimestamp
+      );
+      this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
+    }
+  }
+
+  #generalizeData(){
+    if (this.results.length === 0){
+      return;
+    }
+    const tsSet = new Set<number>();
+    for (const res of this.results) {
+      for (const t of res.timestamps) tsSet.add(t);
+    }
+    const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
+
+    // align each result to the common timeline, filling missing entries with null to not show missing data
+    for (const res of this.results) {
+      let key: keyof typeof Values;
+      for (const key in res.values){
+        const map = new Map<number, number[]>();
+        for (let i = 0; i < res.timestamps.length; i++) {
+          map.set(res.timestamps[i], res.values[key][i]);
+        }
+        const newValues = allTimestamps.map(t => map.has(t) ? (map.get(t) ?? null) : null);
+        res.values[key] = newValues;
+      }
+      // set the common timeline to all results
+      res.timestamps = allTimestamps.slice();
+    }
   }
 
   #updateValidDateInputs(){
@@ -90,10 +142,10 @@ export class LineaPlot extends HTMLElement {
     return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
   }
 
-  #inputValueToZonedDateTime(value: string, timeZone: string) {
+  #inputValueToZonedDateTime(value: string) {
     // value = "2025-06-04T10:24"
     const pdt = Temporal.PlainDateTime.from(value);
-    return pdt.toZonedDateTime(timeZone);
+    return pdt.toZonedDateTime(this.timeZone);
   }
   
 }
