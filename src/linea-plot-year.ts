@@ -27,7 +27,6 @@ import {
  import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year} from "./linea-plot/opts_datapoints_year.ts";
 import { fetchSMET } from "./smet-data";
 import { Temporal } from "temporal-polyfill";
-import { PlotHelper } from "./plot-helper";
 import { YearData } from "./linea-plot/yeardata.ts";
 
 /**
