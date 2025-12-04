@@ -180,7 +180,7 @@ export class LineaPlot extends HTMLElement {
       let lc = new LineaChart(result.timestamps, result.values, result.station, result.altitude,
          this.hasAttribute("showtitle"), this.hasAttribute("showsurfacehoarseries"), backgroundColors[i] ?? "#00000000");
       this.lineacharts.push(lc);
-      this.appendChild(lc.chart);
+      this.appendChild(lc);
     }
     
   }
