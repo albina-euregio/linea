@@ -11,6 +11,7 @@ import { Temporal } from "temporal-polyfill";
  * 
  * A custom HTML element for displaying and filtering SMET (Standard Meteorological Exchange Format) data
  * with interactive date range selection and multi-station chart visualization. Plotting it accordingly to the EAWS workgroup.
+
  * 
  * @element linea-plot
  * 
@@ -59,9 +60,11 @@ import { Temporal } from "temporal-polyfill";
  * - Automatic data generalization across multiple stations with different time ranges
  * - Interactive date range filtering with datetime-local inputs
  * - Fixed date view mode for static data display
- * - Timezone-aware date handling (default: Europe/Berlin)
- * - uPlot-based chart rendering with customizable styling
+ * - Timezone-aware date handling (default: UTC)
+ * - uPlot-based chart rendering with customizable background styling
  * - Null value handling for missing data points
+ * - Export charts as png
+ * - Automatic calculations of surface hoar potential if data is present
  */
 export class LineaPlot extends HTMLElement {
 
@@ -264,6 +267,14 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  /**
+   * Adds the controls to the Plot:
+   * - Datepicker with (previousWeek|startDate|endDate|nextWeek)
+   * - Menu buttons with (exportpng|enlarge)
+   * 
+   * enlarge shows all available data and is shown when the datepicker is there too
+   * export png exports the drawed canvas on the screen, see @method #exportAllPlotsToPNG
+   */
   #addControls(){
     const controls = document.createElement("div");
     controls.classList.add("controls");
@@ -374,7 +385,15 @@ export class LineaPlot extends HTMLElement {
     this.appendChild(controls);
     this.focus();
   }
-
+  /**
+   * Exports all shown LineaChart into a single png file.
+   * The rendering uses the already drawn HTMLCanvasElement from each plot and redraws them on a new Canvas.
+   * This leads to the effect, that the rendered png is as width as the shown plots in the browser.
+   * @todo make the png export with fixed width so there are no problem on mobile phones
+   * 
+   * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
+   * The legend is build autmatically from the shown series.
+   */
   #exportAllPlotsToPNG() {
     const canvases: HTMLCanvasElement[] = [];
     const titles: {station: String, altitude: number}[] = [];
