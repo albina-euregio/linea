@@ -83,6 +83,14 @@ export class LineaPlot extends HTMLElement {
         linea-plot:focus {
           outline: none;
         }
+
+        .controls {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: left;
+          row-gap: 6px;
+          column-gap: 6px;
+        }
         
         .controls-dates {
           display: flex;
@@ -101,7 +109,30 @@ export class LineaPlot extends HTMLElement {
           border-right-width: 0px;
         }
 
+        .controls-menu {
+          border-radius = 0px;
+          border-left-width = 1px;
+          border-right-width = 1px;
+        }
+
+        .controls-menu > button:first-child {
+          border-top-right-radius: 0px;
+          border-bottom-right-radius: 0px;
+          border-top-left-radius: 20px;
+          border-bottom-left-radius: 20px;
+          border-left-width: 2px;
+          border-right-width: 1px;
+        }
         
+        .controls-menu > button:last-child {
+          border-top-right-radius: 20px;
+          border-bottom-right-radius: 20px;
+          border-top-left-radius: 0px;
+          border-bottom-left-radius: 0px;
+          border-left-width: 1px;
+          border-right-width: 2px;
+        }
+
         @media (min-width: 641px) {
           .controls-dates > *:first-child {
             border-top-left-radius: 20px;
@@ -314,6 +345,7 @@ export class LineaPlot extends HTMLElement {
       controlsdates.appendChild(nextWeek);
     }
     const menu = document.createElement("div");
+    menu.classList.add("controls-menu");
     if(this.hasAttribute("showexportpng")){
       const printbtn = document.createElement("button");
       printbtn.innerHTML = "Export png";
