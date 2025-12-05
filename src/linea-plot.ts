@@ -87,6 +87,44 @@ export class LineaPlot extends HTMLElement {
           outline: none;
         }
 
+        .tooltip {
+          position: relative;
+          display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+          visibility: hidden;
+          width: 120px;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px 0;
+          position: absolute;
+          z-index: 1;
+          top: 135%;
+          left: 50%;
+          margin-left: -60px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .tooltip .tooltiptext::after {
+          content: "";
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          margin-left: -5px;
+          border-width: 5px;
+          border-style: solid;
+          border-color: transparent transparent #555 transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+          visibility: visible;
+          opacity: 1;
+        }
+
         .controls {
           display: flex;
           flex-wrap: wrap;
@@ -304,7 +342,8 @@ export class LineaPlot extends HTMLElement {
       const previousWeek = document.createElement("button");
       previousWeek.classList.add("toggle-btn");
       previousWeek.classList.add("controls-dates-inputs");
-      previousWeek.innerHTML = "&larr;";
+      previousWeek.classList.add("tooltip");
+      previousWeek.innerHTML = "&larr;<span class='tooltiptext'>Previous week</span>";
       this.addEventListener("keydown", (e) => {
         if(e.key === "ArrowLeft"){
           previousWeek.click();
@@ -327,7 +366,8 @@ export class LineaPlot extends HTMLElement {
       const nextWeek = document.createElement("button");
       nextWeek.classList.add("toggle-btn");
       nextWeek.classList.add("controls-dates-inputs");
-      nextWeek.innerHTML = "&rarr;";
+      nextWeek.classList.add("tooltip");
+      nextWeek.innerHTML = "&rarr;<span class='tooltiptext'>Next week</span>";
       this.addEventListener("keydown", (e) => {
         if(e.key === "ArrowRight"){
           nextWeek.click();
@@ -369,12 +409,13 @@ export class LineaPlot extends HTMLElement {
     if(this.hasAttribute("showdatepicker")){
       const enlargebtn = document.createElement("button");
       enlargebtn.innerHTML = `<svg width="13px" height="13px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-<line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
-<line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
-<polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-</svg>`;
+        <polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
+        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
+        <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </svg><span class="tooltiptext">Set to whole available timespan</span>`;
       enlargebtn.classList.add("toggle-btn");
+      enlargebtn.classList.add("tooltip");
       enlargebtn.addEventListener('click', () => {
         this.#setStartEndDateToMinMax();
         this.filterAndUpdateData();
