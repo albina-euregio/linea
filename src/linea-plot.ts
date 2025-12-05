@@ -214,7 +214,8 @@ export class LineaPlot extends HTMLElement {
    * @param startDate from where the data shall be shown
    * @param endDate to when the data shall be shown
    */
-  filterAndUpdateData(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime){
+  filterAndUpdateData(startDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.startInput.value),
+                      endDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.endInput.value)){
     for (let i = 0; i < this.lineacharts.length; i++){
       const startTimestamp = startDate.toInstant().epochMilliseconds / 1000;
       const endTimestamp = endDate.toInstant().epochMilliseconds / 1000;
@@ -312,17 +313,32 @@ export class LineaPlot extends HTMLElement {
       controlsdates.appendChild(this.endInput);
       controlsdates.appendChild(nextWeek);
     }
+    const menu = document.createElement("div");
     if(this.hasAttribute("showexportpng")){
-      const exports = document.createElement("div");
       const printbtn = document.createElement("button");
       printbtn.innerHTML = "Export png";
       printbtn.classList.add("toggle-btn");
       printbtn.addEventListener('click', () => {
         this.#exportAllPlotsToPNG();
       });
-      exports.appendChild(printbtn);
-      controls.appendChild(exports);
+      menu.appendChild(printbtn);
     }
+    if(this.hasAttribute("showdatepicker")){
+      const enlargebtn = document.createElement("button");
+      enlargebtn.innerHTML = `<svg width="13px" height="13px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+<line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
+<line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
+<polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+</svg>`;
+      enlargebtn.classList.add("toggle-btn");
+      enlargebtn.addEventListener('click', () => {
+        this.#setStartEndDateToMinMax();
+        this.filterAndUpdateData();
+      });
+      menu.appendChild(enlargebtn);
+    }
+    controls.appendChild(menu);
     this.appendChild(controls);
     this.focus();
   }
