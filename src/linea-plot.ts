@@ -205,7 +205,6 @@ export class LineaPlot extends HTMLElement {
       this.lineacharts.push(lc);
       this.appendChild(lc);
     }
-    
   }
 
   /**
@@ -235,7 +234,9 @@ export class LineaPlot extends HTMLElement {
   #addControls(){
     const controls = document.createElement("div");
     controls.classList.add("controls");
-    controls.classList.add("controls-dates");
+    const controlsdates = document.createElement("div");
+    controlsdates.classList.add("controls-dates");
+    controls.appendChild(controlsdates);
 
     this.startInput = document.createElement("input");
     this.startInput.type = "datetime-local";
@@ -302,13 +303,74 @@ export class LineaPlot extends HTMLElement {
     });
     const breakElement = document.createElement("span");
     breakElement.classList.add("controls-break");
-    controls.appendChild(previousWeek);
-    controls.appendChild(this.startInput);
-    controls.appendChild(breakElement);
-    controls.appendChild(this.endInput);
-    controls.appendChild(nextWeek);
+    controlsdates.appendChild(previousWeek);
+    controlsdates.appendChild(this.startInput);
+    controlsdates.appendChild(breakElement);
+    controlsdates.appendChild(this.endInput);
+    controlsdates.appendChild(nextWeek);
+
+    const exports = document.createElement("div");
+    const printbtn = document.createElement("button");
+    printbtn.innerHTML = "Export png";
+    printbtn.classList.add("toggle-btn");
+    printbtn.addEventListener('click', () => {
+      this.#exportAllPlotsToPNG();
+    });
+    exports.appendChild(printbtn);
+    controls.appendChild(exports);
+
     this.appendChild(controls);
     this.focus();
+  }
+
+  #exportAllPlotsToPNG(filename = "linea-plot.png") {
+    const canvases: HTMLCanvasElement[] = [];
+    const titles: HTMLDivElement[] = [];
+
+    for (const lineachart of this.lineacharts){
+      const plots: uPlot[] = lineachart.plots;
+      plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
+        canvases.push(c);
+      });
+      titles.push(lineachart.querySelector(".u-title") as HTMLDivElement);
+    }
+    
+    let title = "";
+    titles.forEach((t, i) => {
+      title += t ? t.textContent ?? "" : "";
+      if(! (titles.length == (i+1))){
+        title += " — ";
+      }
+    });
+
+    //build png
+    const width = canvases[0].width;
+    const totalHeight = canvases.reduce((sum, c) => sum + c.height, 0) + 40;
+
+    const outCanvas = document.createElement("canvas");
+    outCanvas.width = width;
+    outCanvas.height = totalHeight;
+
+    const ctx = outCanvas.getContext("2d")!;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+    
+    ctx.fillStyle = "#000";
+    ctx.font = "24px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(title, outCanvas.width / 2, 40);
+
+    let y = 30;
+    for (const c of canvases) {
+      ctx.drawImage(c, 0, y);
+      y += c.height;
+    }
+
+    const url = outCanvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
   }
 
   /**
