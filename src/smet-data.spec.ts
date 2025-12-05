@@ -26,7 +26,28 @@ fields = timestamp ISWR HS LF TA TD TS.000 TS.020 TS.040 TS.060 TSS
   expect(parseSMET(smet, parseFloat("inf"))).toMatchSnapshot();
 });
 
-test("parse AT-02", async () => {
+test("parse AT-02 (with tz = 1: UTC+1)", async () => {
+  const smet = `
+[HEADER]
+station_id = 2900250
+station_name = mallnitz_ankogel_hintere_lucke
+latitude = 47.0374000
+longitude = 13.2027000
+altitude = 2317.0000
+nodata = -777
+fields = timestamp\tTA\tRH\tHS
+tz = 1
+
+[DATA]
+2025-11-26T18:50:00\t266.05\t0.935\t34.5
+2025-11-26T19:00:00\t266.05\t0.934\t34.2
+2025-11-26T19:10:00\t265.95\t0.939\t34.1
+2025-11-26T19:20:00\t265.95\t0.947\t34
+`;
+  expect(parseSMET(smet, parseFloat("inf"))).toMatchSnapshot();
+});
+
+test("parse AT-02 (assume tz = 0: UTC)", async () => {
   const smet = `
 [HEADER]
 station_id = 2900250
