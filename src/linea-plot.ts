@@ -69,7 +69,7 @@ export class LineaPlot extends HTMLElement {
   private lineacharts: LineaChart[] = [] as LineaChart[];
   private results: Result[] = [] as Result[];
 
-  private timeZone:string = "Europe/Berlin";
+  private timeZone:string = "UTC";
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
   private minTime: number = +Infinity;
   private maxTime: number = -Infinity;
