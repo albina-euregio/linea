@@ -5,6 +5,8 @@ build:
   script:
     - corepack enable
     - yarn install --immutable
+    - yarn lint
+    - yarn test
     - yarn build
     - yarn pack
   artifacts:
