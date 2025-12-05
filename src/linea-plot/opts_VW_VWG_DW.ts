@@ -27,8 +27,6 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         ctx.save();
         ctx.textBaseline = "top"; 
         const screenwidth = window.innerWidth;
-        console.log("Screenwidth:", screenwidth);
-        console.log("Canvas width:", u.ctx.canvas.width);
         const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
         const yPos = canvasHeight * 0.05;

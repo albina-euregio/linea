@@ -95,8 +95,6 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       if (validMin === Infinity || validMax === -Infinity) {
         return [-30, 10]; 
       }
-      
-      console.log('Valid data range:', validMin, 'to', validMax);
       return (validMin < -30 || validMax > 10) ? [-30, 30] : [-30, 10];
     },
   },
