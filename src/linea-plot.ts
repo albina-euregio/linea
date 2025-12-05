@@ -326,6 +326,9 @@ export class LineaPlot extends HTMLElement {
   #exportAllPlotsToPNG(filename = "linea-plot.png") {
     const canvases: HTMLCanvasElement[] = [];
     const titles: HTMLDivElement[] = [];
+    const series: uPlot.Series[] = [];
+    type LegendItem = { label: string; color: string };
+    const legendItems = {};
 
     for (const lineachart of this.lineacharts){
       const plots: uPlot[] = lineachart.plots;
@@ -333,8 +336,22 @@ export class LineaPlot extends HTMLElement {
         canvases.push(c);
       });
       titles.push(lineachart.querySelector(".u-title") as HTMLDivElement);
+      plots.map(p => series.push(...p.series.slice(1)));
+      plots.map(p => p.series.slice(1).map((s, i) => {
+        const label = s.label ?? `Series ${i + 1}`;
+        let color = "#000000";
+
+        console.log(typeof s.stroke);
+        if (typeof s.stroke === "string") {
+          color = s.stroke;
+        } else {
+          const c = s.stroke(p, i + 1);
+          if (typeof c === "string") color = c;
+        }
+        legendItems[label] = color;
+      }));
     }
-    
+
     let title = "";
     titles.forEach((t, i) => {
       title += t ? t.textContent ?? "" : "";
@@ -344,26 +361,66 @@ export class LineaPlot extends HTMLElement {
     });
 
     //build png
+    const titleHeight = title ? 40 : 0;
+    const legendItemHeight = 22;
+    const legendPadding = 20;
+    
     const width = canvases[0].width;
-    const totalHeight = canvases.reduce((sum, c) => sum + c.height, 0) + 40;
+    const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
+    const totalHeight = titleHeight + chartsHeight + 60;
 
     const outCanvas = document.createElement("canvas");
     outCanvas.width = width;
     outCanvas.height = totalHeight;
 
+    //fill background
     const ctx = outCanvas.getContext("2d")!;
+    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingQuality = "high";
+
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
     
-    ctx.fillStyle = "#000";
-    ctx.font = "24px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(title, outCanvas.width / 2, 40);
+    if(title){
+      ctx.fillStyle = "#000";
+      ctx.font = "24px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(title, outCanvas.width / 2, 40);
+    }
 
-    let y = 30;
+    let y = titleHeight;
     for (const c of canvases) {
       ctx.drawImage(c, 0, y);
       y += c.height;
+    }
+
+    if (Object.keys(legendItems).length > 0) {
+      const swatchSize = 18;
+      const xStart = legendPadding*2;
+      let legendY = y + legendPadding + legendItemHeight / 2;
+
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
+      let x = xStart;
+      for (const [label, color] of Object.entries(legendItems)){
+        const textwidth = ctx.measureText(label).width;
+        if(x + swatchSize + 8 + textwidth > outCanvas.width){
+          x = xStart;
+          legendY += legendItemHeight;
+          outCanvas.height += legendItemHeight;
+        }
+
+        // colored square
+        ctx.fillStyle = color;
+        ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
+
+        // label
+        ctx.fillStyle = "#000";
+        ctx.fillText(label, x + swatchSize + 8, legendY);
+        x = x + swatchSize + 8 + textwidth + 10;
+      }
     }
 
     const url = outCanvas.toDataURL("image/png");
