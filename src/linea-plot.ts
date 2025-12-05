@@ -77,6 +77,10 @@ export class LineaPlot extends HTMLElement {
   connectedCallback() {
       const style = document.createElement("style");
       style.textContent = `
+        linea-plot:focus {
+          outline: none;
+        }
+        
         .controls-dates {
           display: flex;
           flex-wrap: wrap;
@@ -158,6 +162,8 @@ export class LineaPlot extends HTMLElement {
         this.#handleFixedDateView();
       }
     });
+    this.tabIndex = 0;
+    this.focus();
   }
 
   /**
@@ -251,7 +257,7 @@ export class LineaPlot extends HTMLElement {
     previousWeek.classList.add("toggle-btn");
     previousWeek.classList.add("controls-dates-inputs");
     previousWeek.innerHTML = "&larr;";
-    document.addEventListener("keydown", (e) => {
+    this.addEventListener("keydown", (e) => {
       if(e.key === "ArrowLeft"){
         previousWeek.click();
       }
@@ -274,7 +280,7 @@ export class LineaPlot extends HTMLElement {
     nextWeek.classList.add("toggle-btn");
     nextWeek.classList.add("controls-dates-inputs");
     nextWeek.innerHTML = "&rarr;";
-    document.addEventListener("keydown", (e) => {
+    this.addEventListener("keydown", (e) => {
       if(e.key === "ArrowRight"){
         nextWeek.click();
       }
@@ -301,6 +307,7 @@ export class LineaPlot extends HTMLElement {
     controls.appendChild(this.endInput);
     controls.appendChild(nextWeek);
     this.appendChild(controls);
+    this.focus();
   }
 
   /**
