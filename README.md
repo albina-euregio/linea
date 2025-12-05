@@ -4,6 +4,13 @@ Visualizations of avalanche data, such as automated weather stations.
 
 `<linea-plot src="...smet">` is a [web component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) rendering weather station data using [uPlot](https://github.com/leeoniya/uPlot), see `demo.html` for its usage.
 
+## Featuring
+
+LINEA is featuring weather station visualization on:
+
+- https://avalanche.report/weather/stations
+- https://eaws-bulletin-map.legner.me/?stations=1
+
 ## Contributing
 
 1. Install [NodeJS](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/)

@@ -64,6 +64,7 @@ export async function fetchSMET(
 
 export function parseSMET(smet: string): Result {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
+  const separator = /\s/;
   let values: number[][] = [];
   let fields: string[] = [];
   let units: string[] = [];
@@ -76,11 +77,32 @@ export function parseSMET(smet: string): Result {
   let dataIndex = 0;
   lines.forEach((line) => {
     if (line.startsWith("fields =")) {
-      fields = line.slice("fields =".length).trim().split(" ");
+      fields = line.slice("fields =".length).trim().split(separator);
+      units = fields.map(
+        (f) =>
+          ({
+            P: "Pa",
+            TA: "K",
+            TD: "K",
+            TSS: "K",
+            TSG: "K",
+            RH: "1",
+            VW_MAX: "m/s",
+            VW: "m/s",
+            DW: "degree",
+            ISWR: "W/m²",
+            RSWR: "W/m²",
+            ILWR: "W/m²",
+            OLWR: "W/m²",
+            PINT: "mm/h",
+            PSUM: "mm",
+            HS: "m",
+          })[f] ?? ""
+      );
       values = fields.map(() => [] as number[]);
       return;
     } else if (line.startsWith("#units =")) {
-      units = line.slice("#units =".length).trim().split(" ");
+      units = line.slice("#units =".length).trim().split(separator);
       return;
     } else if (line.startsWith("nodata =")) {
       nodata = line.slice("nodata =".length).trim();
@@ -94,7 +116,7 @@ export function parseSMET(smet: string): Result {
     } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
       return;
     }
-    const cells = line.split(" ");
+    const cells = line.split(separator);
     const date = Date.parse(cells[0]);
     // uPlot uses epoch seconds (instead of milliseconds)
     timestamps[dataIndex] = date / 1000;
