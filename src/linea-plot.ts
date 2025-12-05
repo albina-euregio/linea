@@ -323,11 +323,10 @@ export class LineaPlot extends HTMLElement {
     this.focus();
   }
 
-  #exportAllPlotsToPNG(filename = "linea-plot.png") {
+  #exportAllPlotsToPNG() {
     const canvases: HTMLCanvasElement[] = [];
-    const titles: HTMLDivElement[] = [];
+    const titles: {station: String, altitude: number}[] = [];
     const series: uPlot.Series[] = [];
-    type LegendItem = { label: string; color: string };
     const legendItems = {};
 
     for (const lineachart of this.lineacharts){
@@ -335,7 +334,9 @@ export class LineaPlot extends HTMLElement {
       plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
         canvases.push(c);
       });
-      titles.push(lineachart.querySelector(".u-title") as HTMLDivElement);
+      const station = lineachart.station;
+      const altitude = lineachart.altitude;
+      titles.push({station, altitude});
       plots.map(p => series.push(...p.series.slice(1)));
       plots.map(p => p.series.slice(1).map((s, i) => {
         const label = s.label ?? `Series ${i + 1}`;
@@ -351,10 +352,11 @@ export class LineaPlot extends HTMLElement {
         legendItems[label] = color;
       }));
     }
+    console.log(titles);
 
     let title = "";
     titles.forEach((t, i) => {
-      title += t ? t.textContent ?? "" : "";
+      title += t.station + " (" + t.altitude + "m)"
       if(! (titles.length == (i+1))){
         title += " — ";
       }
@@ -426,7 +428,7 @@ export class LineaPlot extends HTMLElement {
     const url = outCanvas.toDataURL("image/png");
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename;
+    a.target="_tab";
     a.click();
   }
 

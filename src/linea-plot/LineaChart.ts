@@ -27,8 +27,8 @@ export class LineaChart extends AbstractLineaChart{
     constructor(
         private timestamps: Uint32Array,
         private values: Values,
-        private station: string,
-        private altitude: number,
+        readonly station: string,
+        readonly altitude: number,
         private showTitle: boolean,
         private showSurfaceHoarSeries: boolean,
         private backgroundColor: string
