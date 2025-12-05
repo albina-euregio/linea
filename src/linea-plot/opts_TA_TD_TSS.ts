@@ -20,7 +20,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     live: true,
     fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
     markers: {
-      fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
+      fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx) ?? u.series[seriesIdx].stroke(u, seriesIdx),
       values: (u: any, seriesIdx: number, values: any) => {
         let result: any = {};
         u.series.forEach((s:any, i: number) => {
@@ -167,6 +167,6 @@ export const opts_SurfaceHoar: uPlot.Series = {
   scale: "yhidden",
   spanGaps: false,
   fill: "rgba(1, 0, 0, 0.1)",
-  stroke: "rgba(0, 0, 0, 0.3)",
-  value: (u, v) => v > 0 ? i18n.message("dialog:weather-station-diagram:parameter:SH:present") : i18n.message("dialog:weather-station-diagram:parameter:SH:present:not"),
+  stroke: "rgba(0, 0, 0, 0.1)",
+  value: (u, v) => v == null ? "-" : v > 0 ? i18n.message("dialog:weather-station-diagram:parameter:SH:present") : i18n.message("dialog:weather-station-diagram:parameter:SH:present:not"),
 };
