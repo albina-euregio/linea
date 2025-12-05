@@ -72,6 +72,10 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
   let nodata = "-777";
   let station = "";
   let altitude = NaN;
+  /**
+   * SMET: timezone of the measurements, decimal number positive going east. If not provided, utc is assumed.
+   */
+  let tz = 0;
   const now = Date.now();
   const lines = smet.split(/\r?\n/);
   const timestamps = new Uint32Array(lines.length);
@@ -108,6 +112,9 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
     } else if (line.startsWith("nodata =")) {
       nodata = line.slice("nodata =".length).trim();
       return;
+    } else if (line.startsWith("tz =")) {
+      tz = +line.slice("tz =".length).trim();
+      return;
     } else if (line.startsWith("station_name =")) {
       station = line.slice("station_name =".length).trim();
       return;
@@ -118,7 +125,17 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
       return;
     }
     const cells = line.split(separator);
-    const date = Date.parse(cells[0]);
+    let dateString = cells[0];
+    if (dateString.length === "2025-11-26T19:00:00".length) {
+      if (tz === 0) {
+        dateString += "Z";
+      } else if (tz > 0) {
+        dateString += `+${String(tz).padStart(2, "0")}:00`; // `tz = 1` -> `+01:00`
+      } else {
+        dateString += `-${String(tz).padStart(2, "0")}:00`;
+      }
+    }
+    const date = Date.parse(dateString);
     if (now - date > timeRangeMilli) return;
     // uPlot uses epoch seconds (instead of milliseconds)
     timestamps[dataIndex] = date / 1000;
