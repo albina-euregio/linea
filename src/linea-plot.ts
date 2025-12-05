@@ -28,7 +28,8 @@ import { Temporal } from "temporal-polyfill";
  *    If used with `showdatepicker` and `startdate` it will set the initial date range.
  *    If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
  * 
- * If startdate or enddate is missing it will show all data from the SMET file.
+ * If startdate or enddate is missing it will show all data from the SMET file. 
+ * If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
  * 
  * @example
  * ```html
@@ -317,7 +318,7 @@ export class LineaPlot extends HTMLElement {
     if(!this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))){
       console.warn("Start and Endate are not chosen, all data is presented!");
     } else if(!this.hasAttribute("showdatepicker")){
-      this.filterAndUpdateData(Temporal.ZonedDateTime.from(this.getAttribute("startdate")), Temporal.ZonedDateTime.from(this.getAttribute("enddate")));
+      this.filterAndUpdateData(Temporal.ZonedDateTime.from(this.getAttribute("startdate")??"1900-00-00T00:00[UTC]"), Temporal.ZonedDateTime.from(this.getAttribute("enddate")??"2300-00-00T00:00[UTC]"));
     }
   }
 
@@ -362,10 +363,12 @@ export class LineaPlot extends HTMLElement {
     if(!this.startInput || !this.endInput){
       return;
     }
-    this.startInput.min = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
-    this.startInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
-    this.endInput.min = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
-    this.endInput.max = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
+    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone);
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone);
+    this.startInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
+    this.startInput.max = this.#zonedDateTimeToLocalInputValue(maxTime);
+    this.endInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
+    this.endInput.max = this.#zonedDateTimeToLocalInputValue(maxTime);
   }
 
   /**
@@ -376,8 +379,17 @@ export class LineaPlot extends HTMLElement {
     if(!this.startInput || !this.endInput){
       return;
     }
-    let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate"));
-    let enddate = Temporal.ZonedDateTime.from(this.getAttribute("enddate"));
+    let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate")??"");
+    let enddate = Temporal.ZonedDateTime.from(this.getAttribute("enddate")??"");
+    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone);
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone);
+    
+    if (Temporal.ZonedDateTime.compare(startdate, maxTime) > 0 || Temporal.ZonedDateTime.compare(startdate, minTime) < 0){
+      startdate = this.#inputValueToZonedDateTime(this.startInput.min);
+    }
+    if (Temporal.ZonedDateTime.compare(enddate, minTime) < 0 || Temporal.ZonedDateTime.compare(enddate, maxTime) > 0){
+      enddate = this.#inputValueToZonedDateTime(this.endInput.max);
+    }
     this.startInput.value = this.#zonedDateTimeToLocalInputValue(startdate);
     this.endInput.value = this.#zonedDateTimeToLocalInputValue(enddate);
     this.filterAndUpdateData(startdate, enddate);
