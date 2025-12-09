@@ -18,7 +18,7 @@ build:
 
 publish-npm:
   stage: deploy
-  image: node:22
+  image: node:24
   needs:
     - build
   script:
