@@ -1,6 +1,5 @@
 
 import uPlot from "uplot";
-import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "./i18n";
 import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";

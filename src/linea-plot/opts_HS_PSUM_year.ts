@@ -31,11 +31,7 @@ hooks: {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
 
-        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
-
-        const screenwidth = window.innerWidth;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
         var labelColor1 = "#DE2D26";
         // "" for second label since only one y-axis here
