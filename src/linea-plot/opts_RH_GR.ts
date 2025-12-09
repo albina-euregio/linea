@@ -25,14 +25,23 @@ export const opts_RH_GR: uPlot.Options = {
       (u) => {
         const ctx = u.ctx;
         ctx.save();
-        ctx.textBaseline = "top"; 
-        
+        ctx.textBaseline = "top";
+
         const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`;
         var labelColor1 = "#6aafd5";
         var labelColor2 = "#DE2D26";
-        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          canvasHeight,
+          labelColor1,
+          labelColor2,
+        );
       },
     ],
   },

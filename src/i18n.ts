@@ -19,11 +19,7 @@ class I18n {
     return this.messages?.[id] ?? messagesEN[id] ?? id;
   }
 
-  number(
-    num: number | null | undefined,
-    opts?: Intl.NumberFormatOptions,
-    unit = ""
-  ): string {
+  number(num: number | null | undefined, opts?: Intl.NumberFormatOptions, unit = ""): string {
     if (typeof num !== "number" || !isFinite(num)) return "–";
     let s = new Intl.NumberFormat(this.lang, {
       useGrouping: num >= 10000,

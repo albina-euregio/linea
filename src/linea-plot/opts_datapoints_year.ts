@@ -5,9 +5,9 @@ import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm] 
+ * uPlot options for snow-height/year [cm]
  */
- 
+
 export const opts_DATAPOINTS_year: uPlot.Options = {
   width: 1040,
   height: 300,
@@ -21,8 +21,8 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
       fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
     },
   },
-  
-hooks: {
+
+  hooks: {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
@@ -36,18 +36,27 @@ hooks: {
         var labely2 = "";
         var labelColor1 = "#00ff55ff";
         var labelColor2 = "";
-        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          canvasHeight,
+          labelColor1,
+          labelColor2,
+        );
       },
     ],
   },
-  
-scales: {
-      y: {
-        range: [0, 58]
-      },
-    },
 
-axes: [
+  scales: {
+    y: {
+      range: [0, 58],
+    },
+  },
+
+  axes: [
     timeAxis,
     {
       scale: "y",
@@ -55,13 +64,13 @@ axes: [
       splits: [0, 10, 20, 30, 40, 50],
     },
   ],
-  
+
   series: [
     {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
-  ], 
+  ],
 };
 
 export const opts_DATAPOINTS_amount_year: uPlot.Series = {
@@ -70,5 +79,6 @@ export const opts_DATAPOINTS_amount_year: uPlot.Series = {
   width: 2,
   points: { show: false },
   scale: "y",
-  value: (u, v) => i18n.number(v, {}, i18n.message("dialog:weather-station-diagram:unit:DATAPOINTS")),
+  value: (u, v) =>
+    i18n.number(v, {}, i18n.message("dialog:weather-station-diagram:unit:DATAPOINTS")),
 };

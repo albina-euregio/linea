@@ -22,17 +22,26 @@ export const opts_HS_PSUM: uPlot.Options = {
   },
   hooks: {
     drawAxes: [
-       (u) => {
-      const ctx = u.ctx;
-      ctx.save();
-      ctx.textBaseline = "top"; 
+      (u) => {
+        const ctx = u.ctx;
+        ctx.save();
+        ctx.textBaseline = "top";
 
-      const canvasHeight = u.ctx.canvas.height;
-      var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
-      var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (cm)`;
-      var labelColor1 = "#08519C";
-      var labelColor2 = "#6aafd5";
-      OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        const canvasHeight = u.ctx.canvas.height;
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (cm)`;
+        var labelColor1 = "#08519C";
+        var labelColor2 = "#6aafd5";
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          canvasHeight,
+          labelColor1,
+          labelColor2,
+        );
       },
     ],
   },
@@ -55,9 +64,7 @@ export const opts_HS_PSUM: uPlot.Options = {
       splits: (u) => {
         const min = u.scales.y.min;
         const max = u.scales.y.max;
-        return min <= 0 && max >= 500
-          ? [0, 100, 200, 300, 400, 500]
-          : [0, 50, 100, 150, 200, 250];
+        return min <= 0 && max >= 500 ? [0, 100, 200, 300, 400, 500] : [0, 50, 100, 150, 200, 250];
       },
       stroke: "#08519C",
     },

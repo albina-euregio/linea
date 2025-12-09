@@ -33,15 +33,12 @@ type ParameterType =
   | "HS"
   | "NS";
 
-const UNIT_MAPPING: Record<
-  string,
-  { to: string; convert: (v: number) => number }
-> = {
-  "K": { to: "°C", convert: (v) => v - 273.15 },
-  "m": { to: "cm", convert: (v) => v * 100 },
+const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number }> = {
+  K: { to: "°C", convert: (v) => v - 273.15 },
+  m: { to: "cm", convert: (v) => v * 100 },
   "1": { to: "%", convert: (v) => v * 100 },
   "m/s": { to: "km/h", convert: (v) => v * 3.6 },
-  "mm": { to: "mm", convert: (v) => v },
+  mm: { to: "mm", convert: (v) => v },
 };
 
 type Units = Record<ParameterType, string>;
@@ -54,9 +51,7 @@ export type Result = {
   values: Values;
 };
 
-export async function fetchSMET(
-  url: string
-): Promise<Result> {
+export async function fetchSMET(url: string): Promise<Result> {
   const response = await fetch(url);
   const smet = await response.text();
   return parseSMET(smet);
@@ -100,7 +95,7 @@ export function parseSMET(smet: string): Result {
             PINT: "mm/h",
             PSUM: "mm",
             HS: "m",
-          })[f] ?? ""
+          })[f] ?? "",
       );
       values = fields.map(() => [] as number[]);
       return;

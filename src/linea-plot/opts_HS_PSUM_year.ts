@@ -5,9 +5,9 @@ import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm] 
+ * uPlot options for snow-height/year [cm]
  */
- 
+
 export const opts_HS_year: uPlot.Options = {
   width: 1040,
   height: 300,
@@ -21,8 +21,8 @@ export const opts_HS_year: uPlot.Options = {
       fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
     },
   },
-  
-hooks: {
+
+  hooks: {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
@@ -36,21 +36,30 @@ hooks: {
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
         var labelColor1 = "#DE2D26";
         var labelColor2 = "#6aafd5";
-        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          canvasHeight,
+          labelColor1,
+          labelColor2,
+        );
       },
     ],
   },
-  
-scales: {
-      y: {
-        range: [0, 500]
-      },
-      y2: {
-        range: [0, 100]
-      },
-    },
 
-axes: [
+  scales: {
+    y: {
+      range: [0, 500],
+    },
+    y2: {
+      range: [0, 100],
+    },
+  },
+
+  axes: [
     timeAxis,
     {
       scale: "y",
@@ -67,24 +76,24 @@ axes: [
       },
     },
   ],
-  
+
   series: [
     {
       label: i18n.message("dialog:weather-station-diagram:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
- 
- bands: [
-  {
-    series: [2, 3],
-    fill: "#d9dcdc",
-  },
-  {
-    series: [2, 1],
-    fill: "#d9dcdc",
-  }
-],  
+
+  bands: [
+    {
+      series: [2, 3],
+      fill: "#d9dcdc",
+    },
+    {
+      series: [2, 1],
+      fill: "#d9dcdc",
+    },
+  ],
 };
 const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
   label: i18n.message(`dialog:weather-station-diagram:parameter:${key}`),
@@ -95,9 +104,9 @@ const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
   value: (u, v) => i18n.number(v, {}, "cm"),
 });
 
-export const opts_HS_year_min     = baseHsSeries("HS_min", "#d9dcdc", 2);
-export const opts_HS_year_max     = baseHsSeries("HS_max", "#d9dcdc", 0);
-export const opts_HS_year_median  = baseHsSeries("HS_median", "#878787", 2);
+export const opts_HS_year_min = baseHsSeries("HS_min", "#d9dcdc", 2);
+export const opts_HS_year_max = baseHsSeries("HS_max", "#d9dcdc", 0);
+export const opts_HS_year_median = baseHsSeries("HS_median", "#878787", 2);
 export const opts_HS_year_current = baseHsSeries("HS", "#ff0000", 2);
 
 export const opts_HS_year_PSUM: uPlot.Series = {
@@ -108,7 +117,5 @@ export const opts_HS_year_PSUM: uPlot.Series = {
   fill: "#6aafd5",
   scale: "y2",
   value: (u, v) =>
-    v == null || Number.isNaN(v)
-      ? "-"
-      : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
+    v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
 };
