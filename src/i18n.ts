@@ -40,6 +40,10 @@ class I18n {
     if (!isFinite(+date)) return "";
     return new Intl.DateTimeFormat(this.lang, opts).format(date);
   }
+
+  timezone(): string {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
 }
 
 export const i18n = new I18n();

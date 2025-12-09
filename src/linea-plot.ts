@@ -60,7 +60,7 @@ import { Temporal } from "temporal-polyfill";
  * - Automatic data generalization across multiple stations with different time ranges
  * - Interactive date range filtering with datetime-local inputs
  * - Fixed date view mode for static data display
- * - Timezone-aware date handling (default: UTC)
+ * - Timezone-aware date handling based on browser settings
  * - uPlot-based chart rendering with customizable background styling
  * - Null value handling for missing data points
  * - Export charts as png
@@ -75,7 +75,6 @@ export class LineaPlot extends HTMLElement {
   private lineacharts: LineaChart[] = [] as LineaChart[];
   private results: Result[] = [] as Result[];
 
-  private timeZone:string = "UTC";
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
   private minTime: number = +Infinity;
   private maxTime: number = -Infinity;
@@ -356,7 +355,7 @@ export class LineaPlot extends HTMLElement {
         nextWeek.disabled = false;
         let newStart = start.subtract({ days: 7 });
         if((newStart.toInstant().epochMilliseconds / 1000) < this.minTime){
-          newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime * 1000).toZonedDateTimeISO(this.timeZone);
+          newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime * 1000).toZonedDateTimeISO(i18n.timezone());
           previousWeek.disabled = true;
         }
         const newEnd = start;
@@ -381,7 +380,7 @@ export class LineaPlot extends HTMLElement {
         const newStart = end;
         let newEnd = end.add({ days: 7 });
         if((newEnd.toInstant().epochMilliseconds / 1000) > this.maxTime){
-          newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime * 1000).toZonedDateTimeISO(this.timeZone);
+          newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime * 1000).toZonedDateTimeISO(i18n.timezone());
           nextWeek.disabled = true;
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
@@ -596,8 +595,8 @@ export class LineaPlot extends HTMLElement {
     if(!this.startInput || !this.endInput){
       return;
     }
-    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone);
-    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone);
+    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(i18n.timezone());
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(i18n.timezone());
     this.startInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
     this.startInput.max = this.#zonedDateTimeToLocalInputValue(maxTime);
     this.endInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
@@ -614,8 +613,8 @@ export class LineaPlot extends HTMLElement {
     }
     let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate")??"");
     let enddate = Temporal.ZonedDateTime.from(this.getAttribute("enddate")??"");
-    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone);
-    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone);
+    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(i18n.timezone());
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(i18n.timezone());
     
     if (Temporal.ZonedDateTime.compare(startdate, maxTime) > 0 || Temporal.ZonedDateTime.compare(startdate, minTime) < 0){
       startdate = this.#inputValueToZonedDateTime(this.startInput.min);
@@ -636,8 +635,8 @@ export class LineaPlot extends HTMLElement {
     if(!this.startInput || !this.endInput){
       return;
     }
-    this.startInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(this.timeZone));
-    this.endInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(this.timeZone));
+    this.startInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(i18n.timezone()));
+    this.endInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(i18n.timezone()));
   }
   
   /**
@@ -669,7 +668,7 @@ export class LineaPlot extends HTMLElement {
   #inputValueToZonedDateTime(value: string) {
     // value = "2025-06-04T10:24"
     const pdt = Temporal.PlainDateTime.from(value);
-    return pdt.toZonedDateTime(this.timeZone);
+    return pdt.toZonedDateTime(i18n.timezone());
   }
   
 }
