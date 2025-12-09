@@ -344,7 +344,7 @@ export class LineaPlot extends HTMLElement {
       previousWeek.classList.add("toggle-btn");
       previousWeek.classList.add("controls-dates-inputs");
       previousWeek.classList.add("tooltip");
-      previousWeek.innerHTML = "&larr;<span class='tooltiptext'>Previous week</span>";
+      previousWeek.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previousweek")}</span>`;
       this.addEventListener("keydown", (e) => {
         if(e.key === "ArrowLeft"){
           previousWeek.click();
@@ -368,7 +368,7 @@ export class LineaPlot extends HTMLElement {
       nextWeek.classList.add("toggle-btn");
       nextWeek.classList.add("controls-dates-inputs");
       nextWeek.classList.add("tooltip");
-      nextWeek.innerHTML = "&rarr;<span class='tooltiptext'>Next week</span>";
+      nextWeek.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:nextweek")}</span>`;
       this.addEventListener("keydown", (e) => {
         if(e.key === "ArrowRight"){
           nextWeek.click();
@@ -400,7 +400,7 @@ export class LineaPlot extends HTMLElement {
     menu.classList.add("controls-menu");
     if(this.hasAttribute("showexportpng")){
       const printbtn = document.createElement("button");
-      printbtn.innerHTML = "Export png";
+      printbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:exportpng")}`;
       printbtn.classList.add("toggle-btn");
       printbtn.addEventListener('click', () => {
         this.#exportAllPlotsToPNG();
@@ -414,7 +414,7 @@ export class LineaPlot extends HTMLElement {
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
         <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </svg><span class="tooltiptext">Set to whole available timespan</span>`;
+        </svg><span class="tooltiptext">${i18n.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`;
       enlargebtn.classList.add("toggle-btn");
       enlargebtn.classList.add("tooltip");
       enlargebtn.addEventListener('click', () => {
