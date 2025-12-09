@@ -480,7 +480,7 @@ export class LineaPlot extends HTMLElement {
           const label = s.label ?? `Series ${i + 1}`;
           let color = "#000000";
 
-          console.log(typeof s.stroke);
+          console.debug(typeof s.stroke);
           if (typeof s.stroke === "string") {
             color = s.stroke;
           } else {
@@ -491,7 +491,7 @@ export class LineaPlot extends HTMLElement {
         }),
       );
     }
-    console.log(titles);
+    console.debug(titles);
 
     let title = "";
     titles.forEach((t, i) => {
@@ -579,7 +579,7 @@ export class LineaPlot extends HTMLElement {
       !this.hasAttribute("showdatepicker") &&
       (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))
     ) {
-      console.warn("Start and Endate are not chosen, all data is presented!");
+      console.debug("Start and Endate are not chosen, all data is presented!");
     } else if (!this.hasAttribute("showdatepicker")) {
       this.filterAndUpdateData(
         Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
