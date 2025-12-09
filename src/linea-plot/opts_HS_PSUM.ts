@@ -33,7 +33,7 @@ export const opts_HS_PSUM: uPlot.Options = {
   // Left Y-axis label
   const xPosY = u.bbox.left;
   ctx.textAlign = "left";
-  ctx.fillStyle = "#DE2D26";
+  ctx.fillStyle = "#08519C";
   ctx.fillText( 
     `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
       xPosY, 
@@ -77,7 +77,7 @@ export const opts_HS_PSUM: uPlot.Options = {
           ? [0, 100, 200, 300, 400, 500]
           : [0, 50, 100, 150, 200, 250];
       },
-      stroke: "#DE2D26",
+      stroke: "#08519C",
     },
     {
       scale: "y2",
@@ -100,7 +100,7 @@ export const opts_HS_PSUM: uPlot.Options = {
 
 export const opts_HS: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
-  stroke: "#ff0000",
+  stroke: "#08519C",
   scale: "y",
   width: 2,
   value: (u, v) => i18n.number(v, {}, "cm"),
