@@ -289,9 +289,9 @@ export class LineaPlot extends HTMLElement {
    */
   filterAndUpdateData(startDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.startInput.value),
                       endDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.endInput.value)){
+    const startTimestamp = startDate.toInstant().epochMilliseconds / 1000;
+    const endTimestamp = endDate.toInstant().epochMilliseconds / 1000;
     for (let i = 0; i < this.lineacharts.length; i++){
-      const startTimestamp = startDate.toInstant().epochMilliseconds / 1000;
-      const endTimestamp = endDate.toInstant().epochMilliseconds / 1000;
       const res = this.results[i];
 
       let filteredValues = {};
