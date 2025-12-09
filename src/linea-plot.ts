@@ -241,10 +241,11 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * fetches the data, generalizes it and update the valid date inputs
+   * fetches the data from the src attribute, generalizes it and update the valid date inputs
    */
   async fetchAndStoreData(){
-    let srcs: string[] = JSON.parse(this.getAttribute("src") ?? "") as string[];
+    const src = this.getAttribute("src") ?? "";
+    let srcs: string[] = src.startsWith("[") || src.startsWith('"') ? JSON.parse(src) as string[] : [src];
     if (!(srcs instanceof Array)){
       srcs = [srcs];
       this.backgroundColors = [];
