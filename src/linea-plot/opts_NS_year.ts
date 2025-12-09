@@ -31,11 +31,8 @@ hooks: {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
 
-        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const screenwidth = window.innerWidth;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:newsnow")} (cm)`;
-        const yPos = canvasHeight * 0.05;
         OptsHelper.UpdateAxisLabels(ctx, labely1,"", u.bbox.left, u.bbox.width, canvasHeight, "#DE2D26", "");
         ctx.restore();
       },
@@ -84,5 +81,5 @@ export const opts_NS_year_snow_cover: uPlot.Series = {
   width: 2,
   scale: "y",
   fill: "rgba(222, 45, 38, 0.2)",
-  value: (u, v) => "",
+  value: () => "-",
 };

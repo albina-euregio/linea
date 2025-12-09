@@ -42,11 +42,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.save();
         ctx.textBaseline = "top"; 
 
-        const screenwidth = window.innerWidth;
-        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
-
         var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`;
         var labelColor1 = "#DE2D26";
@@ -77,7 +73,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
   scales: {
   y: {
-    range: (u, dataMin, dataMax) => {
+    range: (u) => {
       let validMin = Infinity;
       let validMax = -Infinity;
       

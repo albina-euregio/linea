@@ -6,7 +6,6 @@ import {
   opts_TD,
   opts_TSS,
   opts_SurfaceHoar,
-  showSurfaceHoar,
 } from "./opts_TA_TD_TSS";
 import {
   opts_DW,
@@ -18,7 +17,6 @@ import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
 import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
 import { dewPoint } from "./dewPoint";
 import { Values } from "../smet-data";
-import { Temporal } from "temporal-polyfill";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
@@ -98,9 +96,6 @@ export class LineaChart extends AbstractLineaChart{
             plot_HS_PSUM,
             plot_RH_GR
         );
-        const scale = super.GetScale(this.clientWidth);
-
-        
 
         if (this.values.TA) {
             const TD =

@@ -55,7 +55,7 @@ export class LineaPlotYear extends AbstractLineaChart {
     const { station, altitude, timestamps, values } = await fetchSMET(
       this.getAttribute("src") ?? ""
     );
-    const scale = this.GetScale(this.clientWidth);
+    
     const style = document.createElement("style");
     style.textContent = css;
     const plot_HS_year = document.createElement("div");

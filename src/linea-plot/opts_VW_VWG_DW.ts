@@ -25,12 +25,9 @@ export const opts_VW_VWG_DW: uPlot.Options = {
        (u) => {
         const ctx = u.ctx;
         ctx.save();
-        ctx.textBaseline = "top"; 
-        const screenwidth = window.innerWidth;
-        const canvasWidth = u.ctx.canvas.width;
-        const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
+        ctx.textBaseline = "top";
 
+        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`;
         var labely2 = i18n.message("dialog:weather-station-diagram:parameter:DW");
         var labelColor1 = "#00E2B6";
@@ -60,7 +57,6 @@ export const opts_VW_VWG_DW: uPlot.Options = {
    scales: {
       y: {
         range: (u, dataMin, dataMax) => {
-          let validMin = dataMin;
           let validMax = dataMax;
           return validMax > 100 ? [0, 120] : [0, 100];
         },

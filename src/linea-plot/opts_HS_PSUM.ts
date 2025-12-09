@@ -27,14 +27,10 @@ export const opts_HS_PSUM: uPlot.Options = {
       ctx.save();
       ctx.textBaseline = "top"; 
 
-      const canvasWidth = u.ctx.canvas.width;
       const canvasHeight = u.ctx.canvas.height;
-      const yPos = canvasHeight * 0.05;
-
-      const screenwidth = window.innerWidth;
       var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
       var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (cm)`;
-      var labelColor1 = "#DE2D26";
+      var labelColor1 = "#08519C";
       var labelColor2 = "#6aafd5";
       OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
       },
@@ -63,7 +59,7 @@ export const opts_HS_PSUM: uPlot.Options = {
           ? [0, 100, 200, 300, 400, 500]
           : [0, 50, 100, 150, 200, 250];
       },
-      stroke: "#DE2D26",
+      stroke: "#08519C",
     },
     {
       scale: "y2",
@@ -86,7 +82,7 @@ export const opts_HS_PSUM: uPlot.Options = {
 
 export const opts_HS: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
-  stroke: "#ff0000",
+  stroke: "#08519C",
   scale: "y",
   width: 2,
   value: (u, v) => i18n.number(v, {}, "cm"),

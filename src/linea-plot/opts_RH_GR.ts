@@ -26,11 +26,8 @@ export const opts_RH_GR: uPlot.Options = {
         const ctx = u.ctx;
         ctx.save();
         ctx.textBaseline = "top"; 
-
-        const screenwidth = window.innerWidth;
-        const canvasWidth = u.ctx.canvas.width;
+        
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`;
         var labelColor1 = "#6aafd5";

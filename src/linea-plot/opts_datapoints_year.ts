@@ -31,10 +31,7 @@ hooks: {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
 
-        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-
-        const screenwidth = window.innerWidth;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`;
         var labely2 = "";
         var labelColor1 = "#00ff55ff";

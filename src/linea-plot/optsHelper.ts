@@ -51,7 +51,6 @@ export class OptsHelper {
     getTextWidth(text: string, fontSize: number, fontFamily: string = "sans-serif"): number {
         // Create a canvas element (off-screen)
         const canvas = document.createElement("canvas");
-        const style = document.createElement("style");
         const context = canvas.getContext("2d");
         if (!context){
             return 0;

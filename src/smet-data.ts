@@ -75,7 +75,6 @@ export function parseSMET(smet: string): Result {
    * SMET: timezone of the measurements, decimal number positive going east. If not provided, utc is assumed.
    */
   let tz = 0;
-  const now = Date.now();
   const lines = smet.split(/\r?\n/);
   const timestamps = new Uint32Array(lines.length);
   let dataIndex = 0;

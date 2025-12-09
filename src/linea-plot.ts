@@ -299,7 +299,7 @@ export class LineaPlot extends HTMLElement {
       for (const key in res.values) {
         filteredValues[key] = res.values[key].filter((t, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp);
       }
-      const filteredTimestamps = res.timestamps.filter((t, j) => 
+      const filteredTimestamps = res.timestamps.filter((t) => 
         t >= startTimestamp && t <= endTimestamp
       );
       this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
@@ -438,7 +438,7 @@ export class LineaPlot extends HTMLElement {
    */
   #exportAllPlotsToPNG() {
     const canvases: HTMLCanvasElement[] = [];
-    const titles: {station: String, altitude: number}[] = [];
+    const titles: {station: string, altitude: number}[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
 
@@ -575,7 +575,6 @@ export class LineaPlot extends HTMLElement {
 
     // align each result to the common timeline, filling missing entries with null to not show missing data
     for (const res of this.results) {
-      let key: keyof typeof Values;
       for (const key in res.values){
         const map = new Map<number, number[]>();
         for (let i = 0; i < res.timestamps.length; i++) {
