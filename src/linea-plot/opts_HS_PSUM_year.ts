@@ -31,15 +31,12 @@ hooks: {
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
 
-        const canvasWidth = u.ctx.canvas.width;
         const canvasHeight = u.ctx.canvas.height;
-        const yPos = canvasHeight * 0.05;
-
-        const screenwidth = window.innerWidth;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
         var labelColor1 = "#DE2D26";
-        // "" for second label since only one y-axis here
-        OptsHelper.UpdateAxisLabels(ctx, labely1, "", u.bbox.left, u.bbox.width, canvasHeight, labelColor1, "");
+        var labelColor2 = "#6aafd5";
+        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
       },
     ],
   },
@@ -47,7 +44,10 @@ hooks: {
 scales: {
       y: {
         range: [0, 500]
-      }
+      },
+      y2: {
+        range: [0, 100]
+      },
     },
 
 axes: [
@@ -56,6 +56,15 @@ axes: [
       scale: "y",
       stroke: "#DE2D26",
       splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
+    },
+    {
+      scale: "y2",
+      stroke: "#6aafd5",
+      side: 1,
+      splits: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+      grid: {
+        show: false,
+      },
     },
   ],
   
@@ -103,4 +112,3 @@ export const opts_HS_year_PSUM: uPlot.Series = {
       ? "-"
       : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
 };
-
