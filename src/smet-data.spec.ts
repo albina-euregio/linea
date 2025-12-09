@@ -66,3 +66,28 @@ fields = timestamp\tTA\tRH\tHS
 `;
   expect(parseSMET(smet, parseFloat("inf"))).toMatchSnapshot();
 });
+
+test("parse AT-02 (2025-12-09)", async () => {
+  const smet = `
+[HEADER]
+station_id       = 2900250
+station_name     = mallnitz_ankogel_hintere_lucke
+latitude         = 47.037400
+longitude        = 13.202700
+altitude         = 2317.0
+easting          = 363456.169014
+northing         = 5210887.725522
+epsg             = 32633
+nodata           = -999
+tz               = 0
+fields           = timestamp HS RH TA
+[DATA]
+2025-12-02T16:30:00   37.600   0.909   272.75
+2025-12-02T17:30:00   37.800    -999   272.35
+2025-12-02T18:30:00   37.800    -999   272.05
+2025-12-02T19:30:00   38.000    -999   272.15
+2025-12-02T20:30:00   38.000   0.941   272.25
+2025-12-02T21:30:00   37.800    -999   271.95
+`;
+  expect(parseSMET(smet, parseFloat("inf"))).toMatchSnapshot();
+});

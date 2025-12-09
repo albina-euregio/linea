@@ -59,7 +59,7 @@ export async function fetchSMET(url: string): Promise<Result> {
 
 export function parseSMET(smet: string): Result {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
-  const separator = /\s/;
+  const separator = /\s+/;
   let values: number[][] = [];
   let fields: string[] = [];
   let units: string[] = [];
@@ -74,8 +74,17 @@ export function parseSMET(smet: string): Result {
   const timestamps = new Uint32Array(lines.length);
   let dataIndex = 0;
   lines.forEach((line) => {
-    if (line.startsWith("fields =")) {
-      fields = line.slice("fields =".length).trim().split(separator);
+    function parseHeader(prefix: string) {
+      if (!line.startsWith(prefix)) return "";
+      line = line.slice(prefix.length).trim();
+      if (!line.startsWith("=")) return "";
+      line = line.slice("=".length).trim();
+      return line;
+    }
+
+    let header = "";
+    if ((header = parseHeader("fields"))) {
+      fields = header.split(separator);
       units = fields.map(
         (f) =>
           ({
@@ -99,20 +108,20 @@ export function parseSMET(smet: string): Result {
       );
       values = fields.map(() => [] as number[]);
       return;
-    } else if (line.startsWith("#units =")) {
-      units = line.slice("#units =".length).trim().split(separator);
+    } else if ((header = parseHeader("#units"))) {
+      units = header.split(separator);
       return;
-    } else if (line.startsWith("nodata =")) {
-      nodata = line.slice("nodata =".length).trim();
+    } else if ((header = parseHeader("nodata"))) {
+      nodata = header;
       return;
-    } else if (line.startsWith("tz =")) {
-      tz = +line.slice("tz =".length).trim();
+    } else if ((header = parseHeader("tz"))) {
+      tz = +header;
       return;
-    } else if (line.startsWith("station_name =")) {
-      station = line.slice("station_name =".length).trim();
+    } else if ((header = parseHeader("station_name"))) {
+      station = header;
       return;
-    } else if (line.startsWith("altitude =")) {
-      altitude = +line.slice("altitude =".length).trim();
+    } else if ((header = parseHeader("altitude"))) {
+      altitude = +header;
       return;
     } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
       return;
