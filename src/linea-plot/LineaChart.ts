@@ -67,17 +67,10 @@ export class LineaChart extends AbstractLineaChart {
   }
 
   #updateData(plot: uPlot, values: (number | null)[][]) {
-    let data = [this.timestamps];
-    for (const element of values) {
-      data.push(element ?? this.#createNullArray());
-    }
-    plot.setData(data);
-  }
-
-  #createNullArray() {
-    let nulls: number | null[] = [];
-    this.timestamps.forEach(() => nulls.push(null));
-    return nulls;
+    plot.setData([
+      this.timestamps,
+      ...values.map((element) => element ?? Array.from(this.timestamps, () => null)),
+    ]);
   }
 
   async createPlots() {
