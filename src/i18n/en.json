@@ -26,8 +26,8 @@
   "dialog:weather-station-diagram:unit:DATAPOINTS": "Days",
   "dialog:weather-station-diagram:unit:temperature": "Temperature",
   "dialog:weather-station-diagram:unit:time": "Time",
-  "dialog:weather-station-diagram:controls:tooltips:nextweek": "Next week",
-  "dialog:weather-station-diagram:controls:tooltips:previousweek": "Previous week",
+  "dialog:weather-station-diagram:controls:tooltips:nextweek": "Next 7 days",
+  "dialog:weather-station-diagram:controls:tooltips:previousweek": "Previous 7 days",
   "dialog:weather-station-diagram:controls:tooltips:wholetimespan": "Show whole available timespan",
   "dialog:weather-station-diagram:controls:value:exportpng": "Export png"
 }

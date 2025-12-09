@@ -353,12 +353,13 @@ export class LineaPlot extends HTMLElement {
         const start = this.#inputValueToZonedDateTime(this.startInput.value);
         if (!start) return;
         nextWeek.disabled = false;
+        let newEnd = start;
         let newStart = start.subtract({ days: 7 });
         if((newStart.toInstant().epochMilliseconds / 1000) < this.minTime){
           newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime * 1000).toZonedDateTimeISO(i18n.timezone());
           previousWeek.disabled = true;
+          newEnd = newStart.add({days: 7});
         }
-        const newEnd = start;
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
         this.filterAndUpdateData(newStart, newEnd);
@@ -377,11 +378,12 @@ export class LineaPlot extends HTMLElement {
         const end = this.#inputValueToZonedDateTime(this.endInput.value);
         if (!end) return;
         previousWeek.disabled = false;
-        const newStart = end;
+        let newStart = end;
         let newEnd = end.add({ days: 7 });
         if((newEnd.toInstant().epochMilliseconds / 1000) > this.maxTime){
           newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime * 1000).toZonedDateTimeISO(i18n.timezone());
           nextWeek.disabled = true;
+          newStart = newEnd.subtract({days: 7});
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
