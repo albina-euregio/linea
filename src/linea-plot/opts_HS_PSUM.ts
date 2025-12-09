@@ -2,6 +2,7 @@ import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
+import { OptsHelper } from "./optsHelper";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
@@ -21,36 +22,26 @@ export const opts_HS_PSUM: uPlot.Options = {
   },
   hooks: {
     drawAxes: [
-       (u) => {
-  const ctx = u.ctx;
-  ctx.save();
-  ctx.textBaseline = "top"; 
+      (u) => {
+        const ctx = u.ctx;
+        ctx.save();
+        ctx.textBaseline = "top";
 
-    const canvasWidth = u.ctx.canvas.width;
-    const canvasHeight = u.ctx.canvas.height;
-    const yPos = canvasHeight * 0.05;
-
-  // Left Y-axis label
-  const xPosY = u.bbox.left;
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#08519C";
-  ctx.fillText( 
-    `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`,
-      xPosY, 
-      yPos
-      );
-
-
-  // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width;
-  ctx.textAlign = "right";
-  ctx.fillStyle = "#6aafd5";
-  ctx.fillText(
-    `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`,
-      xPosY2, 
-      yPos
-      );
-                        ctx.restore();
+        const canvasHeight = u.ctx.canvas.height;
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
+        var labelColor1 = "#08519C";
+        var labelColor2 = "#6aafd5";
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          canvasHeight,
+          labelColor1,
+          labelColor2,
+        );
       },
     ],
   },
@@ -73,9 +64,7 @@ export const opts_HS_PSUM: uPlot.Options = {
       splits: (u) => {
         const min = u.scales.y.min;
         const max = u.scales.y.max;
-        return min <= 0 && max >= 500
-          ? [0, 100, 200, 300, 400, 500]
-          : [0, 50, 100, 150, 200, 250];
+        return min <= 0 && max >= 500 ? [0, 100, 200, 300, 400, 500] : [0, 50, 100, 150, 200, 250];
       },
       stroke: "#08519C",
     },

@@ -2,6 +2,7 @@ import type uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
+import { OptsHelper } from "./optsHelper";
 
 /**
  * uPlot options for Relative Luftfeuchtigkeit [%] & Globalstrahlung [W/m²]
@@ -21,35 +22,26 @@ export const opts_RH_GR: uPlot.Options = {
   },
   hooks: {
     drawAxes: [
-    (u) => {
-  const ctx = u.ctx;
-  ctx.save();
-  ctx.textBaseline = "top"; 
+      (u) => {
+        const ctx = u.ctx;
+        ctx.save();
+        ctx.textBaseline = "top";
 
-  const canvasHeight = u.ctx.canvas.height;
-  const yPos = canvasHeight * 0.05;
-
-  // Left Y-axis label
-  const xPosY = u.bbox.left;
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#6aafd5";
-  ctx.fillText( 
-    `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`,
-        xPosY, 
-        yPos
+        const canvasHeight = u.ctx.canvas.height;
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`;
+        var labelColor1 = "#6aafd5";
+        var labelColor2 = "#DE2D26";
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          canvasHeight,
+          labelColor1,
+          labelColor2,
         );
-
-
-  // Right Y-axis label 
-  const xPosY2 = u.bbox.left + u.bbox.width;
-  ctx.textAlign = "right";
-  ctx.fillStyle = "#DE2D26";
-  ctx.fillText(
-       `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`,
-        xPosY2, 
-        yPos
-        );
-                        ctx.restore();
       },
     ],
   },

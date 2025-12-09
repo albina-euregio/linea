@@ -19,11 +19,7 @@ class I18n {
     return this.messages?.[id] ?? messagesEN[id] ?? id;
   }
 
-  number(
-    num: number | null | undefined,
-    opts?: Intl.NumberFormatOptions,
-    unit = ""
-  ): string {
+  number(num: number | null | undefined, opts?: Intl.NumberFormatOptions, unit = ""): string {
     if (typeof num !== "number" || !isFinite(num)) return "–";
     let s = new Intl.NumberFormat(this.lang, {
       useGrouping: num >= 10000,
@@ -39,6 +35,10 @@ class I18n {
     if (typeof date === "string") date = Date.parse(date);
     if (!isFinite(+date)) return "";
     return new Intl.DateTimeFormat(this.lang, opts).format(date);
+  }
+
+  timezone(): string {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
 }
 

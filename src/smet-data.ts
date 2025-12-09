@@ -33,20 +33,17 @@ type ParameterType =
   | "HS"
   | "NS";
 
-const UNIT_MAPPING: Record<
-  string,
-  { to: string; convert: (v: number) => number }
-> = {
-  "K": { to: "°C", convert: (v) => v - 273.15 },
-  "m": { to: "cm", convert: (v) => v * 100 },
+const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number }> = {
+  K: { to: "°C", convert: (v) => v - 273.15 },
+  m: { to: "cm", convert: (v) => v * 100 },
   "1": { to: "%", convert: (v) => v * 100 },
   "m/s": { to: "km/h", convert: (v) => v * 3.6 },
-  "mm": { to: "mm", convert: (v) => v },
+  mm: { to: "mm", convert: (v) => v },
 };
 
 type Units = Record<ParameterType, string>;
-export type Values = Record<ParameterType, Float32Array>;
-type Result = {
+export type Values = Record<ParameterType, number[]>;
+export type Result = {
   station: string;
   altitude: number;
   timestamps: Uint32Array;
@@ -54,19 +51,16 @@ type Result = {
   values: Values;
 };
 
-export async function fetchSMET(
-  url: string,
-  timeRangeMilli: number
-): Promise<Result> {
+export async function fetchSMET(url: string): Promise<Result> {
   const response = await fetch(url);
   const smet = await response.text();
-  return parseSMET(smet, timeRangeMilli);
+  return parseSMET(smet);
 }
 
-export function parseSMET(smet: string, timeRangeMilli: number): Result {
+export function parseSMET(smet: string): Result {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s/;
-  let values: Float32Array[] = [];
+  let values: number[][] = [];
   let fields: string[] = [];
   let units: string[] = [];
   let nodata = "-777";
@@ -76,7 +70,6 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
    * SMET: timezone of the measurements, decimal number positive going east. If not provided, utc is assumed.
    */
   let tz = 0;
-  const now = Date.now();
   const lines = smet.split(/\r?\n/);
   const timestamps = new Uint32Array(lines.length);
   let dataIndex = 0;
@@ -102,9 +95,9 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
             PINT: "mm/h",
             PSUM: "mm",
             HS: "m",
-          })[f] ?? ""
+          })[f] ?? "",
       );
-      values = fields.map(() => new Float32Array(lines.length));
+      values = fields.map(() => [] as number[]);
       return;
     } else if (line.startsWith("#units =")) {
       units = line.slice("#units =".length).trim().split(separator);
@@ -136,13 +129,12 @@ export function parseSMET(smet: string, timeRangeMilli: number): Result {
       }
     }
     const date = Date.parse(dateString);
-    if (now - date > timeRangeMilli) return;
     // uPlot uses epoch seconds (instead of milliseconds)
     timestamps[dataIndex] = date / 1000;
     values.forEach((values0, i) => {
       if (i == 0) return; // timestamp
-      const value = cells[i] === nodata ? NaN : +cells[i].replace(",", ".");
-      values0[dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
+      const value = cells[i] === nodata ? null : +cells[i].replace(",", ".");
+      values0[dataIndex] = value == null ? null : (UNIT_MAPPING[units[i]]?.convert(value) ?? value);
     });
     dataIndex++;
   });
