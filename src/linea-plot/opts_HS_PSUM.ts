@@ -29,7 +29,7 @@ export const opts_HS_PSUM: uPlot.Options = {
 
         const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
-        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (cm)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
         var labelColor1 = "#08519C";
         var labelColor2 = "#6aafd5";
         OptsHelper.UpdateAxisLabels(
