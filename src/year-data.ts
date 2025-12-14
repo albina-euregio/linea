@@ -8,12 +8,10 @@ export class YearData {
   values: number[] = [];
   timeZone: string = "";
 
-  get timestamps(): Uint32Array {
+  get timestamps(): number[] {
     const timeZone = this.timeZone;
-    return new Uint32Array(
-      this.dates.map(
-        (d) => d.toZonedDateTime({ plainTime: "00:00:00", timeZone }).epochMilliseconds / 1000,
-      ),
+    return this.dates.map(
+      (d) => d.toZonedDateTime({ plainTime: "00:00:00", timeZone }).epochMilliseconds,
     );
   }
 
@@ -57,14 +55,14 @@ export class YearData {
     timeZone: string,
     startDate: Temporal.PlainDate,
     endDate: Temporal.PlainDate,
-    timestamps: Uint32Array,
+    timestamps: number[],
     values: number[],
   ): YearData {
     const yearData = new YearData();
     yearData.timeZone = timeZone;
     for (let i = 0; i < timestamps.length; i++) {
       const value = Number.isFinite(values[i]) ? values[i] : NaN;
-      const timestamp = timestamps[i] * 1000;
+      const timestamp = timestamps[i];
       const instant = Temporal.Instant.fromEpochMilliseconds(timestamp);
       const date = instant.toZonedDateTimeISO(timeZone).toPlainDate();
       const monthDay = date.toPlainMonthDay().toString();

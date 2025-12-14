@@ -11,7 +11,7 @@ import { AbstractLineaChart } from "./AbstractLineaChart";
 
 export class LineaChart extends AbstractLineaChart {
   constructor(
-    private timestamps: Uint32Array,
+    private timestamps: number[],
     private values: Values,
     readonly station: string,
     readonly altitude: number,
@@ -23,7 +23,7 @@ export class LineaChart extends AbstractLineaChart {
     this.createPlots().catch((e) => console.error(e));
   }
 
-  setData(timestamps: Uint32Array, values: Values) {
+  setData(timestamps: number[], values: Values) {
     this.timestamps = timestamps;
     this.values = values;
     let i = 0;

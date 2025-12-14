@@ -11,6 +11,7 @@ export const showSurfaceHoar = { value: true };
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
  */
 export const opts_TA_TD_TSS: uPlot.Options = {
+  ms: 1, // timestamp multiplier that yields 1 millisecond
   width: 1040,
   height: 300,
   padding: [50, 50, 0, 50],

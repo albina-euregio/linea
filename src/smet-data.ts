@@ -46,7 +46,7 @@ export type Values = Record<ParameterType, number[]>;
 export type Result = {
   station: string;
   altitude: number;
-  timestamps: Uint32Array;
+  timestamps: number[];
   units: Units;
   values: Values;
 };
@@ -71,7 +71,7 @@ export function parseSMET(smet: string): Result {
    */
   let tz = 0;
   const lines = smet.split(/\r?\n/);
-  const timestamps = new Uint32Array(lines.length);
+  const timestamps = [] as number[];
   let dataIndex = 0;
   lines.forEach((line) => {
     function parseHeader(prefix: string) {
@@ -138,8 +138,7 @@ export function parseSMET(smet: string): Result {
       }
     }
     const date = Date.parse(dateString);
-    // uPlot uses epoch seconds (instead of milliseconds)
-    timestamps[dataIndex] = date / 1000;
+    timestamps[dataIndex] = date;
     values.forEach((values0, i) => {
       if (i == 0) return; // timestamp
       const value = cells[i] === nodata ? null : +cells[i].replace(",", ".");

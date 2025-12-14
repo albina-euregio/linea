@@ -9,6 +9,7 @@ import { OptsHelper } from "./optsHelper";
  */
 
 export const opts_NS_year: uPlot.Options = {
+  ms: 1, // timestamp multiplier that yields 1 millisecond
   width: 1040,
   height: 300,
   padding: [50, 50, 0, 50],
