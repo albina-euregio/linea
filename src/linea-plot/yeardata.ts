@@ -65,7 +65,12 @@ export class YearData {
     f: (...values: number[]) => number,
   ): number[] {
     return this.dates.map((d) => {
-      const arr = map.get(d.toPlainMonthDay().toString()) ?? [];
+      let monthDay = d.toPlainMonthDay().toString();
+      if (d.inLeapYear && monthDay === "02-29") {
+        // use 02-28 for 02-29 to avoid artifacts
+        monthDay = d.subtract({ days: 1 }).toPlainMonthDay().toString();
+      }
+      const arr = map.get(monthDay) ?? [];
       const finite = arr.filter(Number.isFinite);
       if (finite.length === 0) return NaN;
       return f(...finite);
