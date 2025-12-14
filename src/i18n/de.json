@@ -1,5 +1,12 @@
 {
   "dialog:weather-station-diagram:parameter:HS": "Schneehöhe",
+  "dialog:weather-station-diagram:parameter:HS_max": "Maximale Schneehöhe",
+  "dialog:weather-station-diagram:parameter:HS_median": "Mediane Schneehöhe",
+  "dialog:weather-station-diagram:parameter:HS_min": "Minimale Schnehöhe",
+  "dialog:weather-station-diagram:parameter:TEMP": "Temperatur",
+  "dialog:weather-station-diagram:parameter:TEMP_max": "Maximale Temperatur",
+  "dialog:weather-station-diagram:parameter:TEMP_median": "Mediane Temperatur",
+  "dialog:weather-station-diagram:parameter:TEMP_min": "Minimale Temperatur",
   "dialog:weather-station-diagram:parameter:PSUM": "Niederschlag",
   "dialog:weather-station-diagram:parameter:TA": "Lufttemperatur",
   "dialog:weather-station-diagram:parameter:TD": "Taupunkt",
@@ -10,8 +17,17 @@
   "dialog:weather-station-diagram:parameter:VW_MAX": "Windböe",
   "dialog:weather-station-diagram:parameter:DW": "Wind-Richtung",
   "dialog:weather-station-diagram:parameter:SH": "Oberflächenreif",
-  "dialog:weather-station-diagram:parameter:SH:hide": "Potential zur Oberflächenreifbildung ausblenden",
-  "dialog:weather-station-diagram:parameter:SH:show": "Potential zur Oberflächenreifbildung einblenden",
+  "dialog:weather-station-diagram:parameter:SH:potential": "Potential zur Oberflächenreifbildung",
+  "dialog:weather-station-diagram:parameter:SH:present": "Ja",
+  "dialog:weather-station-diagram:parameter:SH:present:not": "Nein",
+  "dialog:weather-station-diagram:parameter:DATAPOINTS:amount": "Gemessene Tage",
+  "dialog:weather-station-diagram:parameter:newsnow": "Neuschnee",
+  "dialog:weather-station-diagram:parameter:snowcover": "Schneedecke",
+  "dialog:weather-station-diagram:unit:DATAPOINTS": "Tage",
   "dialog:weather-station-diagram:unit:temperature": "Temperatur",
-  "dialog:weather-station-diagram:unit:time": "Zeit"
+  "dialog:weather-station-diagram:unit:time": "Zeit",
+  "dialog:weather-station-diagram:controls:tooltips:nextweek": "Nächste 7 Tage",
+  "dialog:weather-station-diagram:controls:tooltips:previousweek": "Vorige 7 Tage",
+  "dialog:weather-station-diagram:controls:tooltips:wholetimespan": "Gesamten verfügbaren Zeitraum anzeigen",
+  "dialog:weather-station-diagram:controls:value:exportpng": "PNG exportieren"
 }
