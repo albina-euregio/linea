@@ -20,7 +20,7 @@
   "dialog:weather-station-diagram:parameter:SH:potential": "Potential zur Oberflächenreifbildung",
   "dialog:weather-station-diagram:parameter:SH:present": "Ja",
   "dialog:weather-station-diagram:parameter:SH:present:not": "Nein",
-  "dialog:weather-station-diagram:parameter:DATAPOINTS:amount": "Gemessene Tage",
+  "dialog:weather-station-diagram:parameter:DATAPOINTS:amount": "Kalendertage mit Messung",
   "dialog:weather-station-diagram:parameter:newsnow": "Neuschnee",
   "dialog:weather-station-diagram:parameter:snowcover": "Schneedecke",
   "dialog:weather-station-diagram:unit:DATAPOINTS": "Tage",
