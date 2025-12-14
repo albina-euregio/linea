@@ -1,3 +1,5 @@
+import { i18n } from "../i18n";
+
 const ms = 1,
   s = ms * 1e3,
   m = s * 60,
@@ -6,24 +8,26 @@ const ms = 1,
   y = d * 365;
 
 export const timeAxis: uPlot.Axis = {
-  values: [
-    [y, "{YYYY}", null, null, null, null, null, null, 1],
-    [d * 28, "{MMM}", "\n{YYYY}", null, null, null, null, null, 1], // Shows month as Jan, Feb, May, etc.
-    [d, "{DD}. {MMM}", "\n{YYYY}", null, null, null, null, null, 1], // e.g. 29. May
-    [h, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
-    [m, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
-    [
-      s,
-      ":{ss}",
-      "\n{DD}. {MMM} {YY} {HH}:{mm}",
-      null,
-      "\n{DD}. {MMM} {HH}:{mm}",
-      null,
-      "\n{HHh}:{mm}",
-      null,
-      1,
-    ],
-  ],
+  values(self, splits, axisIdx, foundSpace, foundIncr) {
+    let opts:
+      | [Intl.DateTimeFormatOptions]
+      | [Intl.DateTimeFormatOptions, Intl.DateTimeFormatOptions] = [{}];
+    if (foundIncr >= y) {
+      opts = [{ year: "numeric" }];
+    } else if (foundIncr >= 28 * d) {
+      opts = [{ month: "short" }, { year: "numeric" }];
+    } else if (foundIncr >= d) {
+      opts = [{ month: "short", day: "numeric" }, { year: "numeric" }];
+    } else {
+      opts = [
+        { hour: "2-digit", minute: "2-digit" },
+        { month: "short", day: "2-digit" },
+      ];
+    }
+    return splits.map((s) =>
+      opts.map((o) => i18n.time(s % 100_000 === 99_999 ? s + 1 : s, o)).join("\n"),
+    );
+  },
   grid: {
     show: false,
   },
