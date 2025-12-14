@@ -1,55 +1,10 @@
 import { Temporal } from "temporal-polyfill";
-import { Values } from "./smet-data";
 
 export class YearData {
-  plainMonthData = new Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>();
-
-  plainMonthTempData = new Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>();
-
+  monthDayData = new Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>();
   dates: Temporal.PlainDate[] = [];
-  valuesHS: number[] = [];
-  valuesPSUM: number[] = [];
-  valuesTA: number[] = [];
-  valuesTD: number[] = [];
+  values: number[] = [];
   timeZone: string = "";
-  valuesNS: number[] = [];
-
-  add(
-    startDate: Temporal.PlainDate,
-    endDate: Temporal.PlainDate,
-    date: Temporal.PlainDate,
-    hs: number,
-    psum: number,
-    ta: number,
-    td: number,
-    ns: number = NaN,
-  ) {
-    const monthDay = date.toPlainMonthDay().toString();
-
-    // sanitize inputs: undefined / non-finite -> NaN
-    hs = Number.isFinite(hs) ? hs : NaN;
-    ta = Number.isFinite(ta) ? ta : NaN;
-    psum = Number.isFinite(psum) ? psum : NaN;
-    td = Number.isFinite(td) ? td : NaN;
-    ns = Number.isFinite(ns) ? ns : NaN;
-
-    if (!this.plainMonthData.has(monthDay)) {
-      this.plainMonthData.set(monthDay, []);
-    }
-    this.plainMonthData.get(monthDay)?.push(hs);
-    if (!this.plainMonthTempData.has(monthDay)) {
-      this.plainMonthTempData.set(monthDay, []);
-    }
-    this.plainMonthTempData.get(monthDay)?.push(ta);
-    if (startDate.toString() <= date.toString() && date.toString() <= endDate.toString()) {
-      this.dates.push(date);
-      this.valuesHS.push(hs);
-      this.valuesPSUM.push(psum);
-      this.valuesTA.push(ta);
-      this.valuesTD.push(td);
-      this.valuesNS.push(ns);
-    }
-  }
 
   get timestamps(): Uint32Array {
     const timeZone = this.timeZone;
@@ -77,56 +32,21 @@ export class YearData {
     });
   }
 
-  get N(): number[] {
-    return this.#aggFor(this.plainMonthData, (...v) => v.filter(Number.isFinite).length);
+  get amount(): number[] {
+    return this.#aggFor(this.monthDayData, (...v) => v.filter(Number.isFinite).length);
   }
 
-  get PSUM(): number[] {
-    return this.valuesPSUM;
+  get maxValues(): number[] {
+    return this.#aggFor(this.monthDayData, Math.max);
   }
 
-  get HS(): number[] {
-    return this.valuesHS;
+  get minValues(): number[] {
+    return this.#aggFor(this.monthDayData, Math.min);
   }
 
-  get TA(): number[] {
-    return this.valuesTA;
-  }
-
-  get TD(): number[] {
-    return this.valuesTD;
-  }
-
-  get NS(): number[] {
-    return this.valuesNS;
-  }
-
-  get HS_max(): number[] {
-    return this.#aggFor(this.plainMonthData, Math.max);
-  }
-
-  get HS_min(): number[] {
-    return this.#aggFor(this.plainMonthData, Math.min);
-  }
-
-  get HS_median(): number[] {
+  get medianValues(): number[] {
     return this.#aggFor(
-      this.plainMonthData,
-      (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)],
-    );
-  }
-
-  get TA_min(): number[] {
-    return this.#aggFor(this.plainMonthTempData, Math.min);
-  }
-
-  get TA_max(): number[] {
-    return this.#aggFor(this.plainMonthTempData, Math.max);
-  }
-
-  get TA_median(): number[] {
-    return this.#aggFor(
-      this.plainMonthTempData,
+      this.monthDayData,
       (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)],
     );
   }
@@ -136,21 +56,26 @@ export class YearData {
     startDate: Temporal.PlainDate,
     endDate: Temporal.PlainDate,
     timestamps: Uint32Array,
-    values: Values,
+    values: number[],
   ): YearData {
     const yearData = new YearData();
     yearData.timeZone = timeZone;
     for (let i = 0; i < timestamps.length; i++) {
-      const hs = values.HS[i] ? values.HS[i] : NaN;
-      const ta = values.TA ? values.TA[i] : NaN;
-      const td = values.TD ? values.TD[i] : NaN;
-      const psum = values.PSUM ? values.PSUM[i] : NaN;
-      const ns = values.NS ? values.NS[i] : NaN;
-
+      const value = Number.isFinite(values[i]) ? values[i] : NaN;
       const timestamp = timestamps[i] * 1000;
       const instant = Temporal.Instant.fromEpochMilliseconds(timestamp);
       const date = instant.toZonedDateTimeISO(timeZone).toPlainDate();
-      yearData.add(startDate, endDate, date, hs, psum, ta, td, ns);
+      const monthDay = date.toPlainMonthDay().toString();
+
+      if (!yearData.monthDayData.has(monthDay)) {
+        yearData.monthDayData.set(monthDay, []);
+      }
+      yearData.monthDayData.get(monthDay)?.push(value);
+
+      if (startDate.toString() <= date.toString() && date.toString() <= endDate.toString()) {
+        yearData.dates.push(date);
+        yearData.values.push(value);
+      }
     }
     return yearData;
   }
