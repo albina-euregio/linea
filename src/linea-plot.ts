@@ -2,7 +2,6 @@ import uPlot from "uplot";
 import { i18n } from "./i18n";
 import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
-import { Temporal } from "temporal-polyfill";
 
 /**
  * LineaPlot Web Component
@@ -242,6 +241,9 @@ export class LineaPlot extends HTMLElement {
    * fetches the data from the src attribute, generalizes it and update the valid date inputs
    */
   async fetchAndStoreData() {
+    if (!globalThis.Temporal) {
+      await import("temporal-polyfill/global");
+    }
     const src = this.getAttribute("src") ?? "";
     let srcs: string[] =
       src.startsWith("[") || src.startsWith('"') ? (JSON.parse(src) as string[]) : [src];

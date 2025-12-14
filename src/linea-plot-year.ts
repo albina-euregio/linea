@@ -29,7 +29,6 @@ import {
   opts_DATAPOINTS_amount_year,
 } from "./linea-plot/opts_datapoints_year.ts";
 import { fetchSMET } from "./smet-data";
-import { Temporal } from "temporal-polyfill";
 import { YearData } from "./year-data.ts";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart.ts";
 
@@ -54,6 +53,9 @@ export class LineaPlotYear extends AbstractLineaChart {
   }
 
   async renderPlots() {
+    if (!globalThis.Temporal) {
+      await import("temporal-polyfill/global");
+    }
     this.resizeObserver.unobserve(this);
     const { station, altitude, timestamps, values } = await fetchSMET(
       this.getAttribute("src") ?? "",
