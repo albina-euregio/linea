@@ -1,5 +1,5 @@
 import { Temporal } from "temporal-polyfill";
-import { Values } from "../smet-data";
+import { Values } from "./smet-data";
 
 export class YearData {
   plainMonthData = new Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>();

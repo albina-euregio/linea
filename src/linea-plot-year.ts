@@ -30,7 +30,7 @@ import {
 } from "./linea-plot/opts_datapoints_year.ts";
 import { fetchSMET } from "./smet-data";
 import { Temporal } from "temporal-polyfill";
-import { YearData } from "./linea-plot/yeardata.ts";
+import { YearData } from "./year-data.ts";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart.ts";
 
 /**
