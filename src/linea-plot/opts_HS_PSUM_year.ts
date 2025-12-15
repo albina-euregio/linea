@@ -53,10 +53,14 @@ export const opts_HS_year: uPlot.Options = {
 
   scales: {
     y: {
-      range: [0, 500],
+      range: (u, dataMin, dataMax) => {
+        return dataMax > 500 ? [0, 1000] : [0, 500];
+      },
     },
     y2: {
-      range: [0, 100],
+      range: (u, dataMin, dataMax) => {
+        return dataMax > 100 ? [0, 150] : [0, 100];
+      },
     },
   },
 
@@ -65,13 +69,19 @@ export const opts_HS_year: uPlot.Options = {
     {
       scale: "y",
       stroke: "#DE2D26",
-      splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
+      splits: (u) => {
+        const max = u.scales.y.max ?? 0;
+        return max > 500 ? [0, 200, 400, 600, 800, 1000] : [0, 100, 200, 300, 400, 500];
+      }
     },
     {
       scale: "y2",
       stroke: "#6aafd5",
       side: 1,
-      splits: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+      splits: (u) => {
+        const max = u.scales.y2.max ?? 0;
+        return max > 100 ? [0, 30, 60, 90, 120, 150] : [0, 20, 40, 60, 80, 100];
+      },
       grid: {
         show: false,
       },
