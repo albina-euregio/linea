@@ -260,6 +260,8 @@ export class ExportModal {
     }
 
     #exportAsIframe() {
+    }
+
     #generateTitleString(): string {
         const titles: {station: string, altitude: number}[] = [];
         for (const lineachart of this.lineaPlot.lineacharts){
