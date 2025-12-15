@@ -2,12 +2,39 @@ import { LineaPlot } from "./linea-plot";
 
 export class ExportModal {
 
+    private exportOptions: HTMLDivElement;
+    private exportSettings: HTMLDivElement;
+    private exportResult: HTMLDivElement;
+
     constructor(
         readonly modal: HTMLDivElement, 
         private lineaPlot: LineaPlot
     ) {
         const style: HTMLStyleElement = document.createElement('style');
         style.textContent = `
+            label {
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #black;
+                font-size: 14px;
+            }
+            
+            input {
+                padding: 12px;
+                border: 2px solid #F5F5F5;
+                border-radius: 8px;
+                font-size: 14px;
+                background: #black;
+                color: black;
+                transition: border-color 0.3s ease;
+            }
+            
+            input:focus {
+                outline: none;
+                border-color: #19abff;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            
             .export-modal {
                 display: none;
                 position: fixed;
@@ -114,6 +141,8 @@ export class ExportModal {
                 padding: 15px;
                 border-radius: 8px;
                 margin: 15px 0;
+                display: flex;
+                flex-direction: column;
             }
             
             .export-settings h4 {
@@ -122,29 +151,14 @@ export class ExportModal {
             }
             
             .export-settings label {
-                font-weight: 600;
-                color: #black;
-                font-size: 14px;
                 margin-bottom: 5px;
             }
-            
+
             .export-settings input {
-                padding: 12px;
-                border: 2px solid #F5F5F5;
-                border-radius: 8px;
-                font-size: 14px;
-                background: #black;
-                color: black;
-                transition: border-color 0.3s ease;
                 width: 100%;
                 max-width: 200px;
-            }
+            } 
             
-            .export-settings input:focus {
-                outline: none;
-                border-color: #19abff;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
         `;
         this.modal.appendChild(style);
         
@@ -173,18 +187,15 @@ export class ExportModal {
     
                 <div class="export-settings" id="exportSettings" style="display:none;">
                     <h4>Export Settings</h4>
-    
-                    <div class="export-settings-grid">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <div>
                             <label for="exportWidth">Width (px)</label>
                             <input type="number" id="exportWidth" value="1100" min="400" max="2000">
                         </div>
-    
                         <div>
                             <label for="exportHeight">Height (px)</label>
                             <input type="number" id="exportHeight" value="400" min="200" max="1000">
                         </div>
-    
                         <div>
                             <label for="exportTitle">Chart Title</label>
                             <input type="text" id="exportTitle" value="Avalanche Danger Ratings">
@@ -205,13 +216,18 @@ export class ExportModal {
                     </div>
                 </div>
             </div>`);
+        
+        this.exportOptions = this.modal.querySelector(".export-options") as HTMLDivElement;
+        this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
+        this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
+
         this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
-            this.modal.style.display = "flex";
+            this.exportSettings.style.display = "flex";
             // this.#exportAsIframe();
         });
 
         this.modal.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
-            this.modal.style.display = "flex";
+            this.exportSettings.style.display = "flex";
             // this.exportAsStandalone();
         });
 
@@ -240,6 +256,10 @@ export class ExportModal {
         document.getElementById("exportModal").style.display = 'block';
         document.getElementById("exportResult").style.display = 'none';
         document.getElementById("exportSettings").style.display = 'none';
+    }
+
+    #exportAsIframe() {
+        // Implementation for exporting as iframe
     }
 
     /**
