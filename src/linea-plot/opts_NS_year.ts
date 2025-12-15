@@ -80,7 +80,7 @@ export const opts_NS_year_series: uPlot.Series = {
   fill: "#DE2D26",
   scale: "y",
   value: (u, v) =>
-    v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
+    v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "cm"),
 };
 
 export const opts_NS_year_snow_cover: uPlot.Series = {
