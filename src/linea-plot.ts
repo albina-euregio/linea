@@ -217,8 +217,147 @@ export class LineaPlot extends HTMLElement {
             border-right-width: 2px;
           }
         }
+
+        .export-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+        }
+        
+        .export-modal-content {
+            background-color: #ffffff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .export-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .export-close:hover {
+            color: #fff;
+        }
+        
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .export-option {
+            background: #3498db;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .export-option:hover {
+            background: #444;
+        }
+        
+        .export-option h4 {
+            margin: 0 0 10px 0;
+            color: #ffffff;
+        }
+        
+        .export-option p {
+            margin: 0;
+            font-size: 13px;
+            color: #ffffff;
+        }
+        
+        .code-container {
+            background: #ffffff;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .code-container pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #000000;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #ffffff;
+        }
+        
+        .export-settings {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .export-settings h4 {
+            margin: 0 0 15px 0;
+            color: #3498db;
+        }
+        
+        .export-settings label {
+            font-weight: 600;
+            color: #black;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .export-settings input {
+            padding: 12px;
+            border: 2px solid #F5F5F5;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #black;
+            color: black;
+            transition: border-color 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+        }
+        
+        .export-settings input:focus {
+            outline: none;
+            border-color: #19abff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
       `;
     this.appendChild(style);
+    this.#addExportModal();
     this.#addControls();
     
 
@@ -304,137 +443,195 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
-  #exportAsPNG() {
-    console.log('export png');
+  /**
+   * 
+   */
+  #addExportModal(){
+    const modal: HTMLDivElement = document.createElement("div");
+    modal.classList.add("export-modal");
+    modal.id = "exportModal";
+    modal.insertAdjacentHTML("beforeend", `<div class="export-modal-content">
+          <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
+          <h2>Export Chart</h2>
 
-    const width = Number.parseInt("1600");
-    const height = Number.parseInt("100");
-    
-    const canvas = this.#createPNG(width, height);
-    console.log(width, height);
-    const dataURL = canvas.toDataURL('image/png');
-    
-    const a = document.createElement("a");
-    a.href = dataURL;
-    a.target="_tab";
-    a.click();
+          <div class="export-options">
+              <div class="export-option" id="btnExportIframe">
+                  <h4>Embed Code (iframe)</h4>
+                  <p>Generate HTML iframe code for embedding in websites</p>
+              </div>
+
+              <div class="export-option" id="btnExportStandalone">
+                  <h4>Standalone HTML</h4>
+                  <p>Complete HTML file with embedded data</p>
+              </div>
+
+              <div class="export-option" id="btnExportPNG">
+                  <h4>PNG Image</h4>
+                  <p>Static image of the current chart view</p>
+              </div>
+          </div>
+
+          <div class="export-settings" id="exportSettings" style="display:none;">
+              <h4>Export Settings</h4>
+
+              <div class="export-settings-grid">
+                  <div>
+                      <label for="exportWidth">Width (px)</label>
+                      <input type="number" id="exportWidth" value="1100" min="400" max="2000">
+                  </div>
+
+                  <div>
+                      <label for="exportHeight">Height (px)</label>
+                      <input type="number" id="exportHeight" value="400" min="200" max="1000">
+                  </div>
+
+                  <div>
+                      <label for="exportTitle">Chart Title</label>
+                      <input type="text" id="exportTitle" value="Avalanche Danger Ratings">
+                  </div>
+              </div>
+          </div>
+
+          <div id="exportResult" style="display:none;">
+              <h3>Export Result</h3>
+
+              <div class="code-container">
+                  <button class="copy-btn" id="copyExportBtn">Copy</button>
+                  <pre id="exportCode"></pre>
+              </div>
+
+              <div style="margin-top:15px;">
+                  <button id="downloadBtn" class="export-download-btn">Download File</button>
+              </div>
+          </div>
+      </div>`);
+      this.appendChild(modal);
+      this.querySelector("#btnExportIframe")?.addEventListener("click", () => {
+          modal.style.display = "flex";
+          // this.#exportAsIframe();
+      });
+
+      this.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
+          modal.style.display = "flex";
+          // this.exportAsStandalone();
+      });
+
+      this.querySelector("#btnExportPNG")?.addEventListener("click", () => {
+          modal.style.display = "flex";
+          this.#exportAsPNG();
+      });
+
+      this.querySelector("#copyExportBtn")?.addEventListener("click", () => {
+          // this.#copyToClipboard();
+      });
+
+      this.querySelector("#downloadBtn")?.addEventListener("click", () => {
+          // this.downloadExport();
+      });
+      
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+          const modal = document.getElementById('exportModal');
+          if (event.target === modal) {
+            document.getElementById('exportModal').style.display = 'none';
+          }
+      };
   }
 
-  #exportRoot?: HTMLDivElement;
+  #exportAsPNG() {
+    const currentExportType = 'png';
+    document.getElementById('exportSettings').style.display = 'block';
 
-  #createPNG(width: number, heightPerPlot: number): HTMLCanvasElement {
-    // 1) Create offscreen root (once)
-    if (!this.#exportRoot) {
-      const root = document.createElement("div");
-      root.style.position = "fixed";
-      root.style.left = "-99999px";
-      root.style.top = "0";
-      root.style.width = width + "px";
-      root.style.pointerEvents = "none";
-      document.body.appendChild(root);
-      this.#exportRoot = root;
-    }
+    const width = 1600;
+    const height = 400;
+    
+    const canvas = this.#createPNG(width, height);
+    const dataURL = canvas.toDataURL('image/png');
+    
+    const currentExportData = { 
+        code: `<img src="${dataURL}" alt="Avalanche Danger Ratings Chart" width="${canvas.width}" height="${canvas.height}"/>`, 
+        filename: 'station.png',
+        content: dataURL
+    };
+    
+    document.getElementById('exportCode').innerHTML = `<img src="${dataURL}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+    document.getElementById('exportResult').style.display = 'block';
+  }
 
-    const exportRoot = this.#exportRoot;
+  #createPNG(width: number, height: number): HTMLCanvasElement{
+    const canvases: HTMLCanvasElement[] = [];
+    const titles: {station: string, altitude: number}[] = [];
+    const series: uPlot.Series[] = [];
+    const legendItems = {};
 
-    const exportCanvases: HTMLCanvasElement[] = [];
-    const exportPlots: uPlot[] = [];
-
-    const titles: { station: string; altitude: number }[] = [];
-    const legendItems: Record<string, string> = {};
-
-    // 2) Build *export-only* plots for each LineaChart
-    for (const lineachart of this.lineacharts) {
-      const { station, altitude } = lineachart;
-      titles.push({ station, altitude });
-
-      // --- THIS is where you recreate the uPlots used by this lineachart ---
-      // You likely already have a function or logic somewhere that does something
-      // like: new uPlot(opts_TA_TD_TSS, [timestamps, ...], container)
-      //
-      // For example, you could add a method on LineaChart:
-      //   lineachart.createExportPlots(width, heightPerPlot, exportRoot)
-      //
-      // and it returns an array<uPlot>. I'll assume that here:
-
-      const plots = this.createExportPlots(width, heightPerPlot, exportRoot);
-      exportPlots.push(...plots);
-
-      // collect canvases
-      plots
-        .map((p) => p.root.querySelector("canvas") as HTMLCanvasElement)
-        .forEach((c) => exportCanvases.push(c));
-
-      // collect legend info from series of *export* plots
-      plots.forEach((p) => {
-        p.series.slice(1).forEach((s, i) => {
-          const label = s.label ?? `Series ${i + 1}`;
-          let color = "#000000";
-
-          if (typeof s.stroke === "string") {
-            color = s.stroke;
-          } else {
-            const maybe = s.stroke(p, i + 1);
-            if (typeof maybe === "string") color = maybe;
-          }
-
-          legendItems[label] = color;
-        });
+    for (const lineachart of this.lineacharts){
+      const plots: uPlot[] = lineachart.plots;
+      plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
+        canvases.push(c);
       });
+      const station = lineachart.station;
+      const altitude = lineachart.altitude;
+      titles.push({station, altitude});
+      plots.map(p => series.push(...p.series.slice(1)));
+      plots.map(p => p.series.slice(1).map((s, i) => {
+        const label = s.label ?? `Series ${i + 1}`;
+        let color = "#000000";
+
+        console.log(typeof s.stroke);
+        if (typeof s.stroke === "string") {
+          color = s.stroke;
+        } else {
+          const c = s.stroke(p, i + 1);
+          if (typeof c === "string") color = c;
+        }
+        legendItems[label] = color;
+      }));
     }
 
-    // Build combined title
     let title = "";
     titles.forEach((t, i) => {
-      title += `${t.station} (${t.altitude}m)`;
-      if (i + 1 < titles.length) {
+      title += t.station + " (" + t.altitude + "m)"
+      if(! (titles.length == (i+1))){
         title += " — ";
       }
     });
 
-    // 3) Compute heights
+    //build png
     const titleHeight = title ? 40 : 0;
-    const chartsHeight = exportCanvases.length * heightPerPlot;
     const legendItemHeight = 22;
     const legendPadding = 20;
-
-    // We'll start with an estimated totalHeight; if legend wraps we can adjust
-    let totalHeight = titleHeight + chartsHeight + legendPadding * 2 + legendItemHeight;
+    
+    const chartsHeight = canvases.reduce((sum, c) => sum + height, 0);
+    const totalHeight = titleHeight + chartsHeight + 60;
 
     const outCanvas = document.createElement("canvas");
     outCanvas.width = width;
     outCanvas.height = totalHeight;
 
+    //fill background
     const ctx = outCanvas.getContext("2d")!;
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = false;
     ctx.imageSmoothingQuality = "high";
 
-    // background
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-    // 4) draw title
-    let y = 0;
-    if (title) {
+    
+    if(title){
       ctx.fillStyle = "#000";
       ctx.font = "24px Arial";
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(title, outCanvas.width / 2, titleHeight / 2);
-      y += titleHeight;
+      ctx.fillText(title, outCanvas.width / 2, 40);
     }
 
-    // 5) draw each plot canvas
-    for (const c of exportCanvases) {
-      // note: we draw with width/heightPerPlot – these plots were created at that size so no scaling
-      ctx.drawImage(c, 0, y, width, heightPerPlot);
-      y += heightPerPlot;
+    let y = titleHeight;
+    for (const c of canvases) {
+      ctx.drawImage(c, 0, y, width, height);
+      y += height;
     }
 
-    // 6) draw legend
     if (Object.keys(legendItems).length > 0) {
       const swatchSize = 18;
-      const xStart = legendPadding * 2;
+      const xStart = legendPadding*2;
       let legendY = y + legendPadding + legendItemHeight / 2;
 
       ctx.textAlign = "left";
@@ -442,26 +639,12 @@ export class LineaPlot extends HTMLElement {
       ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
 
       let x = xStart;
-
-      for (const [label, color] of Object.entries(legendItems)) {
-        const textWidth = ctx.measureText(label).width;
-
-        // wrap legend line
-        if (x + swatchSize + 8 + textWidth + legendPadding > outCanvas.width) {
+      for (const [label, color] of Object.entries(legendItems)){
+        const textwidth = ctx.measureText(label).width;
+        if(x + swatchSize + 8 + textwidth > outCanvas.width){
           x = xStart;
           legendY += legendItemHeight;
-          totalHeight += legendItemHeight;
-        }
-
-        // if legend goes beyond original canvas height, increase canvas and copy
-        if (legendY + legendItemHeight / 2 > outCanvas.height) {
-          const tmp = document.createElement("canvas");
-          tmp.width = outCanvas.width;
-          tmp.height = outCanvas.height + legendItemHeight;
-          const tmpCtx = tmp.getContext("2d")!;
-          tmpCtx.drawImage(outCanvas, 0, 0);
-          outCanvas.height = tmp.height;
-          ctx.drawImage(tmp, 0, 0);
+          outCanvas.height += legendItemHeight;
         }
 
         // colored square
@@ -471,37 +654,11 @@ export class LineaPlot extends HTMLElement {
         // label
         ctx.fillStyle = "#000";
         ctx.fillText(label, x + swatchSize + 8, legendY);
-
-        x += swatchSize + 8 + textWidth + 10;
+        x = x + swatchSize + 8 + textwidth + 10;
       }
     }
-
-    // 7) clean up export plots & offscreen dom
-    exportPlots.forEach((p) => p.destroy());
-    exportRoot.innerHTML = ""; // remove all export plot nodes
-
     return outCanvas;
   }
-
-  createExportPlots(width: number, heightPerPlot: number, parent: HTMLElement): uPlot[] {
-    const plots: uPlot[] = [];
-
-    const exportplot: LineaPlot = document.createElement("linea-plot") as LineaPlot;
-    exportplot.style.width = ""+width;
-    exportplot.style.height = ""+heightPerPlot*4;
-    
-    exportplot.setAttribute("src", this.getAttribute("src") ?? "");
-    exportplot.setAttribute("startdate", this.#inputValueToZonedDateTime(this.startInput.value).toLocaleString());
-    exportplot.setAttribute("enddate", this.#inputValueToZonedDateTime(this.endInput.value).toLocaleString());
-    exportplot.connectedCallback();
-    const lineachartsexport = exportplot.lineacharts;
-
-    for (const lc of lineachartsexport){
-      plots.push(...lc.plots);
-    }
-    return plots;
-  }
-
   
   /**
    * Adds the controls to the Plot:
@@ -606,7 +763,9 @@ export class LineaPlot extends HTMLElement {
           alert("Nothing to export!");
           return;
         }
-        this.#exportAsPNG();
+        document.getElementById("exportModal").style.display = 'block';
+        document.getElementById("exportResult").style.display = 'none';
+        document.getElementById("exportSettings").style.display = 'none';
       });
       menu.appendChild(printbtn);
     }
