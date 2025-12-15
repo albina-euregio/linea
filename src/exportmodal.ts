@@ -223,7 +223,7 @@ export class ExportModal {
 
         this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
             this.exportSettings.style.display = "flex";
-            // this.#exportAsIframe();
+            this.#exportAsIframe();
         });
 
         this.modal.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
@@ -246,20 +246,20 @@ export class ExportModal {
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('exportModal');
-            if (event.target === modal) {
+            if (event.target === modal && modal) {
                 modal.style.display = 'none';
             }
         };
     }
 
     show() {
-        document.getElementById("exportModal").style.display = 'block';
-        document.getElementById("exportResult").style.display = 'none';
-        document.getElementById("exportSettings").style.display = 'none';
+        this.modal.style.display = 'block';
+        this.exportResult.style.display = 'none';
+        this.exportSettings.style.display = 'none';
     }
 
     #exportAsIframe() {
-        // Implementation for exporting as iframe
+
     }
 
     /**
@@ -375,5 +375,16 @@ export class ExportModal {
         a.href = url;
         a.target="_tab";
         a.click();
+    }
+
+    #getExportSettings() {
+        const widthInput = document.getElementById("exportWidth") as HTMLInputElement;
+        const heightInput = document.getElementById("exportHeight") as HTMLInputElement;
+        const titleInput = document.getElementById("exportTitle") as HTMLInputElement;
+        return {
+            width: parseInt(widthInput.value),
+            height: parseInt(heightInput.value),
+            title: titleInput.value
+        };
     }
 }
