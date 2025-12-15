@@ -200,11 +200,11 @@ export class ExportModal {
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <div>
                             <label for="exportWidth">Width (px)</label>
-                            <input type="number" id="exportWidth" value="1100" min="400" max="2000">
+                            <input type="number" id="exportWidth" value="1100" min="400" max="2000" step="100">
                         </div>
                         <div>
                             <label for="exportHeight">Height (px)</label>
-                            <input type="number" id="exportHeight" value="400" min="200" max="1000">
+                            <input type="number" id="exportHeight" value="300" min="100" max="600" step="50">
                         </div>
                         <div>
                             <label for="exportTitle">Chart Title</label>
@@ -219,7 +219,7 @@ export class ExportModal {
                     <div class="code-container">
                         <button class="dwn-btn" style="right: 62px;" id="downloadBtn">Download</button>
                         <button class="open-btn" style="right: 10px;" id="openBtn">Open</button>
-                        <button class="copy-btn" style="right: 136px;" id="copyExportBtn">Copy</button>
+                        <button class="copy-btn" style="right: 138px;" id="copyExportBtn">Copy</button>
                         <pre id="exportCode"></pre>
                     </div>
                 </div>
