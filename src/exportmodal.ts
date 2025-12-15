@@ -243,117 +243,117 @@ export class ExportModal {
     }
 
     /**
-   * Exports all shown LineaChart into a single png file.
-   * The rendering uses the already drawn HTMLCanvasElement from each plot and redraws them on a new Canvas.
-   * This leads to the effect, that the rendered png is as width as the shown plots in the browser.
-   * @todo make the png export with adjustable width so there are no problem on mobile phones
-   * 
-   * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
-   * The legend is build autmatically from the shown series.
-   */
-  #exportAllPlotsToPNG() {
-    const canvases: HTMLCanvasElement[] = [];
-    const titles: {station: string, altitude: number}[] = [];
-    const series: uPlot.Series[] = [];
-    const legendItems = {};
+     * Exports all shown LineaChart into a single png file.
+     * The rendering uses the already drawn HTMLCanvasElement from each plot and redraws them on a new Canvas.
+     * This leads to the effect, that the rendered png is as width as the shown plots in the browser.
+     * @todo make the png export with adjustable width so there are no problem on mobile phones
+     * 
+     * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
+     * The legend is build autmatically from the shown series.
+     */
+    #exportAllPlotsToPNG() {
+        const canvases: HTMLCanvasElement[] = [];
+        const titles: {station: string, altitude: number}[] = [];
+        const series: uPlot.Series[] = [];
+        const legendItems = {};
 
-    for (const lineachart of this.lineaPlot.lineacharts){
-      const plots: uPlot[] = lineachart.plots;
-      plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
-        canvases.push(c);
-      });
-      const station = lineachart.station;
-      const altitude = lineachart.altitude;
-      titles.push({station, altitude});
-      plots.map(p => series.push(...p.series.slice(1)));
-      plots.map(p => p.series.slice(1).map((s, i) => {
-        const label = s.label ?? `Series ${i + 1}`;
-        let color = "#000000";
-        if (typeof s.stroke === "string") {
-          color = s.stroke;
-        } else {
-          const c = s.stroke(p, i + 1);
-          if (typeof c === "string") color = c;
-        }
-        legendItems[label] = color;
-      }));
-    }
-
-    let title = "";
-    titles.forEach((t, i) => {
-      title += t.station + " (" + t.altitude + "m)"
-      if(! (titles.length == (i+1))){
-        title += " — ";
-      }
-    });
-
-    //build png
-    const titleHeight = title ? 40 : 0;
-    const legendItemHeight = 22;
-    const legendPadding = 20;
-    
-    const width = canvases[0].width;
-    const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-    const totalHeight = titleHeight + chartsHeight + 90;
-
-    const outCanvas = document.createElement("canvas");
-    outCanvas.width = width;
-    outCanvas.height = totalHeight;
-
-    //fill background
-    const ctx = outCanvas.getContext("2d")!;
-    ctx.imageSmoothingEnabled = false;
-    ctx.imageSmoothingQuality = "high";
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-    
-    if(title){
-      ctx.fillStyle = "#000";
-      ctx.font = "24px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(title, outCanvas.width / 2, 40);
-    }
-
-    let y = titleHeight;
-    for (const c of canvases) {
-      ctx.drawImage(c, 0, y);
-      y += c.height;
-    }
-
-    if (Object.keys(legendItems).length > 0) {
-      const swatchSize = 18;
-      const xStart = legendPadding*2;
-      let legendY = y + legendPadding + legendItemHeight / 2;
-
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-
-      let x = xStart;
-      for (const [label, color] of Object.entries(legendItems)){
-        const textwidth = ctx.measureText(label).width;
-        if(x + swatchSize + 8 + textwidth > outCanvas.width){
-            console.log("line break in legend");
-          x = xStart;
-          legendY += legendItemHeight;
+        for (const lineachart of this.lineaPlot.lineacharts){
+            const plots: uPlot[] = lineachart.plots;
+            plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
+            canvases.push(c);
+            });
+            const station = lineachart.station;
+            const altitude = lineachart.altitude;
+            titles.push({station, altitude});
+            plots.map(p => series.push(...p.series.slice(1)));
+            plots.map(p => p.series.slice(1).map((s, i) => {
+            const label = s.label ?? `Series ${i + 1}`;
+            let color = "#000000";
+            if (typeof s.stroke === "string") {
+                color = s.stroke;
+            } else {
+                const c = s.stroke(p, i + 1);
+                if (typeof c === "string") color = c;
+            }
+            legendItems[label] = color;
+            }));
         }
 
-        // colored square
-        ctx.fillStyle = color;
-        ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
+        let title = "";
+        titles.forEach((t, i) => {
+            title += t.station + " (" + t.altitude + "m)"
+            if(! (titles.length == (i+1))){
+            title += " — ";
+            }
+        });
 
-        // label
-        ctx.fillStyle = "#000";
-        ctx.fillText(label, x + swatchSize + 8, legendY);
-        x = x + swatchSize + 8 + textwidth + 10;
-      }
+        //build png
+        const titleHeight = title ? 40 : 0;
+        const legendItemHeight = 22;
+        const legendPadding = 20;
+
+        const width = canvases[0].width;
+        const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
+        const totalHeight = titleHeight + chartsHeight + 90;
+
+        const outCanvas = document.createElement("canvas");
+        outCanvas.width = width;
+        outCanvas.height = totalHeight;
+
+        //fill background
+        const ctx = outCanvas.getContext("2d")!;
+        ctx.imageSmoothingEnabled = false;
+        ctx.imageSmoothingQuality = "high";
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+
+        if(title){
+            ctx.fillStyle = "#000";
+            ctx.font = "24px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(title, outCanvas.width / 2, 40);
+        }
+
+        let y = titleHeight;
+        for (const c of canvases) {
+            ctx.drawImage(c, 0, y);
+            y += c.height;
+        }
+
+        if (Object.keys(legendItems).length > 0) {
+            const swatchSize = 18;
+            const xStart = legendPadding*2;
+            let legendY = y + legendPadding + legendItemHeight / 2;
+
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+            ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
+            let x = xStart;
+            for (const [label, color] of Object.entries(legendItems)){
+            const textwidth = ctx.measureText(label).width;
+            if(x + swatchSize + 8 + textwidth > outCanvas.width){
+                console.log("line break in legend");
+                x = xStart;
+                legendY += legendItemHeight;
+            }
+
+            // colored square
+            ctx.fillStyle = color;
+            ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
+
+            // label
+            ctx.fillStyle = "#000";
+            ctx.fillText(label, x + swatchSize + 8, legendY);
+            x = x + swatchSize + 8 + textwidth + 10;
+            }
+        }
+
+        const url = outCanvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = url;
+        a.target="_tab";
+        a.click();
     }
-
-    const url = outCanvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = url;
-    a.target="_tab";
-    a.click();
-  }
 }
