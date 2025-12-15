@@ -246,7 +246,7 @@ export class ExportModal {
    * Exports all shown LineaChart into a single png file.
    * The rendering uses the already drawn HTMLCanvasElement from each plot and redraws them on a new Canvas.
    * This leads to the effect, that the rendered png is as width as the shown plots in the browser.
-   * @todo make the png export with fixed width so there are no problem on mobile phones
+   * @todo make the png export with adjustable width so there are no problem on mobile phones
    * 
    * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
    * The legend is build autmatically from the shown series.
