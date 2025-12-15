@@ -84,25 +84,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
   scales: {
     y: {
-      range: (u) => {
-        let validMin = Infinity;
-        let validMax = -Infinity;
-
-        for (let i = 1; i < u.data.length; i++) {
-          const series = u.data[i];
-          for (let j = 0; j < series.length; j++) {
-            const val = series[j] as number;
-            if (!isNaN(val) && val !== null) {
-              validMin = Math.min(validMin, val);
-              validMax = Math.max(validMax, val);
-            }
-          }
-        }
-
-        if (validMin === Infinity || validMax === -Infinity) {
-          return [-30, 10];
-        }
-        return validMin < -30 || validMax > 10 ? [-30, 30] : [-30, 10];
+      range: (u, dataMin, dataMax) => {
+        return dataMax > 10 ? [-30, 30] : [-30, 10];
       },
     },
 
@@ -120,9 +103,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       grid: { show: true },
       splits: (u) => {
         const max = u.scales.y.max ?? 0;
-        const useExtended = max > 10;
-        const baseTicks = useExtended ? [-30, -20, -10, 0, 10, 20, 30] : [-30, -20, -10, 0, 10];
-        return baseTicks;
+        return max > 10 ? [-30, -20, -10, 0, 10, 20, 30] : [-30, -20, -10, 0, 10];
       },
 
       values: (u, vals) => vals.map((v) => v.toString()),

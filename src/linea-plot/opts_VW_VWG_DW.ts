@@ -83,10 +83,8 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       stroke: "#00E2B6",
       grid: { show: true },
       splits: (u) => {
-        const max = u.scales.y.max;
-        const useExtended = max > 100;
-        const baseTicks = useExtended ? [0, 30, 60, 90, 120] : [0, 25, 50, 75, 100];
-        return baseTicks;
+        const max = u.scales.y.max ?? 0;
+        return max > 100 ? [0, 30, 60, 90, 120] : [0, 25, 50, 75, 100];
       },
       values: (u, vals) => vals.map((v) => v.toString()),
     },
