@@ -45,5 +45,6 @@
   "dialog:weather-station-diagram:controls:button:copytoclipboard": "Copy",
   "dialog:weather-station-diagram:controls:button:copytoclipboard:clicked": "Copy",
   "dialog:weather-station-diagram:controls:button:download": "Download",
-  "dialog:weather-station-diagram:controls:button:open": "Open"
+  "dialog:weather-station-diagram:controls:button:open": "Open",
+  "dialog:weather-station-diagram:controls:label:selectdiagrams": "Select Diagrams to Export"
 }

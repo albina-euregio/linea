@@ -180,12 +180,12 @@ export class ExportModal {
                 <h2>${i18n.message("dialog:weather-station-diagram:controls:label:exportchart")}</h2>
     
                 <div class="export-options">
-                    <div class="export-option" id="btnExportIframe">
+                    <div class="export-option" id="btnExportIframe" style="display: none;">
                         <h4>${i18n.message("dialog:weather-station-diagram:controls:button:iframe")}</h4>
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:iframe:sub")}</p>
                     </div>
     
-                    <div class="export-option" id="btnExportStandalone">
+                    <div class="export-option" id="btnExportStandalone" style="display: none;">
                         <h4>${i18n.message("dialog:weather-station-diagram:controls:button:standalonehtml")}</h4>
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:standalonehtml:sub")}</p>
                     </div>
@@ -210,6 +210,11 @@ export class ExportModal {
                         <div>
                             <label for="exportTitle">${i18n.message("dialog:weather-station-diagram:controls:label:title")}</label>
                             <input type="text" id="exportTitle" value="">
+                        </div>
+                        <div>
+                            <label for="exportDiagrams">${i18n.message("dialog:weather-station-diagram:controls:label:selectdiagrams")}</label>
+                            <div id="exportDiagrams" style="display: flex; flex-direction: row; gap: 12px; margin-top: 8px;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -281,9 +286,20 @@ export class ExportModal {
         this.modal.style.display = 'block';
         this.exportSettings.style.display = 'block';
         this.exportResult.style.display = 'none';
+       
+        this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.lineacharts.map((chart, index) => `
+        <label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
+            <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;">
+            ${chart.station} (${chart.altitude}m)
+        </label>
+        `).join('');
         (document.getElementById("exportTitle") as HTMLInputElement)!.value = this.#generateTitleString();
         (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(this.lineaPlot.clientWidth);
         (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(this.lineaPlot.lineacharts[0].plots[0].height);
+        this.modal.querySelectorAll(".diagram-checkbox").forEach( (cb) => {
+            cb.addEventListener("change", () => {
+                (document.getElementById("exportTitle") as HTMLInputElement)!.value = this.#generateTitleString();
+        })});
     }
 
     #copyToClipboard() {
@@ -346,7 +362,13 @@ export class ExportModal {
 
     #generateTitleString(): string {
         const titles: {station: string, altitude: number}[] = [];
+        const indices = this.#getCheckedDiagramIndices();
+        let i = 0;  
         for (const lineachart of this.lineaPlot.lineacharts){
+            i += 1;
+            if(!indices.includes(i-1)){
+                continue;
+            }
             const station = lineachart.station;
             const altitude = lineachart.altitude;
             titles.push({station, altitude});
@@ -374,8 +396,18 @@ export class ExportModal {
         const canvases: HTMLCanvasElement[] = [];
         const series: uPlot.Series[] = [];
         const legendItems = {};
-
+        
+        const indices = this.#getCheckedDiagramIndices();
+        let i = 0;
+        if(indices.length == 0){
+            alert("Nothing to export!");
+            return;
+        }
         for (const lineachart of this.lineaPlot.lineacharts){
+            i += 1;
+            if(!indices.includes(i-1)){
+                continue;
+            }
             const plots: uPlot[] = lineachart.plots;
             plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
                 canvases.push(c);
@@ -463,10 +495,20 @@ export class ExportModal {
         }
         outCanvas.toBlob( (blobdata) => {
             this.exportdata = {blob: blobdata, data:outCanvas.toDataURL(), filename: "linea-chart.png", type: "image/png"};
-            console.log("Exported PNG blob:", this.exportdata);
         });
         document.getElementById('exportCode').innerHTML = `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
         document.getElementById('exportResult').style.display = 'block';
+    }
+
+    #getCheckedDiagramIndices(): number[] {
+        const indices: number[] = [];
+        const checkboxes = this.modal.querySelectorAll(".diagram-checkbox") as NodeListOf<HTMLInputElement>;
+        checkboxes.forEach( (cb) => {
+            if(cb.checked){
+                indices.push(parseInt(cb.value));
+            }
+        });
+        return indices;
     }
 
     #getExportSettings() {
