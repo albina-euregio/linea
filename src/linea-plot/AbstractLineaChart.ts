@@ -5,11 +5,11 @@ export abstract class AbstractLineaChart extends HTMLElement{
     resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
     #m_style: any;
     
-    resizePlots(clientWidth: number, style: CSSStyleDeclaration) {
+    resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
         this.plots.forEach((p) =>
             p.setSize({
                 width: clientWidth,
-                height: p.height,
+                height: Number.isNaN(heightPerCanvas) ? p.height : heightPerCanvas,
         }));
         // compute a scale factor based on element width so text shrinks on narrow layouts
         const baseWidth = 360; // width at which scale == 1
