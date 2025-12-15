@@ -5,6 +5,7 @@ export class ExportModal {
     private exportOptions: HTMLDivElement;
     private exportSettings: HTMLDivElement;
     private exportResult: HTMLDivElement;
+    private exportdata: {blob: Blob, data: string, filename: string, type: string} | null = null;
 
     constructor(
         readonly modal: HTMLDivElement, 
@@ -249,7 +250,7 @@ export class ExportModal {
         });
 
         this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
-            // this.#copyToClipboard();
+            this.#copyToClipboard();
         });
 
         this.modal.querySelector("#downloadBtn")?.addEventListener("click", () => {
@@ -272,6 +273,39 @@ export class ExportModal {
         (document.getElementById("exportTitle") as HTMLInputElement)!.value = this.#generateTitleString();
         (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(this.lineaPlot.clientWidth);
         (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(this.lineaPlot.lineacharts[0].plots[0].height);
+    }
+
+    #copyToClipboard() {
+        let code: ClipboardItem[] = [];
+        if(this.exportdata){
+            if(this.exportdata.type === "image/png"){
+                code = [
+                    new ClipboardItem({
+                        "image/png": this.exportdata.blob,
+                    })
+                ];
+            } else if (this.exportdata.type === "text/html"){
+                code = [
+                    new ClipboardItem({
+                        "text/html": new Blob([this.exportdata.data], { type: "text/html" }),
+                    })
+                ];
+            }
+        } else {
+            return;
+        }
+        navigator.clipboard.write(code).then(() => {
+            const btn = document.querySelector('.copy-btn') as HTMLButtonElement;
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.style.background = '#27ae60';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '#667eea';
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
     }
 
     #exportAsIframe() {
@@ -378,23 +412,26 @@ export class ExportModal {
 
             let x = xStart;
             for (const [label, color] of Object.entries(legendItems)){
-            const textwidth = ctx.measureText(label).width;
-            if(x + swatchSize + 8 + textwidth > outCanvas.width){
-                x = xStart;
-                legendY += legendItemHeight;
-            }
+                const textwidth = ctx.measureText(label).width;
+                if(x + swatchSize + 8 + textwidth > outCanvas.width){
+                    x = xStart;
+                    legendY += legendItemHeight;
+                }
 
-            // colored square
-            ctx.fillStyle = color;
-            ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
+                // colored square
+                ctx.fillStyle = color;
+                ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
 
-            // label
-            ctx.fillStyle = "#000";
-            ctx.fillText(label, x + swatchSize + 8, legendY);
-            x = x + swatchSize + 8 + textwidth + 10;
+                // label
+                ctx.fillStyle = "#000";
+                ctx.fillText(label, x + swatchSize + 8, legendY);
+                x = x + swatchSize + 8 + textwidth + 10;
             }
         }
-
+        outCanvas.toBlob( (blobdata) => {
+            this.exportdata = {blob: blobdata, data:outCanvas.toDataURL(), filename: "linea-chart.png", type: "image/png"};
+            console.log("Exported PNG blob:", this.exportdata);
+        });
         document.getElementById('exportCode').innerHTML = `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
         document.getElementById('exportResult').style.display = 'block';
     }
