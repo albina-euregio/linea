@@ -20,12 +20,6 @@ export abstract class AbstractLineaChart extends HTMLElement{
             style.fontSize =`${12 * scale}px`;
             style.padding =`${6 * scale}px ${10 * scale}px`;
         }
-        this.plots.forEach((p) =>
-            p.setSize({
-                width: clientWidth,
-                height: p.height,
-            })
-        );
     }
 
     addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
