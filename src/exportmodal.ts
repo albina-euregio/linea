@@ -232,7 +232,20 @@ export class ExportModal {
         });
 
         this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
-            this.#exportAllPlotsToPNG();
+            this.exportSettings.style.display = "flex";
+            const exportSettings = this.#getExportSettings();
+            const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
+            for (const lineachart of this.lineaPlot.lineacharts){
+                lineachart.resizeObserver.unobserve(lineachart);
+                lineachart.resizePlots(exportSettings.width, lineachart.style, exportSettings.height);
+            }
+            setTimeout(() => {
+                this.#exportAllPlotsToPNG(exportSettings.title);
+                for (const lineachart of this.lineaPlot.lineacharts){
+                    lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
+                    lineachart.resizeObserver.observe(lineachart);
+                }
+            }, 500);
         });
 
         this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
@@ -254,9 +267,11 @@ export class ExportModal {
 
     show() {
         this.modal.style.display = 'block';
+        this.exportSettings.style.display = 'block';
         this.exportResult.style.display = 'none';
-        this.exportSettings.style.display = 'none';
         (document.getElementById("exportTitle") as HTMLInputElement)!.value = this.#generateTitleString();
+        (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(this.lineaPlot.clientWidth);
+        (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(this.lineaPlot.lineacharts[0].plots[0].height);
     }
 
     #exportAsIframe() {
@@ -321,7 +336,7 @@ export class ExportModal {
 
         const width = canvases[0].width;
         const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-        const totalHeight = titleHeight + chartsHeight + 90;
+        const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
 
         const outCanvas = document.createElement("canvas");
         outCanvas.width = width;
@@ -339,6 +354,10 @@ export class ExportModal {
             ctx.fillStyle = "#000";
             ctx.font = "24px Arial";
             ctx.textAlign = "center";
+            const titlewidth = ctx.measureText(title).width;
+            if(width < titlewidth){
+                ctx.font = "18px Arial";
+            }
             ctx.fillText(title, outCanvas.width / 2, 40);
         }
 
@@ -361,7 +380,6 @@ export class ExportModal {
             for (const [label, color] of Object.entries(legendItems)){
             const textwidth = ctx.measureText(label).width;
             if(x + swatchSize + 8 + textwidth > outCanvas.width){
-                console.log("line break in legend");
                 x = xStart;
                 legendY += legendItemHeight;
             }
@@ -377,11 +395,8 @@ export class ExportModal {
             }
         }
 
-        const url = outCanvas.toDataURL("image/png");
-        const a = document.createElement("a");
-        a.href = url;
-        a.target="_tab";
-        a.click();
+        document.getElementById('exportCode').innerHTML = `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+        document.getElementById('exportResult').style.display = 'block';
     }
 
     #getExportSettings() {
