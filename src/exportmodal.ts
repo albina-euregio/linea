@@ -269,8 +269,6 @@ export class ExportModal {
       plots.map(p => p.series.slice(1).map((s, i) => {
         const label = s.label ?? `Series ${i + 1}`;
         let color = "#000000";
-
-        console.log(typeof s.stroke);
         if (typeof s.stroke === "string") {
           color = s.stroke;
         } else {
@@ -280,7 +278,6 @@ export class ExportModal {
         legendItems[label] = color;
       }));
     }
-    console.log(titles);
 
     let title = "";
     titles.forEach((t, i) => {
@@ -297,7 +294,7 @@ export class ExportModal {
     
     const width = canvases[0].width;
     const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-    const totalHeight = titleHeight + chartsHeight + 60;
+    const totalHeight = titleHeight + chartsHeight + 90;
 
     const outCanvas = document.createElement("canvas");
     outCanvas.width = width;
@@ -337,9 +334,9 @@ export class ExportModal {
       for (const [label, color] of Object.entries(legendItems)){
         const textwidth = ctx.measureText(label).width;
         if(x + swatchSize + 8 + textwidth > outCanvas.width){
+            console.log("line break in legend");
           x = xStart;
           legendY += legendItemHeight;
-          outCanvas.height += legendItemHeight;
         }
 
         // colored square
