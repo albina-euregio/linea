@@ -120,7 +120,7 @@ export class ExportModal {
                 color: #000000;
             }
             
-            .copy-btn {
+            .code-container button {
                 position: absolute;
                 top: 10px;
                 right: 10px;
@@ -133,8 +133,17 @@ export class ExportModal {
                 font-size: 12px;
             }
             
-            .copy-btn:hover {
-                background: #ffffff;
+            .code-container button:hover {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: #3498db;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
             }
             
             .export-settings {
@@ -208,12 +217,10 @@ export class ExportModal {
                     <h3>Export Result</h3>
     
                     <div class="code-container">
-                        <button class="copy-btn" id="copyExportBtn">Copy</button>
+                        <button class="dwn-btn" style="right: 62px;" id="downloadBtn">Download</button>
+                        <button class="open-btn" style="right: 10px;" id="openBtn">Open</button>
+                        <button class="copy-btn" style="right: 136px;" id="copyExportBtn">Copy</button>
                         <pre id="exportCode"></pre>
-                    </div>
-    
-                    <div style="margin-top:15px;">
-                        <button id="downloadBtn" class="export-download-btn">Download File</button>
                     </div>
                 </div>
             </div>`);
@@ -254,7 +261,11 @@ export class ExportModal {
         });
 
         this.modal.querySelector("#downloadBtn")?.addEventListener("click", () => {
-            // this.downloadExport();
+            this.#downloadExport();
+        });
+
+        this.modal.querySelector("#openBtn")?.addEventListener("click", () => {
+            this.#openExport();
         });
         
         // Close modal when clicking outside
@@ -307,6 +318,28 @@ export class ExportModal {
             console.error('Failed to copy: ', err);
         });
     }
+
+    #downloadExport() {
+        if(!this.exportdata){
+            return;
+        }
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(this.exportdata.blob);;
+        a.download = this.exportdata.filename;
+        a.target="_tab";
+        a.click();
+    }
+
+    #openExport() {
+        if(!this.exportdata){
+            return;
+        }
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(this.exportdata.blob);;
+        a.target="_blank";
+        a.click();
+    }
+
 
     #exportAsIframe() {
     }
