@@ -29,7 +29,7 @@
   "dialog:weather-station-diagram:controls:tooltips:nextweek": "Next 7 days",
   "dialog:weather-station-diagram:controls:tooltips:previousweek": "Previous 7 days",
   "dialog:weather-station-diagram:controls:tooltips:wholetimespan": "Show whole available timespan",
-  "dialog:weather-station-diagram:controls:value:exportpng": "Export png",
+  "dialog:weather-station-diagram:controls:value:export": "Export",
   "dialog:weather-station-diagram:controls:label:exportsettings": "Export Settings",
   "dialog:weather-station-diagram:controls:label:heightpercanvas": "Height per canvas",
   "dialog:weather-station-diagram:controls:label:width": "Width",

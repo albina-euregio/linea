@@ -410,17 +410,17 @@ export class LineaPlot extends HTMLElement {
     const menu = document.createElement("div");
     menu.classList.add("controls-menu");
     if(this.hasAttribute("showexportpng")){
-      const printbtn = document.createElement("button");
-      printbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:exportpng")}`;
-      printbtn.classList.add("toggle-btn");
-      printbtn.addEventListener('click', () => {
+      const exportbtn = document.createElement("button");
+      exportbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:export")}`;
+      exportbtn.classList.add("toggle-btn");
+      exportbtn.addEventListener('click', () => {
         if(this.lineacharts.length == 0){
           alert("Nothing to export!");
           return;
         }
         this.exportModal.show();
       });
-      menu.appendChild(printbtn);
+      menu.appendChild(exportbtn);
     }
     if(this.hasAttribute("showdatepicker")){
       const enlargebtn = document.createElement("button");
