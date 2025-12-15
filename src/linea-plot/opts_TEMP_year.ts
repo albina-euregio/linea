@@ -63,9 +63,9 @@ export const opts_TEMP_year: uPlot.Options = {
       scale: "y",
       stroke: "#DE2D26",
       splits: (u) => {
-          const max = u.scales.y.max ?? 0;
-          return max > 20 ? [-30, -20, -10, 0, 10, 20, 30] : [-30, -20, -10, 0, 10, 20];
-        }
+        const max = u.scales.y.max ?? 0;
+        return max > 20 ? [-30, -20, -10, 0, 10, 20, 30] : [-30, -20, -10, 0, 10, 20];
+      },
     },
   ],
 

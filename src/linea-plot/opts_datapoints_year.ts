@@ -64,7 +64,7 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
     {
       scale: "y",
       stroke: "#00ff55ff",
-      splits: (u) =>{
+      splits: (u) => {
         const max = u.scales.y.max ?? 0;
         return max > 50 ? [0, 10, 20, 30, 40, 50, 60] : [0, 10, 20, 30, 40, 50];
       },

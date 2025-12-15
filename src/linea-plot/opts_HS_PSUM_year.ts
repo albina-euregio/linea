@@ -72,7 +72,7 @@ export const opts_HS_year: uPlot.Options = {
       splits: (u) => {
         const max = u.scales.y.max ?? 0;
         return max > 500 ? [0, 200, 400, 600, 800, 1000] : [0, 100, 200, 300, 400, 500];
-      }
+      },
     },
     {
       scale: "y2",
