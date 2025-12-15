@@ -198,7 +198,7 @@ export class ExportModal {
                         </div>
                         <div>
                             <label for="exportTitle">Chart Title</label>
-                            <input type="text" id="exportTitle" value="Avalanche Danger Ratings">
+                            <input type="text" id="exportTitle" value="">
                         </div>
                     </div>
                 </div>
@@ -256,10 +256,25 @@ export class ExportModal {
         this.modal.style.display = 'block';
         this.exportResult.style.display = 'none';
         this.exportSettings.style.display = 'none';
+        (document.getElementById("exportTitle") as HTMLInputElement)!.value = this.#generateTitleString();
     }
 
     #exportAsIframe() {
-
+    #generateTitleString(): string {
+        const titles: {station: string, altitude: number}[] = [];
+        for (const lineachart of this.lineaPlot.lineacharts){
+            const station = lineachart.station;
+            const altitude = lineachart.altitude;
+            titles.push({station, altitude});
+        }
+        let title = "";
+        titles.forEach((t, i) => {
+            title += t.station + " (" + t.altitude + "m)"
+            if(! (titles.length == (i+1))){
+                title += " — ";
+            }
+        });
+        return title;
     }
 
     /**
@@ -273,18 +288,16 @@ export class ExportModal {
      */
     #exportAllPlotsToPNG() {
         const canvases: HTMLCanvasElement[] = [];
-        const titles: {station: string, altitude: number}[] = [];
         const series: uPlot.Series[] = [];
         const legendItems = {};
 
         for (const lineachart of this.lineaPlot.lineacharts){
             const plots: uPlot[] = lineachart.plots;
             plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
-            canvases.push(c);
+                canvases.push(c);
             });
             const station = lineachart.station;
             const altitude = lineachart.altitude;
-            titles.push({station, altitude});
             plots.map(p => series.push(...p.series.slice(1)));
             plots.map(p => p.series.slice(1).map((s, i) => {
             const label = s.label ?? `Series ${i + 1}`;
@@ -299,14 +312,7 @@ export class ExportModal {
             }));
         }
 
-        let title = "";
-        titles.forEach((t, i) => {
-            title += t.station + " (" + t.altitude + "m)"
-            if(! (titles.length == (i+1))){
-            title += " — ";
-            }
-        });
-
+        const title = this.#generateTitleString();
         //build png
         const titleHeight = title ? 40 : 0;
         const legendItemHeight = 22;
