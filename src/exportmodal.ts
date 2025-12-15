@@ -288,7 +288,7 @@ export class ExportModal {
      * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
      * The legend is build autmatically from the shown series.
      */
-    #exportAllPlotsToPNG() {
+    #exportAllPlotsToPNG(title: string = this.#generateTitleString()) {
         const canvases: HTMLCanvasElement[] = [];
         const series: uPlot.Series[] = [];
         const legendItems = {};
@@ -313,8 +313,7 @@ export class ExportModal {
             legendItems[label] = color;
             }));
         }
-
-        const title = this.#generateTitleString();
+        
         //build png
         const titleHeight = title ? 40 : 0;
         const legendItemHeight = 22;
