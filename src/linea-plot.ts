@@ -298,7 +298,7 @@ export class LineaPlot extends HTMLElement {
         result.altitude,
         this.hasAttribute("showtitle"),
         this.hasAttribute("showsurfacehoarseries"),
-        this.backgroundColors[i] ?? "#00000000",
+        this.results.length > 1 ?this.backgroundColors[i] ?? "#00000000" : "#00000000",
       );
       this.lineacharts.push(lc);
       this.appendChild(lc);
