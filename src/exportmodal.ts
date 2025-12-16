@@ -1,6 +1,148 @@
+/**
+ * ExportModal class handles the export functionality for LineaPlot charts.
+ * 
+ * Provides users with options to export charts in various formats (PNG, iframe, standalone HTML)
+ * with customizable export settings such as width, height, and title.
+ * 
+ * @class ExportModal
+ * 
+ * @property {HTMLDivElement} exportOptions - Container for export format options
+ * @property {HTMLDivElement} exportSettings - Container for export configuration settings
+ * @property {HTMLDivElement} exportResult - Container for displaying export results
+ * @property {Object|null} exportdata - Exported data object containing blob, data, filename, and type
+ * @property {Blob} exportdata.blob - The binary data of the exported file
+ * @property {string} exportdata.data - The data URL representation of the export
+ * @property {string} exportdata.filename - The filename for the exported file
+ * @property {string} exportdata.type - The MIME type of the exported file
+ * 
+ * @example
+ * const exportModal = new ExportModal(modalElement, lineaPlot);
+ * exportModal.show();
+ */
+
+/**
+ * Creates an instance of ExportModal and initializes the modal UI.
+ * 
+ * Sets up the export modal HTML structure, CSS styles, and event listeners for:
+ * - PNG export with resizable dimensions
+ * - iframe export with custom settings
+ * - Standalone HTML export
+ * - Copy to clipboard functionality
+ * - Download and open exported files
+ * 
+ * @constructor
+ * @param {HTMLDivElement} modal - The modal container element
+ * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
+ */
+
+/**
+ * Displays the export modal and initializes available export options.
+ * 
+ * Populates the diagram selection checkboxes with all available LineaCharts
+ * and sets default values for export settings based on current plot dimensions.
+ * 
+ * @public
+ * @returns {void}
+ */
+
+/**
+ * Copies the exported content to the system clipboard.
+ * 
+ * Supports copying both PNG images and HTML content formats.
+ * Provides visual feedback by temporarily changing the button text and color.
+ * 
+ * @private
+ * @returns {void}
+ * @throws {Error} Logs error if clipboard write operation fails
+ */
+
+/**
+ * Downloads the exported file to the user's local system.
+ * 
+ * Creates a temporary anchor element and triggers a download
+ * using the exported data blob.
+ * 
+ * @private
+ * @returns {void}
+ */
+
+/**
+ * Opens the exported content in a new browser tab.
+ * 
+ * Creates a temporary anchor element and opens the exported data
+ * in a new tab using the data URL or blob reference.
+ * 
+ * @private
+ * @returns {void}
+ */
+
+/**
+ * Handles iframe export functionality.
+ * 
+ * @private
+ * @returns {void}
+ * @todo Implement iframe export logic
+ */
+
+/**
+ * Generates a formatted title string from selected LineaCharts.
+ * 
+ * Creates a title combining station names and altitudes separated by em-dashes.
+ * Format: "Station1 (altitude1m) — Station2 (altitude2m)"
+ * 
+ * @private
+ * @returns {string} The formatted title string
+ */
+
+/**
+ * Exports all active LineaChart plots to a single PNG image.
+ * 
+ * Combines multiple plot canvases into a single PNG file with:
+ * - Configurable title at the top
+ * - All selected chart plots
+ * - Automatically generated legend from plot series
+ * - White background
+ * 
+ * The PNG dimensions are determined by the export settings and canvas heights.
+ * 
+ * @private
+ * @async
+ * @param {string} [title] - Optional title for the PNG export, defaults to generated title
+ * @returns {Promise<void>}
+ * 
+ * @todo Add support for mobile-friendly responsive width export
+ * 
+ * @example
+ * await this.#exportAllPlotsToPNG("Custom Title");
+ */
+
+/**
+ * Retrieves all currently selected/active LineaCharts based on checkbox state.
+ * 
+ * @private
+ * @returns {LineaChart[]} Array of active LineaChart instances
+ */
+
+/**
+ * Gets the indices of checked diagram checkboxes.
+ * 
+ * @private
+ * @returns {number[]} Array of checked checkbox indices
+ */
+
+/**
+ * Retrieves the current export settings from the modal input fields.
+ * 
+ * @private
+ * @returns {Object} Export settings object
+ * @returns {number} return.width - Export width in pixels
+ * @returns {number} return.height - Export height per canvas in pixels
+ * @returns {string} return.title - Export title text
+ */
 import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
 import { LineaChart } from "./linea-plot/LineaChart";
+
 
 export class ExportModal {
 
