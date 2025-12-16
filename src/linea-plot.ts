@@ -237,9 +237,7 @@ export class LineaPlot extends HTMLElement {
       if (!this.hasAttribute("showdatepicker")) {
         this.#handleFixedDateView();
       }
-      if (this.hasAttribute("lazysrc")) {
-        this.fetchAndStoreData("lazysrc");
-      }
+      this.#lazyLoad();
     });
     this.tabIndex = 0;
     this.focus();
@@ -257,6 +255,7 @@ export class LineaPlot extends HTMLElement {
       this.maxTime = -Infinity;
       this.fetchAndStoreData().then(() => {
         this.render();
+        this.#lazyLoad();
       });
     }
   }
@@ -623,6 +622,15 @@ export class LineaPlot extends HTMLElement {
         Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
         Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "2300-00-00T00:00[UTC]"),
       );
+    }
+  }
+
+  /**
+   * Loads lazy data if the lazysrc attribute is given
+   */
+  #lazyLoad() {
+    if (this.hasAttribute("lazysrc")) {
+      this.fetchAndStoreData("lazysrc");
     }
   }
 
