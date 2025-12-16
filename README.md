@@ -92,7 +92,7 @@ Shows a fixed date span from the given smet file:
 ```html
 <!-- Fixed date view without picker -->
 <linea-plot
-    src='"data/station1.smet"'
+    src="data/station1.smet"
     startdate="2025-06-04T10:00[Europe/Berlin]"
     enddate="2025-06-04T18:00[Europe/Berlin]">
 </linea-plot>
