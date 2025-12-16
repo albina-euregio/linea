@@ -1,5 +1,6 @@
 import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
+import { LineaChart } from "./linea-plot/LineaChart";
 
 export class ExportModal {
 
@@ -392,22 +393,24 @@ export class ExportModal {
      * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
      * The legend is build autmatically from the shown series.
      */
-    #exportAllPlotsToPNG(title: string = this.#generateTitleString()) {
+    async #exportAllPlotsToPNG(title: string = this.#generateTitleString()) {
         const canvases: HTMLCanvasElement[] = [];
         const series: uPlot.Series[] = [];
         const legendItems = {};
         
-        const indices = this.#getCheckedDiagramIndices();
-        let i = 0;
-        if(indices.length == 0){
+        const activeLinecharts = this.#getActiveLineacharts();
+        if(activeLinecharts.length == 0){
             alert("Nothing to export!");
             return;
         }
-        for (const lineachart of this.lineaPlot.lineacharts){
-            i += 1;
-            if(!indices.includes(i-1)){
-                continue;
-            }
+        let oldBackgroundColor = "";
+        if(activeLinecharts.length == 1){
+            oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
+            activeLinecharts[0].setBackgroundColor("#00000000");
+            await new Promise(r => setTimeout(r, 1));
+        }
+
+        for (const lineachart of activeLinecharts){
             const plots: uPlot[] = lineachart.plots;
             plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
                 canvases.push(c);
@@ -493,11 +496,28 @@ export class ExportModal {
                 x = x + swatchSize + 8 + textwidth + 10;
             }
         }
+        if(activeLinecharts.length == 1){
+            activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
+        }
+
         outCanvas.toBlob( (blobdata) => {
             this.exportdata = {blob: blobdata, data:outCanvas.toDataURL(), filename: "linea-chart.png", type: "image/png"};
         });
         document.getElementById('exportCode').innerHTML = `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
         document.getElementById('exportResult').style.display = 'block';
+    }
+
+    #getActiveLineacharts(): LineaChart[] {
+        const activeCharts: LineaChart[] = [];
+        const indices = this.#getCheckedDiagramIndices();
+        let i = 0;
+        for (const lineachart of this.lineaPlot.lineacharts){
+            if(indices.includes(i)){
+                activeCharts.push(lineachart);
+            }
+            i += 1;
+        }
+        return activeCharts;
     }
 
     #getCheckedDiagramIndices(): number[] {

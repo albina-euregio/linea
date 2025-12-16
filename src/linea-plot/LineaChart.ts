@@ -67,6 +67,15 @@ export class LineaChart extends AbstractLineaChart{
         this.resizePlots(this.clientWidth, this.style);
     }
 
+    setBackgroundColor(color: string){
+        this.backgroundColor = color;
+        this.plots.forEach((p) => p.redraw());
+    }
+
+    getBackgroundColor(): string{
+        return this.backgroundColor;
+    }
+
     #updateData(plot: uPlot, values: (number|null)[][]){
         let data = [this.timestamps];
         for (const element of values) {
