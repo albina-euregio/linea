@@ -10,94 +10,98 @@ import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
 export class LineaChart extends AbstractLineaChart {
+  constructor(
+    private timestamps: Uint32Array,
+    private values: Values,
+    readonly station: string,
+    readonly altitude: number,
+    private showTitle: boolean,
+    private showSurfaceHoarSeries: boolean,
+    private backgroundColor: string,
+  ) {
+    super();
+    this.createPlots().catch((e) => console.error(e));
+  }
 
-    constructor(
-        private timestamps: Uint32Array,
-        private values: Values,
-        readonly station: string,
-        readonly altitude: number,
-        private showTitle: boolean,
-        private showSurfaceHoarSeries: boolean,
-        private backgroundColor: string
-    ) {
-        super();
-        this.createPlots().catch((e) => console.error(e));
+  setData(timestamps: Uint32Array, values: Values) {
+    this.timestamps = timestamps;
+    this.values = values;
+    let i = 0;
+    if (this.values.TA || this.values.TD || this.values.TSS) {
+      if (this.showSurfaceHoarSeries && this.values.TD && this.values.TSS) {
+        this.#updateData(this.plots[i], [
+          this.values.TA,
+          this.values.TD ??
+            (this.values.TA && this.values.RH
+              ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+              : undefined),
+          this.values.TSS,
+          this.values.TD.map((td, i) => {
+            return td < 0 && this.values.TSS[i] < td ? 1000 : -100;
+          }),
+        ]);
+      } else {
+        this.#updateData(this.plots[i], [
+          this.values.TA,
+          this.values.TD ??
+            (this.values.TA && this.values.RH
+              ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+              : undefined),
+          this.values.TSS,
+        ]);
+      }
+      i += 1;
     }
-
-    setData(timestamps: Uint32Array, values: Values){
-        this.timestamps = timestamps;
-        this.values = values;
-        let i = 0
-        if (this.values.TA || this.values.TD || this.values.TSS){
-            if(this.showSurfaceHoarSeries && this.values.TD && this.values.TSS){
-                this.#updateData(this.plots[i], [this.values.TA, this.values.TD ?? (this.values.TA && this.values.RH
-                        ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
-                        : undefined), this.values.TSS, this.values.TD.map((td, i) => {
-                        return (td < 0 && this.values.TSS[i] < td) ? 1000 : -100;
-                        })]);
-            } else {
-                this.#updateData(this.plots[i], [this.values.TA, this.values.TD ?? (this.values.TA && this.values.RH
-                        ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
-                        : undefined), this.values.TSS]);
-            }
-            i += 1;
-        }
-        if(this.values.VW || this.values.VW_MAX || this.values.DW){
-            this.#updateData(this.plots[i], [this.values.VW, this.values.VW_MAX, this.values.DW]);
-            i += 1;
-        }
-        if(this.values.HS ||this.values.PSUM){
-            this.#updateData(this.plots[i], [this.values.HS, this.values.PSUM]);
-            i += 1;
-        }
-        if(this.values.RH || this.values.ISWR){
-            this.#updateData(this.plots[i], [this.values.RH, this.values.ISWR]);
-        }
-        this.resizePlots(this.clientWidth, this.style);
+    if (this.values.VW || this.values.VW_MAX || this.values.DW) {
+      this.#updateData(this.plots[i], [this.values.VW, this.values.VW_MAX, this.values.DW]);
+      i += 1;
     }
-
-    setBackgroundColor(color: string){
-        this.backgroundColor = color;
-        this.plots.forEach((p) => p.redraw());
+    if (this.values.HS || this.values.PSUM) {
+      this.#updateData(this.plots[i], [this.values.HS, this.values.PSUM]);
+      i += 1;
     }
-
-    getBackgroundColor(): string{
-        return this.backgroundColor;
+    if (this.values.RH || this.values.ISWR) {
+      this.#updateData(this.plots[i], [this.values.RH, this.values.ISWR]);
     }
+    this.resizePlots(this.clientWidth, this.style);
+  }
 
-    #updateData(plot: uPlot, values: (number|null)[][]){
-        let data = [this.timestamps];
-        for (const element of values) {
-            data.push(element?? this.#createNullArray());
-        }
-        plot.setData(data);
+  setBackgroundColor(color: string) {
+    this.backgroundColor = color;
+    this.plots.forEach((p) => p.redraw());
+  }
+
+  getBackgroundColor(): string {
+    return this.backgroundColor;
+  }
+
+  #updateData(plot: uPlot, values: (number | null)[][]) {
+    let data = [this.timestamps];
+    for (const element of values) {
+      data.push(element ?? this.#createNullArray());
     }
+    plot.setData(data);
+  }
 
-    #createNullArray(){
-        let nulls: number|null[] = [];
-        this.timestamps.forEach(() => nulls.push(null));
-        return nulls;
-    }
+  #createNullArray() {
+    let nulls: number | null[] = [];
+    this.timestamps.forEach(() => nulls.push(null));
+    return nulls;
+  }
 
-    async createPlots() {
-        this.resizeObserver.unobserve(this);
-        const style = document.createElement("style");
-        style.textContent = css;
-        const plot_TA_TD_TSS = document.createElement("div");
-        const plot_VW_VWG_DW = document.createElement("div");
-        const plot_HS_PSUM = document.createElement("div");
-        const plot_RH_GR = document.createElement("div");
-        this.replaceChildren(
-            style,
-            plot_TA_TD_TSS,
-            plot_VW_VWG_DW,
-            plot_HS_PSUM,
-            plot_RH_GR
-        );
+  async createPlots() {
+    this.resizeObserver.unobserve(this);
+    const style = document.createElement("style");
+    style.textContent = css;
+    const plot_TA_TD_TSS = document.createElement("div");
+    const plot_VW_VWG_DW = document.createElement("div");
+    const plot_HS_PSUM = document.createElement("div");
+    const plot_RH_GR = document.createElement("div");
+    this.replaceChildren(style, plot_TA_TD_TSS, plot_VW_VWG_DW, plot_HS_PSUM, plot_RH_GR);
 
-        if (this.values.TA) {
-            const TD =
-            this.values.TD ??
+    if (this.values.TA) {
+      const TD =
+        this.values.TD ??
         (this.values.TA && this.values.RH
           ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
           : undefined);

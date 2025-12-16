@@ -65,8 +65,6 @@ import { ExportModal } from "./exportmodal";
  * - Automatic calculations of surface hoar potential if data is present
  */
 export class LineaPlot extends HTMLElement {
-
-
   private exportModal!: ExportModal;
   private startInput!: HTMLInputElement;
   private endInput!: HTMLInputElement;
@@ -324,13 +322,13 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * 
+   *
    */
-  #addExportModal(){
+  #addExportModal() {
     this.exportModal = new ExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }
-  
+
   /**
    * Adds the controls to the Plot:
    * - Datepicker with (previousWeek|startDate|endDate|nextWeek)
@@ -435,12 +433,12 @@ export class LineaPlot extends HTMLElement {
     }
     const menu = document.createElement("div");
     menu.classList.add("controls-menu");
-    if(this.hasAttribute("showexportpng")){
+    if (this.hasAttribute("showexportpng")) {
       const exportbtn = document.createElement("button");
       exportbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:export")}`;
       exportbtn.classList.add("toggle-btn");
-      exportbtn.addEventListener('click', () => {
-        if(this.lineacharts.length == 0){
+      exportbtn.addEventListener("click", () => {
+        if (this.lineacharts.length == 0) {
           alert("Nothing to export!");
           return;
         }

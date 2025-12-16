@@ -4,12 +4,12 @@ import { LineaChart } from "./linea-plot/LineaChart";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
- * 
+ *
  * Provides users with options to export charts in various formats (PNG, iframe, standalone HTML)
  * with customizable export settings such as width, height, and title.
- * 
+ *
  * @class ExportModal
- * 
+ *
  * @property {HTMLDivElement} exportOptions - Container for export format options
  * @property {HTMLDivElement} exportSettings - Container for export configuration settings
  * @property {HTMLDivElement} exportResult - Container for displaying export results
@@ -18,7 +18,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * @property {string} exportdata.data - The data URL representation of the export
  * @property {string} exportdata.filename - The filename for the exported file
  * @property {string} exportdata.type - The MIME type of the exported file
- * 
+ *
  * @features
  * - PNG export with customizable dimensions and title
  * - Multi-chart export combining multiple LineaChart plots
@@ -29,36 +29,35 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * - Station selection via checkboxes
  * - Dynamic title generation based on selected stations
  * - Chart resizing with preservation of original dimensions
- * 
+ *
  * @example
  * const exportModal = new ExportModal(modalElement, lineaPlot);
  * exportModal.show();
  */
 export class ExportModal {
+  private exportOptions: HTMLDivElement;
+  private exportSettings: HTMLDivElement;
+  private exportResult: HTMLDivElement;
+  private exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;
 
-    private exportOptions: HTMLDivElement;
-    private exportSettings: HTMLDivElement;
-    private exportResult: HTMLDivElement;
-    private exportdata: {blob: Blob, data: string, filename: string, type: string} | null = null;
-    
-    /**
-     * Creates an instance of ExportModal and initializes the modal UI.
-     * 
-     * Sets up the export modal HTML structure, CSS styles, and event listeners for:
-     * - PNG export with resizable dimensions
-     * - Copy to clipboard functionality
-     * - Download and open exported files
-     * 
-     * @constructor
-     * @param {HTMLDivElement} modal - The modal container element
-     * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
-     */ 
-    constructor(
-        readonly modal: HTMLDivElement, 
-        private lineaPlot: LineaPlot
-    ) {
-        const style: HTMLStyleElement = document.createElement('style');
-        style.textContent = `
+  /**
+   * Creates an instance of ExportModal and initializes the modal UI.
+   *
+   * Sets up the export modal HTML structure, CSS styles, and event listeners for:
+   * - PNG export with resizable dimensions
+   * - Copy to clipboard functionality
+   * - Download and open exported files
+   *
+   * @constructor
+   * @param {HTMLDivElement} modal - The modal container element
+   * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
+   */
+  constructor(
+    readonly modal: HTMLDivElement,
+    private lineaPlot: LineaPlot,
+  ) {
+    const style: HTMLStyleElement = document.createElement("style");
+    style.textContent = `
             label {
                 margin-bottom: 8px;
                 font-weight: 600;
@@ -216,11 +215,13 @@ export class ExportModal {
             } 
             
         `;
-        this.modal.appendChild(style);
-        
-        this.modal.classList.add("export-modal");
-        this.modal.id = "exportModal";
-        this.modal.insertAdjacentHTML("beforeend", `<div class="export-modal-content">
+    this.modal.appendChild(style);
+
+    this.modal.classList.add("export-modal");
+    this.modal.id = "exportModal";
+    this.modal.insertAdjacentHTML(
+      "beforeend",
+      `<div class="export-modal-content">
                 <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
                 <h2>${i18n.message("dialog:weather-station-diagram:controls:label:exportchart")}</h2>
     
@@ -273,388 +274,421 @@ export class ExportModal {
                         <pre id="exportCode"></pre>
                     </div>
                 </div>
-            </div>`);
-        
-        this.exportOptions = this.modal.querySelector(".export-options") as HTMLDivElement;
-        this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
-        this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
+            </div>`,
+    );
 
-        this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
-            this.exportSettings.style.display = "flex";
-            this.#exportAsIframe();
-        });
+    this.exportOptions = this.modal.querySelector(".export-options") as HTMLDivElement;
+    this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
+    this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
 
-        this.modal.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
-            this.exportSettings.style.display = "flex";
-            // this.exportAsStandalone();
-        });
+    this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
+      this.exportSettings.style.display = "flex";
+      this.#exportAsIframe();
+    });
 
-        this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
-            this.exportSettings.style.display = "flex";
-            this.#exportAllPlotsToPNG(this.#getExportSettings());
-        });
+    this.modal.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
+      this.exportSettings.style.display = "flex";
+      // this.exportAsStandalone();
+    });
 
-        this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
-            this.#copyToClipboard();
-        });
+    this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
+      this.exportSettings.style.display = "flex";
+      this.#exportAllPlotsToPNG(this.#getExportSettings());
+    });
 
-        this.modal.querySelector("#downloadBtn")?.addEventListener("click", () => {
-            this.#downloadExport();
-        });
+    this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
+      this.#copyToClipboard();
+    });
 
-        this.modal.querySelector("#openBtn")?.addEventListener("click", () => {
-            this.#openExport();
-        });
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('exportModal');
-            if (event.target === modal && modal) {
-                modal.style.display = 'none';
-            }
-        };
-    }
+    this.modal.querySelector("#downloadBtn")?.addEventListener("click", () => {
+      this.#downloadExport();
+    });
 
-    /**
-     * Displays the export modal and initializes available export options.
-     * 
-     * Populates the diagram selection checkboxes with all available LineaCharts
-     * and sets default values for export settings based on current plot dimensions.
-     * 
-     * @public
-     * @returns {void}
-     */
-    show() {
-        this.modal.style.display = 'block';
-        this.exportSettings.style.display = 'block';
-        this.exportResult.style.display = 'none';
-       
-        this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.lineacharts.map((chart, index) => `
+    this.modal.querySelector("#openBtn")?.addEventListener("click", () => {
+      this.#openExport();
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+      const modal = document.getElementById("exportModal");
+      if (event.target === modal && modal) {
+        modal.style.display = "none";
+      }
+    };
+  }
+
+  /**
+   * Displays the export modal and initializes available export options.
+   *
+   * Populates the diagram selection checkboxes with all available LineaCharts
+   * and sets default values for export settings based on current plot dimensions.
+   *
+   * @public
+   * @returns {void}
+   */
+  show() {
+    this.modal.style.display = "block";
+    this.exportSettings.style.display = "block";
+    this.exportResult.style.display = "none";
+
+    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.lineacharts
+      .map(
+        (chart, index) => `
         <label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
             <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;">
             ${chart.station} (${chart.altitude}m)
         </label>
-        `).join('');
-        (document.getElementById("exportTitle") as HTMLInputElement)!.value = this.#generateTitleString();
-        (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(this.lineaPlot.clientWidth);
-        (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(this.lineaPlot.lineacharts[0].plots[0].height);
-        this.modal.querySelectorAll(".diagram-checkbox").forEach( (cb) => {
-            cb.addEventListener("change", () => {
-                (document.getElementById("exportTitle") as HTMLInputElement)!.value = this.#generateTitleString();
-        })});
+        `,
+      )
+      .join("");
+    (document.getElementById("exportTitle") as HTMLInputElement)!.value =
+      this.#generateTitleString();
+    (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
+      this.lineaPlot.clientWidth,
+    );
+    (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
+      this.lineaPlot.lineacharts[0].plots[0].height,
+    );
+    this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
+      cb.addEventListener("change", () => {
+        (document.getElementById("exportTitle") as HTMLInputElement)!.value =
+          this.#generateTitleString();
+      });
+    });
+  }
+
+  /**
+   * Copies the exported content to the system clipboard.
+   *
+   * Supports copying both PNG images and HTML content formats.
+   * Provides visual feedback by temporarily changing the button text and color.
+   *
+   * @private
+   * @returns {void}
+   * @throws {Error} Logs error if clipboard write operation fails
+   */
+  #copyToClipboard() {
+    let code: ClipboardItem[] = [];
+    if (this.exportdata) {
+      if (this.exportdata.type === "image/png") {
+        code = [
+          new ClipboardItem({
+            "image/png": this.exportdata.blob,
+          }),
+        ];
+      } else if (this.exportdata.type === "text/html") {
+        code = [
+          new ClipboardItem({
+            "text/html": new Blob([this.exportdata.data], { type: "text/html" }),
+          }),
+        ];
+      }
+    } else {
+      return;
+    }
+    navigator.clipboard
+      .write(code)
+      .then(() => {
+        const btn = document.querySelector(".copy-btn") as HTMLButtonElement;
+        const originalText = btn.textContent;
+        btn.textContent = `${i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard:clicked")}`;
+        btn.style.background = "#27ae60";
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = "#667eea";
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  }
+
+  /**
+   * Downloads the exported file to the user's local system.
+   *
+   * @private
+   * @returns {void}
+   */
+  #downloadExport() {
+    if (!this.exportdata) {
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(this.exportdata.blob);
+    a.download = this.exportdata.filename;
+    a.target = "_tab";
+    a.click();
+  }
+
+  /**
+   * Opens the exported content in a new browser tab.
+   *
+   * Creates a temporary anchor element and opens the exported data
+   * in a new tab using the data URL or blob reference.
+   *
+   * @private
+   * @returns {void}
+   */
+  #openExport() {
+    if (!this.exportdata) {
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(this.exportdata.blob);
+    a.target = "_blank";
+    a.click();
+  }
+
+  /**
+   * Handles iframe export functionality.
+   *
+   * @private
+   * @returns {void}
+   * @todo Implement iframe export logic
+   */
+  #exportAsIframe() {}
+
+  /**
+   * Generates a formatted title string from selected LineaCharts.
+   *
+   * Creates a title combining station names and altitudes separated by em-dashes.
+   * Format: "Station1 (altitude1m) — Station2 (altitude2m) — ..."
+   *
+   * @private
+   * @returns {string} The formatted title string
+   */
+  #generateTitleString(): string {
+    const titles: { station: string; altitude: number }[] = [];
+    for (const lineachart of this.#getActiveLineacharts()) {
+      const station = lineachart.station;
+      const altitude = lineachart.altitude;
+      titles.push({ station, altitude });
+    }
+    let title = "";
+    titles.forEach((t, i) => {
+      title += t.station + " (" + t.altitude + "m)";
+      if (!(titles.length == i + 1)) {
+        title += " — ";
+      }
+    });
+    return title;
+  }
+
+  /**
+   * Exports all active LineaChart plots to a single PNG image.
+   *
+   * Combines multiple plot canvases into a single PNG file with:
+   * - Configurable title at the top
+   * - All selected chart plots
+   * - Automatically generated legend from plot series
+   * - White background if only one chart is exported
+   *
+   * The PNG dimensions are determined by the export settings and canvas heights.
+   *
+   * @private
+   * @async
+   * @param {string} [title] - Optional title for the PNG export, defaults to generated title
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await this.#exportAllPlotsToPNG("Custom Title");
+   */
+  async #exportAllPlotsToPNG({
+    width,
+    heightPerCanvas,
+    title,
+  }: {
+    width: number;
+    heightPerCanvas: number;
+    title?: string;
+  }) {
+    const canvases: HTMLCanvasElement[] = [];
+    const series: uPlot.Series[] = [];
+    const legendItems = {};
+
+    const activeLinecharts = this.#getActiveLineacharts();
+    if (activeLinecharts.length == 0) {
+      alert("Nothing to export!");
+      return;
+    }
+    let oldBackgroundColor = "";
+    if (activeLinecharts.length == 1) {
+      oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
+      activeLinecharts[0].setBackgroundColor("#00000000");
+    }
+    // has to be done after background color change, because uPlot canvas is redrawn on background color change
+    const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
+    for (const lineachart of this.lineaPlot.lineacharts) {
+      lineachart.resizeObserver.unobserve(lineachart);
+      lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
+      await new Promise((r) => setTimeout(r, 1));
     }
 
-    /**
-     * Copies the exported content to the system clipboard.
-     * 
-     * Supports copying both PNG images and HTML content formats.
-     * Provides visual feedback by temporarily changing the button text and color.
-     * 
-     * @private
-     * @returns {void}
-     * @throws {Error} Logs error if clipboard write operation fails
-     */
-    #copyToClipboard() {
-        let code: ClipboardItem[] = [];
-        if(this.exportdata){
-            if(this.exportdata.type === "image/png"){
-                code = [
-                    new ClipboardItem({
-                        "image/png": this.exportdata.blob,
-                    })
-                ];
-            } else if (this.exportdata.type === "text/html"){
-                code = [
-                    new ClipboardItem({
-                        "text/html": new Blob([this.exportdata.data], { type: "text/html" }),
-                    })
-                ];
-            }
-        } else {
-            return;
-        }
-        navigator.clipboard.write(code).then(() => {
-            const btn = document.querySelector('.copy-btn') as HTMLButtonElement;
-            const originalText = btn.textContent;
-            btn.textContent = `${i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard:clicked")}`;
-            btn.style.background = '#27ae60';
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = '#667eea';
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
+    for (const lineachart of activeLinecharts) {
+      const plots: uPlot[] = lineachart.plots;
+      plots
+        .map((p) => p.root.querySelector("canvas")!)
+        .forEach((c) => {
+          canvases.push(c);
         });
+      const station = lineachart.station;
+      const altitude = lineachart.altitude;
+      plots.map((p) => series.push(...p.series.slice(1)));
+      plots.map((p) =>
+        p.series.slice(1).map((s, i) => {
+          const label = s.label ?? `Series ${i + 1}`;
+          let color = "#000000";
+          if (typeof s.stroke === "string") {
+            color = s.stroke;
+          } else {
+            const c = s.stroke(p, i + 1);
+            if (typeof c === "string") color = c;
+          }
+          legendItems[label] = color;
+        }),
+      );
     }
 
-    /**
-     * Downloads the exported file to the user's local system.
-     * 
-     * @private
-     * @returns {void}
-     */
-    #downloadExport() {
-        if(!this.exportdata){
-            return;
-        }
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(this.exportdata.blob);;
-        a.download = this.exportdata.filename;
-        a.target="_tab";
-        a.click();
+    //build png
+    const titleHeight = title ? 40 : 0;
+    const legendItemHeight = 22;
+    const legendPadding = 20;
+
+    const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
+    const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
+
+    const outCanvas = document.createElement("canvas");
+    outCanvas.width = width;
+    outCanvas.height = totalHeight;
+
+    //fill background
+    const ctx = outCanvas.getContext("2d")!;
+    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingQuality = "high";
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+
+    if (title) {
+      ctx.fillStyle = "#000";
+      ctx.font = "24px Arial";
+      ctx.textAlign = "center";
+      const titlewidth = ctx.measureText(title).width;
+      if (width < titlewidth) {
+        ctx.font = "18px Arial";
+      }
+      ctx.fillText(title, outCanvas.width / 2, 40);
     }
 
-    /**
-     * Opens the exported content in a new browser tab.
-     * 
-     * Creates a temporary anchor element and opens the exported data
-     * in a new tab using the data URL or blob reference.
-     * 
-     * @private
-     * @returns {void}
-     */
-    #openExport() {
-        if(!this.exportdata){
-            return;
-        }
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(this.exportdata.blob);;
-        a.target="_blank";
-        a.click();
+    let y = titleHeight;
+    for (const c of canvases) {
+      ctx.drawImage(c, 0, y);
+      y += c.height;
     }
 
-    /**
-     * Handles iframe export functionality.
-     * 
-     * @private
-     * @returns {void}
-     * @todo Implement iframe export logic
-     */
-    #exportAsIframe() {
+    if (Object.keys(legendItems).length > 0) {
+      const swatchSize = 18;
+      const xStart = legendPadding * 2;
+      let legendY = y + legendPadding + legendItemHeight / 2;
+
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
+      let x = xStart;
+      for (const [label, color] of Object.entries(legendItems)) {
+        const textwidth = ctx.measureText(label).width;
+        if (x + swatchSize + 8 + textwidth > outCanvas.width) {
+          x = xStart;
+          legendY += legendItemHeight;
+        }
+
+        // colored square
+        ctx.fillStyle = color;
+        ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
+
+        // label
+        ctx.fillStyle = "#000";
+        ctx.fillText(label, x + swatchSize + 8, legendY);
+        x = x + swatchSize + 8 + textwidth + 10;
+      }
+    }
+    if (activeLinecharts.length == 1) {
+      activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
+    }
+    for (const lineachart of this.lineaPlot.lineacharts) {
+      lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
+      lineachart.resizeObserver.observe(lineachart);
     }
 
-    /**
-     * Generates a formatted title string from selected LineaCharts.
-     * 
-     * Creates a title combining station names and altitudes separated by em-dashes.
-     * Format: "Station1 (altitude1m) — Station2 (altitude2m) — ..."
-     * 
-     * @private
-     * @returns {string} The formatted title string
-     */
-    #generateTitleString(): string {
-        const titles: {station: string, altitude: number}[] = [];
-        for (const lineachart of this.#getActiveLineacharts()){
-            const station = lineachart.station;
-            const altitude = lineachart.altitude;
-            titles.push({station, altitude});
-        }
-        let title = "";
-        titles.forEach((t, i) => {
-            title += t.station + " (" + t.altitude + "m)"
-            if(! (titles.length == (i+1))){
-                title += " — ";
-            }
-        });
-        return title;
+    outCanvas.toBlob((blobdata) => {
+      this.exportdata = {
+        blob: blobdata,
+        data: outCanvas.toDataURL(),
+        filename: "linea-chart.png",
+        type: "image/png",
+      };
+    });
+    document.getElementById("exportCode").innerHTML =
+      `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+    document.getElementById("exportResult").style.display = "block";
+  }
+
+  /**
+   * Retrieves all currently selected/active LineaCharts based on checkbox state.
+   *
+   * @private
+   * @returns {LineaChart[]} Array of active LineaChart instances
+   */
+  #getActiveLineacharts(): LineaChart[] {
+    const activeCharts: LineaChart[] = [];
+    const indices = this.#getCheckedDiagramIndices();
+    let i = 0;
+    for (const lineachart of this.lineaPlot.lineacharts) {
+      if (indices.includes(i)) {
+        activeCharts.push(lineachart);
+      }
+      i += 1;
     }
+    return activeCharts;
+  }
 
-    /**
-     * Exports all active LineaChart plots to a single PNG image.
-     * 
-     * Combines multiple plot canvases into a single PNG file with:
-     * - Configurable title at the top
-     * - All selected chart plots
-     * - Automatically generated legend from plot series
-     * - White background if only one chart is exported
-     * 
-     * The PNG dimensions are determined by the export settings and canvas heights.
-     * 
-     * @private
-     * @async
-     * @param {string} [title] - Optional title for the PNG export, defaults to generated title
-     * @returns {Promise<void>}
-     * 
-     * @example
-     * await this.#exportAllPlotsToPNG("Custom Title");
-     */
-    async #exportAllPlotsToPNG({width, heightPerCanvas, title}: {width: number, heightPerCanvas: number, title?: string}) {
-        const canvases: HTMLCanvasElement[] = [];
-        const series: uPlot.Series[] = [];
-        const legendItems = {};
-        
-        
-        const activeLinecharts = this.#getActiveLineacharts();
-        if(activeLinecharts.length == 0){
-            alert("Nothing to export!");
-            return;
-        }
-        let oldBackgroundColor = "";
-        if(activeLinecharts.length == 1){
-            oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
-            activeLinecharts[0].setBackgroundColor("#00000000");
-        }
-        // has to be done after background color change, because uPlot canvas is redrawn on background color change
-        const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
-        for (const lineachart of this.lineaPlot.lineacharts){
-            lineachart.resizeObserver.unobserve(lineachart);
-            lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
-            await new Promise(r => setTimeout(r, 1));
-        }
+  /**
+   * Gets the indices of checked diagram checkboxes.
+   *
+   * @private
+   * @returns {number[]} Array of checked checkbox indices
+   */
+  #getCheckedDiagramIndices(): number[] {
+    const indices: number[] = [];
+    const checkboxes = this.modal.querySelectorAll(
+      ".diagram-checkbox",
+    ) as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach((cb) => {
+      if (cb.checked) {
+        indices.push(parseInt(cb.value));
+      }
+    });
+    return indices;
+  }
 
-        for (const lineachart of activeLinecharts){
-            const plots: uPlot[] = lineachart.plots;
-            plots.map(p => p.root.querySelector("canvas")!).forEach( (c) => {
-                canvases.push(c);
-            });
-            const station = lineachart.station;
-            const altitude = lineachart.altitude;
-            plots.map(p => series.push(...p.series.slice(1)));
-            plots.map(p => p.series.slice(1).map((s, i) => {
-            const label = s.label ?? `Series ${i + 1}`;
-            let color = "#000000";
-            if (typeof s.stroke === "string") {
-                color = s.stroke;
-            } else {
-                const c = s.stroke(p, i + 1);
-                if (typeof c === "string") color = c;
-            }
-            legendItems[label] = color;
-            }));
-        }
-        
-        //build png
-        const titleHeight = title ? 40 : 0;
-        const legendItemHeight = 22;
-        const legendPadding = 20;
-
-        const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-        const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
-
-        const outCanvas = document.createElement("canvas");
-        outCanvas.width = width;
-        outCanvas.height = totalHeight;
-
-        //fill background
-        const ctx = outCanvas.getContext("2d")!;
-        ctx.imageSmoothingEnabled = false;
-        ctx.imageSmoothingQuality = "high";
-
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-        if(title){
-            ctx.fillStyle = "#000";
-            ctx.font = "24px Arial";
-            ctx.textAlign = "center";
-            const titlewidth = ctx.measureText(title).width;
-            if(width < titlewidth){
-                ctx.font = "18px Arial";
-            }
-            ctx.fillText(title, outCanvas.width / 2, 40);
-        }
-
-        let y = titleHeight;
-        for (const c of canvases) {
-            ctx.drawImage(c, 0, y);
-            y += c.height;
-        }
-
-        if (Object.keys(legendItems).length > 0) {
-            const swatchSize = 18;
-            const xStart = legendPadding*2;
-            let legendY = y + legendPadding + legendItemHeight / 2;
-
-            ctx.textAlign = "left";
-            ctx.textBaseline = "middle";
-            ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-
-            let x = xStart;
-            for (const [label, color] of Object.entries(legendItems)){
-                const textwidth = ctx.measureText(label).width;
-                if(x + swatchSize + 8 + textwidth > outCanvas.width){
-                    x = xStart;
-                    legendY += legendItemHeight;
-                }
-
-                // colored square
-                ctx.fillStyle = color;
-                ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
-
-                // label
-                ctx.fillStyle = "#000";
-                ctx.fillText(label, x + swatchSize + 8, legendY);
-                x = x + swatchSize + 8 + textwidth + 10;
-            }
-        }
-        if(activeLinecharts.length == 1){
-            activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
-        }
-        for (const lineachart of this.lineaPlot.lineacharts){
-            lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
-            lineachart.resizeObserver.observe(lineachart);
-        }
-
-        outCanvas.toBlob( (blobdata) => {
-            this.exportdata = {blob: blobdata, data:outCanvas.toDataURL(), filename: "linea-chart.png", type: "image/png"};
-        });
-        document.getElementById('exportCode').innerHTML = `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
-        document.getElementById('exportResult').style.display = 'block';
-    }
-
-    /**
-     * Retrieves all currently selected/active LineaCharts based on checkbox state.
-     * 
-     * @private
-     * @returns {LineaChart[]} Array of active LineaChart instances
-     */
-    #getActiveLineacharts(): LineaChart[] {
-        const activeCharts: LineaChart[] = [];
-        const indices = this.#getCheckedDiagramIndices();
-        let i = 0;
-        for (const lineachart of this.lineaPlot.lineacharts){
-            if(indices.includes(i)){
-                activeCharts.push(lineachart);
-            }
-            i += 1;
-        }
-        return activeCharts;
-    }
-
-    /**
-     * Gets the indices of checked diagram checkboxes.
-     * 
-     * @private
-     * @returns {number[]} Array of checked checkbox indices
-     */
-    #getCheckedDiagramIndices(): number[] {
-        const indices: number[] = [];
-        const checkboxes = this.modal.querySelectorAll(".diagram-checkbox") as NodeListOf<HTMLInputElement>;
-        checkboxes.forEach( (cb) => {
-            if(cb.checked){
-                indices.push(parseInt(cb.value));
-            }
-        });
-        return indices;
-    }
-
-    /**
-     * Retrieves the current export settings from the modal input fields.
-     * 
-     * @private
-     * @returns {Object} Export settings object
-     * @returns {number} return.width - Export width in pixels
-     * @returns {number} return.height - Export height per canvas in pixels
-     * @returns {string} return.title - Export title text
-     */
-    #getExportSettings() {
-        const widthInput = document.getElementById("exportWidth") as HTMLInputElement;
-        const heightInput = document.getElementById("exportHeight") as HTMLInputElement;
-        const titleInput = document.getElementById("exportTitle") as HTMLInputElement;
-        return {
-            width: parseInt(widthInput.value),
-            heightPerCanvas: parseInt(heightInput.value),
-            title: titleInput.value
-        };
-    }
+  /**
+   * Retrieves the current export settings from the modal input fields.
+   *
+   * @private
+   * @returns {Object} Export settings object
+   * @returns {number} return.width - Export width in pixels
+   * @returns {number} return.height - Export height per canvas in pixels
+   * @returns {string} return.title - Export title text
+   */
+  #getExportSettings() {
+    const widthInput = document.getElementById("exportWidth") as HTMLInputElement;
+    const heightInput = document.getElementById("exportHeight") as HTMLInputElement;
+    const titleInput = document.getElementById("exportTitle") as HTMLInputElement;
+    return {
+      width: parseInt(widthInput.value),
+      heightPerCanvas: parseInt(heightInput.value),
+      title: titleInput.value,
+    };
+  }
 }
