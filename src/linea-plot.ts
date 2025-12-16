@@ -73,7 +73,6 @@ export class LineaPlot extends HTMLElement {
 
   private lineacharts: LineaChart[] = [] as LineaChart[];
   private results: Result[] = [] as Result[];
-  private finishedLoading: boolean = false;
 
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
   private minTime: number = +Infinity;
@@ -243,11 +242,10 @@ export class LineaPlot extends HTMLElement {
     });
     this.tabIndex = 0;
     this.focus();
-    this.finishedLoading = true;
   }
 
   attributeChangedCallback(name: string) {
-    if (this.finishedLoading && name === "src") {
+    if (name === "src") {
       for (const lc of this.lineacharts) {
         this.removeChild(lc);
       }
