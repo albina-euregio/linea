@@ -4,7 +4,7 @@ import { i18n } from "./i18n";
 import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { Temporal } from "temporal-polyfill";
-import { ExportModal } from "./ExportModal";
+import { ExportModal } from "./exportmodal";
 
 /**
  * LineaPlot Web Component
