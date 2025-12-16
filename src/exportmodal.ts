@@ -20,125 +20,6 @@
  * exportModal.show();
  */
 
-/**
- * Creates an instance of ExportModal and initializes the modal UI.
- * 
- * Sets up the export modal HTML structure, CSS styles, and event listeners for:
- * - PNG export with resizable dimensions
- * - iframe export with custom settings
- * - Standalone HTML export
- * - Copy to clipboard functionality
- * - Download and open exported files
- * 
- * @constructor
- * @param {HTMLDivElement} modal - The modal container element
- * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
- */
-
-/**
- * Displays the export modal and initializes available export options.
- * 
- * Populates the diagram selection checkboxes with all available LineaCharts
- * and sets default values for export settings based on current plot dimensions.
- * 
- * @public
- * @returns {void}
- */
-
-/**
- * Copies the exported content to the system clipboard.
- * 
- * Supports copying both PNG images and HTML content formats.
- * Provides visual feedback by temporarily changing the button text and color.
- * 
- * @private
- * @returns {void}
- * @throws {Error} Logs error if clipboard write operation fails
- */
-
-/**
- * Downloads the exported file to the user's local system.
- * 
- * Creates a temporary anchor element and triggers a download
- * using the exported data blob.
- * 
- * @private
- * @returns {void}
- */
-
-/**
- * Opens the exported content in a new browser tab.
- * 
- * Creates a temporary anchor element and opens the exported data
- * in a new tab using the data URL or blob reference.
- * 
- * @private
- * @returns {void}
- */
-
-/**
- * Handles iframe export functionality.
- * 
- * @private
- * @returns {void}
- * @todo Implement iframe export logic
- */
-
-/**
- * Generates a formatted title string from selected LineaCharts.
- * 
- * Creates a title combining station names and altitudes separated by em-dashes.
- * Format: "Station1 (altitude1m) — Station2 (altitude2m)"
- * 
- * @private
- * @returns {string} The formatted title string
- */
-
-/**
- * Exports all active LineaChart plots to a single PNG image.
- * 
- * Combines multiple plot canvases into a single PNG file with:
- * - Configurable title at the top
- * - All selected chart plots
- * - Automatically generated legend from plot series
- * - White background
- * 
- * The PNG dimensions are determined by the export settings and canvas heights.
- * 
- * @private
- * @async
- * @param {string} [title] - Optional title for the PNG export, defaults to generated title
- * @returns {Promise<void>}
- * 
- * @todo Add support for mobile-friendly responsive width export
- * 
- * @example
- * await this.#exportAllPlotsToPNG("Custom Title");
- */
-
-/**
- * Retrieves all currently selected/active LineaCharts based on checkbox state.
- * 
- * @private
- * @returns {LineaChart[]} Array of active LineaChart instances
- */
-
-/**
- * Gets the indices of checked diagram checkboxes.
- * 
- * @private
- * @returns {number[]} Array of checked checkbox indices
- */
-
-/**
- * Retrieves the current export settings from the modal input fields.
- * 
- * @private
- * @returns {Object} Export settings object
- * @returns {number} return.width - Export width in pixels
- * @returns {number} return.height - Export height per canvas in pixels
- * @returns {string} return.title - Export title text
- */
 import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
 import { LineaChart } from "./linea-plot/LineaChart";
@@ -150,7 +31,21 @@ export class ExportModal {
     private exportSettings: HTMLDivElement;
     private exportResult: HTMLDivElement;
     private exportdata: {blob: Blob, data: string, filename: string, type: string} | null = null;
-
+    
+    /**
+     * Creates an instance of ExportModal and initializes the modal UI.
+     * 
+     * Sets up the export modal HTML structure, CSS styles, and event listeners for:
+     * - PNG export with resizable dimensions
+     * - iframe export with custom settings
+     * - Standalone HTML export
+     * - Copy to clipboard functionality
+     * - Download and open exported files
+     * 
+     * @constructor
+     * @param {HTMLDivElement} modal - The modal container element
+     * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
+     */ 
     constructor(
         readonly modal: HTMLDivElement, 
         private lineaPlot: LineaPlot
@@ -389,19 +284,7 @@ export class ExportModal {
 
         this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
             this.exportSettings.style.display = "flex";
-            const exportSettings = this.#getExportSettings();
-            const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
-            for (const lineachart of this.lineaPlot.lineacharts){
-                lineachart.resizeObserver.unobserve(lineachart);
-                lineachart.resizePlots(exportSettings.width, lineachart.style, exportSettings.height);
-            }
-            setTimeout(() => {
-                this.#exportAllPlotsToPNG(exportSettings.title);
-                for (const lineachart of this.lineaPlot.lineacharts){
-                    lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
-                    lineachart.resizeObserver.observe(lineachart);
-                }
-            }, 500);
+            this.#exportAllPlotsToPNG(this.#getExportSettings());
         });
 
         this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
@@ -425,6 +308,15 @@ export class ExportModal {
         };
     }
 
+    /**
+     * Displays the export modal and initializes available export options.
+     * 
+     * Populates the diagram selection checkboxes with all available LineaCharts
+     * and sets default values for export settings based on current plot dimensions.
+     * 
+     * @public
+     * @returns {void}
+     */
     show() {
         this.modal.style.display = 'block';
         this.exportSettings.style.display = 'block';
@@ -445,6 +337,16 @@ export class ExportModal {
         })});
     }
 
+    /**
+     * Copies the exported content to the system clipboard.
+     * 
+     * Supports copying both PNG images and HTML content formats.
+     * Provides visual feedback by temporarily changing the button text and color.
+     * 
+     * @private
+     * @returns {void}
+     * @throws {Error} Logs error if clipboard write operation fails
+     */
     #copyToClipboard() {
         let code: ClipboardItem[] = [];
         if(this.exportdata){
@@ -478,6 +380,12 @@ export class ExportModal {
         });
     }
 
+    /**
+     * Downloads the exported file to the user's local system.
+     * 
+     * @private
+     * @returns {void}
+     */
     #downloadExport() {
         if(!this.exportdata){
             return;
@@ -489,6 +397,15 @@ export class ExportModal {
         a.click();
     }
 
+    /**
+     * Opens the exported content in a new browser tab.
+     * 
+     * Creates a temporary anchor element and opens the exported data
+     * in a new tab using the data URL or blob reference.
+     * 
+     * @private
+     * @returns {void}
+     */
     #openExport() {
         if(!this.exportdata){
             return;
@@ -499,10 +416,25 @@ export class ExportModal {
         a.click();
     }
 
-
+    /**
+     * Handles iframe export functionality.
+     * 
+     * @private
+     * @returns {void}
+     * @todo Implement iframe export logic
+     */
     #exportAsIframe() {
     }
 
+    /**
+     * Generates a formatted title string from selected LineaCharts.
+     * 
+     * Creates a title combining station names and altitudes separated by em-dashes.
+     * Format: "Station1 (altitude1m) — Station2 (altitude2m) — ..."
+     * 
+     * @private
+     * @returns {string} The formatted title string
+     */
     #generateTitleString(): string {
         const titles: {station: string, altitude: number}[] = [];
         for (const lineachart of this.#getActiveLineacharts()){
@@ -521,18 +453,30 @@ export class ExportModal {
     }
 
     /**
-     * Exports all shown LineaChart into a single png file.
-     * The rendering uses the already drawn HTMLCanvasElement from each plot and redraws them on a new Canvas.
-     * This leads to the effect, that the rendered png is as width as the shown plots in the browser.
-     * @todo make the png export with adjustable width so there are no problem on mobile phones
+     * Exports all active LineaChart plots to a single PNG image.
      * 
-     * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
-     * The legend is build autmatically from the shown series.
+     * Combines multiple plot canvases into a single PNG file with:
+     * - Configurable title at the top
+     * - All selected chart plots
+     * - Automatically generated legend from plot series
+     * - White background if only one chart is exported
+     * 
+     * The PNG dimensions are determined by the export settings and canvas heights.
+     * 
+     * @private
+     * @async
+     * @param {string} [title] - Optional title for the PNG export, defaults to generated title
+     * @returns {Promise<void>}
+     * 
+     * @example
+     * await this.#exportAllPlotsToPNG("Custom Title");
      */
-    async #exportAllPlotsToPNG(title: string = this.#generateTitleString()) {
+    async #exportAllPlotsToPNG({width, heightPerCanvas, title}: {width: number, heightPerCanvas: number, title?: string}) {
         const canvases: HTMLCanvasElement[] = [];
         const series: uPlot.Series[] = [];
         const legendItems = {};
+        
+        const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
         
         const activeLinecharts = this.#getActiveLineacharts();
         if(activeLinecharts.length == 0){
@@ -543,6 +487,11 @@ export class ExportModal {
         if(activeLinecharts.length == 1){
             oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
             activeLinecharts[0].setBackgroundColor("#00000000");
+        }
+        // has to be done after background color change, because uPlot canvas is redrawn on background color change
+        for (const lineachart of this.lineaPlot.lineacharts){
+            lineachart.resizeObserver.unobserve(lineachart);
+            lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
             await new Promise(r => setTimeout(r, 1));
         }
 
@@ -572,7 +521,6 @@ export class ExportModal {
         const legendItemHeight = 22;
         const legendPadding = 20;
 
-        const width = canvases[0].width;
         const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
         const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
 
@@ -635,6 +583,10 @@ export class ExportModal {
         if(activeLinecharts.length == 1){
             activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
         }
+        for (const lineachart of this.lineaPlot.lineacharts){
+            lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
+            lineachart.resizeObserver.observe(lineachart);
+        }
 
         outCanvas.toBlob( (blobdata) => {
             this.exportdata = {blob: blobdata, data:outCanvas.toDataURL(), filename: "linea-chart.png", type: "image/png"};
@@ -643,6 +595,12 @@ export class ExportModal {
         document.getElementById('exportResult').style.display = 'block';
     }
 
+    /**
+     * Retrieves all currently selected/active LineaCharts based on checkbox state.
+     * 
+     * @private
+     * @returns {LineaChart[]} Array of active LineaChart instances
+     */
     #getActiveLineacharts(): LineaChart[] {
         const activeCharts: LineaChart[] = [];
         const indices = this.#getCheckedDiagramIndices();
@@ -656,6 +614,12 @@ export class ExportModal {
         return activeCharts;
     }
 
+    /**
+     * Gets the indices of checked diagram checkboxes.
+     * 
+     * @private
+     * @returns {number[]} Array of checked checkbox indices
+     */
     #getCheckedDiagramIndices(): number[] {
         const indices: number[] = [];
         const checkboxes = this.modal.querySelectorAll(".diagram-checkbox") as NodeListOf<HTMLInputElement>;
@@ -667,6 +631,15 @@ export class ExportModal {
         return indices;
     }
 
+    /**
+     * Retrieves the current export settings from the modal input fields.
+     * 
+     * @private
+     * @returns {Object} Export settings object
+     * @returns {number} return.width - Export width in pixels
+     * @returns {number} return.height - Export height per canvas in pixels
+     * @returns {string} return.title - Export title text
+     */
     #getExportSettings() {
         const widthInput = document.getElementById("exportWidth") as HTMLInputElement;
         const heightInput = document.getElementById("exportHeight") as HTMLInputElement;
