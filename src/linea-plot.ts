@@ -255,6 +255,8 @@ export class LineaPlot extends HTMLElement {
       this.backgroundColors = [];
     }
     this.results = [];
+    this.minTime = +Infinity;
+    this.maxTime = -Infinity;
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
       if (this.minTime > result.timestamps[0]) {
@@ -384,6 +386,10 @@ export class LineaPlot extends HTMLElement {
           );
           previousWeek.disabled = true;
           newEnd = newStart.add({ days: 7 });
+        } else if(newStart.toInstant().epochMilliseconds > this.maxTime) {
+          this.#setStartEndDateToMinMax();
+          this.filterAndUpdateData();
+          return;
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
@@ -411,6 +417,10 @@ export class LineaPlot extends HTMLElement {
           );
           nextWeek.disabled = true;
           newStart = newEnd.subtract({ days: 7 });
+        } else if(newEnd.toInstant().epochMilliseconds < this.minTime) {
+          this.#setStartEndDateToMinMax();
+          this.filterAndUpdateData();
+          return;
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
