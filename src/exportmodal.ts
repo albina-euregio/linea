@@ -363,13 +363,7 @@ export class ExportModal {
 
     #generateTitleString(): string {
         const titles: {station: string, altitude: number}[] = [];
-        const indices = this.#getCheckedDiagramIndices();
-        let i = 0;  
-        for (const lineachart of this.lineaPlot.lineacharts){
-            i += 1;
-            if(!indices.includes(i-1)){
-                continue;
-            }
+        for (const lineachart of this.#getActiveLineacharts()){
             const station = lineachart.station;
             const altitude = lineachart.altitude;
             titles.push({station, altitude});
