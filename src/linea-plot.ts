@@ -232,6 +232,9 @@ export class LineaPlot extends HTMLElement {
       if (!this.hasAttribute("showdatepicker")) {
         this.#handleFixedDateView();
       }
+      if (this.hasAttribute("lazysrc")) {
+        this.fetchAndStoreData("lazysrc");
+      }
     });
     this.tabIndex = 0;
     this.focus();
@@ -240,17 +243,18 @@ export class LineaPlot extends HTMLElement {
   /**
    * fetches the data from the src attribute, generalizes it and update the valid date inputs
    */
-  async fetchAndStoreData() {
+  async fetchAndStoreData(attribute: string = "src") {
     if (!globalThis.Temporal) {
       await import("temporal-polyfill/global");
     }
-    const src = this.getAttribute("src") ?? "";
+    const src = this.getAttribute(attribute) ?? "";
     let srcs: string[] =
       src.startsWith("[") || src.startsWith('"') ? (JSON.parse(src) as string[]) : [src];
     if (!(srcs instanceof Array)) {
       srcs = [srcs];
       this.backgroundColors = [];
     }
+    this.results = [];
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
       if (this.minTime > result.timestamps[0]) {
