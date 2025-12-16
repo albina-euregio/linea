@@ -67,6 +67,8 @@ export class LineaPlot extends HTMLElement {
 
   static observedAttributes = ["src"];
 
+  private isLoaded: boolean = false;
+
   private startInput!: HTMLInputElement;
   private endInput!: HTMLInputElement;
 
@@ -237,10 +239,11 @@ export class LineaPlot extends HTMLElement {
     });
     this.tabIndex = 0;
     this.focus();
+    this.isLoaded = true;
   }
 
   attributeChangedCallback(name: string) {
-    if (name === "src") {
+    if (this.isLoaded &&name === "src") {
       for (const lc of this.lineacharts) {
         this.removeChild(lc);
       }
