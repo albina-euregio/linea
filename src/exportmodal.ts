@@ -246,11 +246,11 @@ export class ExportModal {
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <div>
                             <label for="exportWidth">${i18n.message("dialog:weather-station-diagram:controls:label:width")} (px)</label>
-                            <input type="number" id="exportWidth" value="1100" min="400" max="2000" step="100">
+                            <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
                         </div>
                         <div>
                             <label for="exportHeight">${i18n.message("dialog:weather-station-diagram:controls:label:heightpercanvas")} (px):</label>
-                            <input type="number" id="exportHeight" value="300" min="100" max="600" step="50">
+                            <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
                         </div>
                         <div>
                             <label for="exportTitle">${i18n.message("dialog:weather-station-diagram:controls:label:title")}</label>
