@@ -72,7 +72,10 @@ export class YearData {
       }
       yearData.monthDayData.get(monthDay)?.push(value);
 
-      if (startDate.toString() <= date.toString() && date.toString() <= endDate.toString()) {
+      if (
+        Temporal.PlainDateTime.compare(startDate, date) <= 0 &&
+        Temporal.PlainDateTime.compare(date, endDate) <= 0
+      ) {
         yearData.dates.push(date);
         yearData.values.push(value);
       }

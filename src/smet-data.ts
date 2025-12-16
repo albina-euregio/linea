@@ -33,6 +33,27 @@ type ParameterType =
   | "HS"
   | "NS";
 
+type Units = Record<ParameterType, string>;
+const DEFAULT_UNITS: Units = {
+  P: "Pa",
+  TA: "K",
+  TD: "K",
+  TSS: "K",
+  TSG: "K",
+  RH: "1",
+  VW_MAX: "m/s",
+  VW: "m/s",
+  DW: "degree",
+  ISWR: "W/m²",
+  RSWR: "W/m²",
+  ILWR: "W/m²",
+  OLWR: "W/m²",
+  PINT: "mm/h",
+  PSUM: "mm",
+  HS: "m",
+  NS: "m",
+};
+
 const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number }> = {
   K: { to: "°C", convert: (v) => v - 273.15 },
   m: { to: "cm", convert: (v) => v * 100 },
@@ -41,7 +62,6 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
   mm: { to: "mm", convert: (v) => v },
 };
 
-type Units = Record<ParameterType, string>;
 export type Values = Record<ParameterType, number[]>;
 export type Result = {
   station: string;
@@ -85,27 +105,7 @@ export function parseSMET(smet: string): Result {
     let header = "";
     if ((header = parseHeader("fields"))) {
       fields = header.split(separator);
-      units = fields.map(
-        (f) =>
-          ({
-            P: "Pa",
-            TA: "K",
-            TD: "K",
-            TSS: "K",
-            TSG: "K",
-            RH: "1",
-            VW_MAX: "m/s",
-            VW: "m/s",
-            DW: "degree",
-            ISWR: "W/m²",
-            RSWR: "W/m²",
-            ILWR: "W/m²",
-            OLWR: "W/m²",
-            PINT: "mm/h",
-            PSUM: "mm",
-            HS: "m",
-          })[f] ?? "",
-      );
+      units = fields.map((f) => DEFAULT_UNITS[f as ParameterType] ?? "");
       values = fields.map(() => [] as number[]);
       return;
     } else if ((header = parseHeader("#units"))) {
