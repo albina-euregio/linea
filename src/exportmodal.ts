@@ -1,3 +1,7 @@
+import { i18n } from "./i18n";
+import { LineaPlot } from "./linea-plot";
+import { LineaChart } from "./linea-plot/LineaChart";
+
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
  * 
@@ -15,16 +19,21 @@
  * @property {string} exportdata.filename - The filename for the exported file
  * @property {string} exportdata.type - The MIME type of the exported file
  * 
+ * @features
+ * - PNG export with customizable dimensions and title
+ * - Multi-chart export combining multiple LineaChart plots
+ * - Automatic legend generation from plot series
+ * - Download exported files to local system
+ * - Open exports in new browser tab
+ * - Responsive modal UI with export settings panel
+ * - Station selection via checkboxes
+ * - Dynamic title generation based on selected stations
+ * - Chart resizing with preservation of original dimensions
+ * 
  * @example
  * const exportModal = new ExportModal(modalElement, lineaPlot);
  * exportModal.show();
  */
-
-import { i18n } from "./i18n";
-import { LineaPlot } from "./linea-plot";
-import { LineaChart } from "./linea-plot/LineaChart";
-
-
 export class ExportModal {
 
     private exportOptions: HTMLDivElement;
@@ -37,8 +46,6 @@ export class ExportModal {
      * 
      * Sets up the export modal HTML structure, CSS styles, and event listeners for:
      * - PNG export with resizable dimensions
-     * - iframe export with custom settings
-     * - Standalone HTML export
      * - Copy to clipboard functionality
      * - Download and open exported files
      * 
