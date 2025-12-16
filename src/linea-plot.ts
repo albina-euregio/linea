@@ -14,6 +14,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * 
  * @attributes
  * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (required)
+ * - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to lazy fetch data from after loading the component and the data from `src` (optional)
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
  * - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
@@ -74,6 +75,7 @@ export class LineaPlot extends HTMLElement {
   private minTime: number = +Infinity;
   private maxTime: number = -Infinity;
 
+  
   connectedCallback() {
     const style = document.createElement("style");
     style.textContent = `
@@ -241,7 +243,9 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * fetches the data from the src attribute, generalizes it and update the valid date inputs
+   * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
+   * If a other attribute is given it uses this one instead of src
+   * @param attribute {string} - attribute to fetch the data from, default is "src"
    */
   async fetchAndStoreData(attribute: string = "src") {
     if (!globalThis.Temporal) {
