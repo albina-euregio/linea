@@ -26,7 +26,7 @@ import { ExportModal } from "./exportmodal";
  * - `enddate` {string} - Initial end date in ISO 8601 format (e.g., "2025-06-04T12:24[Europe/Berlin]").
  *    If used with `showdatepicker` and `startdate` it will set the initial date range.
  *    If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
- * - `showexportpng` - toggles if the export png button is shown
+ * - `showexport` - toggles if the export button is shown
  * 
  * If startdate or enddate is missing it will show all data from the SMET file. 
  * If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
@@ -40,7 +40,7 @@ import { ExportModal } from "./exportmodal";
  *   showdatepicker
  *   showsurfacehoarseries
  *   showtitle
- *   showexportpng
+ *   showexport
  *   startdate="2025-06-01T00:00[Europe/Berlin]"
  *   enddate="2025-06-30T23:59[Europe/Berlin]">
  * </linea-plot>
@@ -433,7 +433,7 @@ export class LineaPlot extends HTMLElement {
     }
     const menu = document.createElement("div");
     menu.classList.add("controls-menu");
-    if (this.hasAttribute("showexportpng")) {
+    if (this.hasAttribute("showexport")) {
       const exportbtn = document.createElement("button");
       exportbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:export")}`;
       exportbtn.classList.add("toggle-btn");
