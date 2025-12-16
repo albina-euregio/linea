@@ -483,7 +483,6 @@ export class ExportModal {
         const series: uPlot.Series[] = [];
         const legendItems = {};
         
-        const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
         
         const activeLinecharts = this.#getActiveLineacharts();
         if(activeLinecharts.length == 0){
@@ -496,6 +495,7 @@ export class ExportModal {
             activeLinecharts[0].setBackgroundColor("#00000000");
         }
         // has to be done after background color change, because uPlot canvas is redrawn on background color change
+        const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
         for (const lineachart of this.lineaPlot.lineacharts){
             lineachart.resizeObserver.unobserve(lineachart);
             lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
@@ -653,7 +653,7 @@ export class ExportModal {
         const titleInput = document.getElementById("exportTitle") as HTMLInputElement;
         return {
             width: parseInt(widthInput.value),
-            height: parseInt(heightInput.value),
+            heightPerCanvas: parseInt(heightInput.value),
             title: titleInput.value
         };
     }
