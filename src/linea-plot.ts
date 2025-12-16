@@ -332,10 +332,10 @@ export class LineaPlot extends HTMLElement {
   /**
    * Adds the controls to the Plot:
    * - Datepicker with (previousWeek|startDate|endDate|nextWeek)
-   * - Menu buttons with (exportpng|enlarge)
+   * - Menu buttons with (export|enlarge)
    *
    * enlarge shows all available data and is shown when the datepicker is there too
-   * export png exports the drawed canvas on the screen, see @method #exportAllPlotsToPNG
+   * export exports the drawed canvas on the screen, see @class ExportModal
    */
   #addControls() {
     const controls = document.createElement("div");
