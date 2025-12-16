@@ -79,7 +79,6 @@ export class LineaPlot extends HTMLElement {
   private minTime: number = +Infinity;
   private maxTime: number = -Infinity;
 
-  
   connectedCallback() {
     const style = document.createElement("style");
     style.textContent = `
@@ -407,7 +406,7 @@ export class LineaPlot extends HTMLElement {
           );
           previousWeek.disabled = true;
           newEnd = newStart.add({ days: 7 });
-        } else if(newStart.toInstant().epochMilliseconds > this.maxTime) {
+        } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
           this.#setStartEndDateToMinMax();
           this.filterAndUpdateData();
           return;
@@ -438,7 +437,7 @@ export class LineaPlot extends HTMLElement {
           );
           nextWeek.disabled = true;
           newStart = newEnd.subtract({ days: 7 });
-        } else if(newEnd.toInstant().epochMilliseconds < this.minTime) {
+        } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
           this.#setStartEndDateToMinMax();
           this.filterAndUpdateData();
           return;
