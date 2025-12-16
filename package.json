@@ -7,7 +7,7 @@
   "scripts": {
     "prepare": "husky",
     "test": "vitest run",
-    "lint": "oxlint --max-warnings 12",
+    "lint": "oxfmt --check && oxlint --max-warnings 12",
     "build": "vite build",
     "dev": "vite"
   },
@@ -16,18 +16,14 @@
     "src/",
     "dist/"
   ],
-  "lint-staged": {
-    "*.{css,md,scss}": "prettier --write"
-  },
   "dependencies": {
     "temporal-polyfill": "^0.3.0",
     "uplot": "^1.6.32"
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "lint-staged": "^15.2.10",
-    "oxlint": "^1.28.0",
-    "prettier": "^3.3.3",
+    "oxfmt": "^0.17.0",
+    "oxlint": "^1.32.0",
     "vite": "^7.2.7",
     "vitest": "^4.0.15"
   }

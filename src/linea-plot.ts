@@ -1,9 +1,7 @@
-
 import uPlot from "uplot";
 import { i18n } from "./i18n";
 import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
-import { Temporal } from "temporal-polyfill";
 import { ExportModal } from "./exportmodal";
 
 /**
@@ -81,8 +79,8 @@ export class LineaPlot extends HTMLElement {
   private maxTime: number = -Infinity;
 
   connectedCallback() {
-      const style = document.createElement("style");
-      style.textContent = `
+    const style = document.createElement("style");
+    style.textContent = `
         linea-plot:focus {
           outline: none;
         }
@@ -223,17 +221,20 @@ export class LineaPlot extends HTMLElement {
     this.appendChild(style);
     this.#addExportModal();
     this.#addControls();
-    
 
     this.fetchAndStoreData().then(() => {
       this.#updateValidDateInputs();
       this.render();
-      if(this.hasAttribute("showdatepicker") && this.hasAttribute("startdate") && this.hasAttribute("enddate")){
+      if (
+        this.hasAttribute("showdatepicker") &&
+        this.hasAttribute("startdate") &&
+        this.hasAttribute("enddate")
+      ) {
         this.#setStartEndDateToAttributes();
       } else {
         this.#setStartEndDateToMinMax();
       }
-      if(!this.hasAttribute("showdatepicker")){
+      if (!this.hasAttribute("showdatepicker")) {
         this.#handleFixedDateView();
       }
     });
@@ -244,20 +245,24 @@ export class LineaPlot extends HTMLElement {
   /**
    * fetches the data from the src attribute, generalizes it and update the valid date inputs
    */
-  async fetchAndStoreData(){
+  async fetchAndStoreData() {
+    if (!globalThis.Temporal) {
+      await import("temporal-polyfill/global");
+    }
     const src = this.getAttribute("src") ?? "";
-    let srcs: string[] = src.startsWith("[") || src.startsWith('"') ? JSON.parse(src) as string[] : [src];
-    if (!(srcs instanceof Array)){
+    let srcs: string[] =
+      src.startsWith("[") || src.startsWith('"') ? (JSON.parse(src) as string[]) : [src];
+    if (!(srcs instanceof Array)) {
       srcs = [srcs];
       this.backgroundColors = [];
     }
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
-      if (this.minTime > result.timestamps[0]){
+      if (this.minTime > result.timestamps[0]) {
         this.minTime = result.timestamps[0];
       }
-      if (this.maxTime < result.timestamps[result.timestamps.length-1]){
-        this.maxTime = result.timestamps[result.timestamps.length-1];
+      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
+        this.maxTime = result.timestamps[result.timestamps.length - 1];
       }
       this.results.push(result);
     }
@@ -268,15 +273,22 @@ export class LineaPlot extends HTMLElement {
   /**
    * creates all LineaCharts and initializate them
    */
-  render(){
-    if(this.hasAttribute("backgroundcolors")){
-      this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors")?? "");
+  render() {
+    if (this.hasAttribute("backgroundcolors")) {
+      this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors") ?? "");
     }
 
     for (const i in this.results) {
       const result = this.results[i];
-      let lc = new LineaChart(result.timestamps, result.values, result.station, result.altitude,
-         this.hasAttribute("showtitle"), this.hasAttribute("showsurfacehoarseries"), this.backgroundColors[i] ?? "#00000000");
+      let lc = new LineaChart(
+        result.timestamps,
+        result.values,
+        result.station,
+        result.altitude,
+        this.hasAttribute("showtitle"),
+        this.hasAttribute("showsurfacehoarseries"),
+        this.backgroundColors[i] ?? "#00000000",
+      );
       this.lineacharts.push(lc);
       this.appendChild(lc);
     }
@@ -288,20 +300,24 @@ export class LineaPlot extends HTMLElement {
    * @param startDate from where the data shall be shown
    * @param endDate to when the data shall be shown
    */
-  filterAndUpdateData(startDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.startInput.value),
-                      endDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.endInput.value)){
-    const startTimestamp = startDate.toInstant().epochMilliseconds / 1000;
-    const endTimestamp = endDate.toInstant().epochMilliseconds / 1000;
-    for (let i = 0; i < this.lineacharts.length; i++){
+  filterAndUpdateData(
+    startDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.startInput.value),
+    endDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.endInput.value),
+  ) {
+    const startTimestamp = startDate.toInstant().epochMilliseconds;
+    const endTimestamp = endDate.toInstant().epochMilliseconds;
+    for (let i = 0; i < this.lineacharts.length; i++) {
       const res = this.results[i];
 
       let filteredValues = {};
 
       for (const key in res.values) {
-        filteredValues[key] = res.values[key].filter((t, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp);
+        filteredValues[key] = res.values[key].filter(
+          (t, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp,
+        );
       }
-      const filteredTimestamps = res.timestamps.filter((t) => 
-        t >= startTimestamp && t <= endTimestamp
+      const filteredTimestamps = res.timestamps.filter(
+        (t) => t >= startTimestamp && t <= endTimestamp,
       );
       this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
     }
@@ -319,15 +335,15 @@ export class LineaPlot extends HTMLElement {
    * Adds the controls to the Plot:
    * - Datepicker with (previousWeek|startDate|endDate|nextWeek)
    * - Menu buttons with (exportpng|enlarge)
-   * 
+   *
    * enlarge shows all available data and is shown when the datepicker is there too
    * export png exports the drawed canvas on the screen, see @method #exportAllPlotsToPNG
    */
-  #addControls(){
+  #addControls() {
     const controls = document.createElement("div");
     controls.classList.add("controls");
-    
-    if(this.hasAttribute("showdatepicker")){
+
+    if (this.hasAttribute("showdatepicker")) {
       const controlsdates = document.createElement("div");
       controlsdates.classList.add("controls-dates");
       controls.appendChild(controlsdates);
@@ -337,25 +353,31 @@ export class LineaPlot extends HTMLElement {
       this.startInput.classList.add("toggle-btn");
       this.startInput.classList.add("controls-dates-inputs");
       this.startInput.classList.add("startDateInput");
-      this.startInput.addEventListener('change', () => {
-        this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+      this.startInput.addEventListener("change", () => {
+        this.filterAndUpdateData(
+          this.#inputValueToZonedDateTime(this.startInput.value),
+          this.#inputValueToZonedDateTime(this.endInput.value),
+        );
       });
       this.endInput = document.createElement("input");
       this.endInput.classList.add("toggle-btn");
       this.endInput.classList.add("controls-dates-inputs");
       this.endInput.classList.add("endDateInput");
       this.endInput.type = "datetime-local";
-      this.endInput.addEventListener('change', () => {
-        this.filterAndUpdateData(this.#inputValueToZonedDateTime(this.startInput.value), this.#inputValueToZonedDateTime(this.endInput.value));
+      this.endInput.addEventListener("change", () => {
+        this.filterAndUpdateData(
+          this.#inputValueToZonedDateTime(this.startInput.value),
+          this.#inputValueToZonedDateTime(this.endInput.value),
+        );
       });
-        
+
       const previousWeek = document.createElement("button");
       previousWeek.classList.add("toggle-btn");
       previousWeek.classList.add("controls-dates-inputs");
       previousWeek.classList.add("tooltip");
       previousWeek.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previousweek")}</span>`;
       this.addEventListener("keydown", (e) => {
-        if(e.key === "ArrowLeft"){
+        if (e.key === "ArrowLeft") {
           previousWeek.click();
         }
       });
@@ -365,10 +387,12 @@ export class LineaPlot extends HTMLElement {
         nextWeek.disabled = false;
         let newEnd = start;
         let newStart = start.subtract({ days: 7 });
-        if((newStart.toInstant().epochMilliseconds / 1000) < this.minTime){
-          newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime * 1000).toZonedDateTimeISO(i18n.timezone());
+        if (newStart.toInstant().epochMilliseconds < this.minTime) {
+          newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+            i18n.timezone(),
+          );
           previousWeek.disabled = true;
-          newEnd = newStart.add({days: 7});
+          newEnd = newStart.add({ days: 7 });
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
@@ -380,7 +404,7 @@ export class LineaPlot extends HTMLElement {
       nextWeek.classList.add("tooltip");
       nextWeek.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:nextweek")}</span>`;
       this.addEventListener("keydown", (e) => {
-        if(e.key === "ArrowRight"){
+        if (e.key === "ArrowRight") {
           nextWeek.click();
         }
       });
@@ -390,10 +414,12 @@ export class LineaPlot extends HTMLElement {
         previousWeek.disabled = false;
         let newStart = end;
         let newEnd = end.add({ days: 7 });
-        if((newEnd.toInstant().epochMilliseconds / 1000) > this.maxTime){
-          newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime * 1000).toZonedDateTimeISO(i18n.timezone());
+        if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
+          newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+            i18n.timezone(),
+          );
           nextWeek.disabled = true;
-          newStart = newEnd.subtract({days: 7});
+          newStart = newEnd.subtract({ days: 7 });
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
@@ -422,7 +448,7 @@ export class LineaPlot extends HTMLElement {
       });
       menu.appendChild(exportbtn);
     }
-    if(this.hasAttribute("showdatepicker")){
+    if (this.hasAttribute("showdatepicker")) {
       const enlargebtn = document.createElement("button");
       enlargebtn.innerHTML = `<svg width="13px" height="13px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -432,7 +458,7 @@ export class LineaPlot extends HTMLElement {
         </svg><span class="tooltiptext">${i18n.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`;
       enlargebtn.classList.add("toggle-btn");
       enlargebtn.classList.add("tooltip");
-      enlargebtn.addEventListener('click', () => {
+      enlargebtn.addEventListener("click", () => {
         this.#setStartEndDateToMinMax();
         this.filterAndUpdateData();
       });
@@ -446,11 +472,17 @@ export class LineaPlot extends HTMLElement {
   /**
    * handles the fixed date view
    */
-  #handleFixedDateView(){
-    if(!this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))){
-      console.warn("Start and Endate are not chosen, all data is presented!");
-    } else if(!this.hasAttribute("showdatepicker")){
-      this.filterAndUpdateData(Temporal.ZonedDateTime.from(this.getAttribute("startdate")??"1900-00-00T00:00[UTC]"), Temporal.ZonedDateTime.from(this.getAttribute("enddate")??"2300-00-00T00:00[UTC]"));
+  #handleFixedDateView() {
+    if (
+      !this.hasAttribute("showdatepicker") &&
+      (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))
+    ) {
+      console.debug("Start and Endate are not chosen, all data is presented!");
+    } else if (!this.hasAttribute("showdatepicker")) {
+      this.filterAndUpdateData(
+        Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
+        Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "2300-00-00T00:00[UTC]"),
+      );
     }
   }
 
@@ -461,8 +493,8 @@ export class LineaPlot extends HTMLElement {
    * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
    * so we can show all available data
    */
-  #generalizeData(){
-    if (this.results.length === 0){
+  #generalizeData() {
+    if (this.results.length === 0) {
       return;
     }
     const tsSet = new Set<number>();
@@ -473,12 +505,12 @@ export class LineaPlot extends HTMLElement {
 
     // align each result to the common timeline, filling missing entries with null to not show missing data
     for (const res of this.results) {
-      for (const key in res.values){
+      for (const key in res.values) {
         const map = new Map<number, number[]>();
         for (let i = 0; i < res.timestamps.length; i++) {
           map.set(res.timestamps[i], res.values[key][i]);
         }
-        const newValues = allTimestamps.map(t => map.has(t) ? (map.get(t) ?? null) : null);
+        const newValues = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : null));
         res.values[key] = newValues;
       }
       // set the common timeline to all results
@@ -488,14 +520,18 @@ export class LineaPlot extends HTMLElement {
 
   /**
    * sets the valid data range to the startDate and endDate inputs
-   * @returns 
+   * @returns
    */
-  #updateValidDateInputs(){
-    if(!this.startInput || !this.endInput){
+  #updateValidDateInputs() {
+    if (!this.startInput || !this.endInput) {
       return;
     }
-    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(i18n.timezone());
-    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(i18n.timezone());
+    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
     this.startInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
     this.startInput.max = this.#zonedDateTimeToLocalInputValue(maxTime);
     this.endInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
@@ -504,21 +540,31 @@ export class LineaPlot extends HTMLElement {
 
   /**
    *  Set the start and end input to the values given by the attributes
-   * @returns 
+   * @returns
    */
-  #setStartEndDateToAttributes(){
-    if(!this.startInput || !this.endInput){
+  #setStartEndDateToAttributes() {
+    if (!this.startInput || !this.endInput) {
       return;
     }
-    let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate")??"");
-    let enddate = Temporal.ZonedDateTime.from(this.getAttribute("enddate")??"");
-    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(i18n.timezone());
-    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(i18n.timezone());
-    
-    if (Temporal.ZonedDateTime.compare(startdate, maxTime) > 0 || Temporal.ZonedDateTime.compare(startdate, minTime) < 0){
+    let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "");
+    let enddate = Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "");
+    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
+
+    if (
+      Temporal.ZonedDateTime.compare(startdate, maxTime) > 0 ||
+      Temporal.ZonedDateTime.compare(startdate, minTime) < 0
+    ) {
       startdate = this.#inputValueToZonedDateTime(this.startInput.min);
     }
-    if (Temporal.ZonedDateTime.compare(enddate, minTime) < 0 || Temporal.ZonedDateTime.compare(enddate, maxTime) > 0){
+    if (
+      Temporal.ZonedDateTime.compare(enddate, minTime) < 0 ||
+      Temporal.ZonedDateTime.compare(enddate, maxTime) > 0
+    ) {
       enddate = this.#inputValueToZonedDateTime(this.endInput.max);
     }
     this.startInput.value = this.#zonedDateTimeToLocalInputValue(startdate);
@@ -527,17 +573,21 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * 
+   *
    * set the Input fields to the widthest available timespan
    */
-  #setStartEndDateToMinMax(){
-    if(!this.startInput || !this.endInput){
+  #setStartEndDateToMinMax() {
+    if (!this.startInput || !this.endInput) {
       return;
     }
-    this.startInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.minTime*1000).toZonedDateTimeISO(i18n.timezone()));
-    this.endInput.value = this.#zonedDateTimeToLocalInputValue(Temporal.Instant.fromEpochMilliseconds(this.maxTime*1000).toZonedDateTimeISO(i18n.timezone()));
+    this.startInput.value = this.#zonedDateTimeToLocalInputValue(
+      Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(i18n.timezone()),
+    );
+    this.endInput.value = this.#zonedDateTimeToLocalInputValue(
+      Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(i18n.timezone()),
+    );
   }
-  
+
   /**
    * Converts dates into the format of HTML datetime-local inputs
    * @param zdt date to convert
@@ -558,9 +608,9 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * 
+   *
    * Convert HTMl datetime-local input values into ZonedDateTime Objects
-   * 
+   *
    * @param value a HTML datetime-local string to convert
    * @returns a Temporal ZonedDateTime Object
    */
@@ -569,7 +619,6 @@ export class LineaPlot extends HTMLElement {
     const pdt = Temporal.PlainDateTime.from(value);
     return pdt.toZonedDateTime(i18n.timezone());
   }
-  
 }
 
 customElements.define("linea-plot", LineaPlot);

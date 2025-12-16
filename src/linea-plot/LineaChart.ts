@@ -1,18 +1,7 @@
 import uPlot from "uplot";
 import css from "uplot/dist/uPlot.min.css?raw";
-import {
-  opts_TA,
-  opts_TA_TD_TSS,
-  opts_TD,
-  opts_TSS,
-  opts_SurfaceHoar,
-} from "./opts_TA_TD_TSS";
-import {
-  opts_DW,
-  opts_VW,
-  opts_VW_MAX,
-  opts_VW_VWG_DW,
-} from "./opts_VW_VWG_DW";
+import { opts_TA, opts_TA_TD_TSS, opts_TD, opts_TSS, opts_SurfaceHoar } from "./opts_TA_TD_TSS";
+import { opts_DW, opts_VW, opts_VW_MAX, opts_VW_VWG_DW } from "./opts_VW_VWG_DW";
 import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
 import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
 import { dewPoint } from "./dewPoint";
@@ -20,7 +9,7 @@ import { Values } from "../smet-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
-export class LineaChart extends AbstractLineaChart{
+export class LineaChart extends AbstractLineaChart {
 
     constructor(
         private timestamps: Uint32Array,
@@ -109,82 +98,81 @@ export class LineaChart extends AbstractLineaChart{
         if (this.values.TA) {
             const TD =
             this.values.TD ??
-            (this.values.TA && this.values.RH
-                ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
-                : undefined);
-            const p = new uPlot(
-            {
-                ...opts_TA_TD_TSS,
-                ...(this.showTitle
-                ? {
-                    title: `${this.station} (${i18n.number(this.altitude, { maximumFractionDigits: 0 })}m)`,
-                    }
-                : {}),
-            },
-            [this.timestamps],
-            plot_TA_TD_TSS
-            );
-            this.#modifyDrawHook(p);
-            this.addSeries( p, opts_TA, this.values.TA);
-            this.addSeries( p, opts_TD, TD);
-            
-            // show snow surface temperature and therefore surface hoar only if available
-            if(this.values.TSS) {
-                this.addSeries( p, opts_TSS, this.values.TSS);
-                if(this.showSurfaceHoarSeries){
-                    const surfacehoar = this.values.TD.map((td, i) => {
-                    const tss = this.values.TSS[i];
-                    return (td < 0 && tss < td) ? 1000 : -100;
-                    });
-                    this.addSeries( p, opts_SurfaceHoar, surfacehoar)
-                }
-            } else {
-                this.addSeries( p, opts_TSS, []);
-            }
-        }
+        (this.values.TA && this.values.RH
+          ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+          : undefined);
+      const p = new uPlot(
+        {
+          ...opts_TA_TD_TSS,
+          ...(this.showTitle
+            ? {
+                title: `${this.station} (${i18n.number(this.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [this.timestamps],
+        plot_TA_TD_TSS,
+      );
+      this.#modifyDrawHook(p);
+      this.addSeries(p, opts_TA, this.values.TA);
+      this.addSeries(p, opts_TD, TD);
 
-        if (this.values.VW || this.values.VW_MAX || this.values.DW) {
-            const p = new uPlot({...opts_VW_VWG_DW}, [this.timestamps], plot_VW_VWG_DW);
-            this.#modifyDrawHook(p);      
-            this.addSeries( p, opts_VW, this.values.VW);
-            this.addSeries( p, opts_VW_MAX, this.values.VW_MAX);
-            this.addSeries(p, opts_DW, this.values.DW);
+      // show snow surface temperature and therefore surface hoar only if available
+      if (this.values.TSS) {
+        this.addSeries(p, opts_TSS, this.values.TSS);
+        if (this.showSurfaceHoarSeries) {
+          const surfacehoar = this.values.TD.map((td, i) => {
+            const tss = this.values.TSS[i];
+            return td < 0 && tss < td ? 1000 : -100;
+          });
+          this.addSeries(p, opts_SurfaceHoar, surfacehoar);
         }
-
-        if (this.values.HS || this.values.PSUM) {
-            const p = new uPlot({...opts_HS_PSUM}, [this.timestamps], plot_HS_PSUM);
-            this.#modifyDrawHook(p);
-            this.addSeries( p, opts_HS, this.values.HS);
-            this.addSeries( p, opts_PSUM, this.values.PSUM);
-        }
-
-        if (this.values.RH || this.values.ISWR) {
-            const p = new uPlot({...opts_RH_GR}, [this.timestamps], plot_RH_GR);
-            this.#modifyDrawHook(p);
-            this.addSeries(p, opts_RH, this.values.RH);
-            this.addSeries(p, opts_ISWR, this.values.ISWR);
-        }
-
-        this.resizePlots(this.clientWidth, this.style);
-        this.resizeObserver.observe(this);
+      } else {
+        this.addSeries(p, opts_TSS, []);
+      }
     }
 
-    disconnectedCallback() {
-        this.resizeObserver.unobserve(this);
+    if (this.values.VW || this.values.VW_MAX || this.values.DW) {
+      const p = new uPlot({ ...opts_VW_VWG_DW }, [this.timestamps], plot_VW_VWG_DW);
+      this.#modifyDrawHook(p);
+      this.addSeries(p, opts_VW, this.values.VW);
+      this.addSeries(p, opts_VW_MAX, this.values.VW_MAX);
+      this.addSeries(p, opts_DW, this.values.DW);
     }
 
-    #modifyDrawHook(p: uPlot){
-        p.hooks.draw = p.hooks.draw || [];
-        p.hooks.draw.unshift((u) =>  {
-            const { left, top, width, height } = u.bbox;
-            const ctx = u.ctx;
-            ctx.save();
-            ctx.fillStyle = this.backgroundColor;
-            ctx.fillRect(left, top, width, height);
-            ctx.restore();
-        });
+    if (this.values.HS || this.values.PSUM) {
+      const p = new uPlot({ ...opts_HS_PSUM }, [this.timestamps], plot_HS_PSUM);
+      this.#modifyDrawHook(p);
+      this.addSeries(p, opts_HS, this.values.HS);
+      this.addSeries(p, opts_PSUM, this.values.PSUM);
     }
 
+    if (this.values.RH || this.values.ISWR) {
+      const p = new uPlot({ ...opts_RH_GR }, [this.timestamps], plot_RH_GR);
+      this.#modifyDrawHook(p);
+      this.addSeries(p, opts_RH, this.values.RH);
+      this.addSeries(p, opts_ISWR, this.values.ISWR);
+    }
+
+    this.resizePlots(this.clientWidth, this.style);
+    this.resizeObserver.observe(this);
+  }
+
+  disconnectedCallback() {
+    this.resizeObserver.unobserve(this);
+  }
+
+  #modifyDrawHook(p: uPlot) {
+    p.hooks.draw = p.hooks.draw || [];
+    p.hooks.draw.unshift((u) => {
+      const { left, top, width, height } = u.bbox;
+      const ctx = u.ctx;
+      ctx.save();
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(left, top, width, height);
+      ctx.restore();
+    });
+  }
 }
 
 customElements.define("linea-chart", LineaChart);

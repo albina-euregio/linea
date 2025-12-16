@@ -1,14 +1,62 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`parse AT-02 (2025-12-09) 1`] = `
+{
+  "altitude": 2317,
+  "station": "mallnitz_ankogel_hintere_lucke",
+  "timestamps": [
+    1764693000000,
+    1764696600000,
+    1764700200000,
+    1764703800000,
+    1764707400000,
+    1764711000000,
+  ],
+  "units": {
+    "HS": "cm",
+    "RH": "%",
+    "TA": "°C",
+    "timestamp": "",
+  },
+  "values": {
+    "HS": [
+      3760,
+      3779.9999999999995,
+      3779.9999999999995,
+      3800,
+      3800,
+      3779.9999999999995,
+    ],
+    "RH": [
+      90.9,
+      null,
+      null,
+      null,
+      94.1,
+      null,
+    ],
+    "TA": [
+      -0.39999999999997726,
+      -0.7999999999999545,
+      -1.099999999999966,
+      -1,
+      -0.8999999999999773,
+      -1.1999999999999886,
+    ],
+    "timestamp": [],
+  },
+}
+`;
+
 exports[`parse AT-02 (assume tz = 0: UTC) 1`] = `
 {
   "altitude": 2317,
   "station": "mallnitz_ankogel_hintere_lucke",
-  "timestamps": Uint32Array [
-    1764183000,
-    1764183600,
-    1764184200,
-    1764184800,
+  "timestamps": [
+    1764183000000,
+    1764183600000,
+    1764184200000,
+    1764184800000,
   ],
   "units": {
     "HS": "cm",
@@ -44,11 +92,11 @@ exports[`parse AT-02 (with tz = 1: UTC+1) 1`] = `
 {
   "altitude": 2317,
   "station": "mallnitz_ankogel_hintere_lucke",
-  "timestamps": Uint32Array [
-    1764179400,
-    1764180000,
-    1764180600,
-    1764181200,
+  "timestamps": [
+    1764179400000,
+    1764180000000,
+    1764180600000,
+    1764181200000,
   ],
   "units": {
     "HS": "cm",
@@ -84,11 +132,11 @@ exports[`parse AT-07 1`] = `
 {
   "altitude": 2180,
   "station": "Gallreideschrofen",
-  "timestamps": Uint32Array [
-    1764186000,
-    1764186600,
-    1764187200,
-    1764187800,
+  "timestamps": [
+    1764186000000,
+    1764186600000,
+    1764187200000,
+    1764187800000,
   ],
   "units": {
     "HS": "cm",

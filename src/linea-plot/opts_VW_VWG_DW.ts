@@ -8,6 +8,7 @@ import { OptsHelper } from "./optsHelper";
  * uPlot options for Windgeschwindigkeit [km/h] & Windrichtung [˚]
  */
 export const opts_VW_VWG_DW: uPlot.Options = {
+  ms: 1, // timestamp multiplier that yields 1 millisecond
   width: 1040,
   height: 300,
   padding: [50, 50, 0, 50],
@@ -22,7 +23,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   },
   hooks: {
     drawAxes: [
-       (u) => {
+      (u) => {
         const ctx = u.ctx;
         ctx.save();
         ctx.textBaseline = "top";
@@ -32,8 +33,17 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         var labely2 = i18n.message("dialog:weather-station-diagram:parameter:DW");
         var labelColor1 = "#00E2B6";
         var labelColor2 = "#084D40";
-        OptsHelper.UpdateAxisLabels(ctx, labely1, labely2, u.bbox.left, u.bbox.width, canvasHeight, labelColor1, labelColor2);
-  
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          canvasHeight,
+          labelColor1,
+          labelColor2,
+        );
+
         // Draw reference line at 25 km/h (working group decision)
         const width = 1;
         const offset = (width % 2) / 2;
@@ -54,16 +64,16 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       },
     ],
   },
-   scales: {
-      y: {
-        range: (u, dataMin, dataMax) => {
-          let validMax = dataMax;
-          return validMax > 100 ? [0, 120] : [0, 100];
-        },
+  scales: {
+    y: {
+      range: (u, dataMin, dataMax) => {
+        let validMax = dataMax;
+        return validMax > 100 ? [0, 120] : [0, 100];
       },
-      y2: {
-        range: [0, 360],
-      },
+    },
+    y2: {
+      range: [0, 360],
+    },
   },
   axes: [
     timeAxis,
@@ -71,16 +81,14 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       scale: "y",
       side: 3,
       stroke: "#00E2B6",
-      grid: {show: true},
+      grid: { show: true },
       splits: (u) => {
         const max = u.scales.y.max;
         const useExtended = max > 100;
-        const baseTicks = useExtended
-          ? [0, 30, 60, 90, 120]
-          : [0, 25, 50, 75, 100];
+        const baseTicks = useExtended ? [0, 30, 60, 90, 120] : [0, 25, 50, 75, 100];
         return baseTicks;
       },
-      values: (u, vals) => vals.map(v => v.toString()),
+      values: (u, vals) => vals.map((v) => v.toString()),
     },
     {
       splits: [0, 90, 180, 270, 360],

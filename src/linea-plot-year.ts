@@ -9,30 +9,32 @@ import {
   opts_HS_year_PSUM,
   opts_HS_year,
 } from "./linea-plot/opts_HS_PSUM_year";
- import {
+import {
   opts_TEMP_year,
   opts_DEW_year_current,
   opts_TEMP_year_current,
   opts_TEMP_year_max,
   opts_TEMP_year_median,
   opts_TEMP_year_min,
- } from "./linea-plot/opts_TEMP_year.ts";
- 
-import { 
-  opts_NS_year, 
+} from "./linea-plot/opts_TEMP_year.ts";
+
+import {
+  opts_NS_year,
   opts_NS_year_series,
   opts_NS_year_snow_cover,
- } from "./linea-plot/opts_NS_year";
+} from "./linea-plot/opts_NS_year";
 
- import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year} from "./linea-plot/opts_datapoints_year.ts";
+import {
+  opts_DATAPOINTS_year,
+  opts_DATAPOINTS_amount_year,
+} from "./linea-plot/opts_datapoints_year.ts";
 import { fetchSMET } from "./smet-data";
-import { Temporal } from "temporal-polyfill";
-import { YearData } from "./linea-plot/yeardata.ts";
+import { YearData } from "./year-data.ts";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart.ts";
 
 /**
  * uPlot diagram for yearly overview of snow height.
- * 
+ *
  * Expect `src` to be a SMET file containing daily snow height data from the beginning of measurement.
  * Aggregate the data by each calendar day into min/median/max.
  * Render snow height between `startDate` and `endDate`.
@@ -51,11 +53,14 @@ export class LineaPlotYear extends AbstractLineaChart {
   }
 
   async renderPlots() {
+    if (!globalThis.Temporal) {
+      await import("temporal-polyfill/global");
+    }
     this.resizeObserver.unobserve(this);
     const { station, altitude, timestamps, values } = await fetchSMET(
-      this.getAttribute("src") ?? ""
+      this.getAttribute("src") ?? "",
     );
-    
+
     const style = document.createElement("style");
     style.textContent = css;
     const plot_HS_year = document.createElement("div");
@@ -67,9 +72,9 @@ export class LineaPlotYear extends AbstractLineaChart {
     const startDate = Temporal.PlainDate.from(this.getAttribute("startDate")!);
     const endDate = Temporal.PlainDate.from(this.getAttribute("endDate")!);
     const timeZone = this.getAttribute("timeZone") || "CET";
-    
-    const yearData = YearData.from(timeZone, startDate, endDate, timestamps, values);
-    if(values.HS) {
+
+    if (values.HS) {
+      const yearDataHS = YearData.from(timeZone, startDate, endDate, timestamps, values.HS);
       const p = new uPlot(
         {
           ...opts_HS_year,
@@ -79,34 +84,49 @@ export class LineaPlotYear extends AbstractLineaChart {
               }
             : {}),
         },
-        [yearData.timestamps],
-        plot_HS_year
+        [yearDataHS.timestamps],
+        plot_HS_year,
       );
-      this.addSeries(p, opts_HS_year_min, yearData.HS_min);
-      this.addSeries(p, opts_HS_year_max, yearData.HS_max);
-      this.addSeries(p, opts_HS_year_median, yearData.HS_median);
-      this.addSeries(p, opts_HS_year_current, yearData.HS);
-      if(values.PSUM){
-        this.addSeries(p, opts_HS_year_PSUM, yearData.PSUM);
+      this.addSeries(p, opts_HS_year_min, yearDataHS.minValues);
+      this.addSeries(p, opts_HS_year_max, yearDataHS.maxValues);
+      this.addSeries(p, opts_HS_year_median, yearDataHS.medianValues);
+      this.addSeries(p, opts_HS_year_current, yearDataHS.values);
+      if (values.PSUM) {
+        const yearDataPSUM = YearData.from(timeZone, startDate, endDate, timestamps, values.PSUM);
+        this.addSeries(p, opts_HS_year_PSUM, yearDataPSUM.values);
       }
-      const pDatapoints = new uPlot(opts_DATAPOINTS_year, [yearData.timestamps], plot_DATAPOINTS_year);
-      this.addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearData.N);
+      const pDatapoints = new uPlot(
+        opts_DATAPOINTS_year,
+        [yearDataHS.timestamps],
+        plot_DATAPOINTS_year,
+      );
+      this.addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearDataHS.amount);
     }
-    if(values.NS){
-      let pNewSnow = new uPlot(opts_NS_year, [yearData.timestamps], plot_NS_year);
-      this.addSeries(pNewSnow, opts_NS_year_snow_cover, yearData.HS.map(v => ((v == 0 || Number.isNaN(v)) ? 1000 : -1000)));
-      this.addSeries(pNewSnow, opts_NS_year_series, yearData.NS);
-    }
-    if(values.TA || values.TD){
-      const pTemp = new uPlot(opts_TEMP_year, [yearData.timestamps], plot_TEMP_year);
-      if(values.TA){ 
-        this.addSeries(pTemp, opts_TEMP_year_min, yearData.TA_min);
-        this.addSeries(pTemp, opts_TEMP_year_max, yearData.TA_max);
-        this.addSeries(pTemp, opts_TEMP_year_median, yearData.TA_median);
-        this.addSeries(pTemp, opts_TEMP_year_current, yearData.TA);
+
+    if (values.NS) {
+      const yearDataNS = YearData.from(timeZone, startDate, endDate, timestamps, values.NS);
+      let pNewSnow = new uPlot(opts_NS_year, [yearDataNS.timestamps], plot_NS_year);
+      if (values.HS) {
+        const yearDataHS = YearData.from(timeZone, startDate, endDate, timestamps, values.HS);
+        this.addSeries(
+          pNewSnow,
+          opts_NS_year_snow_cover,
+          yearDataHS.values.map((v) => (v == 0 || Number.isNaN(v) ? 1000 : -1000)),
+        );
       }
-      if(values.TD) {
-        this.addSeries(pTemp, opts_DEW_year_current, yearData.TD);
+      this.addSeries(pNewSnow, opts_NS_year_series, yearDataNS.values);
+    }
+
+    if (values.TA) {
+      const yearDataTA = YearData.from(timeZone, startDate, endDate, timestamps, values.TA);
+      const pTemp = new uPlot(opts_TEMP_year, [yearDataTA.timestamps], plot_TEMP_year);
+      this.addSeries(pTemp, opts_TEMP_year_min, yearDataTA.minValues);
+      this.addSeries(pTemp, opts_TEMP_year_max, yearDataTA.maxValues);
+      this.addSeries(pTemp, opts_TEMP_year_median, yearDataTA.medianValues);
+      this.addSeries(pTemp, opts_TEMP_year_current, yearDataTA.values);
+      if (values.TD) {
+        const yearDataTD = YearData.from(timeZone, startDate, endDate, timestamps, values.TD);
+        this.addSeries(pTemp, opts_DEW_year_current, yearDataTD.values);
       }
     }
 
@@ -117,7 +137,6 @@ export class LineaPlotYear extends AbstractLineaChart {
   disconnectedCallback() {
     this.resizeObserver.unobserve(this);
   }
-
 }
 
 customElements.define("linea-plot-year", LineaPlotYear);

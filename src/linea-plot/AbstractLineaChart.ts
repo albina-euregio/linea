@@ -25,9 +25,9 @@ export abstract class AbstractLineaChart extends HTMLElement{
     addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
         if (!this.plots.includes(plot)) {
             this.plots.push(plot);
-        }        
+        }
         if (!data) {
-            console.warn("addSeries called with undefined data", series.label);
+            console.debug("addSeries called with undefined data", series.label);
             data = [] as number[];
         }
         plot.addSeries({ ...series, show: !!data?.length });
@@ -39,9 +39,9 @@ export abstract class AbstractLineaChart extends HTMLElement{
         const minScale = 0.6;
         return Math.max(minScale, Math.min(1, clientWidth / baseWidth));
     }
-    
-    GetStyle(document: Document, css: string): HTMLStyleElement{
-        if(!this.#m_style){
+
+    GetStyle(document: Document, css: string): HTMLStyleElement {
+        if (!this.#m_style) {
             this.#CreateStyle(document, css);
         }
         return this.#m_style;
@@ -52,16 +52,16 @@ export abstract class AbstractLineaChart extends HTMLElement{
         const style = document.createElement("style");
         style.textContent = css;
         style.textContent += `
-        .vw-max-plot .u-axis-label {
-            transform-origin: left top;
-            white-space: nowrap;
-        }
+            .vw-max-plot .u-axis-label {
+                transform-origin: left top;
+                white-space: nowrap;
+            }
 
-        .hs-year-plot .u-axis-label {
-            transform-origin: left top;
-            white-space: nowrap;
-        }
-        `;
+            .hs-year-plot .u-axis-label {
+                transform-origin: left top;
+                white-space: nowrap;
+            }
+            `;
         document.head.appendChild(style);
         this.#m_style = style;
         return style;

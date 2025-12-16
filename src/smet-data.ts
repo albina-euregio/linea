@@ -33,15 +33,12 @@ type ParameterType =
   | "HS"
   | "NS";
 
-const UNIT_MAPPING: Record<
-  string,
-  { to: string; convert: (v: number) => number }
-> = {
-  "K": { to: "°C", convert: (v) => v - 273.15 },
-  "m": { to: "cm", convert: (v) => v * 100 },
+const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number }> = {
+  K: { to: "°C", convert: (v) => v - 273.15 },
+  m: { to: "cm", convert: (v) => v * 100 },
   "1": { to: "%", convert: (v) => v * 100 },
   "m/s": { to: "km/h", convert: (v) => v * 3.6 },
-  "mm": { to: "mm", convert: (v) => v },
+  mm: { to: "mm", convert: (v) => v },
 };
 
 type Units = Record<ParameterType, string>;
@@ -49,14 +46,12 @@ export type Values = Record<ParameterType, number[]>;
 export type Result = {
   station: string;
   altitude: number;
-  timestamps: Uint32Array;
+  timestamps: number[];
   units: Units;
   values: Values;
 };
 
-export async function fetchSMET(
-  url: string
-): Promise<Result> {
+export async function fetchSMET(url: string): Promise<Result> {
   const response = await fetch(url);
   const smet = await response.text();
   return parseSMET(smet);
@@ -64,7 +59,7 @@ export async function fetchSMET(
 
 export function parseSMET(smet: string): Result {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
-  const separator = /\s/;
+  const separator = /\s+/;
   let values: number[][] = [];
   let fields: string[] = [];
   let units: string[] = [];
@@ -76,11 +71,20 @@ export function parseSMET(smet: string): Result {
    */
   let tz = 0;
   const lines = smet.split(/\r?\n/);
-  const timestamps = new Uint32Array(lines.length);
+  const timestamps = [] as number[];
   let dataIndex = 0;
   lines.forEach((line) => {
-    if (line.startsWith("fields =")) {
-      fields = line.slice("fields =".length).trim().split(separator);
+    function parseHeader(prefix: string) {
+      if (!line.startsWith(prefix)) return "";
+      line = line.slice(prefix.length).trim();
+      if (!line.startsWith("=")) return "";
+      line = line.slice("=".length).trim();
+      return line;
+    }
+
+    let header = "";
+    if ((header = parseHeader("fields"))) {
+      fields = header.split(separator);
       units = fields.map(
         (f) =>
           ({
@@ -100,24 +104,24 @@ export function parseSMET(smet: string): Result {
             PINT: "mm/h",
             PSUM: "mm",
             HS: "m",
-          })[f] ?? ""
+          })[f] ?? "",
       );
       values = fields.map(() => [] as number[]);
       return;
-    } else if (line.startsWith("#units =")) {
-      units = line.slice("#units =".length).trim().split(separator);
+    } else if ((header = parseHeader("#units"))) {
+      units = header.split(separator);
       return;
-    } else if (line.startsWith("nodata =")) {
-      nodata = line.slice("nodata =".length).trim();
+    } else if ((header = parseHeader("nodata"))) {
+      nodata = header;
       return;
-    } else if (line.startsWith("tz =")) {
-      tz = +line.slice("tz =".length).trim();
+    } else if ((header = parseHeader("tz"))) {
+      tz = +header;
       return;
-    } else if (line.startsWith("station_name =")) {
-      station = line.slice("station_name =".length).trim();
+    } else if ((header = parseHeader("station_name"))) {
+      station = header;
       return;
-    } else if (line.startsWith("altitude =")) {
-      altitude = +line.slice("altitude =".length).trim();
+    } else if ((header = parseHeader("altitude"))) {
+      altitude = +header;
       return;
     } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
       return;
@@ -134,8 +138,7 @@ export function parseSMET(smet: string): Result {
       }
     }
     const date = Date.parse(dateString);
-    // uPlot uses epoch seconds (instead of milliseconds)
-    timestamps[dataIndex] = date / 1000;
+    timestamps[dataIndex] = date;
     values.forEach((values0, i) => {
       if (i == 0) return; // timestamp
       const value = cells[i] === nodata ? null : +cells[i].replace(",", ".");
