@@ -82,7 +82,11 @@ export class YearData {
     }
     const lastDate = yearData.dates[yearData.dates.length - 1];
     if (Temporal.PlainDate.compare(lastDate, endDate) < 0) {
-      for (let d = lastDate.add({ days: 1 }); Temporal.PlainDate.compare(d, endDate) <= 0; d = d.add({ days: 1 })) {
+      for (
+        let d = lastDate.add({ days: 1 });
+        Temporal.PlainDate.compare(d, endDate) <= 0;
+        d = d.add({ days: 1 })
+      ) {
         yearData.dates.push(d);
         yearData.values.push(NaN);
       }

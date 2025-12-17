@@ -9,9 +9,11 @@
         font-family: Helvetica, sans-serif;
         margin: 20px;
       }
+
       .controls {
         text-align: center;
       }
+
       .toggle-btn {
         padding: 10px 20px;
         background-color: #ffffff;
@@ -24,23 +26,28 @@
         transition:
           background-color 0.3s ease,
           color 0.3s ease;
+
         &:hover {
           background-color: #19aaff;
           color: white;
         }
+
         &:active {
           transform: translateY(1px);
         }
       }
+
       linea-plot,
       linea-plot-year {
         display: flex;
         flex-direction: column;
         gap: 20px;
-        & > div:empty {
+
+        &>div:empty {
           display: none;
         }
-        & > div {
+
+        &>div {
           background-color: white;
           display: flex;
           justify-content: center;
@@ -50,25 +57,26 @@
       }
     </style>
   </head>
+
   <body>
     <!-- src="/prototype/mock.data" -->
-    <!-- <linea-plot-year
-      src="https://api.avalanche.report/lawine/grafiken/smet/all/GGAL2.smet.gz"
-      startDate="2024-09-01"
-      endDate="2025-06-01"
+    <linea-plot-year
+      src="https://api.avalanche.report/lawine/grafiken/smet/all/4307051551.smet.gz"
+      startDate="2025-11-30"
+      endDate="2026-05-01"
       showTitle
     >
-    </linea-plot-year> -->
+    </linea-plot-year>
     <nav></nav>
 
-    <linea-plot
+    <!-- <linea-plot
       src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
       showsurfacehoarseries
       showtitle
       showexport
       showdatepicker
     >
-    </linea-plot>
+    </linea-plot> -->
     <script type="module" src="./src/main.ts"></script>
     <!--
     <script>
