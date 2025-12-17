@@ -635,15 +635,7 @@ export class LineaPlot extends HTMLElement {
   #zonedDateTimeToLocalInputValue(zdt: Temporal.ZonedDateTime): string {
     // Convert to a PlainDateTime in the same time zone
     const pdt = zdt.toPlainDateTime();
-
-    const yyyy = pdt.year.toString().padStart(4, "0");
-    const mm = pdt.month.toString().padStart(2, "0");
-    const dd = pdt.day.toString().padStart(2, "0");
-    const hh = pdt.hour.toString().padStart(2, "0");
-    const min = pdt.minute.toString().padStart(2, "0");
-
-    // Format required for <input type="datetime-local">
-    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    return pdt.toString({ smallestUnit: "minutes" });
   }
 
   /**
