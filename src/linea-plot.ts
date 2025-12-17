@@ -15,6 +15,7 @@ import { ExportModal } from "./exportmodal";
  * 
  * @attributes
  * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (required)
+ * - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to lazy fetch data from after loading the component and the data from `src` (optional)
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
  * - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
@@ -237,6 +238,7 @@ export class LineaPlot extends HTMLElement {
       if (!this.hasAttribute("showdatepicker")) {
         this.#handleFixedDateView();
       }
+      this.#lazyLoad();
     });
     this.tabIndex = 0;
     this.focus();
@@ -254,24 +256,30 @@ export class LineaPlot extends HTMLElement {
       this.maxTime = -Infinity;
       this.fetchAndStoreData().then(() => {
         this.render();
+        this.#lazyLoad();
       });
     }
   }
 
   /**
-   * fetches the data from the src attribute, generalizes it and update the valid date inputs
+   * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
+   * If a other attribute is given it uses this one instead of src
+   * @param attribute {string} - attribute to fetch the data from, default is "src"
    */
-  async fetchAndStoreData() {
+  async fetchAndStoreData(attribute: string = "src") {
     if (!globalThis.Temporal) {
       await import("temporal-polyfill/global");
     }
-    const src = this.getAttribute("src") ?? "";
+    const src = this.getAttribute(attribute) ?? "";
     let srcs: string[] =
       src.startsWith("[") || src.startsWith('"') ? (JSON.parse(src) as string[]) : [src];
     if (!(srcs instanceof Array)) {
       srcs = [srcs];
       this.backgroundColors = [];
     }
+    this.results = [];
+    this.minTime = +Infinity;
+    this.maxTime = -Infinity;
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
       if (this.minTime > result.timestamps[0]) {
@@ -408,6 +416,10 @@ export class LineaPlot extends HTMLElement {
           );
           previousWeek.disabled = true;
           newEnd = newStart.add({ days: 7 });
+        } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
+          this.#setStartEndDateToMinMax();
+          this.filterAndUpdateData();
+          return;
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
@@ -435,6 +447,10 @@ export class LineaPlot extends HTMLElement {
           );
           nextWeek.disabled = true;
           newStart = newEnd.subtract({ days: 7 });
+        } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
+          this.#setStartEndDateToMinMax();
+          this.filterAndUpdateData();
+          return;
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
@@ -498,6 +514,15 @@ export class LineaPlot extends HTMLElement {
         Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
         Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "2300-00-00T00:00[UTC]"),
       );
+    }
+  }
+
+  /**
+   * Loads lazy data if the lazysrc attribute is given
+   */
+  #lazyLoad() {
+    if (this.hasAttribute("lazysrc")) {
+      this.fetchAndStoreData("lazysrc");
     }
   }
 
