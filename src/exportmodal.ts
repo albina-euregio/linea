@@ -153,7 +153,13 @@ export class ExportModal {
                 border-radius: 8px;
                 padding: 15px;
                 margin: 15px 0;
-                position: relative;
+            }
+            
+            .code-container-buttons {
+                display: flex;
+                gap: 4px;
+                justify-content: flex-end;
+                margin-bottom: 10px;
             }
             
             .code-container pre {
@@ -166,9 +172,6 @@ export class ExportModal {
             }
             
             .code-container button {
-                position: absolute;
-                top: 10px;
-                right: 10px;
                 background: #3498db;
                 color: white;
                 border: none;
@@ -179,16 +182,7 @@ export class ExportModal {
             }
             
             .code-container button:hover {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: #3498db;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
+                background: #2980b9;
             }
             
             .export-settings {
@@ -268,9 +262,11 @@ export class ExportModal {
                 <div id="exportResult" style="display:none;">
                     <h3>${i18n.message("dialog:weather-station-diagram:controls:label:exportresult")}</h3>
                     <div class="code-container">
-                        <button class="dwn-btn" style="right: 62px;" id="downloadBtn">${i18n.message("dialog:weather-station-diagram:controls:button:download")}</button>
-                        <button class="open-btn" style="right: 10px;" id="openBtn">${i18n.message("dialog:weather-station-diagram:controls:button:open")}</button>
-                        <button class="copy-btn" style="right: 138px;" id="copyExportBtn">${i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard")}</button>
+                        <div class="code-container-buttons">
+                            <button class="copy-btn" id="copyExportBtn">${i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard")}</button>
+                            <button class="dwn-btn" id="downloadBtn">${i18n.message("dialog:weather-station-diagram:controls:button:download")}</button>
+                            <button class="open-btn" id="openBtn">${i18n.message("dialog:weather-station-diagram:controls:button:open")}</button>
+                        </div>
                         <pre id="exportCode"></pre>
                     </div>
                 </div>
@@ -446,7 +442,7 @@ export class ExportModal {
    * @returns {void}
    * @todo Implement iframe export logic
    */
-  #exportAsIframe() {}
+  #exportAsIframe() { }
 
   /**
    * Generates a formatted title string from selected LineaCharts.
