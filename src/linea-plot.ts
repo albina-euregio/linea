@@ -1,4 +1,3 @@
-import uPlot from "uplot";
 import { i18n } from "./i18n";
 import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
