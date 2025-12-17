@@ -65,7 +65,6 @@ import { ExportModal } from "./exportmodal";
  * - Automatic calculations of surface hoar potential if data is present
  */
 export class LineaPlot extends HTMLElement {
-  
   static observedAttributes = ["src"];
   private isLoaded: boolean = false;
 
