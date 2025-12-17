@@ -220,7 +220,7 @@ export class ExportModal {
                 <h2>${i18n.message("dialog:weather-station-diagram:controls:label:exportchart")}</h2>
     
                 <div class="export-options">
-                    <div class="export-option" id="btnExportIframe" style="display: none;">
+                    <div class="export-option" id="btnExportIframe">
                         <h4>${i18n.message("dialog:weather-station-diagram:controls:button:iframe")}</h4>
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:iframe:sub")}</p>
                     </div>
@@ -442,7 +442,34 @@ export class ExportModal {
    * @returns {void}
    * @todo Implement iframe export logic
    */
-  #exportAsIframe() { }
+  #exportAsIframe() {
+    var scriptsrc = "https://lawinen.report/node_modules/@albina-euregio/linea/dist/linea.js";
+    const html = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Linea Chart Export</title>
+          <script src="${scriptsrc}"></script>
+      </head>
+      <body>
+          <linea-plot
+            src=""
+            
+      </body>
+      </html>`;
+
+    this.exportResult.style.display = "block";
+    const exports = this.#getExportSettings();
+    document.getElementById("exportCode").innerHTML = `<iframe
+          src="data:text/html;base64,${btoa(html)}" 
+          width="${exports.width}" 
+          height="${exports.heightPerCanvas * 5}" 
+          frameborder="0" 
+          scrolling="no" 
+          title="${exports.title}">
+      </iframe>`;
+  }
 
   /**
    * Generates a formatted title string from selected LineaCharts.
