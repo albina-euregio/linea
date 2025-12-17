@@ -44,6 +44,7 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
 #### Attributes
 
 - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (required)
+- `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from, after the component is rendered and has the data from the `src` attribute. The data from `src` should be a subset from `lazysrc`. (optional)
 - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
 - `showtitle` {boolean} - When present, display the station name and altitude as title
 - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
@@ -59,6 +60,8 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
 
 If startdate or enddate is missing it will show all data from the SMET file.
 If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
+
+If the data from `src` is not a subset from `lazysrc`, the view for the user is not changed after loading and replacing the data from `lazysrc`. Further all inputs are updated with the new valid dates, clicking the previous/next week buttons lead to a zoom to the whole available timespan.
 
 #### Examples
 
