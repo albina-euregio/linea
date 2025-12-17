@@ -11,7 +11,7 @@ import { AbstractLineaChart } from "./AbstractLineaChart";
 
 export class LineaChart extends AbstractLineaChart {
   constructor(
-    private timestamps: number[],
+    private timestamps: Uint32Array,
     private values: Values,
     readonly station: string,
     readonly altitude: number,
@@ -23,7 +23,7 @@ export class LineaChart extends AbstractLineaChart {
     this.createPlots().catch((e) => console.error(e));
   }
 
-  setData(timestamps: number[], values: Values) {
+  setData(timestamps: Uint32Array, values: Values) {
     this.timestamps = timestamps;
     this.values = values;
     let i = 0;
@@ -66,11 +66,27 @@ export class LineaChart extends AbstractLineaChart {
     this.resizePlots(this.clientWidth, this.style);
   }
 
+  setBackgroundColor(color: string) {
+    this.backgroundColor = color;
+    this.plots.forEach((p) => p.redraw());
+  }
+
+  getBackgroundColor(): string {
+    return this.backgroundColor;
+  }
+
   #updateData(plot: uPlot, values: (number | null)[][]) {
-    plot.setData([
-      this.timestamps,
-      ...values.map((element) => element ?? Array.from(this.timestamps, () => null)),
-    ]);
+    let data = [this.timestamps];
+    for (const element of values) {
+      data.push(element ?? this.#createNullArray());
+    }
+    plot.setData(data);
+  }
+
+  #createNullArray() {
+    let nulls: number | null[] = [];
+    this.timestamps.forEach(() => nulls.push(null));
+    return nulls;
   }
 
   async createPlots() {

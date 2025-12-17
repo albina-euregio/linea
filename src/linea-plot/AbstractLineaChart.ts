@@ -4,11 +4,11 @@ export abstract class AbstractLineaChart extends HTMLElement {
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
   #m_style: any;
 
-  resizePlots(clientWidth: number, style: CSSStyleDeclaration) {
+  resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
     this.plots.forEach((p) =>
       p.setSize({
         width: clientWidth,
-        height: p.height,
+        height: Number.isNaN(heightPerCanvas) ? p.height : heightPerCanvas,
       }),
     );
     // compute a scale factor based on element width so text shrinks on narrow layouts
@@ -20,12 +20,6 @@ export abstract class AbstractLineaChart extends HTMLElement {
       style.fontSize = `${12 * scale}px`;
       style.padding = `${6 * scale}px ${10 * scale}px`;
     }
-    this.plots.forEach((p) =>
-      p.setSize({
-        width: clientWidth,
-        height: p.height,
-      }),
-    );
   }
 
   addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
@@ -58,16 +52,16 @@ export abstract class AbstractLineaChart extends HTMLElement {
     const style = document.createElement("style");
     style.textContent = css;
     style.textContent += `
-        .vw-max-plot .u-axis-label {
-            transform-origin: left top;
-            white-space: nowrap;
-        }
+            .vw-max-plot .u-axis-label {
+                transform-origin: left top;
+                white-space: nowrap;
+            }
 
-        .hs-year-plot .u-axis-label {
-            transform-origin: left top;
-            white-space: nowrap;
-        }
-        `;
+            .hs-year-plot .u-axis-label {
+                transform-origin: left top;
+                white-space: nowrap;
+            }
+            `;
     document.head.appendChild(style);
     this.#m_style = style;
     return style;

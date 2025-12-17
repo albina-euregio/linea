@@ -2,6 +2,7 @@ import uPlot from "uplot";
 import { i18n } from "./i18n";
 import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
+import { ExportModal } from "./exportmodal";
 
 /**
  * LineaPlot Web Component
@@ -26,7 +27,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * - `enddate` {string} - Initial end date in ISO 8601 format (e.g., "2025-06-04T12:24[Europe/Berlin]").
  *    If used with `showdatepicker` and `startdate` it will set the initial date range.
  *    If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
- * - `showexportpng` - toggles if the export png button is shown
+ * - `showexport` - toggles if the export button is shown
  * 
  * If startdate or enddate is missing it will show all data from the SMET file. 
  * If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
@@ -40,7 +41,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
  *   showdatepicker
  *   showsurfacehoarseries
  *   showtitle
- *   showexportpng
+ *   showexport
  *   startdate="2025-06-01T00:00[Europe/Berlin]"
  *   enddate="2025-06-30T23:59[Europe/Berlin]">
  * </linea-plot>
@@ -66,13 +67,13 @@ import { LineaChart } from "./linea-plot/LineaChart";
  */
 export class LineaPlot extends HTMLElement {
   static observedAttributes = ["src"];
-
   private isLoaded: boolean = false;
 
+  private exportModal!: ExportModal;
   private startInput!: HTMLInputElement;
   private endInput!: HTMLInputElement;
 
-  private lineacharts: LineaChart[] = [] as LineaChart[];
+  readonly lineacharts: LineaChart[] = [] as LineaChart[];
   private results: Result[] = [] as Result[];
 
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
@@ -220,6 +221,7 @@ export class LineaPlot extends HTMLElement {
         }
       `;
     this.appendChild(style);
+    this.#addExportModal();
     this.#addControls();
     this.fetchAndStoreData().then(() => {
       this.#updateValidDateInputs();
@@ -345,12 +347,20 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
+   *
+   */
+  #addExportModal() {
+    this.exportModal = new ExportModal(document.createElement("div"), this);
+    this.appendChild(this.exportModal.modal);
+  }
+
+  /**
    * Adds the controls to the Plot:
    * - Datepicker with (previousWeek|startDate|endDate|nextWeek)
-   * - Menu buttons with (exportpng|enlarge)
+   * - Menu buttons with (export|enlarge)
    *
    * enlarge shows all available data and is shown when the datepicker is there too
-   * export png exports the drawed canvas on the screen, see @method #exportAllPlotsToPNG
+   * export exports the drawed canvas on the screen, see @class ExportModal
    */
   #addControls() {
     const controls = document.createElement("div");
@@ -456,14 +466,18 @@ export class LineaPlot extends HTMLElement {
     }
     const menu = document.createElement("div");
     menu.classList.add("controls-menu");
-    if (this.hasAttribute("showexportpng")) {
-      const printbtn = document.createElement("button");
-      printbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:exportpng")}`;
-      printbtn.classList.add("toggle-btn");
-      printbtn.addEventListener("click", () => {
-        this.#exportAllPlotsToPNG();
+    if (this.hasAttribute("showexport")) {
+      const exportbtn = document.createElement("button");
+      exportbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:export")}`;
+      exportbtn.classList.add("toggle-btn");
+      exportbtn.addEventListener("click", () => {
+        if (this.lineacharts.length == 0) {
+          alert("Nothing to export!");
+          return;
+        }
+        this.exportModal.show();
       });
-      menu.appendChild(printbtn);
+      menu.appendChild(exportbtn);
     }
     if (this.hasAttribute("showdatepicker")) {
       const enlargebtn = document.createElement("button");
@@ -484,127 +498,6 @@ export class LineaPlot extends HTMLElement {
     controls.appendChild(menu);
     this.appendChild(controls);
     this.focus();
-  }
-  /**
-   * Exports all shown LineaChart into a single png file.
-   * The rendering uses the already drawn HTMLCanvasElement from each plot and redraws them on a new Canvas.
-   * This leads to the effect, that the rendered png is as width as the shown plots in the browser.
-   * @todo make the png export with fixed width so there are no problem on mobile phones
-   *
-   * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
-   * The legend is build autmatically from the shown series.
-   */
-  #exportAllPlotsToPNG() {
-    const canvases: HTMLCanvasElement[] = [];
-    const titles: { station: string; altitude: number }[] = [];
-    const series: uPlot.Series[] = [];
-    const legendItems = {};
-
-    for (const lineachart of this.lineacharts) {
-      const plots: uPlot[] = lineachart.plots;
-      plots
-        .map((p) => p.root.querySelector("canvas")!)
-        .forEach((c) => {
-          canvases.push(c);
-        });
-      const station = lineachart.station;
-      const altitude = lineachart.altitude;
-      titles.push({ station, altitude });
-      plots.map((p) => series.push(...p.series.slice(1)));
-      plots.map((p) =>
-        p.series.slice(1).map((s, i) => {
-          const label = s.label ?? `Series ${i + 1}`;
-          let color = "#000000";
-
-          console.debug(typeof s.stroke);
-          if (typeof s.stroke === "string") {
-            color = s.stroke;
-          } else {
-            const c = s.stroke(p, i + 1);
-            if (typeof c === "string") color = c;
-          }
-          legendItems[label] = color;
-        }),
-      );
-    }
-    console.debug(titles);
-
-    let title = "";
-    titles.forEach((t, i) => {
-      title += t.station + " (" + t.altitude + "m)";
-      if (!(titles.length == i + 1)) {
-        title += " — ";
-      }
-    });
-
-    //build png
-    const titleHeight = title ? 40 : 0;
-    const legendItemHeight = 22;
-    const legendPadding = 20;
-
-    const width = canvases[0].width;
-    const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-    const totalHeight = titleHeight + chartsHeight + 60;
-
-    const outCanvas = document.createElement("canvas");
-    outCanvas.width = width;
-    outCanvas.height = totalHeight;
-
-    //fill background
-    const ctx = outCanvas.getContext("2d")!;
-    ctx.imageSmoothingEnabled = false;
-    ctx.imageSmoothingQuality = "high";
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-    if (title) {
-      ctx.fillStyle = "#000";
-      ctx.font = "24px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(title, outCanvas.width / 2, 40);
-    }
-
-    let y = titleHeight;
-    for (const c of canvases) {
-      ctx.drawImage(c, 0, y);
-      y += c.height;
-    }
-
-    if (Object.keys(legendItems).length > 0) {
-      const swatchSize = 18;
-      const xStart = legendPadding * 2;
-      let legendY = y + legendPadding + legendItemHeight / 2;
-
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-
-      let x = xStart;
-      for (const [label, color] of Object.entries(legendItems)) {
-        const textwidth = ctx.measureText(label).width;
-        if (x + swatchSize + 8 + textwidth > outCanvas.width) {
-          x = xStart;
-          legendY += legendItemHeight;
-          outCanvas.height += legendItemHeight;
-        }
-
-        // colored square
-        ctx.fillStyle = color;
-        ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
-
-        // label
-        ctx.fillStyle = "#000";
-        ctx.fillText(label, x + swatchSize + 8, legendY);
-        x = x + swatchSize + 8 + textwidth + 10;
-      }
-    }
-
-    const url = outCanvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = url;
-    a.target = "_tab";
-    a.click();
   }
 
   /**
