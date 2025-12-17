@@ -64,6 +64,10 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * - Automatic calculations of surface hoar potential if data is present
  */
 export class LineaPlot extends HTMLElement {
+  static observedAttributes = ["src"];
+
+  private isLoaded: boolean = false;
+
   private startInput!: HTMLInputElement;
   private endInput!: HTMLInputElement;
 
@@ -216,7 +220,6 @@ export class LineaPlot extends HTMLElement {
       `;
     this.appendChild(style);
     this.#addControls();
-
     this.fetchAndStoreData().then(() => {
       this.#updateValidDateInputs();
       this.render();
@@ -235,6 +238,22 @@ export class LineaPlot extends HTMLElement {
     });
     this.tabIndex = 0;
     this.focus();
+    this.isLoaded = true;
+  }
+
+  attributeChangedCallback(name: string) {
+    if (this.isLoaded && name === "src") {
+      for (const lc of this.lineacharts) {
+        this.removeChild(lc);
+      }
+      this.lineacharts = [];
+      this.results = [];
+      this.minTime = +Infinity;
+      this.maxTime = -Infinity;
+      this.fetchAndStoreData().then(() => {
+        this.render();
+      });
+    }
   }
 
   /**
@@ -272,7 +291,6 @@ export class LineaPlot extends HTMLElement {
     if (this.hasAttribute("backgroundcolors")) {
       this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors") ?? "");
     }
-
     for (const i in this.results) {
       const result = this.results[i];
       let lc = new LineaChart(
@@ -282,7 +300,7 @@ export class LineaPlot extends HTMLElement {
         result.altitude,
         this.hasAttribute("showtitle"),
         this.hasAttribute("showsurfacehoarseries"),
-        this.backgroundColors[i] ?? "#00000000",
+        this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
       );
       this.lineacharts.push(lc);
       this.appendChild(lc);
