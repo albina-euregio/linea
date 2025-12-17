@@ -446,7 +446,7 @@ export class ExportModal {
    * @returns {void}
    * @todo Implement iframe export logic
    */
-  #exportAsIframe() { }
+  #exportAsIframe() {}
 
   /**
    * Generates a formatted title string from selected LineaCharts.
