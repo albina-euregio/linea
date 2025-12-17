@@ -81,13 +81,22 @@
             Array.from(document.getElementsByTagName("linea-plot")).forEach(
               (plot, i) => {
                 if (i > 0) plot.remove();
-                const url = new URL(id + ".smet.gz", plot.getAttribute("src"));
+                const url = new URL(id + ".smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/");
                 plot.setAttribute("src", url.toString());
               }
             );
           };
           document.getElementsByTagName("nav")[0].append(button);
         });
-    </script> -->
+    </script>
+    <linea-plot
+      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
+      showsurfacehoarseries
+      showtitle
+      showexportpng
+      showdatepicker
+    >
+    </linea-plot>
+    <script type="module" src="./src/main.ts"></script>-->
   </body>
 </html>
