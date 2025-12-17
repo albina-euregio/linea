@@ -446,7 +446,7 @@ export class ExportModal {
    * @returns {void}
    * @todo Implement iframe export logic
    */
-  #exportAsIframe() {}
+  #exportAsIframe() { }
 
   /**
    * Generates a formatted title string from selected LineaCharts.
@@ -531,8 +531,6 @@ export class ExportModal {
         .forEach((c) => {
           canvases.push(c);
         });
-      const station = lineachart.station;
-      const altitude = lineachart.altitude;
       plots.map((p) => series.push(...p.series.slice(1)));
       plots.map((p) =>
         p.series.slice(1).map((s, i) => {
