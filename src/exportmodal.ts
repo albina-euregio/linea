@@ -442,20 +442,27 @@ export class ExportModal {
    * @returns {void}
    * @todo Implement iframe export logic
    */
-  #exportAsIframe() {
-    var scriptsrc = "https://lawinen.report/node_modules/@albina-euregio/linea/dist/linea.js";
+  async #exportAsIframe() {
+
+    const scriptSrc = "";
+
     const html = `<!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Linea Chart Export</title>
-          <script src="${scriptsrc}"></script>
+          <script>${scriptSrc}</script>
       </head>
       <body>
-          <linea-plot
-            src=""
-            
+        <linea-plot
+          src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
+          showsurfacehoarseries
+          showtitle
+          showexport
+          showdatepicker
+        >
+        </linea-plot>
       </body>
       </html>`;
 
