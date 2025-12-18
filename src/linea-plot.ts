@@ -1,5 +1,6 @@
 import { i18n } from "./i18n";
-import { fetchSMET, Result, Values } from "./smet-data";
+import { fetchSMET } from "./smet-data";
+import type { Result, Values } from "./station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { ExportModal } from "./exportmodal";
 
