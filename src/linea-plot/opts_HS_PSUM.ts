@@ -8,19 +8,7 @@ import { OptsHelper } from "./optsHelper";
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
  */
 export const opts_HS_PSUM: uPlot.Options = {
-  ms: 1, // timestamp multiplier that yields 1 millisecond
-  width: 1040,
-  height: 300,
-  padding: [50, 50, 0, 50],
-  cursor: cursorOpts,
-  legend: {
-    show: true,
-    live: true,
-    fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
-    markers: {
-      fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
-    },
-  },
+  ...OptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
