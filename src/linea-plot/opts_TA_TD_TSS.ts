@@ -3,7 +3,6 @@ import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
-import { TouchZoom } from "./touchZoom";
 
 // Create state variable to control shading
 export const showSurfaceHoar = { value: true };
@@ -57,8 +56,6 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       },
     ],
   },
-
-  plugins: [TouchZoom.touchZoomPlugin({})],
 
   scales: {
     y: {

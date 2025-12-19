@@ -3,7 +3,6 @@ import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
-import { TouchZoom } from "./touchZoom";
 
 /**
  * uPlot options for Windgeschwindigkeit [km/h] & Windrichtung [˚]
