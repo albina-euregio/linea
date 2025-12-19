@@ -3,6 +3,7 @@ import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
+import { TouchZoom } from "./touchZoom";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
@@ -21,6 +22,9 @@ export const opts_HS_PSUM: uPlot.Options = {
       fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
     },
   },
+
+  plugins: [TouchZoom.touchZoomPlugin({})],
+
   hooks: {
     drawAxes: [
       (u) => {
