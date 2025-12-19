@@ -1,7 +1,6 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8" />
     <title>Linea Chart Export</title>
     <script>
@@ -4713,64 +4712,65 @@
     </script>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
-        body {
-            font-family: Helvetica, sans-serif;
-            margin: 20px;
-        }
+      body {
+          font-family: Helvetica, sans-serif;
+          margin: 20px;
+      }
 
-        .controls {
-            text-align: center;
-        }
+      .controls {
+          text-align: center;
+      }
 
-        .toggle-btn {
-            padding: 10px 20px;
-            background-color: #ffffff;
-            color: #555555;
-            border: 2px solid #19aaff;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 300;
-            transition:
-                background-color 0.3s ease,
-                color 0.3s ease;
+      .toggle-btn {
+          padding: 10px 20px;
+          background-color: #ffffff;
+          color: #555555;
+          border: 2px solid #19aaff;
+          border-radius: 40px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 300;
+          transition:
+              background-color 0.3s ease,
+              color 0.3s ease;
 
-            &:hover {
-                background-color: #19aaff;
-                color: white;
-            }
+          &:hover {
+              background-color: #19aaff;
+              color: white;
+          }
 
-            &:active {
-                transform: translateY(1px);
-            }
-        }
+          &:active {
+              transform: translateY(1px);
+          }
+      }
 
-        linea-plot,
-        linea-plot-year {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+      linea-plot,
+      linea-plot-year {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
 
-            &>div:empty {
-                display: none;
-            }
+          &>div:empty {
+              display: none;
+          }
 
-            &>div {
-                background-color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 10px;
-            }
-        }
+          &>div {
+              background-color: white;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              padding: 10px;
+          }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <linea-plot
-        src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
-        showsurfacehoarseries showtitle>
+      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
+      showsurfacehoarseries
+      showtitle
+    >
     </linea-plot>
-</body>
-
+  </body>
 </html>

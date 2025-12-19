@@ -452,10 +452,13 @@ export class ExportModal {
     const srcs = this.lineaPlot.srcs.filter((v, i) => indices.includes(i));
     const lazysrcs = this.lineaPlot.lazysrcs.filter((v, i) => indices.includes(i));
 
-    const html = iframeTemplate.replace(
-      "linea-plot src=''",
-      `linea-plot src='${JSON.stringify(srcs)}${lazysrcs.length > 0 ? "' lazysrc='" + JSON.stringify(lazysrcs) + "'" : ""}'`,
-    ).replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`).replace('lang="en"', `lang="${i18n.lang}"`)
+    const html = iframeTemplate
+      .replace(
+        "linea-plot src=''",
+        `linea-plot src='${JSON.stringify(srcs)}${lazysrcs.length > 0 ? "' lazysrc='" + JSON.stringify(lazysrcs) + "'" : ""}'`,
+      )
+      .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
+      .replace('lang="en"', `lang="${i18n.lang}"`);
 
     const uint8Array = new TextEncoder().encode(html);
     let binary = "";
