@@ -443,7 +443,7 @@ export class ExportModal {
    * @todo Implement iframe export logic
    */
   async #exportAsIframe() {
-    const scriptSrc = "https://lawinen.report/node_modules/@albina-euregio/linea/dist/linea.js";
+    const exports = this.#getExportSettings();
 
     const iframeTemplate = await import("./iframtemplate.html?raw").then((m) => m.default);
 
@@ -455,7 +455,7 @@ export class ExportModal {
     const html = iframeTemplate.replace(
       "linea-plot src=''",
       `linea-plot src='${JSON.stringify(srcs)}${lazysrcs.length > 0 ? "' lazysrc='" + JSON.stringify(lazysrcs) + "'" : ""}'`,
-    );
+    ).replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`).replace('lang="en"', `lang="${i18n.lang}"`)
 
     const uint8Array = new TextEncoder().encode(html);
     let binary = "";
@@ -469,7 +469,6 @@ export class ExportModal {
     }
 
     this.exportResult.style.display = "block";
-    const exports = this.#getExportSettings();
     const iframecode = `<iframe
           src="data:text/html;base64,${btoa(binary)}" 
           width="${exports.width}" 
