@@ -50,7 +50,7 @@ export class OptsHelper {
       ms: 1, // timestamp multiplier that yields 1 millisecond
       width: 1040,
       height: 300,
-      padding: [50, 0, 0, 0],
+      padding: [50, 0, 0, -10],
       cursor: cursorOpts,
       legend: {
         show: true,
