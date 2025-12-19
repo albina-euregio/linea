@@ -5,7 +5,7 @@ const syncCursor = uPlot.sync("weather-charts");
 
 // Define shared cursor options for all charts
 export const cursorOpts: uPlot.Cursor = {
-  lock: true,
+  lock: false,
   focus: {
     prox: -1,
   },

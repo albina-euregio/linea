@@ -3,29 +3,13 @@ import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
-import { TouchZoom } from "./touchZoom";
 
 /**
  * uPlot options for snow-height/year [cm]
  */
 
 export const opts_TEMP_year: uPlot.Options = {
-  ms: 1, // timestamp multiplier that yields 1 millisecond
-  width: 1040,
-  height: 300,
-  padding: [50, 50, 0, 50],
-  cursor: cursorOpts,
-  legend: {
-    show: true,
-    live: true,
-    fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
-    markers: {
-      fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
-    },
-  },
-
-  plugins: [TouchZoom.touchZoomPlugin({})],
-
+  ...OptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {

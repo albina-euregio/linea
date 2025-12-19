@@ -1,3 +1,6 @@
+import uPlot from "uplot";
+import { cursorOpts } from "./cursorOpts";
+
 export class OptsHelper {
   static UpdateAxisLabels(
     ctx: CanvasRenderingContext2D,
@@ -40,6 +43,36 @@ export class OptsHelper {
     ctx.fillText(labely2, xPosY2, yPos2);
     ctx.restore();
     return ctx;
+  }
+
+  static getLineaOptions(): uPlot.Options {
+    return {
+      ms: 1, // timestamp multiplier that yields 1 millisecond
+      width: 1040,
+      height: 300,
+      padding: [50, 0, 0, -10],
+      cursor: cursorOpts,
+      legend: {
+        show: true,
+        live: true,
+        fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
+        markers: {
+          fill: (u: any, seriesIdx: number) =>
+            u.series[seriesIdx].stroke(u, seriesIdx) ?? u.series[seriesIdx].stroke(u, seriesIdx),
+          values: (u: any, seriesIdx: number, values: any) => {
+            let result: any = {};
+            u.series.forEach((s: any, i: number) => {
+              if (i === 0) {
+                result[s.label || s.name] = values[i];
+              } else {
+                result[s.label] = values[i] + (s.unit ? ` ${s.unit}` : "");
+              }
+            });
+            return result;
+          },
+        },
+      },
+    };
   }
 
   getTextWidth(text: string, fontSize: number, fontFamily: string = "sans-serif"): number {
