@@ -444,38 +444,49 @@ export class ExportModal {
    */
   async #exportAsIframe() {
 
-    const scriptSrc = "";
+    const scriptSrc = "https://lawinen.report/node_modules/@albina-euregio/linea/dist/linea.js";
 
-    const html = `<!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Linea Chart Export</title>
-          <script>${scriptSrc}</script>
-      </head>
-      <body>
-        <linea-plot
-          src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
-          showsurfacehoarseries
-          showtitle
-          showexport
-          showdatepicker
-        >
-        </linea-plot>
-      </body>
-      </html>`;
+    const iframeTemplate = await import('./iframtemplate.html?raw').then(m => m.default);
+
+    const indices = this.#getCheckedDiagramIndices();
+
+    const srcs = this.lineaPlot.srcs.filter((v, i) => indices.includes(i));
+    const lazysrcs = this.lineaPlot.lazysrcs.filter((v, i) => indices.includes(i));
+
+    const html = iframeTemplate.replace('linea-plot src=\'\'', `linea-plot src='${JSON.stringify(srcs)}${lazysrcs.length > 0 ? "' lazysrc='" + JSON.stringify(lazysrcs) + "'" : ""}'`);
+
+    const uint8Array = new TextEncoder().encode(html);
+    let binary = "";
+    for (let i = 0; i < uint8Array.byteLength; i++) {
+      binary += String.fromCharCode(uint8Array[i]);
+    }
+
+    let totalCanvases = 0;
+    for (const lineachart of this.#getActiveLineacharts()) {
+      totalCanvases += lineachart.plots.length;
+    }
 
     this.exportResult.style.display = "block";
     const exports = this.#getExportSettings();
-    document.getElementById("exportCode").innerHTML = `<iframe
-          src="data:text/html;base64,${btoa(html)}" 
+    const iframecode = `<iframe
+          src="data:text/html;base64,${btoa(binary)}" 
           width="${exports.width}" 
-          height="${exports.heightPerCanvas * 5}" 
+          height="${exports.heightPerCanvas * totalCanvases + 200 * this.#getActiveLineacharts().length}" 
           frameborder="0" 
           scrolling="no" 
           title="${exports.title}">
       </iframe>`;
+
+    document.getElementById("exportCode").innerHTML = iframecode;
+
+    this.exportdata = {
+      blob: new Blob([iframecode], {
+        type: 'text/html'
+      }),
+      data: iframecode,
+      filename: "linea-chart.html",
+      type: "text/html",
+    };
   }
 
   /**

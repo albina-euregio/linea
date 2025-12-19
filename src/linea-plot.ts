@@ -72,7 +72,9 @@ export class LineaPlot extends HTMLElement {
   private startInput!: HTMLInputElement;
   private endInput!: HTMLInputElement;
 
-  readonly lineacharts: LineaChart[] = [] as LineaChart[];
+  srcs: string[] = [];
+  lazysrcs: string[] = [];
+  lineacharts: LineaChart[] = [] as LineaChart[];
   private results: Result[] = [] as Result[];
 
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
@@ -275,6 +277,11 @@ export class LineaPlot extends HTMLElement {
     if (!(srcs instanceof Array)) {
       srcs = [srcs];
       this.backgroundColors = [];
+    }
+    if (attribute == "src") {
+      this.srcs = srcs;
+    } else if (attribute = "lazysrc") {
+      this.lazysrcs = srcs;
     }
     this.results = [];
     this.minTime = +Infinity;
