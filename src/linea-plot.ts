@@ -397,7 +397,7 @@ export class LineaPlot extends HTMLElement {
       previous.classList.add("toggle-btn");
       previous.classList.add("controls-dates-inputs");
       previous.classList.add("tooltip");
-      previous.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previousweek")}</span>`;
+      previous.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowLeft") {
           previous.click();
@@ -405,16 +405,17 @@ export class LineaPlot extends HTMLElement {
       });
       previous.addEventListener("click", () => {
         const start = this.#inputValueToZonedDateTime(this.startInput.value);
-        if (!start) return;
+        const end = this.#inputValueToZonedDateTime(this.endInput.value);
+        if (!start || !end) return;
         next.disabled = false;
-        let newEnd = start;
-        let newStart = start.subtract({ days: 7 });
+        let newEnd = end.subtract({ days: 1 });
+        let newStart = start.subtract({ days: 1 });
         if (newStart.toInstant().epochMilliseconds < this.minTime) {
           newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
             i18n.timezone(),
           );
           previous.disabled = true;
-          newEnd = newStart.add({ days: 7 });
+          newEnd = end;
         } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
           this.#setStartEndDateToMinMax();
           this.filterAndUpdateData();
@@ -428,24 +429,25 @@ export class LineaPlot extends HTMLElement {
       next.classList.add("toggle-btn");
       next.classList.add("controls-dates-inputs");
       next.classList.add("tooltip");
-      next.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:nextweek")}</span>`;
+      next.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           next.click();
         }
       });
       next.addEventListener("click", () => {
+        const start = this.#inputValueToZonedDateTime(this.startInput.value);
         const end = this.#inputValueToZonedDateTime(this.endInput.value);
-        if (!end) return;
+        if (!start || !end) return;
         previous.disabled = false;
-        let newStart = end;
-        let newEnd = end.add({ days: 7 });
+        let newStart = start.add({ days: 1 });
+        let newEnd = end.add({ days: 1 });
         if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
           newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
             i18n.timezone(),
           );
           next.disabled = true;
-          newStart = newEnd.subtract({ days: 7 });
+          newStart = start;
         } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
           this.#setStartEndDateToMinMax();
           this.filterAndUpdateData();
