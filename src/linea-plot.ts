@@ -280,7 +280,7 @@ export class LineaPlot extends HTMLElement {
     }
     if (attribute == "src") {
       this.srcs = srcs;
-    } else if (attribute = "lazysrc") {
+    } else if ((attribute = "lazysrc")) {
       this.lazysrcs = srcs;
     }
     this.results = [];

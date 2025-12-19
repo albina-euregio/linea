@@ -443,17 +443,19 @@ export class ExportModal {
    * @todo Implement iframe export logic
    */
   async #exportAsIframe() {
-
     const scriptSrc = "https://lawinen.report/node_modules/@albina-euregio/linea/dist/linea.js";
 
-    const iframeTemplate = await import('./iframtemplate.html?raw').then(m => m.default);
+    const iframeTemplate = await import("./iframtemplate.html?raw").then((m) => m.default);
 
     const indices = this.#getCheckedDiagramIndices();
 
     const srcs = this.lineaPlot.srcs.filter((v, i) => indices.includes(i));
     const lazysrcs = this.lineaPlot.lazysrcs.filter((v, i) => indices.includes(i));
 
-    const html = iframeTemplate.replace('linea-plot src=\'\'', `linea-plot src='${JSON.stringify(srcs)}${lazysrcs.length > 0 ? "' lazysrc='" + JSON.stringify(lazysrcs) + "'" : ""}'`);
+    const html = iframeTemplate.replace(
+      "linea-plot src=''",
+      `linea-plot src='${JSON.stringify(srcs)}${lazysrcs.length > 0 ? "' lazysrc='" + JSON.stringify(lazysrcs) + "'" : ""}'`,
+    );
 
     const uint8Array = new TextEncoder().encode(html);
     let binary = "";
@@ -481,7 +483,7 @@ export class ExportModal {
 
     this.exportdata = {
       blob: new Blob([iframecode], {
-        type: 'text/html'
+        type: "text/html",
       }),
       data: iframecode,
       filename: "linea-chart.html",
