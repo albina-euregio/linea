@@ -1,3 +1,4 @@
+import { parseGeosphereData } from "./geosphere-data";
 import type { ParameterType, Result, Units, Values } from "./station-data";
 
 const DEFAULT_UNITS: Units = {
@@ -30,6 +31,13 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
 
 export async function fetchSMET(url: string): Promise<Result> {
   const response = await fetch(url);
+  if (url.startsWith("https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min")) {
+    // https://dataset.api.hub.geosphere.at/
+    const metadata = await fetch(
+      "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
+    );
+    return parseGeosphereData(await metadata.json(), await response.json());
+  }
   const smet = await response.text();
   return parseSMET(smet);
 }
