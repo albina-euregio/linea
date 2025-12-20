@@ -355,7 +355,7 @@ export class LineaPlot extends HTMLElement {
 
   /**
    * Adds the controls to the Plot:
-   * - Datepicker with (previousWeek|startDate|endDate|nextWeek)
+   * - Datepicker with (previous|startDate|endDate|next)
    * - Menu buttons with (export|enlarge)
    *
    * enlarge shows all available data and is shown when the datepicker is there too
@@ -393,28 +393,29 @@ export class LineaPlot extends HTMLElement {
         );
       });
 
-      const previousWeek = document.createElement("button");
-      previousWeek.classList.add("toggle-btn");
-      previousWeek.classList.add("controls-dates-inputs");
-      previousWeek.classList.add("tooltip");
-      previousWeek.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previousweek")}</span>`;
+      const previous = document.createElement("button");
+      previous.classList.add("toggle-btn");
+      previous.classList.add("controls-dates-inputs");
+      previous.classList.add("tooltip");
+      previous.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowLeft") {
-          previousWeek.click();
+          previous.click();
         }
       });
-      previousWeek.addEventListener("click", () => {
+      previous.addEventListener("click", () => {
         const start = this.#inputValueToZonedDateTime(this.startInput.value);
-        if (!start) return;
-        nextWeek.disabled = false;
-        let newEnd = start;
-        let newStart = start.subtract({ days: 7 });
+        const end = this.#inputValueToZonedDateTime(this.endInput.value);
+        if (!start || !end) return;
+        next.disabled = false;
+        let newEnd = end.subtract({ days: 1 });
+        let newStart = start.subtract({ days: 1 });
         if (newStart.toInstant().epochMilliseconds < this.minTime) {
           newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
             i18n.timezone(),
           );
-          previousWeek.disabled = true;
-          newEnd = newStart.add({ days: 7 });
+          previous.disabled = true;
+          newEnd = end;
         } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
           this.#setStartEndDateToMinMax();
           this.filterAndUpdateData();
@@ -424,28 +425,29 @@ export class LineaPlot extends HTMLElement {
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
         this.filterAndUpdateData(newStart, newEnd);
       });
-      const nextWeek = document.createElement("button");
-      nextWeek.classList.add("toggle-btn");
-      nextWeek.classList.add("controls-dates-inputs");
-      nextWeek.classList.add("tooltip");
-      nextWeek.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:nextweek")}</span>`;
+      const next = document.createElement("button");
+      next.classList.add("toggle-btn");
+      next.classList.add("controls-dates-inputs");
+      next.classList.add("tooltip");
+      next.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
-          nextWeek.click();
+          next.click();
         }
       });
-      nextWeek.addEventListener("click", () => {
+      next.addEventListener("click", () => {
+        const start = this.#inputValueToZonedDateTime(this.startInput.value);
         const end = this.#inputValueToZonedDateTime(this.endInput.value);
-        if (!end) return;
-        previousWeek.disabled = false;
-        let newStart = end;
-        let newEnd = end.add({ days: 7 });
+        if (!start || !end) return;
+        previous.disabled = false;
+        let newStart = start.add({ days: 1 });
+        let newEnd = end.add({ days: 1 });
         if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
           newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
             i18n.timezone(),
           );
-          nextWeek.disabled = true;
-          newStart = newEnd.subtract({ days: 7 });
+          next.disabled = true;
+          newStart = start;
         } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
           this.#setStartEndDateToMinMax();
           this.filterAndUpdateData();
@@ -457,11 +459,11 @@ export class LineaPlot extends HTMLElement {
       });
       const breakElement = document.createElement("span");
       breakElement.classList.add("controls-break");
-      controlsdates.appendChild(previousWeek);
+      controlsdates.appendChild(previous);
       controlsdates.appendChild(this.startInput);
       controlsdates.appendChild(breakElement);
       controlsdates.appendChild(this.endInput);
-      controlsdates.appendChild(nextWeek);
+      controlsdates.appendChild(next);
     }
     const menu = document.createElement("div");
     menu.classList.add("controls-menu");
