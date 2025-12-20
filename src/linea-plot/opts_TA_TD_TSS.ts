@@ -1,11 +1,7 @@
 import type uPlot from "uplot";
-import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
-
-// Create state variable to control shading
-export const showSurfaceHoar = { value: true };
 
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature

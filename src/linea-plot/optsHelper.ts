@@ -74,20 +74,4 @@ export class OptsHelper {
       },
     };
   }
-
-  getTextWidth(text: string, fontSize: number, fontFamily: string = "sans-serif"): number {
-    // Create a canvas element (off-screen)
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (!context) {
-      return 0;
-    }
-
-    // Set the font style
-    context.font = `${fontSize}px ${fontFamily}`;
-
-    // Measure the text
-    const metrics = context.measureText(text);
-    return metrics.width;
-  }
 }
