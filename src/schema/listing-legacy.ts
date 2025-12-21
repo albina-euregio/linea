@@ -1,51 +1,74 @@
-import { z } from "zod/mini";
+import { z } from "zod";
 
-const number = z.nullish(z.number()).check(z.overwrite((v) => (v === -777 ? undefined : v)));
+const number = z
+  .number()
+  .nullish()
+  .check(z.overwrite((v) => (v === -777 ? undefined : v)));
 
-export const FeaturePropertiesSchema = z.object({
-  name: z.string(),
-  altitude: z.nullish(z.number()),
-  Beobachtungsbeginn: z.nullish(z.string()),
-  operator: z.nullish(z.string()),
-  operatorLink: z.nullish(z.string()),
-  plot: z.nullish(z.string()),
-  "LWD-Nummer": z.nullish(z.string()),
-  "LWD-Region": z.nullish(z.string()),
+export const FeaturePropertiesSchema = z
+  .object({
+    name: z.string().describe("Station name"),
+    altitude: z.number().nullish().describe("Altitude above sea level"),
+    Beobachtungsbeginn: z.string().nullish().describe("Observation start year"),
+    operator: z.string().nullish().describe("Station operator"),
+    operatorLink: z.url().nullish().describe("Link to website of station operator"),
+    plot: z
+      .string()
+      .nullish()
+      .describe("For legacy PNG plots: name of plot which includes this station"),
+    "LWD-Nummer": z
+      .string()
+      .nullish()
+      .describe("Station number as defined by avalanche warning service"),
+    "LWD-Region": z
+      .string()
+      .nullish()
+      .describe("Station region as defined by avalanche warning service"),
 
-  date: z.nullish(z.coerce.date()),
-  GS_O: number,
-  GS_U: number,
-  HS: number,
-  HSD24: number,
-  HSD48: number,
-  HSD72: number,
-  LD: number,
-  LT_MAX: number,
-  LT_MIN: number,
-  LT: number,
-  N24: number,
-  N48: number,
-  N6: number,
-  N72: number,
-  OFT: number,
-  RH: number,
-  TD: number,
-  WG_BOE: number,
-  WG: number,
-  WR: number,
-});
+    date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
+    GS_O: number.describe("Incoming radiation in W/m²"),
+    GS_U: number.describe("Outgoing radiation in W/m²"),
+    HS: number.describe("Snow height in cm"),
+    HSD24: number.describe("Difference in snow height over the last 24h in cm"),
+    HSD48: number.describe("Difference in snow height over the last 48h in cm"),
+    HSD72: number.describe("Difference in snow height over the last 72h in cm"),
+    LD: number.describe("Air pressure in hPa"),
+    LT_MAX: number.describe("Max. air temperature over the last 24h in °C"),
+    LT_MIN: number.describe("Min. air temperature over the last 24h in °C"),
+    LT: number.describe("Air temperature in °C"),
+    N24: number.describe("Precipitation over the last 24h in mm"),
+    N48: number.describe("Precipitation over the last 48h in mm"),
+    N6: number.describe("Precipitation over the last 6h in mm"),
+    N72: number.describe("Precipitation over the last 72h in mm"),
+    OFT: number.describe("Surface temperature in °C"),
+    RH: number.describe("Relative humidity in %"),
+    TD: number.describe("Dew point temperature in °C"),
+    WG_BOE: number.describe("Max. wind velocity (max over the last 3h) in km/h"),
+    WG: number.describe("Wind velocity (average over the last 3h) in km/h"),
+    WR: number.describe("Wind direction (average over the last 3h) in °"),
+  })
+  .describe("The properties of a weather station including measured values");
 
-export const FeatureSchema = z.object({
-  type: z.enum(["Feature"]),
-  geometry: z.union([
-    z.tuple([z.number(), z.number()]),
-    z.tuple([z.number(), z.number(), z.number()]),
-  ]),
-  properties: FeaturePropertiesSchema,
-});
+export const FeatureSchema = z
+  .object({
+    type: z.enum(["Feature"]),
+    geometry: z.union([
+      z.tuple([z.number().describe("Longitude"), z.number().describe("Latitude")]),
+      z.tuple([
+        z.number().describe("Longitude"),
+        z.number().describe("Latitude"),
+        z.number().describe("Altitude"),
+      ]),
+    ]),
+    properties: FeaturePropertiesSchema,
+    id: z.union([z.uuid(), z.string()]).describe("The ID/UUID of the station"),
+  })
+  .describe("A GeoJSON Feature corresponding to one weather station");
 
-export const FeatureCollectionSchema = z.object({
-  type: z.enum(["FeatureCollection"]),
-  features: z.array(FeatureSchema),
-  properties: z.any(),
-});
+export const FeatureCollectionSchema = z
+  .object({
+    type: z.enum(["FeatureCollection"]),
+    features: z.array(FeatureSchema),
+    properties: z.any(),
+  })
+  .describe("A GeoJSON FeatureCollection of weather stations");
