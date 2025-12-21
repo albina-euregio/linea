@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from "vite";
 import * as z from "zod";
-import { FeatureCollectionSchema } from "./src/schema/listing-legacy";
+import { FeatureCollectionSchema as LegacyFeatureCollectionSchema } from "./src/schema/listing-legacy";
+import { FeatureCollectionSchema } from "./src/schema/listing";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -31,7 +32,10 @@ export default defineConfig({
       },
     },
   },
-  plugins: [zodToJsonSchemaPlugin(FeatureCollectionSchema, "listing-legacy.schema.json")],
+  plugins: [
+    zodToJsonSchemaPlugin(FeatureCollectionSchema, "listing.schema.json"),
+    zodToJsonSchemaPlugin(LegacyFeatureCollectionSchema, "listing-legacy.schema.json"),
+  ],
 });
 
 function zodToJsonSchemaPlugin(type: z.ZodType, fileName: string): Plugin {
