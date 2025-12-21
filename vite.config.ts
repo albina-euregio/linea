@@ -1,4 +1,6 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+import * as z from "zod";
+import { FeatureCollectionSchema } from "./src/schema/listing-legacy";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -29,4 +31,25 @@ export default defineConfig({
       },
     },
   },
+  plugins: [zodToJsonSchemaPlugin(FeatureCollectionSchema, "listing-legacy.schema.json")],
 });
+
+function zodToJsonSchemaPlugin(type: z.ZodType, fileName: string): Plugin {
+  return {
+    name: "zod-to-json-schema",
+    apply: "build",
+    buildStart() {
+      const schema = type.toJSONSchema({
+        unrepresentable: "any",
+        override: ({ zodSchema, jsonSchema }) => {
+          if (zodSchema._zod.def.type === "date") {
+            jsonSchema.type = "string";
+            jsonSchema.format = "date-time";
+          }
+        },
+      });
+      const schemaJson = JSON.stringify(schema, undefined, 2);
+      this.emitFile({ type: "asset", fileName, source: schemaJson });
+    },
+  };
+}
