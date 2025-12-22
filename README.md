@@ -44,6 +44,7 @@ Install the @albina-euregio/linea package via https://gitlab.com/albina-euregio/
 To use the `<linea-plot>` component, include it in your HTML with the `src` attribute pointing to your SMET file:
 
 #### Attributes
+
 - `data` {string} - JSON-encoded array of Result objects (optional, either this or the `src` attribute)
 - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute)
 - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from Happens after the component is rendered and has the data from the `src` attribute (data from `src`attribute is replaced by data from `lazysrc` attribute). The data from `src` should be a subset from `lazysrc`. (optional)
@@ -66,6 +67,7 @@ If the startdate is out of bound of the data, it is set to the first available t
 If the data from `src` is not a subset from `lazysrc`, the inital view for the user is not changed after loading and replacing the data from `src` with data from `lazysrc` element. Available dates for the date picker are updated to timespan of data of `lazysrc` element. Clicking the previous/next week button for the first time lead to a zoom to the whole available timespan of the data of `lazysrc` element.#
 
 #### Export options
+
 The export allows to create png and iframe files from the shown plots. There are selections available to export only specific stations or specific plots.
 For png export it is possible to adjust the width, height and title of the plot. The png file is in a similar style to the former wiskiplot with a combined title, legend at the bottom and a background color for the first station.
 
