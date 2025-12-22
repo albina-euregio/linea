@@ -3324,7 +3324,7 @@
                               [this.result.timestamps],
                               i
                           );
-                          if (this.drawedTitle = this.showTitle && !this.drawedTitle, this.#t(m), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:temperature")), this.addSeries(m, Kd, this.result.values.TA), this.addSeries(m, Jd, o), this.result.values.TSS) {
+                          if (this.drawedTitle = !0, this.#t(m), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:temperature")), this.addSeries(m, Kd, this.result.values.TA), this.addSeries(m, Jd, o), this.result.values.TSS) {
                               if (this.addSeries(m, rs, this.result.values.TSS), this.showSurfaceHoarSeries) {
                                   const c = this.result.values.TD.map((h, b) => {
                                       const g = this.result.values.TSS[b];
@@ -3336,31 +3336,43 @@
                               this.addSeries(m, rs, []);
                       }
                       if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
-                          const o = new fe({
-                              ...Xd,
-                              ...this.showTitle && !this.drawedTitle ? {
-                                  title: `${this.result.station} (${y.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`
-                              } : {}
-                          }, [this.result.timestamps], a);
-                          this.drawedTitle = this.showTitle && !this.drawedTitle, this.#t(o), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:wind")), this.addSeries(o, eu, this.result.values.VW), this.addSeries(o, tu, this.result.values.VW_MAX), this.addSeries(o, au, this.result.values.DW);
+                          const o = new fe(
+                              {
+                                  ...Xd,
+                                  ...this.showTitle && !this.drawedTitle ? {
+                                      title: `${this.result.station} (${y.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`
+                                  } : {}
+                              },
+                              [this.result.timestamps],
+                              a
+                          );
+                          this.drawedTitle = !0, this.#t(o), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:wind")), this.addSeries(o, eu, this.result.values.VW), this.addSeries(o, tu, this.result.values.VW_MAX), this.addSeries(o, au, this.result.values.DW);
                       }
                       if (this.result.values.HS || this.result.values.PSUM) {
-                          const o = new fe({
-                              ...iu,
-                              ...this.showTitle && !this.drawedTitle ? {
-                                  title: `${this.result.station} (${y.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`
-                              } : {}
-                          }, [this.result.timestamps], r);
-                          this.drawedTitle = this.showTitle && !this.drawedTitle, this.#t(o), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:precipitation")), this.addSeries(o, lu, this.result.values.HS), this.addSeries(o, ru, this.result.values.PSUM);
+                          const o = new fe(
+                              {
+                                  ...iu,
+                                  ...this.showTitle && !this.drawedTitle ? {
+                                      title: `${this.result.station} (${y.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`
+                                  } : {}
+                              },
+                              [this.result.timestamps],
+                              r
+                          );
+                          this.drawedTitle = !0, this.#t(o), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:precipitation")), this.addSeries(o, lu, this.result.values.HS), this.addSeries(o, ru, this.result.values.PSUM);
                       }
                       if (this.result.values.RH || this.result.values.ISWR) {
-                          const o = new fe({
-                              ...su,
-                              ...this.showTitle && !this.drawedTitle ? {
-                                  title: `${this.result.station} (${y.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`
-                              } : {}
-                          }, [this.result.timestamps], d);
-                          this.drawedTitle = this.showTitle && !this.drawedTitle, this.#t(o), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:humidity_gr")), this.addSeries(o, ou, this.result.values.RH), this.addSeries(o, nu, this.result.values.ISWR);
+                          const o = new fe(
+                              {
+                                  ...su,
+                                  ...this.showTitle && !this.drawedTitle ? {
+                                      title: `${this.result.station} (${y.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`
+                                  } : {}
+                              },
+                              [this.result.timestamps],
+                              d
+                          );
+                          this.drawedTitle = !0, this.#t(o), this.plotnames.push(y.message("dialog:weather-station-diagram:plotnames:humidity_gr")), this.addSeries(o, ou, this.result.values.RH), this.addSeries(o, nu, this.result.values.ISWR);
                       }
                       this.resizePlots(this.clientWidth, this.style), this.resizeObserver.observe(this);
                   }
@@ -3631,22 +3643,20 @@
                    * @returns {void}
                    */
                   show() {
-                      this.modal.style.display = "block", this.exportSettings.style.display = "block", this.exportResult.style.display = "none", this.modal.querySelector("#exportDiagrams").innerHTML = this.lineaPlot.lineacharts.map(
-                          (e, i) => {
-                              let a = "";
-                              return e.plotnames.forEach((r, d) => {
-                                  a += `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
+                      this.modal.style.display = "block", this.exportSettings.style.display = "block", this.exportResult.style.display = "none", this.modal.querySelector("#exportDiagrams").innerHTML = this.lineaPlot.lineacharts.map((e, i) => {
+                          let a = "";
+                          return e.plotnames.forEach((r, d) => {
+                              a += `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
                   <input type="checkbox" class="diagram-plot-checkbox-${i}" value="${d}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
                   ${r}
                   </label>`;
-                              }), `
+                          }), `
                 <div style="display: flex; flex-direction: row; gap:20px;"><label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
                     <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${i}" value="${i}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
                     ${e.result.station} (${e.result.altitude}m)
                 </label>${a}</div>
                 `;
-                          }
-                      ).join(""), document.getElementById("exportTitle").value = this.#s(), document.getElementById("exportWidth").value = String(
+                      }).join(""), document.getElementById("exportTitle").value = this.#s(), document.getElementById("exportWidth").value = String(
                           this.lineaPlot.clientWidth
                       ), document.getElementById("exportHeight").value = String(
                           this.lineaPlot.lineacharts[0].plots[0].height
@@ -3724,12 +3734,18 @@
                    * @todo Implement iframe export logic
                    */
                   async #d() {
-                      const e = this.#n(), i = await import("./iframetemplate-DlDTH_Fa.js").then((h) => h.default);
+                      const e = this.#n(), i = await import("./iframetemplate-DnXlE8HP.js").then((h) => h.default);
                       this.#r();
                       const a = [];
                       this.#a().forEach((h, b) => {
                           const g = this.#l(b);
-                          let f = { station: h.result.station, altitude: h.result.altitude, timestamps: h.result.timestamps, values: {}, units: {} };
+                          let f = {
+                              station: h.result.station,
+                              altitude: h.result.altitude,
+                              timestamps: h.result.timestamps,
+                              values: {},
+                              units: {}
+                          };
                           g.forEach((v) => {
                               h.plotnames[v] === y.message("dialog:weather-station-diagram:plotnames:temperature") ? (f.values.TA = h.result.values.TA ?? [], f.values.TD = h.result.values.TD ?? [], f.values.TSS = h.result.values.TSS ?? []) : h.plotnames[v] === y.message("dialog:weather-station-diagram:plotnames:wind") ? (f.values.VW = h.result.values.VW ?? [], f.values.VW_MAX = h.result.values.VW_MAX ?? [], f.values.DW = h.result.values.DW ?? []) : h.plotnames[v] === y.message("dialog:weather-station-diagram:plotnames:humidity_gr") ? (f.values.RH = h.result.values.RH ?? [], f.values.ISWR = h.result.values.ISWR ?? []) : h.plotnames[v] === y.message("dialog:weather-station-diagram:plotnames:precipitation") && (f.values.HS = h.result.values.HS ?? [], f.values.PSUM = h.result.values.PSUM ?? []);
                           }), a.push(f);
@@ -3746,10 +3762,11 @@
                           m += this.#l(h).length;
                       }), this.exportResult.style.display = "block";
                       const c = `<iframe
+                id="test"
                 src="data:text/html;base64,${btoa(o)}"
                 frameborder="0"
                 scrolling="no"
-                style="width: 100%; height: ${(e.heightPerCanvas + 50) * m + 50 * this.#a().length}px;border:none;overflow:hidden;"
+                style="width: 100%; height: ${(e.heightPerCanvas + 70) * m + 55 * this.#a().length}px;border:none;overflow:hidden;"
                 title="${e.title}">
             </iframe>`;
                       document.getElementById("exportCode").innerHTML = c, this.exportdata = {
@@ -3893,9 +3910,7 @@
                   }
                   #o(e) {
                       const i = [];
-                      return this.modal.querySelectorAll(
-                          e
-                      ).forEach((r) => {
+                      return this.modal.querySelectorAll(e).forEach((r) => {
                           r.checked && i.push(parseInt(r.value));
                       }), i;
                   }
