@@ -10,7 +10,6 @@ __metadata:
   resolution: "@albina-euregio/linea@workspace:."
   dependencies:
     husky: "npm:^9.1.7"
-    mui-daterange-picker: "npm:^1.0.5"
     oxfmt: "npm:^0.17.0"
     oxlint: "npm:^1.32.0"
     temporal-polyfill: "npm:^0.3.0"
@@ -19,13 +18,6 @@ __metadata:
     vitest: "npm:^4.0.15"
   languageName: unknown
   linkType: soft
-
-"@babel/runtime@npm:^7.16.7":
-  version: 7.28.4
-  resolution: "@babel/runtime@npm:7.28.4"
-  checksum: 10c0/792ce7af9750fb9b93879cc9d1db175701c4689da890e6ced242ea0207c9da411ccf16dc04e689cc01158b28d7898c40d75598f4559109f761c12ce01e959bf7
-  languageName: node
-  linkType: hard
 
 "@esbuild/aix-ppc64@npm:0.25.12":
   version: 0.25.12
@@ -1257,25 +1249,6 @@ __metadata:
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
   checksum: 10c0/d924b57e7312b3b63ad21fc5b3dc0af5e78d61a1fc7cfb5457edaf26326bf62be5307cc87ffb6862ef1c2b33b0233cdb5d4f01c4c958cc0d660948b65a287a48
-  languageName: node
-  linkType: hard
-
-"mui-daterange-picker@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "mui-daterange-picker@npm:1.0.5"
-  dependencies:
-    "@babel/runtime": "npm:^7.16.7"
-  peerDependencies:
-    "@babel/runtime": ^7.16.7
-    "@emotion/react": ^11.7.1
-    "@emotion/styled": ^11.6.0
-    "@mui/icons-material": ^5.0.4
-    "@mui/material": ^5.2.6
-    "@mui/system": ^5.0.6
-    date-fns: ^2.28.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
-  checksum: 10c0/f6a804a0f2687e8e5e8db872652e5bb7df499dcecc81cf9e08db68539410646f08629b6f17b74f925e14454f9b88ce5d7cd8bb081d57a07b6df40ef646aedb34
   languageName: node
   linkType: hard
 
