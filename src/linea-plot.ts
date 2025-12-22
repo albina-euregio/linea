@@ -171,9 +171,7 @@ export class LineaPlot extends HTMLElement {
         .controls-menu > button:last-child {
           border-top-right-radius: 20px;
           border-bottom-right-radius: 20px;
-          border-top-left-radius: 0px;
-          border-bottom-left-radius: 0px;
-          border-left-width: 1px;
+          border-left-width: 2px;
           border-right-width: 2px;
         }
 
@@ -535,7 +533,7 @@ export class LineaPlot extends HTMLElement {
         this.#setStartEndDateToMinMax();
         this.filterAndUpdateData();
       });
-      menu.appendChild(enlargebtn);
+      // menu.appendChild(enlargebtn);
     }
     controls.appendChild(menu);
     this.appendChild(controls);
