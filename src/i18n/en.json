@@ -32,8 +32,8 @@
   "dialog:weather-station-diagram:controls:value:export": "Export",
   "dialog:weather-station-diagram:controls:label:exportsettings": "Export Settings",
   "dialog:weather-station-diagram:controls:label:heightpercanvas": "Height per canvas",
-  "dialog:weather-station-diagram:controls:label:width": "Width",
-  "dialog:weather-station-diagram:controls:label:title": "Filename",
+  "dialog:weather-station-diagram:controls:label:width": "Width (only PNG)",
+  "dialog:weather-station-diagram:controls:label:title": "Title (only PNG)",
   "dialog:weather-station-diagram:controls:label:exportchart": "Export Chart",
   "dialog:weather-station-diagram:controls:label:exportresult": "Export Result",
   "dialog:weather-station-diagram:controls:button:pngimage": "PNG Image",
@@ -46,5 +46,9 @@
   "dialog:weather-station-diagram:controls:button:copytoclipboard:clicked": "Copy",
   "dialog:weather-station-diagram:controls:button:download": "Download",
   "dialog:weather-station-diagram:controls:button:open": "Open",
-  "dialog:weather-station-diagram:controls:label:selectdiagrams": "Select Diagrams to Export"
+  "dialog:weather-station-diagram:controls:label:selectdiagrams": "Select Diagrams to Export",
+  "dialog:weather-station-diagram:plotnames:temperature": "Temperatures",
+  "dialog:weather-station-diagram:plotnames:wind": "Wind",
+  "dialog:weather-station-diagram:plotnames:precipitation": "Precipitation",
+  "dialog:weather-station-diagram:plotnames:humidity_gr": "Humidity&GR"
 }

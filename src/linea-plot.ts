@@ -13,7 +13,8 @@ import { ExportModal } from "./exportmodal";
  * @element linea-plot
  * 
  * @attributes
- * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (required)
+ * - `data` {string} - JSON-encoded array of @class Result objects (optional, either this or the `src` attribute)
+ * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute)
  * - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to lazy fetch data from after loading the component and the data from `src` (optional)
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
@@ -72,8 +73,10 @@ export class LineaPlot extends HTMLElement {
   private startInput!: HTMLInputElement;
   private endInput!: HTMLInputElement;
 
-  readonly lineacharts: LineaChart[] = [] as LineaChart[];
-  private results: Result[] = [] as Result[];
+  srcs: string[] = [];
+  lazysrcs: string[] = [];
+  lineacharts: LineaChart[] = [] as LineaChart[];
+  results: Result[] = [] as Result[];
 
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
   private minTime: number = +Infinity;
@@ -222,23 +225,15 @@ export class LineaPlot extends HTMLElement {
     this.appendChild(style);
     this.#addExportModal();
     this.#addControls();
-    this.fetchAndStoreData().then(() => {
-      this.#updateValidDateInputs();
-      this.render();
-      if (
-        this.hasAttribute("showdatepicker") &&
-        this.hasAttribute("startdate") &&
-        this.hasAttribute("enddate")
-      ) {
-        this.#setStartEndDateToAttributes();
-      } else {
-        this.#setStartEndDateToMinMax();
-      }
-      if (!this.hasAttribute("showdatepicker")) {
-        this.#handleFixedDateView();
-      }
-      this.#lazyLoad();
-    });
+    if (this.hasAttribute("data")) {
+      this.storeDataFromAttribute();
+      this.#initAfterDataStorage();
+    } else {
+      this.fetchAndStoreData().then(() => {
+        this.#initAfterDataStorage();
+        this.#lazyLoad();
+      });
+    }
     this.tabIndex = 0;
     this.focus();
     this.isLoaded = true;
@@ -261,6 +256,26 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
+   * builds and update the UI after data is stored.
+   */
+  #initAfterDataStorage() {
+    this.#updateValidDateInputs();
+    this.render();
+    if (
+      this.hasAttribute("showdatepicker") &&
+      this.hasAttribute("startdate") &&
+      this.hasAttribute("enddate")
+    ) {
+      this.#setStartEndDateToAttributes();
+    } else {
+      this.#setStartEndDateToMinMax();
+    }
+    if (!this.hasAttribute("showdatepicker")) {
+      this.#handleFixedDateView();
+    }
+  }
+
+  /**
    * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
    * If a other attribute is given it uses this one instead of src
    * @param attribute {string} - attribute to fetch the data from, default is "src"
@@ -275,6 +290,11 @@ export class LineaPlot extends HTMLElement {
     if (!(srcs instanceof Array)) {
       srcs = [srcs];
       this.backgroundColors = [];
+    }
+    if (attribute == "src") {
+      this.srcs = srcs;
+    } else if ((attribute = "lazysrc")) {
+      this.lazysrcs = srcs;
     }
     this.results = [];
     this.minTime = +Infinity;
@@ -294,6 +314,26 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
+   *
+   */
+  storeDataFromAttribute() {
+    const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
+    this.results = results;
+    this.minTime = +Infinity;
+    this.maxTime = -Infinity;
+    for (const result of results) {
+      if (this.minTime > result.timestamps[0]) {
+        this.minTime = result.timestamps[0];
+      }
+      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
+        this.maxTime = result.timestamps[result.timestamps.length - 1];
+      }
+    }
+    this.#generalizeData();
+    this.#updateValidDateInputs();
+  }
+
+  /**
    * creates all LineaCharts and initializate them
    */
   render() {
@@ -303,10 +343,7 @@ export class LineaPlot extends HTMLElement {
     for (const i in this.results) {
       const result = this.results[i];
       let lc = new LineaChart(
-        result.timestamps,
-        result.values,
-        result.station,
-        result.altitude,
+        result,
         this.hasAttribute("showtitle"),
         this.hasAttribute("showsurfacehoarseries"),
         this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",

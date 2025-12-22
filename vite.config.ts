@@ -5,7 +5,7 @@ export default defineConfig({
   base: "./",
   build: {
     lib: {
-      entry: "/src/main.ts",
+      entry: "./src/main.ts",
       formats: ["es"],
     },
     sourcemap: true,
