@@ -1,6 +1,6 @@
 # LINEA
 
-Visualizations of meteorological data, such as automated weather stations. The view is defined by the [EAWS](https://www.avalanches.org/) _work group communication_.
+Visualizations of meteorological data, such as automated weather stations. The view is defined by the [LAWIS](https://https://www.lawis.at/) work group.
 The data has to be available as smet-file, see the [specification of the smet format](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf).
 
 The package offers two [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to show:
