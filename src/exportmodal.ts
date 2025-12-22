@@ -277,6 +277,20 @@ export class ExportModal {
     this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
     this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
 
+    const keyListener = (e: KeyboardEvent) => {
+      if (!this.exportdata || e.key !== "Enter") {
+        return;
+      }
+      if (this.exportdata.type == "image/png") {
+        (this.modal.querySelector('#btnExportPNG') as HTMLButtonElement).click();
+      } else if (this.exportdata.type == "text/html") {
+        (this.modal.querySelector('#btnExportIframe') as HTMLButtonElement).click();
+      }
+    }
+
+    this.modal.querySelector("#exportWidth")?.addEventListener("keydown", keyListener);
+    this.modal.querySelector("#exportHeight")?.addEventListener("keydown", keyListener);
+
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       this.exportSettings.style.display = "flex";
       this.#exportAsIframe();
