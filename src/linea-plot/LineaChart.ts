@@ -120,7 +120,7 @@ export class LineaChart extends AbstractLineaChart {
         [this.result.timestamps],
         plot_TA_TD_TSS,
       );
-      this.drawedTitle = this.showTitle && !this.drawedTitle;
+      this.drawedTitle = true;
 
       this.#modifyDrawHook(p);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:temperature"));
@@ -155,7 +155,7 @@ export class LineaChart extends AbstractLineaChart {
         [this.result.timestamps],
         plot_VW_VWG_DW,
       );
-      this.drawedTitle = this.showTitle && !this.drawedTitle;
+      this.drawedTitle = true;
       this.#modifyDrawHook(p);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:wind"));
       this.addSeries(p, opts_VW, this.result.values.VW);
@@ -176,7 +176,7 @@ export class LineaChart extends AbstractLineaChart {
         [this.result.timestamps],
         plot_HS_PSUM,
       );
-      this.drawedTitle = this.showTitle && !this.drawedTitle;
+      this.drawedTitle = true;
       this.#modifyDrawHook(p);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:precipitation"));
       this.addSeries(p, opts_HS, this.result.values.HS);
@@ -196,7 +196,7 @@ export class LineaChart extends AbstractLineaChart {
         [this.result.timestamps],
         plot_RH_GR,
       );
-      this.drawedTitle = this.showTitle && !this.drawedTitle;
+      this.drawedTitle = true;
       this.#modifyDrawHook(p);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr"));
       this.addSeries(p, opts_RH, this.result.values.RH);
