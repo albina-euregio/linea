@@ -469,9 +469,10 @@ export class ExportModal {
     for (const lc of this.#getActiveLineacharts()) {
       resultsFiltered.push(lc.result);
     }
+    console.log(resultsFiltered);
 
     const html = iframeTemplate
-      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
+      .replace('linea-plot data=""', `linea-plot data='${JSON.stringify(resultsFiltered)}'`)
       .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
       .replace('lang="en"', `lang="${i18n.lang}"`);
 
