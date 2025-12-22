@@ -31,3 +31,17 @@ publish-npm:
     - npm publish
   only:
     - tags
+
+pages:
+  stage: deploy
+  image: alpine:latest
+  needs:
+    - build
+  script:
+    - mv dist/ public/
+    - echo Deploying GitLab Pages
+  artifacts:
+    paths:
+      - public/
+  only:
+    - tags
