@@ -1,3 +1,4 @@
+import uPlot from "uplot";
 import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
 import { LineaChart } from "./linea-plot/LineaChart";
@@ -207,7 +208,7 @@ export class ExportModal {
             .export-settings input {
                 width: 100%;
                 max-width: 200px;
-            } 
+            }
             
         `;
     this.modal.appendChild(style);
@@ -254,7 +255,7 @@ export class ExportModal {
                         </div>
                         <div>
                             <label for="exportDiagrams">${i18n.message("dialog:weather-station-diagram:controls:label:selectdiagrams")}</label>
-                            <div id="exportDiagrams" style="display: flex; flex-direction: row; gap: 12px; margin-top: 8px;">
+                            <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
                             </div>
                         </div>
                     </div>
@@ -344,14 +345,23 @@ export class ExportModal {
 
     this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.lineacharts
       .map(
-        (chart, index) => `
-        <label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
-            <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;">
-            ${chart.result.station} (${chart.result.altitude}m)
-        </label>
-        `,
-      )
-      .join("");
+        (chart, index) => {
+          let options = "";
+          chart.plotnames.forEach((name, i) => {
+            options += `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
+            <input type="checkbox" class="diagram-plot-checkbox-${index}" value="${i}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
+            ${name}
+            </label>`
+          })
+
+          return `
+          <div style="display: flex; flex-direction: row; gap:20px;"><label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
+              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
+              ${chart.result.station} (${chart.result.altitude}m)
+          </label>${options}</div>
+          `;
+        }
+      ).join("");
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
@@ -360,12 +370,13 @@ export class ExportModal {
     (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
       this.lineaPlot.lineacharts[0].plots[0].height,
     );
-    this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
-      cb.addEventListener("change", () => {
-        (document.getElementById("exportTitle") as HTMLInputElement)!.value =
-          this.#generateTitleString();
+    this.modal.querySelectorAll(".diagram-checkbox")
+      .forEach((cb) => {
+        cb.addEventListener("change", () => {
+          (document.getElementById("exportTitle") as HTMLInputElement)!.value =
+            this.#generateTitleString();
+        });
       });
-    });
   }
 
   /**
@@ -466,9 +477,28 @@ export class ExportModal {
 
     const resultsFiltered: Result[] = [];
 
-    for (const lc of this.#getActiveLineacharts()) {
-      resultsFiltered.push(lc.result);
-    }
+    this.#getActiveLineacharts().forEach((lc, index) => {
+      const activeplots = this.#getCheckedPlotIndices(index);
+      let result: Result = { station: lc.result.station, altitude: lc.result.altitude, timestamps: lc.result.timestamps, values: {}, units: {} };
+      activeplots.forEach((index) => {
+        if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:temperature")) {
+          result.values.TA = lc.result.values.TA ?? [];
+          result.values.TD = lc.result.values.TD ?? [];
+          result.values.TSS = lc.result.values.TSS ?? [];
+        } else if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")) {
+          result.values.VW = lc.result.values.VW ?? [];
+          result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
+          result.values.DW = lc.result.values.DW ?? [];
+        } else if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")) {
+          result.values.RH = lc.result.values.RH ?? [];
+          result.values.ISWR = lc.result.values.ISWR ?? [];
+        } else if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:precipitation")) {
+          result.values.HS = lc.result.values.HS ?? [];
+          result.values.PSUM = lc.result.values.PSUM ?? [];
+        }
+      });
+      resultsFiltered.push(result);
+    });
 
     const html =
       iframeTemplate
@@ -476,7 +506,7 @@ export class ExportModal {
         .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
         .replace('lang="en"', `lang="${i18n.lang}"`) +
       `<body>
-            <linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle />
+            <linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle/>
         </body>
         </html>`;
 
@@ -487,16 +517,16 @@ export class ExportModal {
     }
 
     let totalCanvases = 0;
-    for (const lineachart of this.#getActiveLineacharts()) {
-      totalCanvases += lineachart.plots.length;
-    }
+    this.#getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.#getCheckedPlotIndices(index).length;
+    });
 
     this.exportResult.style.display = "block";
     const iframecode = `<iframe
           src="data:text/html;base64,${btoa(binary)}"
           frameborder="0" 
           scrolling="no"
-          style="width: 100%; height: ${exports.heightPerCanvas * totalCanvases + 200 * this.#getActiveLineacharts().length}px;"
+          style="width: 100%; height: ${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px;border:none;overflow:hidden;"
           title="${exports.title}">
       </iframe>`;
 
@@ -588,8 +618,9 @@ export class ExportModal {
       await new Promise((r) => setTimeout(r, 1));
     }
 
-    for (const lineachart of activeLinecharts) {
-      const plots: uPlot[] = lineachart.plots;
+    activeLinecharts.forEach((lineachart, index) => {
+      const plotindices = this.#getCheckedPlotIndices(index);
+      const plots: uPlot[] = lineachart.plots.filter((v, i) => plotindices.includes(i));
       plots
         .map((p) => p.root.querySelector("canvas")!)
         .forEach((c) => {
@@ -609,7 +640,7 @@ export class ExportModal {
           legendItems[label] = color;
         }),
       );
-    }
+    });
 
     //build png
     const titleHeight = title ? 40 : 0;
@@ -715,6 +746,10 @@ export class ExportModal {
     return activeCharts;
   }
 
+  #getCheckedPlotIndices(index: number): number[] {
+    return this.#evaluateCheckboxes(`.diagram-plot-checkbox-${index}`);
+  }
+
   /**
    * Gets the indices of checked diagram checkboxes.
    *
@@ -722,9 +757,13 @@ export class ExportModal {
    * @returns {number[]} Array of checked checkbox indices
    */
   #getCheckedDiagramIndices(): number[] {
+    return this.#evaluateCheckboxes(".diagram-checkbox");
+  }
+
+  #evaluateCheckboxes(classname: string): number[] {
     const indices: number[] = [];
     const checkboxes = this.modal.querySelectorAll(
-      ".diagram-checkbox",
+      classname,
     ) as NodeListOf<HTMLInputElement>;
     checkboxes.forEach((cb) => {
       if (cb.checked) {

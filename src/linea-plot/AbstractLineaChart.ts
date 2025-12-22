@@ -1,6 +1,7 @@
 import uPlot from "uplot";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
+  plotnames: string[] = [];
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
 
   resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
