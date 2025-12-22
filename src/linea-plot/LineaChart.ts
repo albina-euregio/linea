@@ -10,7 +10,6 @@ import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
 export class LineaChart extends AbstractLineaChart {
-
   private drawedTitle: boolean = false;
 
   constructor(
@@ -32,9 +31,9 @@ export class LineaChart extends AbstractLineaChart {
         this.#updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
-          (this.result.values.TA && this.result.values.RH
-            ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
-            : undefined),
+            (this.result.values.TA && this.result.values.RH
+              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+              : undefined),
           this.result.values.TSS,
           this.result.values.TD.map((td, i) => {
             return td < 0 && this.result.values.TSS[i] < td ? 1000 : -100;
@@ -44,9 +43,9 @@ export class LineaChart extends AbstractLineaChart {
         this.#updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
-          (this.result.values.TA && this.result.values.RH
-            ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
-            : undefined),
+            (this.result.values.TA && this.result.values.RH
+              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+              : undefined),
           this.result.values.TSS,
         ]);
       }
@@ -114,8 +113,8 @@ export class LineaChart extends AbstractLineaChart {
           ...opts_TA_TD_TSS,
           ...(this.showTitle && !this.drawedTitle
             ? {
-              title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-            }
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
             : {}),
         },
         [this.result.timestamps],
@@ -144,14 +143,18 @@ export class LineaChart extends AbstractLineaChart {
     }
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
-      const p = new uPlot({
-        ...opts_VW_VWG_DW,
-        ...(this.showTitle && !this.drawedTitle
-          ? {
-            title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-          }
-          : {})
-      }, [this.result.timestamps], plot_VW_VWG_DW);
+      const p = new uPlot(
+        {
+          ...opts_VW_VWG_DW,
+          ...(this.showTitle && !this.drawedTitle
+            ? {
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [this.result.timestamps],
+        plot_VW_VWG_DW,
+      );
       this.drawedTitle = this.showTitle && !this.drawedTitle;
       this.#modifyDrawHook(p);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:wind"));
@@ -161,14 +164,18 @@ export class LineaChart extends AbstractLineaChart {
     }
 
     if (this.result.values.HS || this.result.values.PSUM) {
-      const p = new uPlot({
-        ...opts_HS_PSUM,
-        ...(this.showTitle && !this.drawedTitle
-          ? {
-            title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-          }
-          : {})
-      }, [this.result.timestamps], plot_HS_PSUM);
+      const p = new uPlot(
+        {
+          ...opts_HS_PSUM,
+          ...(this.showTitle && !this.drawedTitle
+            ? {
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [this.result.timestamps],
+        plot_HS_PSUM,
+      );
       this.drawedTitle = this.showTitle && !this.drawedTitle;
       this.#modifyDrawHook(p);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:precipitation"));
@@ -177,14 +184,18 @@ export class LineaChart extends AbstractLineaChart {
     }
 
     if (this.result.values.RH || this.result.values.ISWR) {
-      const p = new uPlot({
-        ...opts_RH_GR,
-        ...(this.showTitle && !this.drawedTitle
-          ? {
-            title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-          }
-          : {})
-      }, [this.result.timestamps], plot_RH_GR);
+      const p = new uPlot(
+        {
+          ...opts_RH_GR,
+          ...(this.showTitle && !this.drawedTitle
+            ? {
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [this.result.timestamps],
+        plot_RH_GR,
+      );
       this.drawedTitle = this.showTitle && !this.drawedTitle;
       this.#modifyDrawHook(p);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr"));

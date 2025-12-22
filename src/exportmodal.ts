@@ -344,24 +344,23 @@ export class ExportModal {
     this.exportResult.style.display = "none";
 
     this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.lineacharts
-      .map(
-        (chart, index) => {
-          let options = "";
-          chart.plotnames.forEach((name, i) => {
-            options += `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
+      .map((chart, index) => {
+        let options = "";
+        chart.plotnames.forEach((name, i) => {
+          options += `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
             <input type="checkbox" class="diagram-plot-checkbox-${index}" value="${i}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
             ${name}
-            </label>`
-          })
+            </label>`;
+        });
 
-          return `
+        return `
           <div style="display: flex; flex-direction: row; gap:20px;"><label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
               <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
               ${chart.result.station} (${chart.result.altitude}m)
           </label>${options}</div>
           `;
-        }
-      ).join("");
+      })
+      .join("");
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
@@ -370,13 +369,12 @@ export class ExportModal {
     (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
       this.lineaPlot.lineacharts[0].plots[0].height,
     );
-    this.modal.querySelectorAll(".diagram-checkbox")
-      .forEach((cb) => {
-        cb.addEventListener("change", () => {
-          (document.getElementById("exportTitle") as HTMLInputElement)!.value =
-            this.#generateTitleString();
-        });
+    this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
+      cb.addEventListener("change", () => {
+        (document.getElementById("exportTitle") as HTMLInputElement)!.value =
+          this.#generateTitleString();
       });
+    });
   }
 
   /**
@@ -479,20 +477,37 @@ export class ExportModal {
 
     this.#getActiveLineacharts().forEach((lc, index) => {
       const activeplots = this.#getCheckedPlotIndices(index);
-      let result: Result = { station: lc.result.station, altitude: lc.result.altitude, timestamps: lc.result.timestamps, values: {}, units: {} };
+      let result: Result = {
+        station: lc.result.station,
+        altitude: lc.result.altitude,
+        timestamps: lc.result.timestamps,
+        values: {},
+        units: {},
+      };
       activeplots.forEach((index) => {
-        if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:temperature")) {
+        if (
+          lc.plotnames[index] ===
+          i18n.message("dialog:weather-station-diagram:plotnames:temperature")
+        ) {
           result.values.TA = lc.result.values.TA ?? [];
           result.values.TD = lc.result.values.TD ?? [];
           result.values.TSS = lc.result.values.TSS ?? [];
-        } else if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")) {
+        } else if (
+          lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
+        ) {
           result.values.VW = lc.result.values.VW ?? [];
           result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
           result.values.DW = lc.result.values.DW ?? [];
-        } else if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")) {
+        } else if (
+          lc.plotnames[index] ===
+          i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
+        ) {
           result.values.RH = lc.result.values.RH ?? [];
           result.values.ISWR = lc.result.values.ISWR ?? [];
-        } else if (lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:precipitation")) {
+        } else if (
+          lc.plotnames[index] ===
+          i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
+        ) {
           result.values.HS = lc.result.values.HS ?? [];
           result.values.PSUM = lc.result.values.PSUM ?? [];
         }
@@ -762,9 +777,7 @@ export class ExportModal {
 
   #evaluateCheckboxes(classname: string): number[] {
     const indices: number[] = [];
-    const checkboxes = this.modal.querySelectorAll(
-      classname,
-    ) as NodeListOf<HTMLInputElement>;
+    const checkboxes = this.modal.querySelectorAll(classname) as NodeListOf<HTMLInputElement>;
     checkboxes.forEach((cb) => {
       if (cb.checked) {
         indices.push(parseInt(cb.value));
