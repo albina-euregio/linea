@@ -471,10 +471,14 @@ export class ExportModal {
     }
     console.log(resultsFiltered);
 
-    const html = iframeTemplate
-      .replace('linea-plot data=""', `linea-plot data='${JSON.stringify(resultsFiltered)}'`)
-      .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
-      .replace('lang="en"', `lang="${i18n.lang}"`);
+    const html =
+      iframeTemplate
+        .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
+        .replace('lang="en"', `lang="${i18n.lang}"`) +
+      `<body>
+            <linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle />
+        </body>
+        </html>`;
 
     const uint8Array = new TextEncoder().encode(html);
     let binary = "";
