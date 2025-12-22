@@ -489,11 +489,10 @@ export class ExportModal {
 
     this.exportResult.style.display = "block";
     const iframecode = `<iframe
-          src="data:text/html;base64,${btoa(binary)}" 
-          width="${exports.width}" 
-          height="${exports.heightPerCanvas * totalCanvases + 200 * this.#getActiveLineacharts().length}" 
+          src="data:text/html;base64,${btoa(binary)}"
           frameborder="0" 
-          scrolling="no" 
+          scrolling="no"
+          style="width: 100%; height: ${exports.heightPerCanvas * totalCanvases + 200 * this.#getActiveLineacharts().length}px;"
           title="${exports.title}">
       </iframe>`;
 
