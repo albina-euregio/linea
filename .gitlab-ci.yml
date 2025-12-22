@@ -31,3 +31,14 @@ publish-npm:
     - npm publish
   only:
     - tags
+
+pages:
+  stage: deploy
+  image: alpine:latest
+  needs:
+    - build
+  artifacts:
+    paths:
+      - dist/
+  only:
+    - tags
