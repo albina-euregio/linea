@@ -362,6 +362,9 @@ export class LineaPlot extends HTMLElement {
    * export exports the drawed canvas on the screen, see @class ExportModal
    */
   #addControls() {
+    if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport")) {
+      return;
+    }
     const controls = document.createElement("div");
     controls.classList.add("controls");
 
