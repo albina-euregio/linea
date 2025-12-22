@@ -1,6 +1,7 @@
 import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
 import { LineaChart } from "./linea-plot/LineaChart";
+import { Result } from "./smet-data";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -346,7 +347,7 @@ export class ExportModal {
         (chart, index) => `
         <label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
             <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;">
-            ${chart.station} (${chart.altitude}m)
+            ${chart.result.station} (${chart.result.altitude}m)
         </label>
         `,
       )
@@ -463,14 +464,14 @@ export class ExportModal {
 
     const indices = this.#getCheckedDiagramIndices();
 
-    const srcs = this.lineaPlot.srcs.filter((v, i) => indices.includes(i));
-    const lazysrcs = this.lineaPlot.lazysrcs.filter((v, i) => indices.includes(i));
+    const resultsFiltered: Result[] = [];
+
+    for (const lc of this.#getActiveLineacharts()) {
+      resultsFiltered.push(lc.result);
+    }
 
     const html = iframeTemplate
-      .replace(
-        "linea-plot src=''",
-        `linea-plot src='${JSON.stringify(srcs)}${lazysrcs.length > 0 ? "' lazysrc='" + JSON.stringify(lazysrcs) + "'" : ""}'`,
-      )
+      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
       .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
       .replace('lang="en"', `lang="${i18n.lang}"`);
 
@@ -519,8 +520,8 @@ export class ExportModal {
   #generateTitleString(): string {
     const titles: { station: string; altitude: number }[] = [];
     for (const lineachart of this.#getActiveLineacharts()) {
-      const station = lineachart.station;
-      const altitude = lineachart.altitude;
+      const station = lineachart.result.station;
+      const altitude = lineachart.result.altitude;
       titles.push({ station, altitude });
     }
     let title = "";
