@@ -77,6 +77,10 @@ export const opts_HS_year: uPlot.Options = {
       fill: "#d9dcdc",
     },
     {
+      series: [3, 1],
+      fill: "#d9dcdc",
+    },
+    {
       series: [2, 1],
       fill: "#d9dcdc",
     },
