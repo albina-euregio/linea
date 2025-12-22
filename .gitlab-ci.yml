@@ -38,7 +38,8 @@ pages:
   needs:
     - build
   script:
+    - mv dist/ public/
     - echo Deploying GitLab Pages
   artifacts:
     paths:
-      - dist/
+      - public/
