@@ -474,8 +474,7 @@ export class ExportModal {
     const html =
       iframeTemplate
         .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
-        .replace('lang="en"', `lang="${i18n.lang}"`) +
-      `<body>
+        .replace('lang="en"', `lang="${i18n.lang}"`) + `<body>
             <linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle />
         </body>
         </html>`;

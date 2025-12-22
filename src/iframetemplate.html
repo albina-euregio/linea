@@ -890,7 +890,7 @@
             return e == "UTC" || e == "Etc/UTC" ? i = new Date(+t + t.getTimezoneOffset() * 6e4) : e == Un ? i = t : (i = new Date(t.toLocaleString("en-US", { timeZone: e })), i.setMilliseconds(t.getMilliseconds())), i;
         }
         const Ts = (t) => t % 1 == 0, xi = [1, 2, 2.5, 5], Gn = ti(10, -32, 0, xi), ys = ti(10, 0, 32, xi), $n = ys.filter(Ts), ra = Gn.concat(ys), Hl = `
-      `, _s = "{YYYY}", Vr = Hl + _s, Ds = "{M}/{D}", Ja = Hl + Ds, pi = Ja + "/{YY}", Ms = "{aa}", Yn = "{h}:{mm}", Pa = Yn + Ms, Or = Hl + Pa, Fr = ":{ss}", ce = null;
+`, _s = "{YYYY}", Vr = Hl + _s, Ds = "{M}/{D}", Ja = Hl + Ds, pi = Ja + "/{YY}", Ms = "{aa}", Yn = "{h}:{mm}", Pa = Yn + Ms, Or = Hl + Pa, Fr = ":{ss}", ce = null;
         function ks(t) {
             let e = t * 1e3, i = e * 60, a = i * 60, r = a * 24, d = r * 30, o = r * 365, u = (t == 1 ? ti(10, 0, 3, xi).filter(Ts) : ti(10, -3, 0, xi)).concat([
                 // minute divisors (# of secs)
@@ -2374,7 +2374,7 @@
                         if (it != null) {
                             c == 0 ? h = pt[je] : f = pt[je], it = "" + it;
                             let ia = it.indexOf(`
-      `) == -1 ? [it] : it.split(/\n/gm);
+`) == -1 ? [it] : it.split(/\n/gm);
                             for (let Ze = 0; Ze < ia.length; Ze++) {
                                 let gr = ia[Ze];
                                 me ? (g.save(), g.translate(h, f + Ze * at), g.rotate(me), g.fillText(gr, 0, 0), g.restore()) : g.fillText(gr, h, f + Ze * at);
@@ -2865,7 +2865,7 @@
                     { month: "short", day: "2-digit" }
                 ], e.map(
                     (o) => d.map((m) => M.time(o % 1e5 === 99999 ? o + 1 : o, m)).join(`
-      `)
+`)
                 );
             },
             grid: {
@@ -3374,525 +3374,29 @@
                 this.modal = e, this.lineaPlot = i, this.exportdata = null;
                 const a = document.createElement("style");
                 a.textContent = `
-                  label {
-                      margin-bottom: 8px;
-                      font-weight: 600;
-                      color: #black;
-                      font-size: 14px;
-                  }
-
-                  input {
-                      padding: 12px;
-                      border: 2px solid #F5F5F5;
-                      border-radius: 8px;
-                      font-size: 14px;
-                      background: #black;
-                      color: black;
-                      transition: border-color 0.3s ease;
-                  }
-
-                  input:focus {
-                      outline: none;
-                      border-color: #19abff;
-                      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-                  }
-
-                  .export-modal {
-                      display: none;
-                      position: fixed;
-                      z-index: 1000;
-                      left: 0;
-                      top: 0;
-                      width: 100%;
-                      height: 100%;
-                      background-color: #ffffff;
-                  }
-
-                  .export-modal-content {
-                      background-color: #ffffff;
-                      margin: 5% auto;
-                      padding: 20px;
-                      border-radius: 12px;
-                      width: 90%;
-                      max-width: 800px;
-                      max-height: 80vh;
-                      overflow-y: auto;
-                  }
-
-                  .export-close {
-                      color: #aaa;
-                      float: right;
-                      font-size: 28px;
-                      font-weight: bold;
-                      cursor: pointer;
-                      line-height: 1;
-                  }
-
-                  .export-close:hover {
-                      color: #fff;
-                  }
-
-                  .export-options {
-                      display: grid;
-                      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                      gap: 15px;
-                      margin: 20px 0;
-                  }
-
-                  .export-option {
-                      background: #3498db;
-                      padding: 20px;
-                      border-radius: 8px;
-                      text-align: center;
-                      cursor: pointer;
-                      transition: background 0.3s ease;
-                  }
-
-                  .export-option:hover {
-                      background: #444;
-                  }
-
-                  .export-option h4 {
-                      margin: 0 0 10px 0;
-                      color: #ffffff;
-                  }
-
-                  .export-option p {
-                      margin: 0;
-                      font-size: 13px;
-                      color: #ffffff;
-                  }
-
-                  .code-container {
-                      background: #ffffff;
-                      border: 1px solid #444;
-                      border-radius: 8px;
-                      padding: 15px;
-                      margin: 15px 0;
-                  }
-
-                  .code-container-buttons {
-                      display: flex;
-                      gap: 4px;
-                      justify-content: flex-end;
-                      margin-bottom: 10px;
-                  }
-
-                  .code-container pre {
-                      margin: 0;
-                      white-space: pre-wrap;
-                      word-wrap: break-word;
-                      font-family: 'Monaco', 'Consolas', monospace;
-                      font-size: 12px;
-                      color: #000000;
-                  }
-
-                  .code-container button {
-                      background: #3498db;
-                      color: white;
-                      border: none;
-                      padding: 5px 10px;
-                      border-radius: 4px;
-                      cursor: pointer;
-                      font-size: 12px;
-                  }
-
-                  .code-container button:hover {
-                      background: #2980b9;
-                  }
-
-                  .export-settings {
-                      background: #ffffff;
-                      padding: 15px;
-                      border-radius: 8px;
-                      margin: 15px 0;
-                      display: flex;
-                      flex-direction: column;
-                  }
-
-                  .export-settings h4 {
-                      margin: 0 0 15px 0;
-                      color: #3498db;
-                  }
-
-                  .export-settings label {
-                      margin-bottom: 5px;
-                  }
-
-                  .export-settings input {
-                      width: 100%;
-                      max-width: 200px;
-                  }
-
-              `, this.modal.appendChild(a), this.modal.classList.add("export-modal"), this.modal.id = "exportModal", this.modal.insertAdjacentHTML(
-                    "beforeend",
-                    `<div class="export-modal-content">
-                      <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
-                      <h2>${M.message("dialog:weather-station-diagram:controls:label:exportchart")}</h2>
-
-                      <div class="export-options">
-                          <div class="export-option" id="btnExportIframe">
-                              <h4>${M.message("dialog:weather-station-diagram:controls:button:iframe")}</h4>
-                              <p>${M.message("dialog:weather-station-diagram:controls:button:iframe:sub")}</p>
-                          </div>
-
-                          <div class="export-option" id="btnExportStandalone" style="display: none;">
-                              <h4>${M.message("dialog:weather-station-diagram:controls:button:standalonehtml")}</h4>
-                              <p>${M.message("dialog:weather-station-diagram:controls:button:standalonehtml:sub")}</p>
-                          </div>
-
-                          <div class="export-option" id="btnExportPNG">
-                              <h4>${M.message("dialog:weather-station-diagram:controls:button:pngimage")}</h4>
-                              <p>${M.message("dialog:weather-station-diagram:controls:button:pngimage:sub")}</p>
-                          </div>
-                      </div>
-
-                      <div class="export-settings" id="exportSettings" style="display:none;">
-                          <h4>${M.message("dialog:weather-station-diagram:controls:label:exportsettings")}</h4>
-                          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                              <div>
-                                  <label for="exportWidth">${M.message("dialog:weather-station-diagram:controls:label:width")} (px)</label>
-                                  <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
-                              </div>
-                              <div>
-                                  <label for="exportHeight">${M.message("dialog:weather-station-diagram:controls:label:heightpercanvas")} (px):</label>
-                                  <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
-                              </div>
-                              <div>
-                                  <label for="exportTitle">${M.message("dialog:weather-station-diagram:controls:label:title")}</label>
-                                  <input type="text" id="exportTitle" value="">
-                              </div>
-                              <div>
-                                  <label for="exportDiagrams">${M.message("dialog:weather-station-diagram:controls:label:selectdiagrams")}</label>
-                                  <div id="exportDiagrams" style="display: flex; flex-direction: row; gap: 12px; margin-top: 8px;">
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-
-                      <div id="exportResult" style="display:none;">
-                          <h3>${M.message("dialog:weather-station-diagram:controls:label:exportresult")}</h3>
-                          <div class="code-container">
-                              <div class="code-container-buttons">
-                                  <button class="copy-btn" id="copyExportBtn">${M.message("dialog:weather-station-diagram:controls:button:copytoclipboard")}</button>
-                                  <button class="dwn-btn" id="downloadBtn">${M.message("dialog:weather-station-diagram:controls:button:download")}</button>
-                                  <button class="open-btn" id="openBtn">${M.message("dialog:weather-station-diagram:controls:button:open")}</button>
-                              </div>
-                              <pre id="exportCode"></pre>
-                          </div>
-                      </div>
-                  </div>`
-                ), this.exportOptions = this.modal.querySelector(".export-options"), this.exportSettings = this.modal.querySelector("#exportSettings"), this.exportResult = this.modal.querySelector("#exportResult");
-                const r = (d) => {
-                    !this.exportdata || d.key !== "Enter" || (this.exportdata.type == "image/png" ? this.modal.querySelector("#btnExportPNG").click() : this.exportdata.type == "text/html" && this.modal.querySelector("#btnExportIframe").click());
-                };
-                this.modal.querySelector("#exportWidth")?.addEventListener("keydown", r), this.modal.querySelector("#exportHeight")?.addEventListener("keydown", r), this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
-                    this.exportSettings.style.display = "flex", this.#o();
-                }), this.modal.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
-                    this.exportSettings.style.display = "flex";
-                }), this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
-                    this.exportSettings.style.display = "flex", this.#n(this.#s());
-                }), this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
-                    this.#e();
-                }), this.modal.querySelector("#downloadBtn")?.addEventListener("click", () => {
-                    this.#i();
-                }), this.modal.querySelector("#openBtn")?.addEventListener("click", () => {
-                    this.#t();
-                }), window.onclick = function (d) {
-                    const o = document.getElementById("exportModal");
-                    d.target === o && o && (o.style.display = "none");
-                };
+            label {
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #black;
+                font-size: 14px;
             }
-            /**
-             * Displays the export modal and initializes available export options.
-             *
-             * Populates the diagram selection checkboxes with all available LineaCharts
-             * and sets default values for export settings based on current plot dimensions.
-             *
-             * @public
-             * @returns {void}
-             */
-            show() {
-                this.modal.style.display = "block", this.exportSettings.style.display = "block", this.exportResult.style.display = "none", this.modal.querySelector("#exportDiagrams").innerHTML = this.lineaPlot.lineacharts.map(
-                    (e, i) => `
-              <label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
-                  <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${i}" value="${i}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;">
-                  ${e.result.station} (${e.result.altitude}m)
-              </label>
-              `
-                ).join(""), document.getElementById("exportTitle").value = this.#l(), document.getElementById("exportWidth").value = String(
-                    this.lineaPlot.clientWidth
-                ), document.getElementById("exportHeight").value = String(
-                    this.lineaPlot.lineacharts[0].plots[0].height
-                ), this.modal.querySelectorAll(".diagram-checkbox").forEach((e) => {
-                    e.addEventListener("change", () => {
-                        document.getElementById("exportTitle").value = this.#l();
-                    });
-                });
+            
+            input {
+                padding: 12px;
+                border: 2px solid #F5F5F5;
+                border-radius: 8px;
+                font-size: 14px;
+                background: #black;
+                color: black;
+                transition: border-color 0.3s ease;
             }
-            /**
-             * Copies the exported content to the system clipboard.
-             *
-             * Supports copying both PNG images and HTML content formats.
-             * Provides visual feedback by temporarily changing the button text and color.
-             *
-             * @private
-             * @returns {void}
-             * @throws {Error} Logs error if clipboard write operation fails
-             */
-            #e() {
-                let e = [];
-                if (this.exportdata)
-                    this.exportdata.type === "image/png" ? e = [
-                        new ClipboardItem({
-                            "image/png": this.exportdata.blob
-                        })
-                    ] : this.exportdata.type === "text/html" && (e = [
-                        new ClipboardItem({
-                            "text/plain": this.exportdata.blob
-                        })
-                    ]);
-                else
-                    return;
-                navigator.clipboard.write(e).then(() => {
-                    const i = document.querySelector(".copy-btn"), a = i.textContent;
-                    i.textContent = `${M.message("dialog:weather-station-diagram:controls:button:copytoclipboard:clicked")}`, i.style.background = "#27ae60", setTimeout(() => {
-                        i.textContent = a, i.style.background = "#667eea";
-                    }, 2e3);
-                }).catch((i) => {
-                    console.error("Failed to copy: ", i);
-                });
-            }
-            /**
-             * Downloads the exported file to the user's local system.
-             *
-             * @private
-             * @returns {void}
-             */
-            #i() {
-                if (!this.exportdata)
-                    return;
-                const e = document.createElement("a");
-                e.href = URL.createObjectURL(this.exportdata.blob), e.download = this.exportdata.filename, e.target = "_tab", e.click();
-            }
-            /**
-             * Opens the exported content in a new browser tab.
-             *
-             * Creates a temporary anchor element and opens the exported data
-             * in a new tab using the data URL or blob reference.
-             *
-             * @private
-             * @returns {void}
-             */
-            #t() {
-                if (!this.exportdata)
-                    return;
-                const e = document.createElement("a");
-                e.href = URL.createObjectURL(this.exportdata.blob), e.target = "_blank", e.click();
-            }
-            /**
-             * Handles iframe export functionality.
-             *
-             * @private
-             * @returns {void}
-             * @todo Implement iframe export logic
-             */
-            async #o() {
-                const e = this.#s(), i = await import("./iframetemplate-D7r8UlRK.js").then((p) => p.default);
-                this.#r();
-                const a = [];
-                for (const p of this.#a())
-                    a.push(p.result);
-                console.log(a);
-                let o = "";
-                for (let p = 0; p < d.byteLength; p++)
-                    o += String.fromCharCode(d[p]);
-                let m = 0;
-                for (const p of this.#a())
-                    m += p.plots.length;
-                this.exportResult.style.display = "block";
-                const u = `<iframe
-                src="data:text/html;base64,${btoa(o)}"
-                frameborder="0"
-                scrolling="no"
-                style="width: 100%; height: ${e.heightPerCanvas * m + 200 * this.#a().length}px;"
-                title="${e.title}">
-            </iframe>`;
-                document.getElementById("exportCode").innerHTML = u, this.exportdata = {
-                    blob: new Blob([u], {
-                        type: "text/html"
-                    }),
-                    data: u,
-                    filename: "linea-chart.html",
-                    type: "text/html"
-                };
-            }
-            /**
-             * Generates a formatted title string from selected LineaCharts.
-             *
-             * Creates a title combining station names and altitudes separated by em-dashes.
-             * Format: "Station1 (altitude1m) — Station2 (altitude2m) — ..."
-             *
-             * @private
-             * @returns {string} The formatted title string
-             */
-            #l() {
-                const e = [];
-                for (const a of this.#a()) {
-                    const r = a.result.station, d = a.result.altitude;
-                    e.push({ station: r, altitude: d });
-                }
-                let i = "";
-                return e.forEach((a, r) => {
-                    i += a.station + " (" + a.altitude + "m)", e.length != r + 1 && (i += " — ");
-                }), i;
-            }
-            /**
-             * Exports all active LineaChart plots to a single PNG image.
-             *
-             * Combines multiple plot canvases into a single PNG file with:
-             * - Configurable title at the top
-             * - All selected chart plots
-             * - Automatically generated legend from plot series
-             * - White background if only one chart is exported
-             *
-             * The PNG dimensions are determined by the export settings and canvas heights.
-             *
-             * @private
-             * @async
-             * @param {string} [title] - Optional title for the PNG export, defaults to generated title
-             * @returns {Promise<void>}
-             *
-             * @example
-             * await this.#exportAllPlotsToPNG("Custom Title");
-             */
-            async #n({
-                width: e,
-                heightPerCanvas: i,
-                title: a
-            }) {
-                const r = [], d = [], o = {}, m = this.#a();
-                if (m.length == 0) {
-                    alert("Nothing to export!");
-                    return;
-                }
-                let u = "";
-                m.length == 1 && (u = m[0].getBackgroundColor(), m[0].setBackgroundColor("#00000000"));
-                const p = this.lineaPlot.lineacharts[0].plots[0].height;
-                for (const x of this.lineaPlot.lineacharts)
-                    x.resizeObserver.unobserve(x), x.resizePlots(e, x.style, i), await new Promise((H) => setTimeout(H, 1));
-                for (const x of m) {
-                    const H = x.plots;
-                    H.map((_) => _.root.querySelector("canvas")).forEach((_) => {
-                        r.push(_);
-                    }), H.map((_) => d.push(..._.series.slice(1))), H.map(
-                        (_) => _.series.slice(1).map((B, I) => {
-                            const q = B.label ?? `Series ${I + 1}`;
-                            let G = "#000000";
-                            if (typeof B.stroke == "string")
-                                G = B.stroke;
-                            else {
-                                const X = B.stroke(_, I + 1);
-                                typeof X == "string" && (G = X);
-                            }
-                            o[q] = G;
-                        })
-                    );
-                }
-                const b = a ? 40 : 0, g = 22, w = 20, T = r.reduce((x, H) => x + H.height, 0), y = b + T + (e <= 550 ? 110 : 90), A = document.createElement("canvas");
-                A.width = e, A.height = y;
-                const k = A.getContext("2d");
-                if (k.imageSmoothingEnabled = !1, k.imageSmoothingQuality = "high", k.fillStyle = "#ffffff", k.fillRect(0, 0, A.width, A.height), a) {
-                    k.fillStyle = "#000", k.font = "24px Arial", k.textAlign = "center";
-                    const x = k.measureText(a).width;
-                    e < x && (k.font = "18px Arial"), k.fillText(a, A.width / 2, 40);
-                }
-                let O = b;
-                for (const x of r)
-                    k.drawImage(x, 0, O), O += x.height;
-                if (Object.keys(o).length > 0) {
-                    const H = w * 2;
-                    let _ = O + w + g / 2;
-                    k.textAlign = "left", k.textBaseline = "middle", k.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-                    let B = H;
-                    for (const [I, q] of Object.entries(o)) {
-                        const G = k.measureText(I).width;
-                        B + 18 + 8 + G > A.width && (B = H, _ += g), k.fillStyle = q, k.fillRect(B, _ - 18 / 2, 18, 18), k.fillStyle = "#000", k.fillText(I, B + 18 + 8, _), B = B + 18 + 8 + G + 10;
-                    }
-                }
-                m.length == 1 && m[0].setBackgroundColor(u);
-                for (const x of this.lineaPlot.lineacharts)
-                    x.resizePlots(this.lineaPlot.clientWidth, x.style, p), x.resizeObserver.observe(x);
-                A.toBlob((x) => {
-                    this.exportdata = {
-                        blob: x,
-                        data: A.toDataURL(),
-                        filename: "linea-chart.png",
-                        type: "image/png"
-                    };
-                }), document.getElementById("exportCode").innerHTML = `<img src="${A.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`, document.getElementById("exportResult").style.display = "block";
-            }
-            /**
-             * Retrieves all currently selected/active LineaCharts based on checkbox state.
-             *
-             * @private
-             * @returns {LineaChart[]} Array of active LineaChart instances
-             */
-            #a() {
-                const e = [], i = this.#r();
-                let a = 0;
-                for (const r of this.lineaPlot.lineacharts)
-                    i.includes(a) && e.push(r), a += 1;
-                return e;
-            }
-            /**
-             * Gets the indices of checked diagram checkboxes.
-             *
-             * @private
-             * @returns {number[]} Array of checked checkbox indices
-             */
-            #r() {
-                const e = [];
-                return this.modal.querySelectorAll(
-                    ".diagram-checkbox"
-                ).forEach((a) => {
-                    a.checked && e.push(parseInt(a.value));
-                }), e;
-            }
-            /**
-             * Retrieves the current export settings from the modal input fields.
-             *
-             * @private
-             * @returns {Object} Export settings object
-             * @returns {number} return.width - Export width in pixels
-             * @returns {number} return.height - Export height per canvas in pixels
-             * @returns {string} return.title - Export title text
-             */
-            #s() {
-                const e = document.getElementById("exportWidth"), i = document.getElementById("exportHeight"), a = document.getElementById("exportTitle");
-                return {
-                    width: parseInt(e.value),
-                    heightPerCanvas: parseInt(i.value),
-                    title: a.value
-                };
-            }
-        }
-        var U, Sl, Js, Qs, Xs, xl, vl, wi, eo, Qa, lt, rt;
-        const zl = class zl extends HTMLElement {
-            constructor() {
-                super(...arguments);
-                wr(this, U);
-                this.isLoaded = !1, this.srcs = [], this.lazysrcs = [], this.lineacharts = [], this.results = [], this.backgroundColors = ["rgba(0, 0, 0, 0.05)"], this.minTime = 1 / 0, this.maxTime = -1 / 0;
-            }
-            connectedCallback() {
-                const i = document.createElement("style");
-                i.textContent = `
-              linea-plot:focus {
+            
+            input:focus {
                 outline: none;
                 border-color: #19abff;
                 box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
             }
-
+            
             .export-modal {
                 display: none;
                 position: fixed;
@@ -3903,7 +3407,7 @@
                 height: 100%;
                 background-color: #ffffff;
             }
-
+            
             .export-modal-content {
                 background-color: #ffffff;
                 margin: 5% auto;
@@ -3914,7 +3418,7 @@
                 max-height: 80vh;
                 overflow-y: auto;
             }
-
+            
             .export-close {
                 color: #aaa;
                 float: right;
@@ -3923,18 +3427,18 @@
                 cursor: pointer;
                 line-height: 1;
             }
-
+            
             .export-close:hover {
                 color: #fff;
             }
-
+            
             .export-options {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
                 gap: 15px;
                 margin: 20px 0;
             }
-
+            
             .export-option {
                 background: #3498db;
                 padding: 20px;
@@ -3943,22 +3447,22 @@
                 cursor: pointer;
                 transition: background 0.3s ease;
             }
-
+            
             .export-option:hover {
                 background: #444;
             }
-
+            
             .export-option h4 {
                 margin: 0 0 10px 0;
                 color: #ffffff;
             }
-
+            
             .export-option p {
                 margin: 0;
                 font-size: 13px;
                 color: #ffffff;
             }
-
+            
             .code-container {
                 background: #ffffff;
                 border: 1px solid #444;
@@ -3966,14 +3470,14 @@
                 padding: 15px;
                 margin: 15px 0;
             }
-
+            
             .code-container-buttons {
                 display: flex;
                 gap: 4px;
                 justify-content: flex-end;
                 margin-bottom: 10px;
             }
-
+            
             .code-container pre {
                 margin: 0;
                 white-space: pre-wrap;
@@ -3982,7 +3486,7 @@
                 font-size: 12px;
                 color: #000000;
             }
-
+            
             .code-container button {
                 background: #3498db;
                 color: white;
@@ -3992,11 +3496,11 @@
                 cursor: pointer;
                 font-size: 12px;
             }
-
+            
             .code-container button:hover {
                 background: #2980b9;
             }
-
+            
             .export-settings {
                 background: #ffffff;
                 padding: 15px;
@@ -4005,12 +3509,12 @@
                 display: flex;
                 flex-direction: column;
             }
-
+            
             .export-settings h4 {
                 margin: 0 0 15px 0;
                 color: #3498db;
             }
-
+            
             .export-settings label {
                 margin-bottom: 5px;
             }
@@ -4018,31 +3522,31 @@
             .export-settings input {
                 width: 100%;
                 max-width: 200px;
-            }
-
+            } 
+            
         `, this.modal.appendChild(a), this.modal.classList.add("export-modal"), this.modal.id = "exportModal", this.modal.insertAdjacentHTML(
                     "beforeend",
                     `<div class="export-modal-content">
                 <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
                 <h2>${M.message("dialog:weather-station-diagram:controls:label:exportchart")}</h2>
-
+    
                 <div class="export-options">
                     <div class="export-option" id="btnExportIframe">
                         <h4>${M.message("dialog:weather-station-diagram:controls:button:iframe")}</h4>
                         <p>${M.message("dialog:weather-station-diagram:controls:button:iframe:sub")}</p>
                     </div>
-
+    
                     <div class="export-option" id="btnExportStandalone" style="display: none;">
                         <h4>${M.message("dialog:weather-station-diagram:controls:button:standalonehtml")}</h4>
                         <p>${M.message("dialog:weather-station-diagram:controls:button:standalonehtml:sub")}</p>
                     </div>
-
+    
                     <div class="export-option" id="btnExportPNG">
                         <h4>${M.message("dialog:weather-station-diagram:controls:button:pngimage")}</h4>
                         <p>${M.message("dialog:weather-station-diagram:controls:button:pngimage:sub")}</p>
                     </div>
                 </div>
-
+    
                 <div class="export-settings" id="exportSettings" style="display:none;">
                     <h4>${M.message("dialog:weather-station-diagram:controls:label:exportsettings")}</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
@@ -4065,7 +3569,7 @@
                         </div>
                     </div>
                 </div>
-
+    
                 <div id="exportResult" style="display:none;">
                     <h3>${M.message("dialog:weather-station-diagram:controls:label:exportresult")}</h3>
                     <div class="code-container">
@@ -4200,6 +3704,7 @@
                 for (const p of this.#a())
                     a.push(p.result);
                 console.log(a);
+                const r = i.replace('linea-plot data=""', `linea-plot data='${JSON.stringify(a)}'`).replaceAll("height: 300,", `height: ${e.heightPerCanvas},`).replace('lang="en"', `lang="${M.lang}"`), d = new TextEncoder().encode(r);
                 let o = "";
                 for (let p = 0; p < d.byteLength; p++)
                     o += String.fromCharCode(d[p]);
@@ -4209,7 +3714,7 @@
                 this.exportResult.style.display = "block";
                 const u = `<iframe
           src="data:text/html;base64,${btoa(o)}"
-          frameborder="0"
+          frameborder="0" 
           scrolling="no"
           style="width: 100%; height: ${e.heightPerCanvas * m + 200 * this.#a().length}px;"
           title="${e.title}">
@@ -4432,7 +3937,7 @@
           row-gap: 6px;
           column-gap: 6px;
         }
-
+        
         .controls-dates {
           display: flex;
           flex-wrap: wrap;
@@ -4464,7 +3969,7 @@
           border-left-width: 2px;
           border-right-width: 1px;
         }
-
+        
         .controls-menu > button:last-child {
           border-top-right-radius: 20px;
           border-bottom-right-radius: 20px;
@@ -4486,13 +3991,13 @@
             border-right-width: 2px;
           }
         }
-
+        
         @media (max-width: 640px) {
-
+        
           .controls-break {
             flex-basis: 100%; /* force wrap */
           }
-
+          
           .controls-dates > button:first-child {
             border-top-left-radius: 20px;
             border-bottom-left-radius: 20px;
@@ -4532,626 +4037,614 @@
                     });
                 }
             }
-            `, this.appendChild(i), K(this, U, Js).call(this), K(this, U, Qs).call(this), this.hasAttribute("data") ? (this.storeDataFromAttribute(), K(this, U, Sl).call(this)) : this.fetchAndStoreData().then(() => {
-                          K(this, U, Sl).call(this), K(this, U, xl).call(this);
-                      }), this.tabIndex = 0, this.focus(), this.isLoaded = !0;
-                  }
-                  attributeChangedCallback(i) {
-                      if (this.isLoaded && i === "src") {
-                          for (const a of this.lineacharts)
-                              this.removeChild(a);
-                          this.lineacharts = [], this.results = [], this.minTime = 1 / 0, this.maxTime = -1 / 0, this.fetchAndStoreData().then(() => {
-                              this.render(), K(this, U, xl).call(this);
-                          });
-                      }
-                  }
-                  /**
-                   * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
-                   * If a other attribute is given it uses this one instead of src
-                   * @param attribute {string} - attribute to fetch the data from, default is "src"
-                   */
-                  async fetchAndStoreData(i = "src") {
-                      globalThis.Temporal || await import("./global.esm-B3KdlxCS.js");
-                      const a = this.getAttribute(i) ?? "";
-                      let r = a.startsWith("[") || a.startsWith('"') ? JSON.parse(a) : [a];
-                      r instanceof Array || (r = [r], this.backgroundColors = []), i == "src" ? this.srcs = r : (i = "lazysrc") && (this.lazysrcs = r), this.results = [], this.minTime = 1 / 0, this.maxTime = -1 / 0;
-                      for (const d in r) {
-                          let o = await os(r[d]);
-                          this.minTime > o.timestamps[0] && (this.minTime = o.timestamps[0]), this.maxTime < o.timestamps[o.timestamps.length - 1] && (this.maxTime = o.timestamps[o.timestamps.length - 1]), this.results.push(o);
-                      }
-                      K(this, U, vl).call(this), K(this, U, wi).call(this);
-                  }
-                  /**
-                   *
-                   */
-                  storeDataFromAttribute() {
-                      const i = JSON.parse(this.getAttribute("data") ?? "");
-                      this.results = i, this.minTime = 1 / 0, this.maxTime = -1 / 0;
-                      for (const a of i)
-                          this.minTime > a.timestamps[0] && (this.minTime = a.timestamps[0]), this.maxTime < a.timestamps[a.timestamps.length - 1] && (this.maxTime = a.timestamps[a.timestamps.length - 1]);
-                      K(this, U, vl).call(this), K(this, U, wi).call(this);
-                  }
-                  /**
-                   * creates all LineaCharts and initializate them
-                   */
-                  render() {
-                      this.hasAttribute("backgroundcolors") && (this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors") ?? ""));
-                      for (const i in this.results) {
-                          const a = this.results[i];
-                          let r = new Ks(
-                              a,
-                              this.hasAttribute("showtitle"),
-                              this.hasAttribute("showsurfacehoarseries"),
-                              this.results.length > 1 ? this.backgroundColors[i] ?? "#00000000" : "#00000000"
-                          );
-                          this.lineacharts.push(r), this.appendChild(r);
-                      }
-                  }
-                  /**
-                   * Filters the Results for each LineaChart for the given timespan.
-                   * Passes the filtered data to the LineaCharts
-                   * @param startDate from where the data shall be shown
-                   * @param endDate to when the data shall be shown
-                   */
-                  filterAndUpdateData(i = K(this, U, rt).call(this, this.startInput.value), a = K(this, U, rt).call(this, this.endInput.value)) {
-                      const r = i.toInstant().epochMilliseconds, d = a.toInstant().epochMilliseconds;
-                      for (let o = 0; o < this.lineacharts.length; o++) {
-                          const m = this.results[o];
-                          let u = {};
-                          for (const b in m.values)
-                              u[b] = m.values[b].filter(
-                                  (g, w) => m.timestamps[w] >= r && m.timestamps[w] <= d
-                              );
-                          const p = m.timestamps.filter(
-                              (b) => b >= r && b <= d
-                          );
-                          this.lineacharts[o].setData(p, u);
-                      }
-                  }
-              };
-              U = new WeakSet(), /**
-       * builds and update the UI after data is stored.
-       */
-                  Sl = function () {
-                      K(this, U, wi).call(this), this.render(), this.hasAttribute("showdatepicker") && this.hasAttribute("startdate") && this.hasAttribute("enddate") ? K(this, U, eo).call(this) : K(this, U, Qa).call(this), this.hasAttribute("showdatepicker") || K(this, U, Xs).call(this);
-                  }, /**
-       *
-       */
-                  Js = function () {
-                      this.exportModal = new dc(document.createElement("div"), this), this.appendChild(this.exportModal.modal);
-                  }, /**
-       * Adds the controls to the Plot:
-       * - Datepicker with (previous|startDate|endDate|next)
-       * - Menu buttons with (export|enlarge)
-       *
-       * enlarge shows all available data and is shown when the datepicker is there too
-       * export exports the drawed canvas on the screen, see @class ExportModal
-       */
-                  Qs = function () {
-                      if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport"))
-                          return;
-                      const i = document.createElement("div");
-                      if (i.classList.add("controls"), this.hasAttribute("showdatepicker")) {
-                          const r = document.createElement("div");
-                          r.classList.add("controls-dates"), i.appendChild(r), this.startInput = document.createElement("input"), this.startInput.type = "datetime-local", this.startInput.classList.add("toggle-btn"), this.startInput.classList.add("controls-dates-inputs"), this.startInput.classList.add("startDateInput"), this.startInput.addEventListener("change", () => {
-                              this.filterAndUpdateData(
-                                  K(this, U, rt).call(this, this.startInput.value),
-                                  K(this, U, rt).call(this, this.endInput.value)
-                              );
-                          }), this.endInput = document.createElement("input"), this.endInput.classList.add("toggle-btn"), this.endInput.classList.add("controls-dates-inputs"), this.endInput.classList.add("endDateInput"), this.endInput.type = "datetime-local", this.endInput.addEventListener("change", () => {
-                              this.filterAndUpdateData(
-                                  K(this, U, rt).call(this, this.startInput.value),
-                                  K(this, U, rt).call(this, this.endInput.value)
-                              );
-                          });
-                          const d = document.createElement("button");
-                          d.classList.add("toggle-btn"), d.classList.add("controls-dates-inputs"), d.classList.add("tooltip"), d.innerHTML = `& larr; <span class='tooltiptext'>${M.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`, this.addEventListener("keydown", (u) => {
-                              u.key === "ArrowLeft" && d.click();
-                          }), d.addEventListener("click", () => {
-                              const u = K(this, U, rt).call(this, this.startInput.value), p = K(this, U, rt).call(this, this.endInput.value);
-                              if (!u || !p) return;
-                              o.disabled = !1;
-                              let b = p.subtract({ days: 1 }), g = u.subtract({ days: 1 });
-                              if (g.toInstant().epochMilliseconds < this.minTime)
-                                  g = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-                                      M.timezone()
-                                  ), d.disabled = !0, b = p;
-                              else if (g.toInstant().epochMilliseconds > this.maxTime) {
-                                  K(this, U, Qa).call(this), this.filterAndUpdateData();
-                                  return;
-                              }
-                              this.startInput.value = K(this, U, lt).call(this, g), this.endInput.value = K(this, U, lt).call(this, b), this.filterAndUpdateData(g, b);
-                          });
-                          const o = document.createElement("button");
-                          o.classList.add("toggle-btn"), o.classList.add("controls-dates-inputs"), o.classList.add("tooltip"), o.innerHTML = `& rarr; <span class='tooltiptext'>${M.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`, this.addEventListener("keydown", (u) => {
-                              u.key === "ArrowRight" && o.click();
-                          }), o.addEventListener("click", () => {
-                              const u = K(this, U, rt).call(this, this.startInput.value), p = K(this, U, rt).call(this, this.endInput.value);
-                              if (!u || !p) return;
-                              d.disabled = !1;
-                              let b = u.add({ days: 1 }), g = p.add({ days: 1 });
-                              if (g.toInstant().epochMilliseconds > this.maxTime)
-                                  g = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-                                      M.timezone()
-                                  ), o.disabled = !0, b = u;
-                              else if (g.toInstant().epochMilliseconds < this.minTime) {
-                                  K(this, U, Qa).call(this), this.filterAndUpdateData();
-                                  return;
-                              }
-                              this.startInput.value = K(this, U, lt).call(this, b), this.endInput.value = K(this, U, lt).call(this, g), this.filterAndUpdateData(b, g);
-                          });
-                          const m = document.createElement("span");
-                          m.classList.add("controls-break"), r.appendChild(d), r.appendChild(this.startInput), r.appendChild(m), r.appendChild(this.endInput), r.appendChild(o);
-                      }
-                      const a = document.createElement("div");
-                      if (a.classList.add("controls-menu"), this.hasAttribute("showexport")) {
-                          const r = document.createElement("button");
-                          r.innerHTML = `${ M.message("dialog:weather-station-diagram:controls:value:export") } `, r.classList.add("toggle-btn"), r.addEventListener("click", () => {
-                              if (this.lineacharts.length == 0) {
-                                  alert("Nothing to export!");
-                                  return;
-                              }
-                              this.exportModal.show();
-                          }), a.appendChild(r);
-                      }
-                      if (this.hasAttribute("showdatepicker")) {
-                          const r = document.createElement("button");
-                          r.innerHTML = `< svg width = "13px" height = "13px" viewBox = "0 0 24 24" xmlns = "http://www.w3.org/2000/svg" >
-              <polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
-              <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
-              <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg > <span class="tooltiptext">${M.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`, r.classList.add("toggle-btn"), r.classList.add("tooltip"), r.addEventListener("click", () => {
-                              K(this, U, Qa).call(this), this.filterAndUpdateData();
-                          }), a.appendChild(r);
-                      }
-                      i.appendChild(a), this.appendChild(i), this.focus();
-                  }, /**
-       * handles the fixed date view
-       */
-                  Xs = function () {
-                      !this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate")) ? console.debug("Start and Endate are not chosen, all data is presented!") : this.hasAttribute("showdatepicker") || this.filterAndUpdateData(
-                          Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
-                          Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "2300-00-00T00:00[UTC]")
-                      );
-                  }, /**
-       * Loads lazy data if the lazysrc attribute is given
-       */
-                  xl = function () {
-                      this.hasAttribute("lazysrc") && this.fetchAndStoreData("lazysrc");
-                  }, /**
-       * Generalizes the data stored in the results list:
-       * ensures that all Results objects have the same timestamps and fill up missing data.
-       * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
-       * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
-       * so we can show all available data
-       */
-                  vl = function () {
-                      if (this.results.length === 0)
-                          return;
-                      const i = /* @__PURE__ */ new Set();
-                      for (const r of this.results)
-                          for (const d of r.timestamps) i.add(d);
-                      const a = Array.from(i).sort((r, d) => r - d);
-                      for (const r of this.results) {
-                          for (const d in r.values) {
-                              const o = /* @__PURE__ */ new Map();
-                              for (let u = 0; u < r.timestamps.length; u++)
-                                  o.set(r.timestamps[u], r.values[d][u]);
-                              const m = a.map((u) => o.has(u) ? o.get(u) ?? null : null);
-                              r.values[d] = m;
-                          }
-                          r.timestamps = a.slice();
-                      }
-                  }, /**
-       * sets the valid data range to the startDate and endDate inputs
-       * @returns
-       */
-                  wi = function () {
-                      if (!this.startInput || !this.endInput)
-                          return;
-                      const i = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-                          M.timezone()
-                      ), a = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-                          M.timezone()
-                      );
-                      this.startInput.min = K(this, U, lt).call(this, i), this.startInput.max = K(this, U, lt).call(this, a), this.endInput.min = K(this, U, lt).call(this, i), this.endInput.max = K(this, U, lt).call(this, a);
-                  }, /**
-       *  Set the start and end input to the values given by the attributes
-       * @returns
-       */
-                  eo = function () {
-                      if (!this.startInput || !this.endInput)
-                          return;
-                      let i = Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? ""), a = Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "");
-                      const r = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-                          M.timezone()
-                      ), d = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-                          M.timezone()
-                      );
-                      (Temporal.ZonedDateTime.compare(i, d) > 0 || Temporal.ZonedDateTime.compare(i, r) < 0) && (i = K(this, U, rt).call(this, this.startInput.min)), (Temporal.ZonedDateTime.compare(a, r) < 0 || Temporal.ZonedDateTime.compare(a, d) > 0) && (a = K(this, U, rt).call(this, this.endInput.max)), this.startInput.value = K(this, U, lt).call(this, i), this.endInput.value = K(this, U, lt).call(this, a), this.filterAndUpdateData(i, a);
-                  }, /**
-       *
-       * set the Input fields to the widthest available timespan
-       */
-                  Qa = function () {
-                      !this.startInput || !this.endInput || (this.startInput.value = K(this, U, lt).call(this, Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(M.timezone())), this.endInput.value = K(this, U, lt).call(this, Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(M.timezone())));
-                  }, /**
-       * Converts dates into the format of HTML datetime-local inputs
-       * @param zdt date to convert
-       * @returns string, formated for HTML datetime-local input value
-       */
-                  lt = function (i) {
-                      return i.toPlainDateTime().toString({ smallestUnit: "minutes" });
-                  }, /**
-       *
-       * Convert HTMl datetime-local input values into ZonedDateTime Objects
-       *
-       * @param value a HTML datetime-local string to convert
-       * @returns a Temporal ZonedDateTime Object
-       */
-                  rt = function (i) {
-                      return Temporal.PlainDateTime.from(i).toZonedDateTime(M.timezone());
-                  }, zl.observedAttributes = ["src"];
-              let bl = zl;
-              customElements.define("linea-plot", bl);
-              const cc = {
-                  ...Be.getLineaOptions(),
-                  hooks: {
-                      drawAxes: [
-                          (t) => {
-                              const e = t.ctx;
-                              e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
-                              const i = t.ctx.canvas.height;
-                              var a = `${ M.message("dialog:weather-station-diagram:parameter:HS") } (cm)`, r = `${ M.message("dialog:weather-station-diagram:parameter:PSUM") } (mm)`, d = "#DE2D26", o = "#6aafd5";
-                              Be.UpdateAxisLabels(
-                                  e,
-                                  a,
-                                  r,
-                                  t.bbox.left,
-                                  t.bbox.width,
-                                  i,
-                                  d,
-                                  o
-                              );
-                          }
-                      ]
-                  },
-                  scales: {
-                      y: {
-                          range: [0, 500]
-                      },
-                      y2: {
-                          range: [0, 100]
-                      }
-                  },
-                  axes: [
-                      jt,
-                      {
-                          scale: "y",
-                          stroke: "#DE2D26",
-                          splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
-                      },
-                      {
-                          scale: "y2",
-                          stroke: "#6aafd5",
-                          side: 1,
-                          splits: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-                          grid: {
-                              show: !1
-                          }
-                      }
-                  ],
-                  series: [
-                      {
-                          label: M.message("dialog:weather-station-diagram:unit:time"),
-                          value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
-                      }
-                  ],
-                  bands: [
-                      {
-                          series: [2, 3],
-                          fill: "#d9dcdc"
-                      },
-                      {
-                          series: [2, 1],
-                          fill: "#d9dcdc"
-                      }
-                  ]
-              }, Ei = (t, e, i = 2) => ({
-                  label: M.message(`dialog: weather - station - diagram: parameter:${ t } `),
-                  stroke: e,
-                  width: i,
-                  points: { show: !1 },
-                  scale: "y",
-                  value: (a, r) => M.number(r, {}, "cm")
-              }), uc = Ei("HS_min", "#d9dcdc", 2), mc = Ei("HS_max", "#d9dcdc", 0), hc = Ei("HS_median", "#878787", 2), pc = Ei("HS", "#ff0000", 2), gc = {
-                  label: M.message("dialog:weather-station-diagram:parameter:PSUM"),
-                  paths: fe.paths.bars(),
-                  points: { show: !1 },
-                  stroke: "#6aafd5",
-                  fill: "#6aafd5",
-                  scale: "y2",
-                  value: (t, e) => e == null || Number.isNaN(e) ? "-" : M.number(Math.round(e * 10) / 10, {}, "mm")
-              }, fc = {
-                  ...Be.getLineaOptions(),
-                  hooks: {
-                      drawAxes: [
-                          (t) => {
-                              const e = t.ctx;
-                              e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
-                              const i = t.ctx.canvas.height;
-                              var a = `${ M.message("dialog:weather-station-diagram:unit:temperature") } (cm)`;
-                              Be.UpdateAxisLabels(
-                                  e,
-                                  a,
-                                  "",
-                                  t.bbox.left,
-                                  t.bbox.width,
-                                  i,
-                                  "#DE2D26",
-                                  ""
-                              ), e.restore();
-                          }
-                      ]
-                  },
-                  scales: {
-                      y: {
-                          range: [-26.5, 14]
-                      }
-                  },
-                  axes: [
-                      jt,
-                      {
-                          scale: "y",
-                          stroke: "#DE2D26",
-                          splits: [-25, -20, -15, -10, -5, 0, 5, 10]
-                      }
-                  ],
-                  series: [
-                      {
-                          label: M.message("dialog:weather-station-diagram:unit:time"),
-                          value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
-                      }
-                  ],
-                  bands: [
-                      {
-                          series: [2, 3],
-                          fill: "#d9dcdc"
-                      },
-                      {
-                          series: [2, 1],
-                          fill: "#d9dcdc"
-                      }
-                  ]
-              }, ai = (t, e, i = 2) => ({
-                  label: M.message(`dialog: weather - station - diagram: parameter:${ t } `),
-                  stroke: e,
-                  width: i,
-                  points: { show: !1 },
-                  scale: "y",
-                  value: (a, r) => M.number(r, {}, "°C")
-              }), wc = ai("TEMP_min", "#d9dcdc", 2), bc = ai("TEMP_max", "#d9dcdc", 0), Sc = ai("TEMP_median", "#878787", 2), xc = ai("TEMP", "#DE2D26", 2), vc = ai("TD", "#6aafd5", 2), Tc = {
-                  ...Be.getLineaOptions(),
-                  hooks: {
-                      drawAxes: [
-                          (t) => {
-                              const e = t.ctx;
-                              e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
-                              const i = t.ctx.canvas.height;
-                              var a = `${ M.message("dialog:weather-station-diagram:parameter:newsnow") } (cm)`;
-                              Be.UpdateAxisLabels(
-                                  e,
-                                  a,
-                                  "",
-                                  t.bbox.left,
-                                  t.bbox.width,
-                                  i,
-                                  "#DE2D26",
-                                  ""
-                              ), e.restore();
-                          }
-                      ]
-                  },
-                  scales: {
-                      y: {
-                          range: [0, 27]
-                      }
-                  },
-                  axes: [
-                      jt,
-                      {
-                          scale: "y",
-                          stroke: "#DE2D26",
-                          splits: [0, 5, 10, 15, 20, 25]
-                      }
-                  ],
-                  series: [
-                      {
-                          label: M.message("dialog:weather-station-diagram:unit:time"),
-                          value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
-                      }
-                  ]
-              }, yc = {
-                  label: M.message("dialog:weather-station-diagram:parameter:newsnow"),
-                  paths: fe.paths.bars(),
-                  points: { show: !1 },
-                  stroke: "#DE2D26",
-                  fill: "#DE2D26",
-                  scale: "y",
-                  value: (t, e) => e == null || Number.isNaN(e) ? "-" : M.number(Math.round(e * 10) / 10, {}, "cm")
-              }, _c = {
-                  label: M.message("dialog:weather-station-diagram:parameter:snowcover"),
-                  stroke: "#rgba(222, 45, 38, 0.2)",
-                  width: 2,
-                  scale: "y",
-                  fill: "rgba(222, 45, 38, 0.2)",
-                  value: () => "-"
-              }, Dc = {
-                  ...Be.getLineaOptions(),
-                  hooks: {
-                      drawAxes: [
-                          (t) => {
-                              const e = t.ctx;
-                              e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
-                              const i = t.ctx.canvas.height;
-                              var a = `${ M.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount") } `, r = "", d = "#00ff55ff", o = "";
-                              Be.UpdateAxisLabels(
-                                  e,
-                                  a,
-                                  r,
-                                  t.bbox.left,
-                                  t.bbox.width,
-                                  i,
-                                  d,
-                                  o
-                              );
-                          }
-                      ]
-                  },
-                  scales: {
-                      y: {
-                          range: [0, 58]
-                      }
-                  },
-                  axes: [
-                      jt,
-                      {
-                          scale: "y",
-                          stroke: "#00ff55ff",
-                          splits: [0, 10, 20, 30, 40, 50]
-                      }
-                  ],
-                  series: [
-                      {
-                          label: M.message("dialog:weather-station-diagram:unit:time"),
-                          value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
-                      }
-                  ]
-              }, Mc = {
-                  label: M.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount"),
-                  stroke: "#00ff55ff",
-                  width: 2,
-                  points: { show: !1 },
-                  scale: "y",
-                  value: (t, e) => M.number(e, {}, M.message("dialog:weather-station-diagram:unit:DATAPOINTS"))
-              };
-              globalThis.Temporal || import("./global.esm-B3KdlxCS.js");
-              class $t {
-                  constructor() {
-                      this.monthDayData = /* @__PURE__ */ new Map(), this.dates = [], this.values = [], this.timeZone = "";
-                  }
-                  get timestamps() {
-                      const e = this.timeZone;
-                      return this.dates.map(
-                          (i) => i.toZonedDateTime({ plainTime: "00:00:00", timeZone: e }).epochMilliseconds
-                      );
-                  }
-                  #e(e, i) {
-                      return this.dates.map((a) => {
-                          let r = a.toPlainMonthDay().toString();
-                          a.inLeapYear && r === "02-29" && (r = a.subtract({ days: 1 }).toPlainMonthDay().toString());
-                          const o = (e.get(r) ?? []).filter(Number.isFinite);
-                          return o.length === 0 ? NaN : i(...o);
-                      });
-                  }
-                  get amount() {
-                      return this.#e(this.monthDayData, (...e) => e.filter(Number.isFinite).length);
-                  }
-                  get maxValues() {
-                      return this.#e(this.monthDayData, Math.max);
-                  }
-                  get minValues() {
-                      return this.#e(this.monthDayData, Math.min);
-                  }
-                  get medianValues() {
-                      return this.#e(
-                          this.monthDayData,
-                          (...e) => e.sort((i, a) => i - a)[Math.floor(e.length / 2)]
-                      );
-                  }
-                  static from(e, i, a, r, d) {
-                      const o = new $t();
-                      o.timeZone = e;
-                      for (let u = 0; u < r.length; u++) {
-                          const p = Number.isFinite(d[u]) ? d[u] : NaN, b = r[u], w = Temporal.Instant.fromEpochMilliseconds(b).toZonedDateTimeISO(e).toPlainDate(), T = w.toPlainMonthDay().toString();
-                          o.monthDayData.has(T) || o.monthDayData.set(T, []), o.monthDayData.get(T)?.push(p), Temporal.PlainDateTime.compare(i, w) <= 0 && Temporal.PlainDateTime.compare(w, a) <= 0 && (o.dates.push(w), o.values.push(p));
-                      }
-                      const m = o.dates[o.dates.length - 1];
-                      if (Temporal.PlainDate.compare(m, a) < 0)
-                          for (let u = m.add({ days: 1 }); Temporal.PlainDate.compare(u, a) <= 0; u = u.add({ days: 1 }))
-                              o.dates.push(u), o.values.push(NaN);
-                      return o;
-                  }
-              }
-              const Vl = class Vl extends qs {
-                  connectedCallback() {
-                      this.renderPlots().catch((e) => console.error(e));
-                  }
-                  attributeChangedCallback(e) {
-                      (e === "src" || e == "timeRangeMilli") && this.renderPlots().catch((i) => console.error(i));
-                  }
-                  async renderPlots() {
-                      globalThis.Temporal || await import("./global.esm-B3KdlxCS.js"), this.resizeObserver.unobserve(this);
-                      const { station: e, altitude: i, timestamps: a, values: r } = await os(
-                          this.getAttribute("src") ?? ""
-                      ), d = document.createElement("style");
-                      d.textContent = Zs;
-                      const o = document.createElement("div"), m = document.createElement("div"), u = document.createElement("div"), p = document.createElement("div");
-                      this.replaceChildren(d, o, m, u, p);
-                      const b = Temporal.PlainDate.from(this.getAttribute("startDate")), g = Temporal.PlainDate.from(this.getAttribute("endDate")), w = this.getAttribute("timeZone") || "CET";
-                      if (r.HS) {
-                          const T = $t.from(w, b, g, a, r.HS), y = new fe(
-                              {
-                                  ...cc,
-                                  ...this.hasAttribute("showTitle") ? {
-                                      title: `${ e } (${ M.number(i, { maximumFractionDigits: 0 }) }m)`
-                                  } : {}
-                              },
-                              [T.timestamps],
-                              o
-                          );
-                          if (this.addSeries(y, uc, T.minValues), this.addSeries(y, mc, T.maxValues), this.addSeries(y, hc, T.medianValues), this.addSeries(y, pc, T.values), r.PSUM) {
-                              const k = $t.from(w, b, g, a, r.PSUM);
-                              this.addSeries(y, gc, k.values);
-                          }
-                          const A = new fe(
-                              Dc,
-                              [T.timestamps],
-                              p
-                          );
-                          this.addSeries(A, Mc, T.amount);
-                      }
-                      if (r.NS) {
-                          const T = $t.from(w, b, g, a, r.NS);
-                          let y = new fe(Tc, [T.timestamps], m);
-                          if (r.HS) {
-                              const A = $t.from(w, b, g, a, r.HS);
-                              this.addSeries(
-                                  y,
-                                  _c,
-                                  A.values.map((k) => k == 0 || Number.isNaN(k) ? 1e3 : -1e3)
-                              );
-                          }
-                          this.addSeries(y, yc, T.values);
-                      }
-                      if (r.TA) {
-                          const T = $t.from(w, b, g, a, r.TA), y = new fe(fc, [T.timestamps], u);
-                          if (this.addSeries(y, wc, T.minValues), this.addSeries(y, bc, T.maxValues), this.addSeries(y, Sc, T.medianValues), this.addSeries(y, xc, T.values), r.TD) {
-                              const A = $t.from(w, b, g, a, r.TD);
-                              this.addSeries(y, vc, A.values);
-                          }
-                      }
-                      this.resizePlots(this.clientWidth, this.style), this.resizeObserver.observe(this);
-                  }
-                  disconnectedCallback() {
-                      this.resizeObserver.unobserve(this);
-                  }
-              };
-              Vl.observedAttributes = ["src"];
-              let Tl = Vl;
-              customElements.define("linea-plot-year", Tl);
-              //# sourceMappingURL=linea.js.map
+            /**
+             * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
+             * If a other attribute is given it uses this one instead of src
+             * @param attribute {string} - attribute to fetch the data from, default is "src"
+             */
+            async fetchAndStoreData(i = "src") {
+                globalThis.Temporal || await import("./global.esm-B3KdlxCS.js");
+                const a = this.getAttribute(i) ?? "";
+                let r = a.startsWith("[") || a.startsWith('"') ? JSON.parse(a) : [a];
+                r instanceof Array || (r = [r], this.backgroundColors = []), i == "src" ? this.srcs = r : (i = "lazysrc") && (this.lazysrcs = r), this.results = [], this.minTime = 1 / 0, this.maxTime = -1 / 0;
+                for (const d in r) {
+                    let o = await os(r[d]);
+                    this.minTime > o.timestamps[0] && (this.minTime = o.timestamps[0]), this.maxTime < o.timestamps[o.timestamps.length - 1] && (this.maxTime = o.timestamps[o.timestamps.length - 1]), this.results.push(o);
+                }
+                K(this, U, vl).call(this), K(this, U, wi).call(this);
+            }
+            /**
+             *
+             */
+            storeDataFromAttribute() {
+                const i = JSON.parse(this.getAttribute("data") ?? "");
+                this.results = i, this.minTime = 1 / 0, this.maxTime = -1 / 0;
+                for (const a of i)
+                    this.minTime > a.timestamps[0] && (this.minTime = a.timestamps[0]), this.maxTime < a.timestamps[a.timestamps.length - 1] && (this.maxTime = a.timestamps[a.timestamps.length - 1]);
+                K(this, U, vl).call(this), K(this, U, wi).call(this);
+            }
+            /**
+             * creates all LineaCharts and initializate them
+             */
+            render() {
+                this.hasAttribute("backgroundcolors") && (this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors") ?? ""));
+                for (const i in this.results) {
+                    const a = this.results[i];
+                    let r = new Ks(
+                        a,
+                        this.hasAttribute("showtitle"),
+                        this.hasAttribute("showsurfacehoarseries"),
+                        this.results.length > 1 ? this.backgroundColors[i] ?? "#00000000" : "#00000000"
+                    );
+                    this.lineacharts.push(r), this.appendChild(r);
+                }
+            }
+            /**
+             * Filters the Results for each LineaChart for the given timespan.
+             * Passes the filtered data to the LineaCharts
+             * @param startDate from where the data shall be shown
+             * @param endDate to when the data shall be shown
+             */
+            filterAndUpdateData(i = K(this, U, rt).call(this, this.startInput.value), a = K(this, U, rt).call(this, this.endInput.value)) {
+                const r = i.toInstant().epochMilliseconds, d = a.toInstant().epochMilliseconds;
+                for (let o = 0; o < this.lineacharts.length; o++) {
+                    const m = this.results[o];
+                    let u = {};
+                    for (const b in m.values)
+                        u[b] = m.values[b].filter(
+                            (g, w) => m.timestamps[w] >= r && m.timestamps[w] <= d
+                        );
+                    const p = m.timestamps.filter(
+                        (b) => b >= r && b <= d
+                    );
+                    this.lineacharts[o].setData(p, u);
+                }
+            }
+        };
+        U = new WeakSet(), /**
+ * builds and update the UI after data is stored.
+ */
+            Sl = function () {
+                K(this, U, wi).call(this), this.render(), this.hasAttribute("showdatepicker") && this.hasAttribute("startdate") && this.hasAttribute("enddate") ? K(this, U, eo).call(this) : K(this, U, Qa).call(this), this.hasAttribute("showdatepicker") || K(this, U, Xs).call(this);
+            }, /**
+ *
+ */
+            Js = function () {
+                this.exportModal = new dc(document.createElement("div"), this), this.appendChild(this.exportModal.modal);
+            }, /**
+ * Adds the controls to the Plot:
+ * - Datepicker with (previous|startDate|endDate|next)
+ * - Menu buttons with (export|enlarge)
+ *
+ * enlarge shows all available data and is shown when the datepicker is there too
+ * export exports the drawed canvas on the screen, see @class ExportModal
+ */
+            Qs = function () {
+                if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport"))
+                    return;
+                const i = document.createElement("div");
+                if (i.classList.add("controls"), this.hasAttribute("showdatepicker")) {
+                    const r = document.createElement("div");
+                    r.classList.add("controls-dates"), i.appendChild(r), this.startInput = document.createElement("input"), this.startInput.type = "datetime-local", this.startInput.classList.add("toggle-btn"), this.startInput.classList.add("controls-dates-inputs"), this.startInput.classList.add("startDateInput"), this.startInput.addEventListener("change", () => {
+                        this.filterAndUpdateData(
+                            K(this, U, rt).call(this, this.startInput.value),
+                            K(this, U, rt).call(this, this.endInput.value)
+                        );
+                    }), this.endInput = document.createElement("input"), this.endInput.classList.add("toggle-btn"), this.endInput.classList.add("controls-dates-inputs"), this.endInput.classList.add("endDateInput"), this.endInput.type = "datetime-local", this.endInput.addEventListener("change", () => {
+                        this.filterAndUpdateData(
+                            K(this, U, rt).call(this, this.startInput.value),
+                            K(this, U, rt).call(this, this.endInput.value)
+                        );
+                    });
+                    const d = document.createElement("button");
+                    d.classList.add("toggle-btn"), d.classList.add("controls-dates-inputs"), d.classList.add("tooltip"), d.innerHTML = `&larr;<span class='tooltiptext'>${M.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`, this.addEventListener("keydown", (u) => {
+                        u.key === "ArrowLeft" && d.click();
+                    }), d.addEventListener("click", () => {
+                        const u = K(this, U, rt).call(this, this.startInput.value), p = K(this, U, rt).call(this, this.endInput.value);
+                        if (!u || !p) return;
+                        o.disabled = !1;
+                        let b = p.subtract({ days: 1 }), g = u.subtract({ days: 1 });
+                        if (g.toInstant().epochMilliseconds < this.minTime)
+                            g = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+                                M.timezone()
+                            ), d.disabled = !0, b = p;
+                        else if (g.toInstant().epochMilliseconds > this.maxTime) {
+                            K(this, U, Qa).call(this), this.filterAndUpdateData();
+                            return;
+                        }
+                        this.startInput.value = K(this, U, lt).call(this, g), this.endInput.value = K(this, U, lt).call(this, b), this.filterAndUpdateData(g, b);
+                    });
+                    const o = document.createElement("button");
+                    o.classList.add("toggle-btn"), o.classList.add("controls-dates-inputs"), o.classList.add("tooltip"), o.innerHTML = `&rarr;<span class='tooltiptext'>${M.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`, this.addEventListener("keydown", (u) => {
+                        u.key === "ArrowRight" && o.click();
+                    }), o.addEventListener("click", () => {
+                        const u = K(this, U, rt).call(this, this.startInput.value), p = K(this, U, rt).call(this, this.endInput.value);
+                        if (!u || !p) return;
+                        d.disabled = !1;
+                        let b = u.add({ days: 1 }), g = p.add({ days: 1 });
+                        if (g.toInstant().epochMilliseconds > this.maxTime)
+                            g = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+                                M.timezone()
+                            ), o.disabled = !0, b = u;
+                        else if (g.toInstant().epochMilliseconds < this.minTime) {
+                            K(this, U, Qa).call(this), this.filterAndUpdateData();
+                            return;
+                        }
+                        this.startInput.value = K(this, U, lt).call(this, b), this.endInput.value = K(this, U, lt).call(this, g), this.filterAndUpdateData(b, g);
+                    });
+                    const m = document.createElement("span");
+                    m.classList.add("controls-break"), r.appendChild(d), r.appendChild(this.startInput), r.appendChild(m), r.appendChild(this.endInput), r.appendChild(o);
+                }
+                const a = document.createElement("div");
+                if (a.classList.add("controls-menu"), this.hasAttribute("showexport")) {
+                    const r = document.createElement("button");
+                    r.innerHTML = `${M.message("dialog:weather-station-diagram:controls:value:export")}`, r.classList.add("toggle-btn"), r.addEventListener("click", () => {
+                        if (this.lineacharts.length == 0) {
+                            alert("Nothing to export!");
+                            return;
+                        }
+                        this.exportModal.show();
+                    }), a.appendChild(r);
+                }
+                if (this.hasAttribute("showdatepicker")) {
+                    const r = document.createElement("button");
+                    r.innerHTML = `<svg width="13px" height="13px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
+        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
+        <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </svg><span class="tooltiptext">${M.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`, r.classList.add("toggle-btn"), r.classList.add("tooltip"), r.addEventListener("click", () => {
+                        K(this, U, Qa).call(this), this.filterAndUpdateData();
+                    }), a.appendChild(r);
+                }
+                i.appendChild(a), this.appendChild(i), this.focus();
+            }, /**
+ * handles the fixed date view
+ */
+            Xs = function () {
+                !this.hasAttribute("showdatepicker") && (!this.hasAttribute("startdate") || !this.hasAttribute("enddate")) ? console.debug("Start and Endate are not chosen, all data is presented!") : this.hasAttribute("showdatepicker") || this.filterAndUpdateData(
+                    Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
+                    Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "2300-00-00T00:00[UTC]")
+                );
+            }, /**
+ * Loads lazy data if the lazysrc attribute is given
+ */
+            xl = function () {
+                this.hasAttribute("lazysrc") && this.fetchAndStoreData("lazysrc");
+            }, /**
+ * Generalizes the data stored in the results list:
+ * ensures that all Results objects have the same timestamps and fill up missing data.
+ * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
+ * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
+ * so we can show all available data
+ */
+            vl = function () {
+                if (this.results.length === 0)
+                    return;
+                const i = /* @__PURE__ */ new Set();
+                for (const r of this.results)
+                    for (const d of r.timestamps) i.add(d);
+                const a = Array.from(i).sort((r, d) => r - d);
+                for (const r of this.results) {
+                    for (const d in r.values) {
+                        const o = /* @__PURE__ */ new Map();
+                        for (let u = 0; u < r.timestamps.length; u++)
+                            o.set(r.timestamps[u], r.values[d][u]);
+                        const m = a.map((u) => o.has(u) ? o.get(u) ?? null : null);
+                        r.values[d] = m;
+                    }
+                    r.timestamps = a.slice();
+                }
+            }, /**
+ * sets the valid data range to the startDate and endDate inputs
+ * @returns
+ */
+            wi = function () {
+                if (!this.startInput || !this.endInput)
+                    return;
+                const i = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+                    M.timezone()
+                ), a = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+                    M.timezone()
+                );
+                this.startInput.min = K(this, U, lt).call(this, i), this.startInput.max = K(this, U, lt).call(this, a), this.endInput.min = K(this, U, lt).call(this, i), this.endInput.max = K(this, U, lt).call(this, a);
+            }, /**
+ *  Set the start and end input to the values given by the attributes
+ * @returns
+ */
+            eo = function () {
+                if (!this.startInput || !this.endInput)
+                    return;
+                let i = Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? ""), a = Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "");
+                const r = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+                    M.timezone()
+                ), d = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+                    M.timezone()
+                );
+                (Temporal.ZonedDateTime.compare(i, d) > 0 || Temporal.ZonedDateTime.compare(i, r) < 0) && (i = K(this, U, rt).call(this, this.startInput.min)), (Temporal.ZonedDateTime.compare(a, r) < 0 || Temporal.ZonedDateTime.compare(a, d) > 0) && (a = K(this, U, rt).call(this, this.endInput.max)), this.startInput.value = K(this, U, lt).call(this, i), this.endInput.value = K(this, U, lt).call(this, a), this.filterAndUpdateData(i, a);
+            }, /**
+ *
+ * set the Input fields to the widthest available timespan
+ */
+            Qa = function () {
+                !this.startInput || !this.endInput || (this.startInput.value = K(this, U, lt).call(this, Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(M.timezone())), this.endInput.value = K(this, U, lt).call(this, Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(M.timezone())));
+            }, /**
+ * Converts dates into the format of HTML datetime-local inputs
+ * @param zdt date to convert
+ * @returns string, formated for HTML datetime-local input value
+ */
+            lt = function (i) {
+                return i.toPlainDateTime().toString({ smallestUnit: "minutes" });
+            }, /**
+ *
+ * Convert HTMl datetime-local input values into ZonedDateTime Objects
+ *
+ * @param value a HTML datetime-local string to convert
+ * @returns a Temporal ZonedDateTime Object
+ */
+            rt = function (i) {
+                return Temporal.PlainDateTime.from(i).toZonedDateTime(M.timezone());
+            }, zl.observedAttributes = ["src"];
+        let bl = zl;
+        customElements.define("linea-plot", bl);
+        const cc = {
+            ...Be.getLineaOptions(),
+            hooks: {
+                drawAxes: [
+                    (t) => {
+                        const e = t.ctx;
+                        e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
+                        const i = t.ctx.canvas.height;
+                        var a = `${M.message("dialog:weather-station-diagram:parameter:HS")} (cm)`, r = `${M.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`, d = "#DE2D26", o = "#6aafd5";
+                        Be.UpdateAxisLabels(
+                            e,
+                            a,
+                            r,
+                            t.bbox.left,
+                            t.bbox.width,
+                            i,
+                            d,
+                            o
+                        );
+                    }
+                ]
+            },
+            scales: {
+                y: {
+                    range: [0, 500]
+                },
+                y2: {
+                    range: [0, 100]
+                }
+            },
+            axes: [
+                jt,
+                {
+                    scale: "y",
+                    stroke: "#DE2D26",
+                    splits: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+                },
+                {
+                    scale: "y2",
+                    stroke: "#6aafd5",
+                    side: 1,
+                    splits: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                    grid: {
+                        show: !1
+                    }
+                }
+            ],
+            series: [
+                {
+                    label: M.message("dialog:weather-station-diagram:unit:time"),
+                    value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
+                }
+            ],
+            bands: [
+                {
+                    series: [2, 3],
+                    fill: "#d9dcdc"
+                },
+                {
+                    series: [2, 1],
+                    fill: "#d9dcdc"
+                }
+            ]
+        }, Ei = (t, e, i = 2) => ({
+            label: M.message(`dialog:weather-station-diagram:parameter:${t}`),
+            stroke: e,
+            width: i,
+            points: { show: !1 },
+            scale: "y",
+            value: (a, r) => M.number(r, {}, "cm")
+        }), uc = Ei("HS_min", "#d9dcdc", 2), mc = Ei("HS_max", "#d9dcdc", 0), hc = Ei("HS_median", "#878787", 2), pc = Ei("HS", "#ff0000", 2), gc = {
+            label: M.message("dialog:weather-station-diagram:parameter:PSUM"),
+            paths: fe.paths.bars(),
+            points: { show: !1 },
+            stroke: "#6aafd5",
+            fill: "#6aafd5",
+            scale: "y2",
+            value: (t, e) => e == null || Number.isNaN(e) ? "-" : M.number(Math.round(e * 10) / 10, {}, "mm")
+        }, fc = {
+            ...Be.getLineaOptions(),
+            hooks: {
+                drawAxes: [
+                    (t) => {
+                        const e = t.ctx;
+                        e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
+                        const i = t.ctx.canvas.height;
+                        var a = `${M.message("dialog:weather-station-diagram:unit:temperature")} (cm)`;
+                        Be.UpdateAxisLabels(
+                            e,
+                            a,
+                            "",
+                            t.bbox.left,
+                            t.bbox.width,
+                            i,
+                            "#DE2D26",
+                            ""
+                        ), e.restore();
+                    }
+                ]
+            },
+            scales: {
+                y: {
+                    range: [-26.5, 14]
+                }
+            },
+            axes: [
+                jt,
+                {
+                    scale: "y",
+                    stroke: "#DE2D26",
+                    splits: [-25, -20, -15, -10, -5, 0, 5, 10]
+                }
+            ],
+            series: [
+                {
+                    label: M.message("dialog:weather-station-diagram:unit:time"),
+                    value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
+                }
+            ],
+            bands: [
+                {
+                    series: [2, 3],
+                    fill: "#d9dcdc"
+                },
+                {
+                    series: [2, 1],
+                    fill: "#d9dcdc"
+                }
+            ]
+        }, ai = (t, e, i = 2) => ({
+            label: M.message(`dialog:weather-station-diagram:parameter:${t}`),
+            stroke: e,
+            width: i,
+            points: { show: !1 },
+            scale: "y",
+            value: (a, r) => M.number(r, {}, "°C")
+        }), wc = ai("TEMP_min", "#d9dcdc", 2), bc = ai("TEMP_max", "#d9dcdc", 0), Sc = ai("TEMP_median", "#878787", 2), xc = ai("TEMP", "#DE2D26", 2), vc = ai("TD", "#6aafd5", 2), Tc = {
+            ...Be.getLineaOptions(),
+            hooks: {
+                drawAxes: [
+                    (t) => {
+                        const e = t.ctx;
+                        e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
+                        const i = t.ctx.canvas.height;
+                        var a = `${M.message("dialog:weather-station-diagram:parameter:newsnow")} (cm)`;
+                        Be.UpdateAxisLabels(
+                            e,
+                            a,
+                            "",
+                            t.bbox.left,
+                            t.bbox.width,
+                            i,
+                            "#DE2D26",
+                            ""
+                        ), e.restore();
+                    }
+                ]
+            },
+            scales: {
+                y: {
+                    range: [0, 27]
+                }
+            },
+            axes: [
+                jt,
+                {
+                    scale: "y",
+                    stroke: "#DE2D26",
+                    splits: [0, 5, 10, 15, 20, 25]
+                }
+            ],
+            series: [
+                {
+                    label: M.message("dialog:weather-station-diagram:unit:time"),
+                    value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
+                }
+            ]
+        }, yc = {
+            label: M.message("dialog:weather-station-diagram:parameter:newsnow"),
+            paths: fe.paths.bars(),
+            points: { show: !1 },
+            stroke: "#DE2D26",
+            fill: "#DE2D26",
+            scale: "y",
+            value: (t, e) => e == null || Number.isNaN(e) ? "-" : M.number(Math.round(e * 10) / 10, {}, "cm")
+        }, _c = {
+            label: M.message("dialog:weather-station-diagram:parameter:snowcover"),
+            stroke: "#rgba(222, 45, 38, 0.2)",
+            width: 2,
+            scale: "y",
+            fill: "rgba(222, 45, 38, 0.2)",
+            value: () => "-"
+        }, Dc = {
+            ...Be.getLineaOptions(),
+            hooks: {
+                drawAxes: [
+                    (t) => {
+                        const e = t.ctx;
+                        e.save(), e.font = "bold 0.9vm sans-serif", e.textAlign = "center", e.textBaseline = "bottom";
+                        const i = t.ctx.canvas.height;
+                        var a = `${M.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`, r = "", d = "#00ff55ff", o = "";
+                        Be.UpdateAxisLabels(
+                            e,
+                            a,
+                            r,
+                            t.bbox.left,
+                            t.bbox.width,
+                            i,
+                            d,
+                            o
+                        );
+                    }
+                ]
+            },
+            scales: {
+                y: {
+                    range: [0, 58]
+                }
+            },
+            axes: [
+                jt,
+                {
+                    scale: "y",
+                    stroke: "#00ff55ff",
+                    splits: [0, 10, 20, 30, 40, 50]
+                }
+            ],
+            series: [
+                {
+                    label: M.message("dialog:weather-station-diagram:unit:time"),
+                    value: "{DD}. {MMM}. {YYYY} {HH}:{mm}"
+                }
+            ]
+        }, Mc = {
+            label: M.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount"),
+            stroke: "#00ff55ff",
+            width: 2,
+            points: { show: !1 },
+            scale: "y",
+            value: (t, e) => M.number(e, {}, M.message("dialog:weather-station-diagram:unit:DATAPOINTS"))
+        };
+        globalThis.Temporal || import("./global.esm-B3KdlxCS.js");
+        class $t {
+            constructor() {
+                this.monthDayData = /* @__PURE__ */ new Map(), this.dates = [], this.values = [], this.timeZone = "";
+            }
+            get timestamps() {
+                const e = this.timeZone;
+                return this.dates.map(
+                    (i) => i.toZonedDateTime({ plainTime: "00:00:00", timeZone: e }).epochMilliseconds
+                );
+            }
+            #e(e, i) {
+                return this.dates.map((a) => {
+                    let r = a.toPlainMonthDay().toString();
+                    a.inLeapYear && r === "02-29" && (r = a.subtract({ days: 1 }).toPlainMonthDay().toString());
+                    const o = (e.get(r) ?? []).filter(Number.isFinite);
+                    return o.length === 0 ? NaN : i(...o);
+                });
+            }
+            get amount() {
+                return this.#e(this.monthDayData, (...e) => e.filter(Number.isFinite).length);
+            }
+            get maxValues() {
+                return this.#e(this.monthDayData, Math.max);
+            }
+            get minValues() {
+                return this.#e(this.monthDayData, Math.min);
+            }
+            get medianValues() {
+                return this.#e(
+                    this.monthDayData,
+                    (...e) => e.sort((i, a) => i - a)[Math.floor(e.length / 2)]
+                );
+            }
+            static from(e, i, a, r, d) {
+                const o = new $t();
+                o.timeZone = e;
+                for (let u = 0; u < r.length; u++) {
+                    const p = Number.isFinite(d[u]) ? d[u] : NaN, b = r[u], w = Temporal.Instant.fromEpochMilliseconds(b).toZonedDateTimeISO(e).toPlainDate(), T = w.toPlainMonthDay().toString();
+                    o.monthDayData.has(T) || o.monthDayData.set(T, []), o.monthDayData.get(T)?.push(p), Temporal.PlainDateTime.compare(i, w) <= 0 && Temporal.PlainDateTime.compare(w, a) <= 0 && (o.dates.push(w), o.values.push(p));
+                }
+                const m = o.dates[o.dates.length - 1];
+                if (Temporal.PlainDate.compare(m, a) < 0)
+                    for (let u = m.add({ days: 1 }); Temporal.PlainDate.compare(u, a) <= 0; u = u.add({ days: 1 }))
+                        o.dates.push(u), o.values.push(NaN);
+                return o;
+            }
+        }
+        const Vl = class Vl extends qs {
+            connectedCallback() {
+                this.renderPlots().catch((e) => console.error(e));
+            }
+            attributeChangedCallback(e) {
+                (e === "src" || e == "timeRangeMilli") && this.renderPlots().catch((i) => console.error(i));
+            }
+            async renderPlots() {
+                globalThis.Temporal || await import("./global.esm-B3KdlxCS.js"), this.resizeObserver.unobserve(this);
+                const { station: e, altitude: i, timestamps: a, values: r } = await os(
+                    this.getAttribute("src") ?? ""
+                ), d = document.createElement("style");
+                d.textContent = Zs;
+                const o = document.createElement("div"), m = document.createElement("div"), u = document.createElement("div"), p = document.createElement("div");
+                this.replaceChildren(d, o, m, u, p);
+                const b = Temporal.PlainDate.from(this.getAttribute("startDate")), g = Temporal.PlainDate.from(this.getAttribute("endDate")), w = this.getAttribute("timeZone") || "CET";
+                if (r.HS) {
+                    const T = $t.from(w, b, g, a, r.HS), y = new fe(
+                        {
+                            ...cc,
+                            ...this.hasAttribute("showTitle") ? {
+                                title: `${e} (${M.number(i, { maximumFractionDigits: 0 })}m)`
+                            } : {}
+                        },
+                        [T.timestamps],
+                        o
+                    );
+                    if (this.addSeries(y, uc, T.minValues), this.addSeries(y, mc, T.maxValues), this.addSeries(y, hc, T.medianValues), this.addSeries(y, pc, T.values), r.PSUM) {
+                        const k = $t.from(w, b, g, a, r.PSUM);
+                        this.addSeries(y, gc, k.values);
+                    }
+                    const A = new fe(
+                        Dc,
+                        [T.timestamps],
+                        p
+                    );
+                    this.addSeries(A, Mc, T.amount);
+                }
+                if (r.NS) {
+                    const T = $t.from(w, b, g, a, r.NS);
+                    let y = new fe(Tc, [T.timestamps], m);
+                    if (r.HS) {
+                        const A = $t.from(w, b, g, a, r.HS);
+                        this.addSeries(
+                            y,
+                            _c,
+                            A.values.map((k) => k == 0 || Number.isNaN(k) ? 1e3 : -1e3)
+                        );
+                    }
+                    this.addSeries(y, yc, T.values);
+                }
+                if (r.TA) {
+                    const T = $t.from(w, b, g, a, r.TA), y = new fe(fc, [T.timestamps], u);
+                    if (this.addSeries(y, wc, T.minValues), this.addSeries(y, bc, T.maxValues), this.addSeries(y, Sc, T.medianValues), this.addSeries(y, xc, T.values), r.TD) {
+                        const A = $t.from(w, b, g, a, r.TD);
+                        this.addSeries(y, vc, A.values);
+                    }
+                }
+                this.resizePlots(this.clientWidth, this.style), this.resizeObserver.observe(this);
+            }
+            disconnectedCallback() {
+                this.resizeObserver.unobserve(this);
+            }
+        };
+        Vl.observedAttributes = ["src"];
+        let Tl = Vl;
+        customElements.define("linea-plot-year", Tl);
+        //# sourceMappingURL=linea.js.map
+
     </script>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
@@ -5207,5 +4700,3 @@
         }
     </style>
 </head>
-
-</html>
