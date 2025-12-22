@@ -282,11 +282,11 @@ export class ExportModal {
         return;
       }
       if (this.exportdata.type == "image/png") {
-        (this.modal.querySelector('#btnExportPNG') as HTMLButtonElement).click();
+        (this.modal.querySelector("#btnExportPNG") as HTMLButtonElement).click();
       } else if (this.exportdata.type == "text/html") {
-        (this.modal.querySelector('#btnExportIframe') as HTMLButtonElement).click();
+        (this.modal.querySelector("#btnExportIframe") as HTMLButtonElement).click();
       }
-    }
+    };
 
     this.modal.querySelector("#exportWidth")?.addEventListener("keydown", keyListener);
     this.modal.querySelector("#exportHeight")?.addEventListener("keydown", keyListener);
@@ -459,7 +459,7 @@ export class ExportModal {
   async #exportAsIframe() {
     const exports = this.#getExportSettings();
 
-    const iframeTemplate = await import("./iframtemplate.html?raw").then((m) => m.default);
+    const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
 
     const indices = this.#getCheckedDiagramIndices();
 
