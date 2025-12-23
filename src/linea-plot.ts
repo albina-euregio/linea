@@ -2,6 +2,8 @@ import { i18n } from "./i18n";
 import { fetchSMET, Result, Values } from "./smet-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { ExportModal } from "./exportmodal";
+import AirDatepicker from "air-datepicker";
+import "air-datepicker/air-datepicker.css";
 
 /**
  * LineaPlot Web Component
@@ -70,8 +72,8 @@ export class LineaPlot extends HTMLElement {
   private isLoaded: boolean = false;
 
   private exportModal!: ExportModal;
-  private startInput!: HTMLInputElement;
-  private endInput!: HTMLInputElement;
+  private datepicker!: AirDatepicker<HTMLElement>;
+  private daterange!: HTMLInputElement;
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
@@ -360,8 +362,8 @@ export class LineaPlot extends HTMLElement {
    * @param endDate to when the data shall be shown
    */
   filterAndUpdateData(
-    startDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.startInput.value),
-    endDate: Temporal.ZonedDateTime = this.#inputValueToZonedDateTime(this.endInput.value),
+    startDate: Temporal.ZonedDateTime = this.#dateToZonedDateTime(this.datepicker.selectedDates[0]),
+    endDate: Temporal.ZonedDateTime = this.#dateToZonedDateTime(this.datepicker.selectedDates[1]),
   ) {
     const startTimestamp = startDate.toInstant().epochMilliseconds;
     const endTimestamp = endDate.toInstant().epochMilliseconds;
@@ -410,28 +412,9 @@ export class LineaPlot extends HTMLElement {
       controlsdates.classList.add("controls-dates");
       controls.appendChild(controlsdates);
 
-      this.startInput = document.createElement("input");
-      this.startInput.type = "datetime-local";
-      this.startInput.classList.add("toggle-btn");
-      this.startInput.classList.add("controls-dates-inputs");
-      this.startInput.classList.add("startDateInput");
-      this.startInput.addEventListener("change", () => {
-        this.filterAndUpdateData(
-          this.#inputValueToZonedDateTime(this.startInput.value),
-          this.#inputValueToZonedDateTime(this.endInput.value),
-        );
-      });
-      this.endInput = document.createElement("input");
-      this.endInput.classList.add("toggle-btn");
-      this.endInput.classList.add("controls-dates-inputs");
-      this.endInput.classList.add("endDateInput");
-      this.endInput.type = "datetime-local";
-      this.endInput.addEventListener("change", () => {
-        this.filterAndUpdateData(
-          this.#inputValueToZonedDateTime(this.startInput.value),
-          this.#inputValueToZonedDateTime(this.endInput.value),
-        );
-      });
+      this.daterange = document.createElement("input");
+      this.daterange.type = "text";
+      this.daterange.id = "daterangeinput";
 
       const previous = document.createElement("button");
       previous.classList.add("toggle-btn");
@@ -444,8 +427,8 @@ export class LineaPlot extends HTMLElement {
         }
       });
       previous.addEventListener("click", () => {
-        const start = this.#inputValueToZonedDateTime(this.startInput.value);
-        const end = this.#inputValueToZonedDateTime(this.endInput.value);
+        const start = this.#dateToZonedDateTime(this.datepicker.selectedDates[0]);
+        const end = this.#dateToZonedDateTime(this.datepicker.selectedDates[1]);
         if (!start || !end) return;
         next.disabled = false;
         let newEnd = end.subtract({ days: 1 });
@@ -461,8 +444,7 @@ export class LineaPlot extends HTMLElement {
           this.filterAndUpdateData();
           return;
         }
-        this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
-        this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
+        this.#updateDatepickerStartEndDate(newStart, newEnd);
         this.filterAndUpdateData(newStart, newEnd);
       });
       const next = document.createElement("button");
@@ -476,8 +458,8 @@ export class LineaPlot extends HTMLElement {
         }
       });
       next.addEventListener("click", () => {
-        const start = this.#inputValueToZonedDateTime(this.startInput.value);
-        const end = this.#inputValueToZonedDateTime(this.endInput.value);
+        const start = this.#dateToZonedDateTime(this.datepicker.selectedDates[0]);
+        const end = this.#dateToZonedDateTime(this.datepicker.selectedDates[1]);
         if (!start || !end) return;
         previous.disabled = false;
         let newStart = start.add({ days: 1 });
@@ -493,16 +475,14 @@ export class LineaPlot extends HTMLElement {
           this.filterAndUpdateData();
           return;
         }
-        this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
-        this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
+        this.#updateDatepickerStartEndDate(newStart, newEnd);
         this.filterAndUpdateData(newStart, newEnd);
       });
       const breakElement = document.createElement("span");
       breakElement.classList.add("controls-break");
       controlsdates.appendChild(previous);
-      controlsdates.appendChild(this.startInput);
+      controlsdates.appendChild(this.daterange);
       controlsdates.appendChild(breakElement);
-      controlsdates.appendChild(this.endInput);
       controlsdates.appendChild(next);
     }
     const menu = document.createElement("div");
@@ -604,7 +584,7 @@ export class LineaPlot extends HTMLElement {
    * @returns
    */
   #updateValidDateInputs() {
-    if (!this.startInput || !this.endInput) {
+    if (!this.daterange || !this.datepicker) {
       return;
     }
     const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
@@ -613,10 +593,7 @@ export class LineaPlot extends HTMLElement {
     const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
       i18n.timezone(),
     );
-    this.startInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
-    this.startInput.max = this.#zonedDateTimeToLocalInputValue(maxTime);
-    this.endInput.min = this.#zonedDateTimeToLocalInputValue(minTime);
-    this.endInput.max = this.#zonedDateTimeToLocalInputValue(maxTime);
+    this.#updateDatePickerMinMax(minTime, maxTime);
   }
 
   /**
@@ -624,7 +601,7 @@ export class LineaPlot extends HTMLElement {
    * @returns
    */
   #setStartEndDateToAttributes() {
-    if (!this.startInput || !this.endInput) {
+    if (!this.daterange || !this.datepicker) {
       return;
     }
     let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "");
@@ -640,16 +617,21 @@ export class LineaPlot extends HTMLElement {
       Temporal.ZonedDateTime.compare(startdate, maxTime) > 0 ||
       Temporal.ZonedDateTime.compare(startdate, minTime) < 0
     ) {
-      startdate = this.#inputValueToZonedDateTime(this.startInput.min);
+      const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+        i18n.timezone(),
+      );
+      startdate = minTime;
     }
     if (
       Temporal.ZonedDateTime.compare(enddate, minTime) < 0 ||
       Temporal.ZonedDateTime.compare(enddate, maxTime) > 0
     ) {
-      enddate = this.#inputValueToZonedDateTime(this.endInput.max);
+      const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+        i18n.timezone(),
+      );
+      enddate = maxTime;
     }
-    this.startInput.value = this.#zonedDateTimeToLocalInputValue(startdate);
-    this.endInput.value = this.#zonedDateTimeToLocalInputValue(enddate);
+    this.#updateDatepickerStartEndDate(startdate, enddate);
     this.filterAndUpdateData(startdate, enddate);
   }
 
@@ -658,15 +640,16 @@ export class LineaPlot extends HTMLElement {
    * set the Input fields to the widthest available timespan
    */
   #setStartEndDateToMinMax() {
-    if (!this.startInput || !this.endInput) {
+    if (!this.daterange || !this.datepicker) {
       return;
     }
-    this.startInput.value = this.#zonedDateTimeToLocalInputValue(
-      Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(i18n.timezone()),
+    const minDate = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+      i18n.timezone(),
     );
-    this.endInput.value = this.#zonedDateTimeToLocalInputValue(
-      Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(i18n.timezone()),
+    const maxDate = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+      i18n.timezone(),
     );
+    this.#updateDatepickerStartEndDate(minDate, maxDate);
   }
 
   /**
@@ -691,6 +674,45 @@ export class LineaPlot extends HTMLElement {
     // value = "2025-06-04T10:24"
     const pdt = Temporal.PlainDateTime.from(value);
     return pdt.toZonedDateTime(i18n.timezone());
+  }
+
+  /**
+   * Converts a Date to a ZonedDateTime
+   * @param value Date to convert
+   * @returns a Temporal ZonedDateTime Object
+   */
+  #dateToZonedDateTime(value: Date): Temporal.ZonedDateTime {
+    return value.toTemporalInstant().toZonedDateTimeISO(i18n.timezone());
+  }
+
+  /**
+   * Converts a Date to a ZonedDateTime
+   * @param value Date to convert
+   * @returns a Temporal ZonedDateTime Object
+   */
+  #zonedDateTimeToDate(value: Temporal.ZonedDateTime): Date {
+    return new Date(value.toLocaleString());
+  }
+
+  #updateDatepickerStartEndDate(
+    startDate: Temporal.ZonedDateTime,
+    endDate: Temporal.ZonedDateTime,
+  ) {
+    this.datepicker = new AirDatepicker("#daterangeinput", {});
+  }
+
+  #updateDatePickerMinMax(minDate: Temporal.ZonedDateTime, maxDate: Temporal.ZonedDateTime) {
+    this.datepicker = new AirDatepicker("#daterangeinput", {
+      range: true,
+      multipleDatesSeparator: " - ",
+      onSelect: (dates) => {
+        this.filterAndUpdateData(
+          this.#dateToZonedDateTime(this.datepicker.selectedDates[0]),
+          this.#dateToZonedDateTime(this.datepicker.selectedDates[1]),
+        );
+      },
+      selectedDates: [this.#zonedDateTimeToDate(minDate), this.#zonedDateTimeToDate(maxDate)],
+    });
   }
 }
 
