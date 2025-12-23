@@ -9,9 +9,11 @@
         font-family: Helvetica, sans-serif;
         margin: 20px;
       }
+
       .controls {
         text-align: center;
       }
+
       .toggle-btn {
         padding: 10px 20px;
         background-color: #ffffff;
@@ -24,23 +26,28 @@
         transition:
           background-color 0.3s ease,
           color 0.3s ease;
+
         &:hover {
           background-color: #19aaff;
           color: white;
         }
+
         &:active {
           transform: translateY(1px);
         }
       }
+
       linea-plot,
       linea-plot-year {
         display: flex;
         flex-direction: column;
         gap: 20px;
-        & > div:empty {
+
+        &>div:empty {
           display: none;
         }
-        & > div {
+
+        &>div {
           background-color: white;
           display: flex;
           justify-content: center;
@@ -50,6 +57,7 @@
       }
     </style>
   </head>
+
   <body>
     <!-- src="/prototype/mock.data" -->
     <!-- <linea-plot-year
@@ -60,7 +68,7 @@
     >
     </linea-plot-year> -->
     <nav></nav>
-
+    <!-- 
     <linea-plot
       src="https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min?station_ids=11318&parameters=TL%2CFF%2CFFX%2CDD%2CP%2CRF%2CSCHNEE%2CTP&output_format=geojson&start=2025-12-12T00%3A00%3A00.000Z&end=2025-12-19T00%3A00%3A00.000Z"
       showsurfacehoarseries
@@ -68,10 +76,11 @@
       showexport
       showdatepicker
     >
-    </linea-plot>
+    </linea-plot> -->
 
     <linea-plot
-      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
+      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz"]'
+      lazysrc='["https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz"]'
       showsurfacehoarseries
       showtitle
       showexport
