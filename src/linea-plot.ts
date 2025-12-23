@@ -3,9 +3,12 @@ import { fetchSMET } from "./smet-data";
 import type { Result, Values } from "./station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { ExportModal } from "./exportmodal";
-import AirDatepicker from "air-datepicker";
-import "air-datepicker/air-datepicker.css";
-
+import AirDatepicker from 'air-datepicker';
+import 'air-datepicker/air-datepicker.css';
+import localeEn from 'air-datepicker/locale/en';
+if (!globalThis.Temporal) {
+  import("temporal-polyfill/global");
+}
 /**
  * LineaPlot Web Component
  * 
@@ -73,8 +76,9 @@ export class LineaPlot extends HTMLElement {
   private isLoaded: boolean = false;
 
   private exportModal!: ExportModal;
-  private datepicker!: AirDatepicker<HTMLElement>;
   private daterange!: HTMLInputElement;
+
+  private dp;
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
@@ -517,6 +521,12 @@ export class LineaPlot extends HTMLElement {
     }
     controls.appendChild(menu);
     this.appendChild(controls);
+
+    this.dp = new AirDatepicker(this.daterange, {
+      range: true,
+      multipleDatesSeparator: ' - ',
+      locale: localeEn
+    });
     this.focus();
   }
 
@@ -583,7 +593,7 @@ export class LineaPlot extends HTMLElement {
    * @returns
    */
   #updateValidDateInputs() {
-    if (!this.daterange || !this.datepicker) {
+    if (!this.daterange) {
       return;
     }
     const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
@@ -681,16 +691,20 @@ export class LineaPlot extends HTMLElement {
    * @returns a Temporal ZonedDateTime Object
    */
   #dateToZonedDateTime(value: Date): Temporal.ZonedDateTime {
-    return value.toTemporalInstant().toZonedDateTimeISO(i18n.timezone());
+    // Convert the Date to a Temporal Instant
+    const instant = Temporal.Instant.from(value.toISOString());
+    // Return a ZonedDateTime object in the specified timezone
+    return instant.toZonedDateTimeISO(i18n.timezone());
   }
 
   /**
-   * Converts a Date to a ZonedDateTime
-   * @param value Date to convert
-   * @returns a Temporal ZonedDateTime Object
+   * Converts a ZonedDateTime to a Date
+   * @param value Temporal.ZonedDateTime to convert
+   * @returns a Date Object
    */
   #zonedDateTimeToDate(value: Temporal.ZonedDateTime): Date {
-    return new Date(value.toLocaleString());
+    // Get the Instant from the ZonedDateTime and return a Date
+    return new Date(value.toInstant().toString());
   }
 
   #updateDatepickerStartEndDate(
@@ -701,17 +715,7 @@ export class LineaPlot extends HTMLElement {
   }
 
   #updateDatePickerMinMax(minDate: Temporal.ZonedDateTime, maxDate: Temporal.ZonedDateTime) {
-    this.datepicker = new AirDatepicker("#daterangeinput", {
-      range: true,
-      multipleDatesSeparator: " - ",
-      onSelect: (dates) => {
-        this.filterAndUpdateData(
-          this.#dateToZonedDateTime(this.datepicker.selectedDates[0]),
-          this.#dateToZonedDateTime(this.datepicker.selectedDates[1]),
-        );
-      },
-      selectedDates: [this.#zonedDateTimeToDate(minDate), this.#zonedDateTimeToDate(maxDate)],
-    });
+    console.log("§c");
   }
 }
 
