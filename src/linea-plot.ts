@@ -7,9 +7,15 @@ import AirDatepicker from "air-datepicker";
 import "air-datepicker/air-datepicker.css";
 
 import localeEn from "air-datepicker/locale/en";
-if (!globalThis.Temporal) {
-  import("temporal-polyfill/global");
-}
+import localeDe from "air-datepicker/locale/de";
+import localeCa from "air-datepicker/locale/ca";
+import localeEs from "air-datepicker/locale/es";
+import localeFr from "air-datepicker/locale/fr";
+import localeIt from "air-datepicker/locale/it";
+import localePl from "air-datepicker/locale/pl";
+import localeSk from "air-datepicker/locale/sk";
+import localeSl from "air-datepicker/locale/sl";
+
 /**
  * LineaPlot Web Component
  * 
@@ -726,6 +732,50 @@ export class LineaPlot extends HTMLElement {
     this.#localizeDatePicker();
   }
 
+  /**
+   * Localozes the AirDatepicker
+   */
+  #localizeDatePicker() {
+    let locale;
+    switch (i18n.lang) {
+      case "en":
+        locale = localeEn; // English
+        break;
+      case "ca":
+        locale = localeCa; // Catalan
+        break;
+      case "de":
+        locale = localeDe; // German
+        break;
+      case "es":
+        locale = localeEs; // Spanish
+        break;
+      case "fr":
+        locale = localeFr; // French
+        break;
+      case "it":
+        locale = localeIt; // Italian
+        break;
+      case "oc":
+        locale = localeEn; // Occitan, not implemented yet
+        break;
+      case "pl":
+        locale = localePl; // Polish
+        break;
+      case "sk":
+        locale = localeSk; // Slovak
+        break;
+      case "sl":
+        locale = localeSl; // Slovenian
+        break;
+      default:
+        locale = localeEn; // Default to English if no match
+        break;
+    }
+    this.dp.update({
+      locale: locale,
+    });
+  }
 }
 
 customElements.define("linea-plot", LineaPlot);
