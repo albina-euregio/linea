@@ -240,18 +240,20 @@ export class ExportModal {
     
                 <div class="export-settings" id="exportSettings" style="display:none;">
                     <h4>${i18n.message("dialog:weather-station-diagram:controls:label:exportsettings")}</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <div>
-                            <label for="exportWidth">${i18n.message("dialog:weather-station-diagram:controls:label:width")} (px)</label>
-                            <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
-                        </div>
-                        <div>
-                            <label for="exportHeight">${i18n.message("dialog:weather-station-diagram:controls:label:heightpercanvas")} (px):</label>
-                            <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
-                        </div>
-                        <div>
-                            <label for="exportTitle">${i18n.message("dialog:weather-station-diagram:controls:label:title")}</label>
-                            <input type="text" id="exportTitle" value="">
+                    <div style="display: grid; gap: 15px;">
+                        <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                          <div>
+                              <label for="exportWidth">${i18n.message("dialog:weather-station-diagram:controls:label:width")} (px)</label>
+                              <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
+                          </div>
+                          <div>
+                              <label for="exportHeight">${i18n.message("dialog:weather-station-diagram:controls:label:heightpercanvas")} (px):</label>
+                              <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
+                          </div>
+                          <div>
+                              <label for="exportTitle">${i18n.message("dialog:weather-station-diagram:controls:label:title")}</label>
+                              <input type="text" id="exportTitle" value="">
+                          </div>
                         </div>
                         <div>
                             <label for="exportDiagrams">${i18n.message("dialog:weather-station-diagram:controls:label:selectdiagrams")}</label>
@@ -294,7 +296,7 @@ export class ExportModal {
     this.modal.querySelector("#exportHeight")?.addEventListener("keydown", keyListener);
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
-      this.exportSettings.style.display = "flex";
+      document.getElementById("exportSizes").style.display = "none";
       this.#exportAsIframe();
     });
 
@@ -304,7 +306,7 @@ export class ExportModal {
     });
 
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
-      this.exportSettings.style.display = "flex";
+      document.getElementById("exportSizes").style.display = "grid";
       this.#exportAllPlotsToPNG(this.#getExportSettings());
     });
 
