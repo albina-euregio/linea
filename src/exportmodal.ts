@@ -515,15 +515,9 @@ export class ExportModal {
       resultsFiltered.push(result);
     });
 
-    const html =
-      iframeTemplate
-        .replaceAll("</html>", "")
-        .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
-        .replace('lang="en"', `lang="${i18n.lang}"`) +
-      `<body>
-            <linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle/>
-        </body>
-        </html>`;
+    const html = iframeTemplate
+      .replace('lang="en"', `lang="${i18n.lang}"`)
+      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`);
 
     const uint8Array = new TextEncoder().encode(html);
     let binary = "";
