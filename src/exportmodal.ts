@@ -227,11 +227,6 @@ export class ExportModal {
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:iframe:sub")}</p>
                     </div>
     
-                    <div class="export-option" id="btnExportStandalone" style="display: none;">
-                        <h4>${i18n.message("dialog:weather-station-diagram:controls:button:standalonehtml")}</h4>
-                        <p>${i18n.message("dialog:weather-station-diagram:controls:button:standalonehtml:sub")}</p>
-                    </div>
-    
                     <div class="export-option" id="btnExportPNG">
                         <h4>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage")}</h4>
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage:sub")}</p>
@@ -298,11 +293,6 @@ export class ExportModal {
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "none";
       this.#exportAsIframe();
-    });
-
-    this.modal.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
-      this.exportSettings.style.display = "flex";
-      // this.exportAsStandalone();
     });
 
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
