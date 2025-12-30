@@ -5,6 +5,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
 import { ExportModal } from "./exportmodal";
 import AirDatepicker from "air-datepicker";
 import "air-datepicker/air-datepicker.css";
+
 import localeEn from "air-datepicker/locale/en";
 if (!globalThis.Temporal) {
   import("temporal-polyfill/global");
@@ -200,7 +201,7 @@ export class LineaPlot extends HTMLElement {
             border-top-left-radius: 0px;
             border-bottom-left-radius: 0px;
             border-left-width: 1px;
-            border-right-width: 1px;
+            border-right-width: 0px;
           }
         }
         
@@ -362,14 +363,17 @@ export class LineaPlot extends HTMLElement {
    * @param endDate to when the data shall be shown
    */
   filterAndUpdateData(
-    startDate: Temporal.ZonedDateTime = this.#dateToZonedDateTime(this.dp.selectedDates[0]),
-    endDate: Temporal.ZonedDateTime = this.#dateToZonedDateTime(this.dp.selectedDates[1]),
+    startDate: Temporal.ZonedDateTime = this.#getDatePickerStartDate(),
+    endDate: Temporal.ZonedDateTime = this.#getDatePickerEndDate(),
   ) {
     const startTimestamp = startDate.toInstant().epochMilliseconds;
     const endTimestamp = endDate.toInstant().epochMilliseconds;
+
     for (let i = 0; i < this.lineacharts.length; i++) {
       const res = this.results[i];
-
+      if (res === undefined) {
+        continue;
+      }
       let filteredValues = {};
 
       for (const key in res.values) {
@@ -521,14 +525,7 @@ export class LineaPlot extends HTMLElement {
     controls.appendChild(menu);
     this.appendChild(controls);
 
-    this.dp = new AirDatepicker(this.daterange, {
-      range: true,
-      multipleDatesSeparator: " - ",
-      locale: localeEn,
-      onSelect: (e) => {
-        this.filterAndUpdateData();
-      },
-    });
+    this.#constructDatePicker();
     this.focus();
   }
 
@@ -575,7 +572,6 @@ export class LineaPlot extends HTMLElement {
     }
     const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
 
-    // align each result to the common timeline, filling missing entries with null to not show missing data
     for (const res of this.results) {
       for (const key in res.values) {
         const map = new Map<number, number[]>();
@@ -664,30 +660,6 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * Converts dates into the format of HTML datetime-local inputs
-   * @param zdt date to convert
-   * @returns string, formated for HTML datetime-local input value
-   */
-  #zonedDateTimeToLocalInputValue(zdt: Temporal.ZonedDateTime): string {
-    // Convert to a PlainDateTime in the same time zone
-    const pdt = zdt.toPlainDateTime();
-    return pdt.toString({ smallestUnit: "minutes" });
-  }
-
-  /**
-   *
-   * Convert HTMl datetime-local input values into ZonedDateTime Objects
-   *
-   * @param value a HTML datetime-local string to convert
-   * @returns a Temporal ZonedDateTime Object
-   */
-  #inputValueToZonedDateTime(value: string) {
-    // value = "2025-06-04T10:24"
-    const pdt = Temporal.PlainDateTime.from(value);
-    return pdt.toZonedDateTime(i18n.timezone());
-  }
-
-  /**
    * Converts a Date to a ZonedDateTime
    * @param value Date to convert
    * @returns a Temporal ZonedDateTime Object
@@ -722,6 +694,38 @@ export class LineaPlot extends HTMLElement {
       maxDate: this.#zonedDateTimeToDate(maxDate),
     });
   }
+
+  #getDatePickerStartDate(): Temporal.ZonedDateTime {
+    const date: Date = this.dp.selectedDates[0];
+    date.setHours(0);
+    date.setMinutes(0);
+    return this.#dateToZonedDateTime(date);
+  }
+
+  #getDatePickerEndDate(): Temporal.ZonedDateTime {
+    let date: Date;
+    if (this.dp.selectedDates.length == 1) {
+      date = this.dp.selectedDates[0];
+    } else {
+      date = this.dp.selectedDates[1];
+    }
+    return this.#dateToZonedDateTime(date).add({ days: 1 });
+  }
+
+  /**
+   * cosntructs the AirDatePicker
+   */
+  #constructDatePicker() {
+    this.dp = new AirDatepicker(this.daterange, {
+      range: true,
+      multipleDatesSeparator: " - ",
+      onSelect: (e) => {
+        this.filterAndUpdateData();
+      },
+    });
+    this.#localizeDatePicker();
+  }
+
 }
 
 customElements.define("linea-plot", LineaPlot);
