@@ -364,7 +364,7 @@ export class ExportModal {
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
-      this.lineaPlot.lineacharts[0].plots[0].root.querySelector('canvas').width,
+      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width,
     );
     (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
       this.lineaPlot.lineacharts[0].plots[0].height,
@@ -607,7 +607,9 @@ export class ExportModal {
     const series: uPlot.Series[] = [];
     const legendItems = {};
 
-    const parentWidth = width * this.lineaPlot.lineacharts[0].clientWidth / this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
+    const parentWidth =
+      (width * this.lineaPlot.lineacharts[0].clientWidth) /
+      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
 
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
