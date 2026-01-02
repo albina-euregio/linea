@@ -606,10 +606,6 @@ export class ExportModal {
     width,
     heightPerCanvas,
     title,
-  }: {
-    width: number;
-    heightPerCanvas: number;
-    title?: string;
   }) {
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
@@ -629,7 +625,7 @@ export class ExportModal {
     const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
     for (const lineachart of this.lineaPlot.lineacharts) {
       lineachart.resizeObserver.unobserve(lineachart);
-      lineachart.resizePlots(width * 1.25, lineachart.style, heightPerCanvas);
+      lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
       await new Promise((r) => setTimeout(r, 1));
     }
 
@@ -666,7 +662,7 @@ export class ExportModal {
     const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
 
     const outCanvas = document.createElement("canvas");
-    outCanvas.width = width;
+    outCanvas.width = canvases[0].width;
     outCanvas.height = totalHeight;
 
     //fill background
