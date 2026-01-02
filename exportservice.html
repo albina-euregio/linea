@@ -92,7 +92,7 @@
     </div>
 
     <linea-plot
-      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/AXLIZ1.smet.gz"]'
+      src="['https://api.avalanche.report/lawine/grafiken/smet/woche/AXLIZ1.smet.gz']"
       showSurfaceHoarSeries
       showTitle
       showExport
@@ -120,7 +120,7 @@
           "TRAU1", "TRAU2", "TTUX1", "TTUX2", "TWAN1", "TWAN2", "ZSIL1", "ZSIL2"
       ];
 
-      const selectedIds = [];
+      const selectedIds = ['AXLIZ1'];
 
       const stationsContainer = document.getElementById("stations");
       const selectedContainer = document.getElementById("selectedStations");
@@ -133,6 +133,7 @@
           btn.addEventListener("click", () => addStation(id));
           stationsContainer.appendChild(btn);
       });
+      renderSelectedStations();
 
       function addStation(id) {
           if (selectedIds.includes(id)) return;
@@ -148,15 +149,17 @@
           updatePlotSrc();
       }
 
-      function renderSelectedStations() {
-          selectedContainer.innerHTML = "";
-          selectedIds.forEach(id => {
-              const chip = document.createElement("div");
-              chip.className = "station-chip";
-              chip.innerHTML = `${id} <button onclick="removeStation('${id}')">&times;</button>`;
-              selectedContainer.appendChild(chip);
-          });
-      }
+        // Update pickers whenever the selection changes
+        function renderSelectedStations() {
+            selectedContainer.innerHTML = "";
+            selectedIds.forEach(id => {
+            const chip = document.createElement("div");
+            chip.className = "station-chip";
+            chip.innerHTML = `${id} <button onclick="removeStation('${id}')">&times;</button>`;
+            selectedContainer.appendChild(chip);
+            });
+            updatePlotSrc();
+        }
 
       function updatePlotSrc() {
           const srcs = selectedIds.map(id =>
