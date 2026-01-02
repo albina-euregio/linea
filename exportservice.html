@@ -87,9 +87,17 @@
   <body>
     <h1>Linea Station Selector</h1>
     <nav id="stations"></nav>
-    <div id="selectedStations"></div>
+    <div id="selectedStations">
+      <div class="station-chip">AXLIZ1<button onclick="removeStation('AXLIZ1')">x</button></div>
+    </div>
 
-    <linea-plot src="[]" showSurfaceHoarSeries showTitle showExport showDatePicker></linea-plot>
+    <linea-plot
+      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/AXLIZ1.smet.gz"]'
+      showSurfaceHoarSeries
+      showTitle
+      showExport
+      showDatePicker
+    ></linea-plot>
 
     <script type="module" src="https://albina-euregio.gitlab.io/linea/linea.js"></script>
 
