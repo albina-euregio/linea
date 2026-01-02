@@ -267,6 +267,7 @@ export class LineaPlot extends HTMLElement {
 
   attributeChangedCallback(name: string) {
     if (this.isLoaded && name === "src") {
+      this.isLoaded = false;
       for (const lc of this.lineacharts) {
         this.removeChild(lc);
       }
@@ -274,9 +275,11 @@ export class LineaPlot extends HTMLElement {
       this.results = [];
       this.minTime = +Infinity;
       this.maxTime = -Infinity;
+      console.log("attribute changed ", this.childNodes.length);
       this.fetchAndStoreData().then(() => {
         this.render();
         this.#lazyLoad();
+        this.isLoaded = true;
       });
     }
   }
@@ -312,11 +315,16 @@ export class LineaPlot extends HTMLElement {
     }
     const src = this.getAttribute(attribute) ?? "";
     let srcs: string[] =
-      src.startsWith("[") || src.startsWith('"') ? (JSON.parse(src) as string[]) : [src];
+      src.startsWith("[") || src.startsWith("'") ? (JSON.parse(src) as string[]) : [src];
     if (!(srcs instanceof Array)) {
       srcs = [srcs];
       this.backgroundColors = [];
     }
+    if (srcs.length == 0) {
+      return;
+    }
+    console.log(srcs);
+
     if (attribute == "src") {
       this.srcs = srcs;
     } else if ((attribute = "lazysrc")) {
@@ -376,6 +384,10 @@ export class LineaPlot extends HTMLElement {
       );
       this.lineacharts.push(lc);
       this.appendChild(lc);
+      this.#setStartEndDateTo(
+        result.timestamps[0],
+        result.timestamps[result.timestamps.length - 1],
+      );
     }
   }
 
@@ -692,6 +704,23 @@ export class LineaPlot extends HTMLElement {
     );
     this.endInput.value = this.#zonedDateTimeToLocalInputValue(
       Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(i18n.timezone()),
+    );
+  }
+
+  /**
+   * Set the start and endate in the datepicker to the given values
+   * values are given in UTC epoch milliseconds
+   *
+   */
+  #setStartEndDateTo(min: number, max: number) {
+    if (!this.startInput || !this.endInput) {
+      return;
+    }
+    this.startInput.value = this.#zonedDateTimeToLocalInputValue(
+      Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(i18n.timezone()),
+    );
+    this.endInput.value = this.#zonedDateTimeToLocalInputValue(
+      Temporal.Instant.fromEpochMilliseconds(max).toZonedDateTimeISO(i18n.timezone()),
     );
   }
 
