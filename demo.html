@@ -1,43 +1,45 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <title>linea</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    body {
-      font-family: Helvetica, sans-serif;
-      margin: 20px;
-    }
-
-    linea-plot,
-    linea-plot-year {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-
-      &>div:empty {
-        display: none;
+  <head>
+    <meta charset="utf-8" />
+    <title>linea</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        font-family: Helvetica, sans-serif;
+        margin: 20px;
       }
 
-      &>div {
-        background-color: white;
+      linea-plot,
+      linea-plot-year {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 10px;
+        flex-direction: column;
+        gap: 20px;
+
+        &>div:empty {
+          display: none;
+        }
+
+        &>div {
+          background-color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 10px;
+        }
       }
-    }
-  </style>
-</head>
+    </style>
+  </head>
 
-<body>
-  <linea-plot
-    src='["https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz"]'
-    showSurfaceHoarSeries showTitle showExport showDatePicker>
-  </linea-plot>
-  <script type="module" src="./dist/linea.js"></script>
-</body>
-
+  <body>
+    <linea-plot
+      src='["https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz"]'
+      showSurfaceHoarSeries
+      showTitle
+      showExport
+      showDatePicker
+    >
+    </linea-plot>
+    <script type="module" src="./dist/linea.js"></script>
+  </body>
 </html>
