@@ -709,7 +709,10 @@ export class LineaPlot extends HTMLElement {
    * values are given in UTC epoch milliseconds
    *
    */
-  #setStartEndDateTo(min: number, max: number) {
+  #setStartEndDateTo(
+    min: number,
+    max: number
+  ) {
     if (!this.dp || !this.daterange) {
       return;
     }
@@ -748,7 +751,10 @@ export class LineaPlot extends HTMLElement {
     this.dp.selectDate([this.#zonedDateTimeToDate(startDate), this.#zonedDateTimeToDate(endDate)]);
   }
 
-  #updateDatePickerMinMax(minDate: Temporal.ZonedDateTime, maxDate: Temporal.ZonedDateTime) {
+  #updateDatePickerMinMax(
+    minDate: Temporal.ZonedDateTime,
+    maxDate: Temporal.ZonedDateTime
+  ) {
     this.dp.update({
       minDate: this.#zonedDateTimeToDate(minDate),
       maxDate: this.#zonedDateTimeToDate(maxDate),
