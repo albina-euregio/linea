@@ -364,7 +364,7 @@ export class ExportModal {
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
-      this.lineaPlot.clientWidth,
+      this.lineaPlot.lineacharts[0].plots[0].root.querySelector('canvas').width,
     );
     (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
       this.lineaPlot.lineacharts[0].plots[0].height,
@@ -607,6 +607,8 @@ export class ExportModal {
     const series: uPlot.Series[] = [];
     const legendItems = {};
 
+    const parentWidth = width * this.lineaPlot.lineacharts[0].clientWidth / this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
+
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
       alert("Nothing to export!");
@@ -621,7 +623,7 @@ export class ExportModal {
     const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
     for (const lineachart of this.lineaPlot.lineacharts) {
       lineachart.resizeObserver.unobserve(lineachart);
-      lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
+      lineachart.resizePlots(parentWidth, lineachart.style, heightPerCanvas);
       await new Promise((r) => setTimeout(r, 1));
     }
 
