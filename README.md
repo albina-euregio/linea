@@ -73,15 +73,15 @@ For png export it is possible to adjust the width, height and title of the plot.
 
 An exported `iframe` is useable in a blog. To use in wordpress, place a _individual HTML_ block in a _group_ block. The _group_ block aligns the iframe correctly centered.
 
+To export a user-defined set of weather stations visit the `exportservice.html` file. For the latest LINEA version it is available at https://albina-euregio.gitlab.io/linea/exportservice.html
+
 #### Examples
 
 Minimal working example:
 Shows the whole datset which is in the smet source file. Does not show surface hoar potential, datepickers, export functions.
 
 ```html
-<linea-plot
-    src='data/station1.smet'>
-</linea-plot>
+<linea-plot src="data/station1.smet"> </linea-plot>
 ```
 
 Maximum example, uses every available attribute:
@@ -90,13 +90,14 @@ Maximum example, uses every available attribute:
 <!-- Display all data with date picker -->
 <linea-plot
   src='["data/station1.smet", "data/station2.smet"]'
-  backgroundcolors = '["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
+  backgroundcolors='["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
   showdatepicker
   showsurfacehoarseries
   showtitle
   showexport
   startdate="2025-06-01T00:00[Europe/Berlin]"
-  enddate="2025-06-30T23:59[Europe/Berlin]">
+  enddate="2025-06-30T23:59[Europe/Berlin]"
+>
 </linea-plot>
 ```
 
@@ -105,9 +106,10 @@ Shows a fixed date span from the given smet file:
 ```html
 <!-- Fixed date view without picker -->
 <linea-plot
-    src="data/station1.smet"
-    startdate="2025-06-04T10:00[Europe/Berlin]"
-    enddate="2025-06-04T18:00[Europe/Berlin]">
+  src="data/station1.smet"
+  startdate="2025-06-04T10:00[Europe/Berlin]"
+  enddate="2025-06-04T18:00[Europe/Berlin]"
+>
 </linea-plot>
 ```
 
@@ -123,10 +125,11 @@ For yearly overviews, use the `<linea-plot-year>` component similarly:
 
 ```html
 <linea-plot-year
-    src="path/to/data.smet"
-    startDate="2023-01-01"
-    endDate="2023-12-31"
-    timeZone="CET"
-    showTitle>
+  src="path/to/data.smet"
+  startDate="2023-01-01"
+  endDate="2023-12-31"
+  timeZone="CET"
+  showTitle
+>
 </linea-plot-year>
 ```

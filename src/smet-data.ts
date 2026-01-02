@@ -30,7 +30,7 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
 };
 
 export async function fetchSMET(url: string): Promise<Result> {
-  const response = await fetch(url);
+  let response = await fetch(url);
   if (url.startsWith("https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min")) {
     // https://dataset.api.hub.geosphere.at/
     const metadata = await fetch(
@@ -38,6 +38,16 @@ export async function fetchSMET(url: string): Promise<Result> {
     );
     return parseGeosphereData(await metadata.json(), await response.json());
   }
+
+  if (
+    response.headers.get("Content-Encoding") === "gzip" ||
+    response.headers.get("Content-Type") === "application/x-gzip"
+  ) {
+    const blob = await response.blob();
+    const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
+    response = new Response(stream);
+  }
+
   const smet = await response.text();
   return parseSMET(smet);
 }
