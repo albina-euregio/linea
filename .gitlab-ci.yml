@@ -37,12 +37,9 @@ pages:
   image: alpine:latest
   needs:
     - build
+  pages:
+    publish: dist
   script:
-    - mv dist/ public/
-    - cp exportservice.html public/exportservice.html
     - echo Deploying GitLab Pages
-  artifacts:
-    paths:
-      - public/
   only:
     - tags
