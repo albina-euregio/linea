@@ -225,7 +225,6 @@ export class LineaChart extends AbstractLineaChart {
 
   #filterDWData(values: number[]): number[] {
     let density = Math.ceil(values.length / 7500);
-    console.log(density);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
     return out;
   }
