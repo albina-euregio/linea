@@ -602,11 +602,7 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG({
-    width,
-    heightPerCanvas,
-    title,
-  }) {
+  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }) {
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
