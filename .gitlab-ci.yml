@@ -39,6 +39,7 @@ pages:
     - build
   script:
     - mv dist/ public/
+    - mv exportserice.html public/
     - echo Deploying GitLab Pages
   artifacts:
     paths:
