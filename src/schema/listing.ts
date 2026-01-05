@@ -38,7 +38,9 @@ export const FeaturePropertiesSchema = z
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
     ISWR: number.describe("Incoming Short Wave Radiation in W/m²"),
-    RSWR: number.describe("Outgoing Short Wave Radiation in W/m²"),
+    RSWR: number.describe("Reflected Short Wave Radiation in W/m²"),
+    ILWR: number.describe("Incoming Long Wave Radiation in W/m²"),
+    OLWR: number.describe("Outgoing Long Wave Radiation in W/m²"),
     HS: number.describe("Snow height in m"),
     HSD24: number.describe("Difference in snow height over the last 24h in m"),
     HSD48: number.describe("Difference in snow height over the last 48h in m"),
