@@ -29,6 +29,7 @@ import { ExportModal } from "./exportmodal";
  *    If used with `showdatepicker` and `startdate` it will set the initial date range.
  *    If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
  * - `showexport` - toggles if the export button is shown
+ * - `showinteractiveblogexport` - toggles if the export for the interactive blog button is shown, just in combination with `showexport`
  * 
  * If startdate or enddate is missing it will show all data from the SMET file. 
  * If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
