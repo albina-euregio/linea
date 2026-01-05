@@ -8,22 +8,33 @@ const number = z
 export const FeaturePropertiesSchema = z
   .object({
     name: z.string().describe("Station name"),
-    altitude: z.number().nullish().describe("Altitude above sea level"),
-    Beobachtungsbeginn: z.string().nullish().describe("Observation start year"),
-    operator: z.string().nullish().describe("Station operator"),
-    operatorLink: z.url().nullish().describe("Link to website of station operator"),
-    plot: z
+    shortName: z
       .string()
+      .regex(/^[A-Za-z0-9]+$/)
       .nullish()
-      .describe("For legacy PNG plots: name of plot which includes this station"),
-    "LWD-Nummer": z
-      .string()
-      .nullish()
-      .describe("Station number as defined by avalanche warning service"),
+      .describe("Station short name (such as ISEE2) consisting of [A-Za-z0-9] only"),
+
     microRegionID: z
       .string()
       .nullish()
       .describe("EAWS micro region ID, see https://gitlab.com/eaws/eaws-regions"),
+    stationCharacteristics: z
+      .string()
+      .nullish()
+      .describe("A few sentences describing the station characteristics/locality/history/..."),
+    altitude: z
+      .number()
+      .nullish()
+      .describe("Altitude above sea level (alternatively specify 3rd component in coordinates)"),
+    startYear: z.string().nullish().describe("Observation start year"),
+
+    operator: z.string().nullish().describe("Station operator"),
+    operatorLink: z.url().nullish().describe("Link to website of station operator"),
+
+    plot: z
+      .string()
+      .nullish()
+      .describe("For legacy PNG plots: name of plot which includes this station"),
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
     ISWR: number.describe("Incoming Short Wave Radiation in W/m²"),
