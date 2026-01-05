@@ -333,7 +333,6 @@ export class LineaPlot extends HTMLElement {
     if (srcs.length == 0) {
       return;
     }
-    console.log(srcs);
 
     if (attribute == "src") {
       this.srcs = srcs;
@@ -709,20 +708,19 @@ export class LineaPlot extends HTMLElement {
    * values are given in UTC epoch milliseconds
    *
    */
-  #setStartEndDateTo(
-    min: number,
-    max: number
-  ) {
+  #setStartEndDateTo(min: number, max: number) {
     if (!this.dp || !this.daterange) {
       return;
     }
-    const startDate = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(i18n.timezone());
+    const startDate = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
     const endDate = Temporal.Instant.fromEpochMilliseconds(max).toZonedDateTimeISO(i18n.timezone());
     this.#updateDatepickerStartEndDate(startDate, endDate);
   }
 
   /**
-   * 
+   *
    * Converts a Date to a ZonedDateTime
    * @param value Date to convert
    * @returns a Temporal ZonedDateTime Object
@@ -751,10 +749,7 @@ export class LineaPlot extends HTMLElement {
     this.dp.selectDate([this.#zonedDateTimeToDate(startDate), this.#zonedDateTimeToDate(endDate)]);
   }
 
-  #updateDatePickerMinMax(
-    minDate: Temporal.ZonedDateTime,
-    maxDate: Temporal.ZonedDateTime
-  ) {
+  #updateDatePickerMinMax(minDate: Temporal.ZonedDateTime, maxDate: Temporal.ZonedDateTime) {
     this.dp.update({
       minDate: this.#zonedDateTimeToDate(minDate),
       maxDate: this.#zonedDateTimeToDate(maxDate),
