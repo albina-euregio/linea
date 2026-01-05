@@ -557,8 +557,6 @@ export class ExportModal {
   }
 
   #exportAsLineaPlotElement() {
-    const exports = this.#getExportSettings();
-
     const resultsFiltered: Result[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
