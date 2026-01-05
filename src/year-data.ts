@@ -72,9 +72,23 @@ export class YearData {
       }
       yearData.monthDayData.get(monthDay)?.push(value);
 
-      if (startDate.toString() <= date.toString() && date.toString() <= endDate.toString()) {
+      if (
+        Temporal.PlainDateTime.compare(startDate, date) <= 0 &&
+        Temporal.PlainDateTime.compare(date, endDate) <= 0
+      ) {
         yearData.dates.push(date);
         yearData.values.push(value);
+      }
+    }
+    const lastDate = yearData.dates[yearData.dates.length - 1];
+    if (Temporal.PlainDate.compare(lastDate, endDate) < 0) {
+      for (
+        let d = lastDate.add({ days: 1 });
+        Temporal.PlainDate.compare(d, endDate) <= 0;
+        d = d.add({ days: 1 })
+      ) {
+        yearData.dates.push(d);
+        yearData.values.push(NaN);
       }
     }
     return yearData;

@@ -1,42 +1,13 @@
 import type uPlot from "uplot";
-import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
-
-// Create state variable to control shading
-export const showSurfaceHoar = { value: true };
 
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
  */
 export const opts_TA_TD_TSS: uPlot.Options = {
-  ms: 1, // timestamp multiplier that yields 1 millisecond
-  width: 1040,
-  height: 300,
-  padding: [50, 50, 0, 50],
-  cursor: cursorOpts,
-  legend: {
-    show: true,
-    live: true,
-    fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
-    markers: {
-      fill: (u: any, seriesIdx: number) =>
-        u.series[seriesIdx].stroke(u, seriesIdx) ?? u.series[seriesIdx].stroke(u, seriesIdx),
-      values: (u: any, seriesIdx: number, values: any) => {
-        let result: any = {};
-        u.series.forEach((s: any, i: number) => {
-          if (i === 0) {
-            result[s.label || s.name] = values[i];
-          } else {
-            result[s.label] = values[i] + (s.unit ? ` ${s.unit}` : "");
-          }
-        });
-        return result;
-      },
-    },
-  },
-
+  ...OptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {

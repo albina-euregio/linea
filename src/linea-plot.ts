@@ -1,7 +1,8 @@
-import uPlot from "uplot";
 import { i18n } from "./i18n";
-import { fetchSMET, Result, Values } from "./smet-data";
+import { fetchSMET } from "./smet-data";
+import type { Result, Values } from "./station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
+import { ExportModal } from "./exportmodal";
 
 /**
  * LineaPlot Web Component
@@ -13,7 +14,9 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * @element linea-plot
  * 
  * @attributes
- * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (required)
+ * - `data` {string} - JSON-encoded array of @class Result objects (optional, either this or the `src` attribute)
+ * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute)
+ * - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to lazy fetch data from after loading the component and the data from `src` (optional)
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
  * - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
@@ -25,7 +28,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * - `enddate` {string} - Initial end date in ISO 8601 format (e.g., "2025-06-04T12:24[Europe/Berlin]").
  *    If used with `showdatepicker` and `startdate` it will set the initial date range.
  *    If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
- * - `showexportpng` - toggles if the export png button is shown
+ * - `showexport` - toggles if the export button is shown
  * 
  * If startdate or enddate is missing it will show all data from the SMET file. 
  * If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
@@ -39,7 +42,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
  *   showdatepicker
  *   showsurfacehoarseries
  *   showtitle
- *   showexportpng
+ *   showexport
  *   startdate="2025-06-01T00:00[Europe/Berlin]"
  *   enddate="2025-06-30T23:59[Europe/Berlin]">
  * </linea-plot>
@@ -64,11 +67,17 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * - Automatic calculations of surface hoar potential if data is present
  */
 export class LineaPlot extends HTMLElement {
+  static observedAttributes = ["src"];
+  private isLoaded: boolean = false;
+
+  private exportModal!: ExportModal;
   private startInput!: HTMLInputElement;
   private endInput!: HTMLInputElement;
 
-  private lineacharts: LineaChart[] = [] as LineaChart[];
-  private results: Result[] = [] as Result[];
+  srcs: string[] = [];
+  lazysrcs: string[] = [];
+  lineacharts: LineaChart[] = [] as LineaChart[];
+  results: Result[] = [] as Result[];
 
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
   private minTime: number = +Infinity;
@@ -162,9 +171,7 @@ export class LineaPlot extends HTMLElement {
         .controls-menu > button:last-child {
           border-top-right-radius: 20px;
           border-bottom-right-radius: 20px;
-          border-top-left-radius: 0px;
-          border-bottom-left-radius: 0px;
-          border-left-width: 1px;
+          border-left-width: 2px;
           border-right-width: 2px;
         }
 
@@ -215,42 +222,82 @@ export class LineaPlot extends HTMLElement {
         }
       `;
     this.appendChild(style);
+    this.#addExportModal();
     this.#addControls();
-
-    this.fetchAndStoreData().then(() => {
-      this.#updateValidDateInputs();
-      this.render();
-      if (
-        this.hasAttribute("showdatepicker") &&
-        this.hasAttribute("startdate") &&
-        this.hasAttribute("enddate")
-      ) {
-        this.#setStartEndDateToAttributes();
-      } else {
-        this.#setStartEndDateToMinMax();
-      }
-      if (!this.hasAttribute("showdatepicker")) {
-        this.#handleFixedDateView();
-      }
-    });
+    if (this.hasAttribute("data")) {
+      this.storeDataFromAttribute();
+      this.#initAfterDataStorage();
+    } else {
+      this.fetchAndStoreData().then(() => {
+        this.#initAfterDataStorage();
+        this.#lazyLoad();
+      });
+    }
     this.tabIndex = 0;
     this.focus();
+    this.isLoaded = true;
+  }
+
+  attributeChangedCallback(name: string) {
+    if (this.isLoaded && name === "src") {
+      for (const lc of this.lineacharts) {
+        this.removeChild(lc);
+      }
+      this.lineacharts = [];
+      this.results = [];
+      this.minTime = +Infinity;
+      this.maxTime = -Infinity;
+      this.fetchAndStoreData().then(() => {
+        this.render();
+        this.#lazyLoad();
+      });
+    }
   }
 
   /**
-   * fetches the data from the src attribute, generalizes it and update the valid date inputs
+   * builds and update the UI after data is stored.
    */
-  async fetchAndStoreData() {
+  #initAfterDataStorage() {
+    this.#updateValidDateInputs();
+    this.render();
+    if (
+      this.hasAttribute("showdatepicker") &&
+      this.hasAttribute("startdate") &&
+      this.hasAttribute("enddate")
+    ) {
+      this.#setStartEndDateToAttributes();
+    } else {
+      this.#setStartEndDateToMinMax();
+    }
+    if (!this.hasAttribute("showdatepicker")) {
+      this.#handleFixedDateView();
+    }
+  }
+
+  /**
+   * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
+   * If a other attribute is given it uses this one instead of src
+   * @param attribute {string} - attribute to fetch the data from, default is "src"
+   */
+  async fetchAndStoreData(attribute: string = "src") {
     if (!globalThis.Temporal) {
       await import("temporal-polyfill/global");
     }
-    const src = this.getAttribute("src") ?? "";
+    const src = this.getAttribute(attribute) ?? "";
     let srcs: string[] =
       src.startsWith("[") || src.startsWith('"') ? (JSON.parse(src) as string[]) : [src];
     if (!(srcs instanceof Array)) {
       srcs = [srcs];
       this.backgroundColors = [];
     }
+    if (attribute == "src") {
+      this.srcs = srcs;
+    } else if ((attribute = "lazysrc")) {
+      this.lazysrcs = srcs;
+    }
+    this.results = [];
+    this.minTime = +Infinity;
+    this.maxTime = -Infinity;
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
       if (this.minTime > result.timestamps[0]) {
@@ -266,23 +313,39 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
+   *
+   */
+  storeDataFromAttribute() {
+    const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
+    this.results = results;
+    this.minTime = +Infinity;
+    this.maxTime = -Infinity;
+    for (const result of results) {
+      if (this.minTime > result.timestamps[0]) {
+        this.minTime = result.timestamps[0];
+      }
+      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
+        this.maxTime = result.timestamps[result.timestamps.length - 1];
+      }
+    }
+    this.#generalizeData();
+    this.#updateValidDateInputs();
+  }
+
+  /**
    * creates all LineaCharts and initializate them
    */
   render() {
     if (this.hasAttribute("backgroundcolors")) {
       this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors") ?? "");
     }
-
     for (const i in this.results) {
       const result = this.results[i];
       let lc = new LineaChart(
-        result.timestamps,
-        result.values,
-        result.station,
-        result.altitude,
+        result,
         this.hasAttribute("showtitle"),
         this.hasAttribute("showsurfacehoarseries"),
-        this.backgroundColors[i] ?? "#00000000",
+        this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
       );
       this.lineacharts.push(lc);
       this.appendChild(lc);
@@ -319,14 +382,25 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
+   *
+   */
+  #addExportModal() {
+    this.exportModal = new ExportModal(document.createElement("div"), this);
+    this.appendChild(this.exportModal.modal);
+  }
+
+  /**
    * Adds the controls to the Plot:
-   * - Datepicker with (previousWeek|startDate|endDate|nextWeek)
-   * - Menu buttons with (exportpng|enlarge)
+   * - Datepicker with (previous|startDate|endDate|next)
+   * - Menu buttons with (export|enlarge)
    *
    * enlarge shows all available data and is shown when the datepicker is there too
-   * export png exports the drawed canvas on the screen, see @method #exportAllPlotsToPNG
+   * export exports the drawed canvas on the screen, see @class ExportModal
    */
   #addControls() {
+    if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport")) {
+      return;
+    }
     const controls = document.createElement("div");
     controls.classList.add("controls");
 
@@ -358,55 +432,65 @@ export class LineaPlot extends HTMLElement {
         );
       });
 
-      const previousWeek = document.createElement("button");
-      previousWeek.classList.add("toggle-btn");
-      previousWeek.classList.add("controls-dates-inputs");
-      previousWeek.classList.add("tooltip");
-      previousWeek.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previousweek")}</span>`;
+      const previous = document.createElement("button");
+      previous.classList.add("toggle-btn");
+      previous.classList.add("controls-dates-inputs");
+      previous.classList.add("tooltip");
+      previous.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowLeft") {
-          previousWeek.click();
+          previous.click();
         }
       });
-      previousWeek.addEventListener("click", () => {
+      previous.addEventListener("click", () => {
         const start = this.#inputValueToZonedDateTime(this.startInput.value);
-        if (!start) return;
-        nextWeek.disabled = false;
-        let newEnd = start;
-        let newStart = start.subtract({ days: 7 });
+        const end = this.#inputValueToZonedDateTime(this.endInput.value);
+        if (!start || !end) return;
+        next.disabled = false;
+        let newEnd = end.subtract({ days: 1 });
+        let newStart = start.subtract({ days: 1 });
         if (newStart.toInstant().epochMilliseconds < this.minTime) {
           newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
             i18n.timezone(),
           );
-          previousWeek.disabled = true;
-          newEnd = newStart.add({ days: 7 });
+          previous.disabled = true;
+          newEnd = end;
+        } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
+          this.#setStartEndDateToMinMax();
+          this.filterAndUpdateData();
+          return;
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
         this.filterAndUpdateData(newStart, newEnd);
       });
-      const nextWeek = document.createElement("button");
-      nextWeek.classList.add("toggle-btn");
-      nextWeek.classList.add("controls-dates-inputs");
-      nextWeek.classList.add("tooltip");
-      nextWeek.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:nextweek")}</span>`;
+      const next = document.createElement("button");
+      next.classList.add("toggle-btn");
+      next.classList.add("controls-dates-inputs");
+      next.classList.add("tooltip");
+      next.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
-          nextWeek.click();
+          next.click();
         }
       });
-      nextWeek.addEventListener("click", () => {
+      next.addEventListener("click", () => {
+        const start = this.#inputValueToZonedDateTime(this.startInput.value);
         const end = this.#inputValueToZonedDateTime(this.endInput.value);
-        if (!end) return;
-        previousWeek.disabled = false;
-        let newStart = end;
-        let newEnd = end.add({ days: 7 });
+        if (!start || !end) return;
+        previous.disabled = false;
+        let newStart = start.add({ days: 1 });
+        let newEnd = end.add({ days: 1 });
         if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
           newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
             i18n.timezone(),
           );
-          nextWeek.disabled = true;
-          newStart = newEnd.subtract({ days: 7 });
+          next.disabled = true;
+          newStart = start;
+        } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
+          this.#setStartEndDateToMinMax();
+          this.filterAndUpdateData();
+          return;
         }
         this.startInput.value = this.#zonedDateTimeToLocalInputValue(newStart);
         this.endInput.value = this.#zonedDateTimeToLocalInputValue(newEnd);
@@ -414,22 +498,26 @@ export class LineaPlot extends HTMLElement {
       });
       const breakElement = document.createElement("span");
       breakElement.classList.add("controls-break");
-      controlsdates.appendChild(previousWeek);
+      controlsdates.appendChild(previous);
       controlsdates.appendChild(this.startInput);
       controlsdates.appendChild(breakElement);
       controlsdates.appendChild(this.endInput);
-      controlsdates.appendChild(nextWeek);
+      controlsdates.appendChild(next);
     }
     const menu = document.createElement("div");
     menu.classList.add("controls-menu");
-    if (this.hasAttribute("showexportpng")) {
-      const printbtn = document.createElement("button");
-      printbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:exportpng")}`;
-      printbtn.classList.add("toggle-btn");
-      printbtn.addEventListener("click", () => {
-        this.#exportAllPlotsToPNG();
+    if (this.hasAttribute("showexport")) {
+      const exportbtn = document.createElement("button");
+      exportbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:export")}`;
+      exportbtn.classList.add("toggle-btn");
+      exportbtn.addEventListener("click", () => {
+        if (this.lineacharts.length == 0) {
+          alert("Nothing to export!");
+          return;
+        }
+        this.exportModal.show();
       });
-      menu.appendChild(printbtn);
+      menu.appendChild(exportbtn);
     }
     if (this.hasAttribute("showdatepicker")) {
       const enlargebtn = document.createElement("button");
@@ -445,132 +533,11 @@ export class LineaPlot extends HTMLElement {
         this.#setStartEndDateToMinMax();
         this.filterAndUpdateData();
       });
-      menu.appendChild(enlargebtn);
+      // menu.appendChild(enlargebtn);
     }
     controls.appendChild(menu);
     this.appendChild(controls);
     this.focus();
-  }
-  /**
-   * Exports all shown LineaChart into a single png file.
-   * The rendering uses the already drawn HTMLCanvasElement from each plot and redraws them on a new Canvas.
-   * This leads to the effect, that the rendered png is as width as the shown plots in the browser.
-   * @todo make the png export with fixed width so there are no problem on mobile phones
-   *
-   * The plot title is set automatically set to a string with <stationname> (<altitude>m)[ — <stationname> (<altitude>m)]... using an emdash.
-   * The legend is build autmatically from the shown series.
-   */
-  #exportAllPlotsToPNG() {
-    const canvases: HTMLCanvasElement[] = [];
-    const titles: { station: string; altitude: number }[] = [];
-    const series: uPlot.Series[] = [];
-    const legendItems = {};
-
-    for (const lineachart of this.lineacharts) {
-      const plots: uPlot[] = lineachart.plots;
-      plots
-        .map((p) => p.root.querySelector("canvas")!)
-        .forEach((c) => {
-          canvases.push(c);
-        });
-      const station = lineachart.station;
-      const altitude = lineachart.altitude;
-      titles.push({ station, altitude });
-      plots.map((p) => series.push(...p.series.slice(1)));
-      plots.map((p) =>
-        p.series.slice(1).map((s, i) => {
-          const label = s.label ?? `Series ${i + 1}`;
-          let color = "#000000";
-
-          console.debug(typeof s.stroke);
-          if (typeof s.stroke === "string") {
-            color = s.stroke;
-          } else {
-            const c = s.stroke(p, i + 1);
-            if (typeof c === "string") color = c;
-          }
-          legendItems[label] = color;
-        }),
-      );
-    }
-    console.debug(titles);
-
-    let title = "";
-    titles.forEach((t, i) => {
-      title += t.station + " (" + t.altitude + "m)";
-      if (!(titles.length == i + 1)) {
-        title += " — ";
-      }
-    });
-
-    //build png
-    const titleHeight = title ? 40 : 0;
-    const legendItemHeight = 22;
-    const legendPadding = 20;
-
-    const width = canvases[0].width;
-    const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-    const totalHeight = titleHeight + chartsHeight + 60;
-
-    const outCanvas = document.createElement("canvas");
-    outCanvas.width = width;
-    outCanvas.height = totalHeight;
-
-    //fill background
-    const ctx = outCanvas.getContext("2d")!;
-    ctx.imageSmoothingEnabled = false;
-    ctx.imageSmoothingQuality = "high";
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-    if (title) {
-      ctx.fillStyle = "#000";
-      ctx.font = "24px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(title, outCanvas.width / 2, 40);
-    }
-
-    let y = titleHeight;
-    for (const c of canvases) {
-      ctx.drawImage(c, 0, y);
-      y += c.height;
-    }
-
-    if (Object.keys(legendItems).length > 0) {
-      const swatchSize = 18;
-      const xStart = legendPadding * 2;
-      let legendY = y + legendPadding + legendItemHeight / 2;
-
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-
-      let x = xStart;
-      for (const [label, color] of Object.entries(legendItems)) {
-        const textwidth = ctx.measureText(label).width;
-        if (x + swatchSize + 8 + textwidth > outCanvas.width) {
-          x = xStart;
-          legendY += legendItemHeight;
-          outCanvas.height += legendItemHeight;
-        }
-
-        // colored square
-        ctx.fillStyle = color;
-        ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
-
-        // label
-        ctx.fillStyle = "#000";
-        ctx.fillText(label, x + swatchSize + 8, legendY);
-        x = x + swatchSize + 8 + textwidth + 10;
-      }
-    }
-
-    const url = outCanvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = url;
-    a.target = "_tab";
-    a.click();
   }
 
   /**
@@ -587,6 +554,15 @@ export class LineaPlot extends HTMLElement {
         Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
         Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "2300-00-00T00:00[UTC]"),
       );
+    }
+  }
+
+  /**
+   * Loads lazy data if the lazysrc attribute is given
+   */
+  #lazyLoad() {
+    if (this.hasAttribute("lazysrc")) {
+      this.fetchAndStoreData("lazysrc");
     }
   }
 
@@ -700,15 +676,7 @@ export class LineaPlot extends HTMLElement {
   #zonedDateTimeToLocalInputValue(zdt: Temporal.ZonedDateTime): string {
     // Convert to a PlainDateTime in the same time zone
     const pdt = zdt.toPlainDateTime();
-
-    const yyyy = pdt.year.toString().padStart(4, "0");
-    const mm = pdt.month.toString().padStart(2, "0");
-    const dd = pdt.day.toString().padStart(2, "0");
-    const hh = pdt.hour.toString().padStart(2, "0");
-    const min = pdt.minute.toString().padStart(2, "0");
-
-    // Format required for <input type="datetime-local">
-    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    return pdt.toString({ smallestUnit: "minutes" });
   }
 
   /**

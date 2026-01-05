@@ -1,5 +1,4 @@
 import uPlot from "uplot";
-import { cursorOpts } from "./cursorOpts";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./optsHelper";
@@ -9,20 +8,7 @@ import { OptsHelper } from "./optsHelper";
  */
 
 export const opts_NS_year: uPlot.Options = {
-  ms: 1, // timestamp multiplier that yields 1 millisecond
-  width: 1040,
-  height: 300,
-  padding: [50, 50, 0, 50],
-  cursor: cursorOpts,
-  legend: {
-    show: true,
-    live: true,
-    fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
-    markers: {
-      fill: (u, seriesIdx) => u.series[seriesIdx].stroke(u, seriesIdx),
-    },
-  },
-
+  ...OptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
@@ -80,7 +66,7 @@ export const opts_NS_year_series: uPlot.Series = {
   fill: "#DE2D26",
   scale: "y",
   value: (u, v) =>
-    v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
+    v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "cm"),
 };
 
 export const opts_NS_year_snow_cover: uPlot.Series = {

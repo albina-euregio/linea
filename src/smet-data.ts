@@ -1,37 +1,25 @@
-// P Air pressure, in Pa
-// TA Temperature Air, in Kelvin
-// TD Temperature Dew Point, in Kelvin
-// TSS Temperature Snow Surface, in Kelvin
-// TSG Temperature Surface Ground, in Kelvin
-// RH Relative Humidity, between 0 and 1
-// VW_MAX Maximum wind velocity, in m/s
-// VW Velocity Wind, in m/s
-// DW Direction Wind, in degrees, clockwise and north being zero degrees
-// ISWR Incoming Short Wave Radiation, in W/m2
-// RSWR Reflected Short Wave Radiation, in W/m2 (previously OSWR)
-// ILWR Incoming Long Wave Radiation, in W/m2
-// OLWR Outgoing Long Wave Radiation, in W/m2
-// PINT Precipitation Intensity, in mm/h, as an average over the timestep
-// PSUM Precipitation accumulation, in mm, summed over the last timestep
-// HS Height Snow, in m
-type ParameterType =
-  | "P"
-  | "TA"
-  | "TD"
-  | "TSS"
-  | "TSG"
-  | "RH"
-  | "VW_MAX"
-  | "VW"
-  | "DW"
-  | "ISWR"
-  | "RSWR"
-  | "ILWR"
-  | "OLWR"
-  | "PINT"
-  | "PSUM"
-  | "HS"
-  | "NS";
+import { parseGeosphereData } from "./geosphere-data";
+import type { ParameterType, Result, Units, Values } from "./station-data";
+
+const DEFAULT_UNITS: Units = {
+  P: "Pa",
+  TA: "K",
+  TD: "K",
+  TSS: "K",
+  TSG: "K",
+  RH: "1",
+  VW_MAX: "m/s",
+  VW: "m/s",
+  DW: "degree",
+  ISWR: "W/m²",
+  RSWR: "W/m²",
+  ILWR: "W/m²",
+  OLWR: "W/m²",
+  PINT: "mm/h",
+  PSUM: "mm",
+  HS: "m",
+  NS: "m",
+};
 
 const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number }> = {
   K: { to: "°C", convert: (v) => v - 273.15 },
@@ -41,18 +29,25 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
   mm: { to: "mm", convert: (v) => v },
 };
 
-type Units = Record<ParameterType, string>;
-export type Values = Record<ParameterType, number[]>;
-export type Result = {
-  station: string;
-  altitude: number;
-  timestamps: number[];
-  units: Units;
-  values: Values;
-};
-
 export async function fetchSMET(url: string): Promise<Result> {
-  const response = await fetch(url);
+  let response = await fetch(url);
+  if (url.startsWith("https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min")) {
+    // https://dataset.api.hub.geosphere.at/
+    const metadata = await fetch(
+      "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
+    );
+    return parseGeosphereData(await metadata.json(), await response.json());
+  }
+
+  if (
+    response.headers.get("Content-Encoding") === "gzip" ||
+    response.headers.get("Content-Type") === "application/x-gzip"
+  ) {
+    const blob = await response.blob();
+    const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
+    response = new Response(stream);
+  }
+
   const smet = await response.text();
   return parseSMET(smet);
 }
@@ -85,27 +80,7 @@ export function parseSMET(smet: string): Result {
     let header = "";
     if ((header = parseHeader("fields"))) {
       fields = header.split(separator);
-      units = fields.map(
-        (f) =>
-          ({
-            P: "Pa",
-            TA: "K",
-            TD: "K",
-            TSS: "K",
-            TSG: "K",
-            RH: "1",
-            VW_MAX: "m/s",
-            VW: "m/s",
-            DW: "degree",
-            ISWR: "W/m²",
-            RSWR: "W/m²",
-            ILWR: "W/m²",
-            OLWR: "W/m²",
-            PINT: "mm/h",
-            PSUM: "mm",
-            HS: "m",
-          })[f] ?? "",
-      );
+      units = fields.map((f) => DEFAULT_UNITS[f as ParameterType] ?? "");
       values = fields.map(() => [] as number[]);
       return;
     } else if ((header = parseHeader("#units"))) {

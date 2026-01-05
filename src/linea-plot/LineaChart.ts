@@ -5,16 +5,15 @@ import { opts_DW, opts_VW, opts_VW_MAX, opts_VW_VWG_DW } from "./opts_VW_VWG_DW"
 import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
 import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
 import { dewPoint } from "./dewPoint";
-import { Values } from "../smet-data";
+import { Result, Values } from "../station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
 export class LineaChart extends AbstractLineaChart {
+  private drawedTitle: boolean = false;
+
   constructor(
-    private timestamps: number[],
-    private values: Values,
-    readonly station: string,
-    readonly altitude: number,
+    readonly result: Result,
     private showTitle: boolean,
     private showSurfaceHoarSeries: boolean,
     private backgroundColor: string,
@@ -24,53 +23,73 @@ export class LineaChart extends AbstractLineaChart {
   }
 
   setData(timestamps: number[], values: Values) {
-    this.timestamps = timestamps;
-    this.values = values;
+    this.result.timestamps = timestamps;
+    this.result.values = values;
     let i = 0;
-    if (this.values.TA || this.values.TD || this.values.TSS) {
-      if (this.showSurfaceHoarSeries && this.values.TD && this.values.TSS) {
+    if (this.result.values.TA || this.result.values.TD || this.result.values.TSS) {
+      if (this.showSurfaceHoarSeries && this.result.values.TD && this.result.values.TSS) {
         this.#updateData(this.plots[i], [
-          this.values.TA,
-          this.values.TD ??
-            (this.values.TA && this.values.RH
-              ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+          this.result.values.TA,
+          this.result.values.TD ??
+            (this.result.values.TA && this.result.values.RH
+              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
               : undefined),
-          this.values.TSS,
-          this.values.TD.map((td, i) => {
-            return td < 0 && this.values.TSS[i] < td ? 1000 : -100;
+          this.result.values.TSS,
+          this.result.values.TD.map((td, i) => {
+            return td < 0 && this.result.values.TSS[i] < td ? 1000 : -100;
           }),
         ]);
       } else {
         this.#updateData(this.plots[i], [
-          this.values.TA,
-          this.values.TD ??
-            (this.values.TA && this.values.RH
-              ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+          this.result.values.TA,
+          this.result.values.TD ??
+            (this.result.values.TA && this.result.values.RH
+              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
               : undefined),
-          this.values.TSS,
+          this.result.values.TSS,
         ]);
       }
       i += 1;
     }
-    if (this.values.VW || this.values.VW_MAX || this.values.DW) {
-      this.#updateData(this.plots[i], [this.values.VW, this.values.VW_MAX, this.values.DW]);
+    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
+      this.#updateData(this.plots[i], [
+        this.result.values.VW,
+        this.result.values.VW_MAX,
+        this.result.values.DW,
+      ]);
       i += 1;
     }
-    if (this.values.HS || this.values.PSUM) {
-      this.#updateData(this.plots[i], [this.values.HS, this.values.PSUM]);
+    if (this.result.values.HS || this.result.values.PSUM) {
+      this.#updateData(this.plots[i], [this.result.values.HS, this.result.values.PSUM]);
       i += 1;
     }
-    if (this.values.RH || this.values.ISWR) {
-      this.#updateData(this.plots[i], [this.values.RH, this.values.ISWR]);
+    if (this.result.values.RH || this.result.values.ISWR) {
+      this.#updateData(this.plots[i], [this.result.values.RH, this.result.values.ISWR]);
     }
     this.resizePlots(this.clientWidth, this.style);
   }
 
+  setBackgroundColor(color: string) {
+    this.backgroundColor = color;
+    this.plots.forEach((p) => p.redraw());
+  }
+
+  getBackgroundColor(): string {
+    return this.backgroundColor;
+  }
+
   #updateData(plot: uPlot, values: (number | null)[][]) {
-    plot.setData([
-      this.timestamps,
-      ...values.map((element) => element ?? Array.from(this.timestamps, () => null)),
-    ]);
+    let data = [this.result.timestamps];
+    for (const element of values) {
+      data.push(element ?? this.#createNullArray());
+    }
+    plot.setData(data);
+  }
+
+  #createNullArray() {
+    let nulls: number | null[] = [];
+    this.result.timestamps.forEach(() => nulls.push(null));
+    return nulls;
   }
 
   async createPlots() {
@@ -83,34 +102,37 @@ export class LineaChart extends AbstractLineaChart {
     const plot_RH_GR = document.createElement("div");
     this.replaceChildren(style, plot_TA_TD_TSS, plot_VW_VWG_DW, plot_HS_PSUM, plot_RH_GR);
 
-    if (this.values.TA) {
+    if (this.result.values.TA) {
       const TD =
-        this.values.TD ??
-        (this.values.TA && this.values.RH
-          ? this.values.TA.map((temp, i) => dewPoint(temp, this.values.RH[i]))
+        this.result.values.TD ??
+        (this.result.values.TA && this.result.values.RH
+          ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
           : undefined);
       const p = new uPlot(
         {
           ...opts_TA_TD_TSS,
-          ...(this.showTitle
+          ...(this.showTitle && !this.drawedTitle
             ? {
-                title: `${this.station} (${i18n.number(this.altitude, { maximumFractionDigits: 0 })}m)`,
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
               }
             : {}),
         },
-        [this.timestamps],
+        [this.result.timestamps],
         plot_TA_TD_TSS,
       );
+      this.drawedTitle = true;
+
       this.#modifyDrawHook(p);
-      this.addSeries(p, opts_TA, this.values.TA);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:temperature"));
+      this.addSeries(p, opts_TA, this.result.values.TA);
       this.addSeries(p, opts_TD, TD);
 
       // show snow surface temperature and therefore surface hoar only if available
-      if (this.values.TSS) {
-        this.addSeries(p, opts_TSS, this.values.TSS);
+      if (this.result.values.TSS) {
+        this.addSeries(p, opts_TSS, this.result.values.TSS);
         if (this.showSurfaceHoarSeries) {
-          const surfacehoar = this.values.TD.map((td, i) => {
-            const tss = this.values.TSS[i];
+          const surfacehoar = this.result.values.TD.map((td, i) => {
+            const tss = this.result.values.TSS[i];
             return td < 0 && tss < td ? 1000 : -100;
           });
           this.addSeries(p, opts_SurfaceHoar, surfacehoar);
@@ -120,26 +142,65 @@ export class LineaChart extends AbstractLineaChart {
       }
     }
 
-    if (this.values.VW || this.values.VW_MAX || this.values.DW) {
-      const p = new uPlot({ ...opts_VW_VWG_DW }, [this.timestamps], plot_VW_VWG_DW);
+    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
+      const p = new uPlot(
+        {
+          ...opts_VW_VWG_DW,
+          ...(this.showTitle && !this.drawedTitle
+            ? {
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [this.result.timestamps],
+        plot_VW_VWG_DW,
+      );
+      this.drawedTitle = true;
       this.#modifyDrawHook(p);
-      this.addSeries(p, opts_VW, this.values.VW);
-      this.addSeries(p, opts_VW_MAX, this.values.VW_MAX);
-      this.addSeries(p, opts_DW, this.values.DW);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:wind"));
+      this.addSeries(p, opts_VW, this.result.values.VW);
+      this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
+      this.addSeries(p, opts_DW, this.result.values.DW);
     }
 
-    if (this.values.HS || this.values.PSUM) {
-      const p = new uPlot({ ...opts_HS_PSUM }, [this.timestamps], plot_HS_PSUM);
+    if (this.result.values.HS || this.result.values.PSUM) {
+      const p = new uPlot(
+        {
+          ...opts_HS_PSUM,
+          ...(this.showTitle && !this.drawedTitle
+            ? {
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [this.result.timestamps],
+        plot_HS_PSUM,
+      );
+      this.drawedTitle = true;
       this.#modifyDrawHook(p);
-      this.addSeries(p, opts_HS, this.values.HS);
-      this.addSeries(p, opts_PSUM, this.values.PSUM);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:precipitation"));
+      this.addSeries(p, opts_HS, this.result.values.HS);
+      this.addSeries(p, opts_PSUM, this.result.values.PSUM);
     }
 
-    if (this.values.RH || this.values.ISWR) {
-      const p = new uPlot({ ...opts_RH_GR }, [this.timestamps], plot_RH_GR);
+    if (this.result.values.RH || this.result.values.ISWR) {
+      const p = new uPlot(
+        {
+          ...opts_RH_GR,
+          ...(this.showTitle && !this.drawedTitle
+            ? {
+                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+              }
+            : {}),
+        },
+        [this.result.timestamps],
+        plot_RH_GR,
+      );
+      this.drawedTitle = true;
       this.#modifyDrawHook(p);
-      this.addSeries(p, opts_RH, this.values.RH);
-      this.addSeries(p, opts_ISWR, this.values.ISWR);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr"));
+      this.addSeries(p, opts_RH, this.result.values.RH);
+      this.addSeries(p, opts_ISWR, this.result.values.ISWR);
     }
 
     this.resizePlots(this.clientWidth, this.style);
