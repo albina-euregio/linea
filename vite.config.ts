@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   base: "./",
   build: {
+    chunkSizeWarningLimit: 190,
     license: { fileName: "license.json" },
     lib: {
       entry: "./src/main.ts",
