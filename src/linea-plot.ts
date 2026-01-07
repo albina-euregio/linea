@@ -2,7 +2,6 @@ import { i18n } from "./i18n";
 import { fetchSMET } from "./smet-data";
 import type { Result, Values } from "./station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
-import { ExportModal } from "./exportmodal";
 
 /**
  * LineaPlot Web Component
@@ -388,7 +387,11 @@ export class LineaPlot extends HTMLElement {
   /**
    *
    */
-  #addExportModal() {
+  async #addExportModal() {
+    if (!this.hasAttribute("showexport")) {
+      return;
+    }
+    const { ExportModal } = await import("./exportmodal");
     this.exportModal = new ExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }
