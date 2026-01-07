@@ -55,7 +55,7 @@ export class LineaChart extends AbstractLineaChart {
       this.#updateData(this.plots[i], [
         this.result.values.VW,
         this.result.values.VW_MAX,
-        this.result.values.DW,
+        this.#filterDWData(this.result.values.DW),
       ]);
       i += 1;
     }
@@ -160,7 +160,7 @@ export class LineaChart extends AbstractLineaChart {
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:wind"));
       this.addSeries(p, opts_VW, this.result.values.VW);
       this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
-      this.addSeries(p, opts_DW, this.result.values.DW);
+      this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
     }
 
     if (this.result.values.HS || this.result.values.PSUM) {
@@ -221,6 +221,12 @@ export class LineaChart extends AbstractLineaChart {
       ctx.fillRect(left, top, width, height);
       ctx.restore();
     });
+  }
+
+  #filterDWData(values: number[]): number[] {
+    let density = Math.ceil(values.length / 7500);
+    let out = values.map((o, i) => (i % density == 0 ? o : null));
+    return out;
   }
 }
 
