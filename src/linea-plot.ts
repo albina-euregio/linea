@@ -336,7 +336,7 @@ export class LineaPlot extends HTMLElement {
 
     if (attribute == "src") {
       this.srcs = srcs;
-    } else if ((attribute = "lazysrc")) {
+    } else if ((attribute == "lazysrc")) {
       this.lazysrcs = srcs;
     }
     this.results = [];
@@ -780,7 +780,7 @@ export class LineaPlot extends HTMLElement {
     this.dp = new AirDatepicker(this.daterange, {
       range: true,
       multipleDatesSeparator: " - ",
-      onSelect: (e) => {
+      onSelect: (_) => {
         this.filterAndUpdateData();
       },
     });
