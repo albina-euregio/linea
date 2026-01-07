@@ -11,5 +11,25 @@ export default defineConfig({
       formats: ["es"],
     },
     sourcemap: true,
+    rolldownOptions: {
+      output: {
+        advancedChunks: {
+          groups: [
+            {
+              test: /node_modules\/air-datepicker/,
+              name: "air-datepicker",
+            },
+            {
+              test: /node_modules\/temporal-polyfill/,
+              name: "temporal-polyfill",
+            },
+            {
+              test: /node_modules\/uplot/,
+              name: "uplot",
+            },
+          ],
+        },
+      },
+    },
   },
 });
