@@ -3,18 +3,6 @@ import { fetchSMET } from "./smet-data";
 import type { Result, Values } from "./station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { ExportModal } from "./exportmodal";
-import AirDatepicker from "air-datepicker";
-import "air-datepicker/air-datepicker.css";
-
-import localeEn from "air-datepicker/locale/en";
-import localeDe from "air-datepicker/locale/de";
-import localeCa from "air-datepicker/locale/ca";
-import localeEs from "air-datepicker/locale/es";
-import localeFr from "air-datepicker/locale/fr";
-import localeIt from "air-datepicker/locale/it";
-import localePl from "air-datepicker/locale/pl";
-import localeSk from "air-datepicker/locale/sk";
-import localeSl from "air-datepicker/locale/sl";
 
 /**
  * LineaPlot Web Component
@@ -738,7 +726,9 @@ export class LineaPlot extends HTMLElement {
   /**
    * cosntructs the AirDatePicker
    */
-  #constructDatePicker() {
+  async #constructDatePicker() {
+    const { default: AirDatepicker } = await import("air-datepicker");
+    import("air-datepicker/air-datepicker.css");
     this.dp = new AirDatepicker(this.daterange, {
       range: true,
       multipleDatesSeparator: " - ",
@@ -752,26 +742,26 @@ export class LineaPlot extends HTMLElement {
   /**
    * Localizes the AirDatepicker
    */
-  #localizeDatePicker() {
+  async #localizeDatePicker() {
     let locale;
     switch (i18n.lang) {
       case "en":
-        locale = localeEn; // English
+        locale = (await import("air-datepicker/locale/en")).default; // English
         break;
       case "ca":
-        locale = localeCa; // Catalan
+        locale = (await import("air-datepicker/locale/ca")).default; // Catalan
         break;
       case "de":
-        locale = localeDe; // German
+        locale = (await import("air-datepicker/locale/de")).default; // German
         break;
       case "es":
-        locale = localeEs; // Spanish
+        locale = (await import("air-datepicker/locale/es")).default; // Spanish
         break;
       case "fr":
-        locale = localeFr; // French
+        locale = (await import("air-datepicker/locale/fr")).default; // French
         break;
       case "it":
-        locale = localeIt; // Italian
+        locale = (await import("air-datepicker/locale/it")).default; // Italian
         break;
       case "oc":
         locale = {
@@ -814,16 +804,16 @@ export class LineaPlot extends HTMLElement {
         };
         break;
       case "pl":
-        locale = localePl; // Polish
+        locale = (await import("air-datepicker/locale/pl")).default; // Polish
         break;
       case "sk":
-        locale = localeSk; // Slovak
+        locale = (await import("air-datepicker/locale/sk")).default; // Slovak
         break;
       case "sl":
-        locale = localeSl; // Slovenian
+        locale = (await import("air-datepicker/locale/sl")).default; // Slovenian
         break;
       default:
-        locale = localeEn; // Default to English if no match
+        locale = (await import("air-datepicker/locale/en")).default; // Default to English if no match
         break;
     }
     this.dp.update({
