@@ -200,62 +200,26 @@ export class LineaPlot extends HTMLElement {
           border-right-width = 1px;
         }
 
-        .controls-menu > button:first-child {
+        .dpclass {
           border-top-right-radius: 0px;
           border-bottom-right-radius: 0px;
-          border-top-left-radius: 20px;
-          border-bottom-left-radius: 20px;
-          border-left-width: 2px;
+          border-top-left-radius: 0px;
+          border-bottom-left-radius: 0px;
+          border-left-width: 1px;
           border-right-width: 1px;
         }
         
-        .controls-menu > button:last-child {
+        .controls-dates > button:first-child {
+          border-top-left-radius: 20px;
+          border-bottom-left-radius: 20px;
+          border-right-width: 1px;
+        }
+
+        .controls-dates > button:last-child {
           border-top-right-radius: 20px;
           border-bottom-right-radius: 20px;
-          border-left-width: 2px;
+          border-left-width: 1px;
           border-right-width: 2px;
-        }
-
-        @media (min-width: 641px) {
-          .controls-dates > *:first-child {
-            border-top-left-radius: 20px;
-            border-bottom-left-radius: 20px;
-          }
-
-          .controls-dates > *:last-child {
-            border-top-right-radius: 20px;
-            border-bottom-right-radius: 20px;
-            border-right-width: 2px;
-          }
-
-          .dpclass {
-            border-top-right-radius: 0px;
-            border-bottom-right-radius: 0px;
-            border-top-left-radius: 0px;
-            border-bottom-left-radius: 0px;
-            border-left-width: 1px;
-            border-right-width: 0px;
-          }
-        }
-        
-        @media (max-width: 640px) {
-        
-          .controls-break {
-            flex-basis: 100%; /* force wrap */
-          }
-          
-          .controls-dates > button:first-child {
-            border-top-left-radius: 20px;
-            border-bottom-left-radius: 20px;
-            border-right-width: 1px;
-          }
-
-          .controls-dates > button:last-child {
-            border-top-right-radius: 20px;
-            border-bottom-right-radius: 20px;
-            border-left-width: 1px;
-            border-right-width: 2px;
-          }
         }
       `;
     this.appendChild(style);
@@ -336,7 +300,7 @@ export class LineaPlot extends HTMLElement {
 
     if (attribute == "src") {
       this.srcs = srcs;
-    } else if ((attribute == "lazysrc")) {
+    } else if (attribute == "lazysrc") {
       this.lazysrcs = srcs;
     }
     this.results = [];
@@ -528,11 +492,8 @@ export class LineaPlot extends HTMLElement {
         this.#updateDatepickerStartEndDate(newStart, newEnd);
         this.filterAndUpdateData(newStart, newEnd);
       });
-      const breakElement = document.createElement("span");
-      breakElement.classList.add("controls-break");
       controlsdates.appendChild(previous);
       controlsdates.appendChild(this.daterange);
-      controlsdates.appendChild(breakElement);
       controlsdates.appendChild(next);
     }
     const menu = document.createElement("div");
@@ -788,7 +749,7 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * Localozes the AirDatepicker
+   * Localizes the AirDatepicker
    */
   #localizeDatePicker() {
     let locale;
