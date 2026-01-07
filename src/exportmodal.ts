@@ -356,7 +356,7 @@ export class ExportModal {
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
-      this.lineaPlot.clientWidth,
+      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width,
     );
     (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
       this.lineaPlot.lineacharts[0].plots[0].height,
@@ -588,18 +588,14 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG({
-    width,
-    heightPerCanvas,
-    title,
-  }: {
-    width: number;
-    heightPerCanvas: number;
-    title?: string;
-  }) {
+  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }) {
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
+
+    const parentWidth =
+      (width * this.lineaPlot.lineacharts[0].clientWidth) /
+      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
 
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
@@ -615,7 +611,7 @@ export class ExportModal {
     const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
     for (const lineachart of this.lineaPlot.lineacharts) {
       lineachart.resizeObserver.unobserve(lineachart);
-      lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
+      lineachart.resizePlots(parentWidth, lineachart.style, heightPerCanvas);
       await new Promise((r) => setTimeout(r, 1));
     }
 
@@ -652,7 +648,7 @@ export class ExportModal {
     const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
 
     const outCanvas = document.createElement("canvas");
-    outCanvas.width = width;
+    outCanvas.width = canvases[0].width;
     outCanvas.height = totalHeight;
 
     //fill background
