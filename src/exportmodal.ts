@@ -227,11 +227,6 @@ export class ExportModal {
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:iframe:sub")}</p>
                     </div>
     
-                    <div class="export-option" id="btnExportStandalone" style="display: none;">
-                        <h4>${i18n.message("dialog:weather-station-diagram:controls:button:standalonehtml")}</h4>
-                        <p>${i18n.message("dialog:weather-station-diagram:controls:button:standalonehtml:sub")}</p>
-                    </div>
-    
                     <div class="export-option" id="btnExportPNG">
                         <h4>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage")}</h4>
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage:sub")}</p>
@@ -240,18 +235,20 @@ export class ExportModal {
     
                 <div class="export-settings" id="exportSettings" style="display:none;">
                     <h4>${i18n.message("dialog:weather-station-diagram:controls:label:exportsettings")}</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <div>
-                            <label for="exportWidth">${i18n.message("dialog:weather-station-diagram:controls:label:width")} (px)</label>
-                            <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
-                        </div>
-                        <div>
-                            <label for="exportHeight">${i18n.message("dialog:weather-station-diagram:controls:label:heightpercanvas")} (px):</label>
-                            <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
-                        </div>
-                        <div>
-                            <label for="exportTitle">${i18n.message("dialog:weather-station-diagram:controls:label:title")}</label>
-                            <input type="text" id="exportTitle" value="">
+                    <div style="display: grid; gap: 15px;">
+                        <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                          <div>
+                              <label for="exportWidth">${i18n.message("dialog:weather-station-diagram:controls:label:width")} (px)</label>
+                              <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
+                          </div>
+                          <div>
+                              <label for="exportHeight">${i18n.message("dialog:weather-station-diagram:controls:label:heightpercanvas")} (px):</label>
+                              <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
+                          </div>
+                          <div>
+                              <label for="exportTitle">${i18n.message("dialog:weather-station-diagram:controls:label:title")}</label>
+                              <input type="text" id="exportTitle" value="">
+                          </div>
                         </div>
                         <div>
                             <label for="exportDiagrams">${i18n.message("dialog:weather-station-diagram:controls:label:selectdiagrams")}</label>
@@ -294,17 +291,12 @@ export class ExportModal {
     this.modal.querySelector("#exportHeight")?.addEventListener("keydown", keyListener);
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
-      this.exportSettings.style.display = "flex";
+      document.getElementById("exportSizes").style.display = "none";
       this.#exportAsIframe();
     });
 
-    this.modal.querySelector("#btnExportStandalone")?.addEventListener("click", () => {
-      this.exportSettings.style.display = "flex";
-      // this.exportAsStandalone();
-    });
-
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
-      this.exportSettings.style.display = "flex";
+      document.getElementById("exportSizes").style.display = "grid";
       this.#exportAllPlotsToPNG(this.#getExportSettings());
     });
 
@@ -364,7 +356,7 @@ export class ExportModal {
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
-      this.lineaPlot.clientWidth,
+      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width,
     );
     (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
       this.lineaPlot.lineacharts[0].plots[0].height,
@@ -515,15 +507,9 @@ export class ExportModal {
       resultsFiltered.push(result);
     });
 
-    const html =
-      iframeTemplate
-        .replaceAll("</html>", "")
-        .replaceAll(`height: 300,`, `height: ${exports.heightPerCanvas},`)
-        .replace('lang="en"', `lang="${i18n.lang}"`) +
-      `<body>
-            <linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle/>
-        </body>
-        </html>`;
+    const html = iframeTemplate
+      .replace('lang="en"', `lang="${i18n.lang}"`)
+      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`);
 
     const uint8Array = new TextEncoder().encode(html);
     let binary = "";
@@ -602,18 +588,14 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG({
-    width,
-    heightPerCanvas,
-    title,
-  }: {
-    width: number;
-    heightPerCanvas: number;
-    title?: string;
-  }) {
+  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }) {
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
+
+    const parentWidth =
+      (width * this.lineaPlot.lineacharts[0].clientWidth) /
+      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
 
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
@@ -629,7 +611,7 @@ export class ExportModal {
     const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
     for (const lineachart of this.lineaPlot.lineacharts) {
       lineachart.resizeObserver.unobserve(lineachart);
-      lineachart.resizePlots(width, lineachart.style, heightPerCanvas);
+      lineachart.resizePlots(parentWidth, lineachart.style, heightPerCanvas);
       await new Promise((r) => setTimeout(r, 1));
     }
 
@@ -666,7 +648,7 @@ export class ExportModal {
     const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
 
     const outCanvas = document.createElement("canvas");
-    outCanvas.width = width;
+    outCanvas.width = canvases[0].width;
     outCanvas.height = totalHeight;
 
     //fill background
