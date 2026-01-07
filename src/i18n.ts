@@ -34,6 +34,14 @@ class I18n {
   time(date: Date | number | string, opts?: Intl.DateTimeFormatOptions) {
     if (typeof date === "string") date = Date.parse(date);
     if (!isFinite(+date)) return "";
+    switch (this.lang) {
+      case navigator.language.slice(0, 2):
+        return new Intl.DateTimeFormat(navigator.language, opts).format(date);
+      case "en":
+        return new Intl.DateTimeFormat("en-GB", opts).format(date);
+      case "de":
+        return new Intl.DateTimeFormat("de-AT", opts).format(date);
+    }
     return new Intl.DateTimeFormat(this.lang, opts).format(date);
   }
 
