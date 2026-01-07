@@ -60,6 +60,7 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
   If used with `showdatepicker` and `startdate` it will set the initial date range.
   If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
 - `showexport` - toggles if the export button is shown
+- `showinteractiveblogexport`- in combination with showexport` it shows a button to export just the linea-plot element with corresponding data. In the target platform the linea module has to be available to show the element.
 
 If startdate or enddate is missing it will show all data from the SMET file.
 If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
@@ -71,9 +72,12 @@ If the data from `src` is not a subset from `lazysrc`, the inital view for the u
 The export allows to create png and iframe files from the shown plots. There are selections available to export only specific stations or specific plots.
 For png export it is possible to adjust the width, height and title of the plot. The png file is in a similar style to the former wiskiplot with a combined title, legend at the bottom and a background color for the first station.
 
-An exported `iframe` is useable in a blog. To use in wordpress, place a _individual HTML_ block in a _group_ block. The _group_ block aligns the iframe correctly centered.
+An exported `Embed Code (iframe)` is useable in a website. To use in wordpress, place a _individual HTML_ block in a _group_ block. The _group_ block aligns the iframe correctly centered.
+
+The export option `Embed Code (blog)` is useable in a website, where the linea is already included. Therefore, per default it should not be shown.
 
 To export a user-defined set of weather stations visit the `exportservice.html` file. For the latest LINEA version it is available at https://albina-euregio.gitlab.io/linea/exportservice.html
+In the `exportservice.html` it is possible per default to just export the `linea-plot` element.
 
 #### Examples
 

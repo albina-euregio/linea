@@ -231,6 +231,11 @@ export class ExportModal {
                         <h4>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage")}</h4>
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage:sub")}</p>
                     </div>
+
+                    <div class="export-option" id="btnExportInteractiveBlog" style="display: none;">
+                        <h4>${i18n.message("dialog:weather-station-diagram:controls:button:interactiveblog")}</h4>
+                        <p>${i18n.message("dialog:weather-station-diagram:controls:button:interactiveblog:sub")}</p>
+                    </div>
                 </div>
     
                 <div class="export-settings" id="exportSettings" style="display:none;">
@@ -289,6 +294,16 @@ export class ExportModal {
 
     this.modal.querySelector("#exportWidth")?.addEventListener("keydown", keyListener);
     this.modal.querySelector("#exportHeight")?.addEventListener("keydown", keyListener);
+
+    if (this.lineaPlot.hasAttribute("showinteractiveblogexport")) {
+      (this.modal.querySelector("#btnExportInteractiveBlog") as HTMLElement).style.display = "grid";
+      (this.modal.querySelector("#btnExportInteractiveBlog") as HTMLElement).addEventListener(
+        "click",
+        () => {
+          this.#exportAsLineaPlotElement();
+        },
+      );
+    }
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "none";
@@ -463,8 +478,6 @@ export class ExportModal {
 
     const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
 
-    const indices = this.#getCheckedDiagramIndices();
-
     const resultsFiltered: Result[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
@@ -538,6 +551,64 @@ export class ExportModal {
         type: "text/html",
       }),
       data: iframecode,
+      filename: "linea-chart.html",
+      type: "text/html",
+    };
+  }
+
+  #exportAsLineaPlotElement() {
+    const resultsFiltered: Result[] = [];
+
+    this.#getActiveLineacharts().forEach((lc, index) => {
+      const activeplots = this.#getCheckedPlotIndices(index);
+      let result: Result = {
+        station: lc.result.station,
+        altitude: lc.result.altitude,
+        timestamps: lc.result.timestamps,
+        values: {},
+        units: {},
+      };
+      activeplots.forEach((index) => {
+        if (
+          lc.plotnames[index] ===
+          i18n.message("dialog:weather-station-diagram:plotnames:temperature")
+        ) {
+          result.values.TA = lc.result.values.TA ?? [];
+          result.values.TD = lc.result.values.TD ?? [];
+          result.values.TSS = lc.result.values.TSS ?? [];
+        } else if (
+          lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
+        ) {
+          result.values.VW = lc.result.values.VW ?? [];
+          result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
+          result.values.DW = lc.result.values.DW ?? [];
+        } else if (
+          lc.plotnames[index] ===
+          i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
+        ) {
+          result.values.RH = lc.result.values.RH ?? [];
+          result.values.ISWR = lc.result.values.ISWR ?? [];
+        } else if (
+          lc.plotnames[index] ===
+          i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
+        ) {
+          result.values.HS = lc.result.values.HS ?? [];
+          result.values.PSUM = lc.result.values.PSUM ?? [];
+        }
+      });
+      resultsFiltered.push(result);
+    });
+
+    this.exportResult.style.display = "block";
+    const lineaelement = `<linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle />`;
+
+    document.getElementById("exportCode").innerHTML = lineaelement;
+
+    this.exportdata = {
+      blob: new Blob([lineaelement], {
+        type: "text/html",
+      }),
+      data: lineaelement,
       filename: "linea-chart.html",
       type: "text/html",
     };
