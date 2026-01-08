@@ -220,7 +220,7 @@ export class LineaPlot extends HTMLElement {
       this.fetchAndStoreData().then(() => {
         this.#initAfterDataStorage();
         this.#lazyLoad();
-      });
+      }).catch((_) => {});
     }
     this.tabIndex = 0;
     this.focus();
@@ -239,10 +239,10 @@ export class LineaPlot extends HTMLElement {
       this.maxTime = -Infinity;
       console.log("attribute changed ", this.childNodes.length);
       this.fetchAndStoreData().then(() => {
-        this.render();
+        this.#initAfterDataStorage();
         this.#lazyLoad();
         this.isLoaded = true;
-      });
+      }).catch((_) => {});
     }
   }
 
@@ -283,7 +283,7 @@ export class LineaPlot extends HTMLElement {
       this.backgroundColors = [];
     }
     if (srcs.length == 0) {
-      return;
+      throw "Empty src array!";
     }
 
     if (attribute == "src") {
