@@ -217,10 +217,12 @@ export class LineaPlot extends HTMLElement {
       this.storeDataFromAttribute();
       this.#initAfterDataStorage();
     } else {
-      this.fetchAndStoreData().then(() => {
-        this.#initAfterDataStorage();
-        this.#lazyLoad();
-      }).catch((_) => {});
+      this.fetchAndStoreData()
+        .then(() => {
+          this.#initAfterDataStorage();
+          this.#lazyLoad();
+        })
+        .catch((_) => {});
     }
     this.tabIndex = 0;
     this.focus();
@@ -238,11 +240,13 @@ export class LineaPlot extends HTMLElement {
       this.minTime = +Infinity;
       this.maxTime = -Infinity;
       console.log("attribute changed ", this.childNodes.length);
-      this.fetchAndStoreData().then(() => {
-        this.#initAfterDataStorage();
-        this.#lazyLoad();
-        this.isLoaded = true;
-      }).catch((_) => {});
+      this.fetchAndStoreData()
+        .then(() => {
+          this.#initAfterDataStorage();
+          this.#lazyLoad();
+          this.isLoaded = true;
+        })
+        .catch((_) => {});
     }
   }
 
