@@ -4,11 +4,11 @@ build:
   stage: build
   script:
     - corepack enable
-    - yarn install --immutable
-    - yarn lint
-    - yarn test
-    - yarn build
-    - yarn pack
+    - pnpm install --frozen-lockfile
+    - pnpm lint
+    - pnpm test
+    - pnpm build
+    - pnpm pack
   artifacts:
     paths:
       - demo.html
@@ -23,7 +23,7 @@ publish-npm:
     - build
   script:
     - corepack enable
-    - yarn install --immutable
+    - pnpm install --frozen-lockfile
     - npm config set -- "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/"
     - npm config set -- "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=\${CI_JOB_TOKEN}"
     - npm config set -- "${CI_API_V4_URL#https?}/groups/${CI_PROJECT_ROOT_NAMESPACE}/-/packages/npm/:_authToken=\${CI_JOB_TOKEN}"

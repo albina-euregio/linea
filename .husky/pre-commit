@@ -1,2 +1,2 @@
-yarn oxfmt
-yarn oxlint
+pnpm oxfmt
+pnpm oxlint
