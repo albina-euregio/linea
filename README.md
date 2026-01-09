@@ -17,11 +17,11 @@ LINEA is featuring weather station visualization on:
 
 ## Contributing
 
-1. Install [NodeJS](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/)
-2. Run `yarn`
-3. Run `yarn dev`
+1. Install [NodeJS](https://nodejs.org/en/) and [pnpm](https://pnpm.io/)
+2. Run `pnpm install`
+3. Run `pnpm dev`
 4. Open browser at http://localhost:5173/
-5. Run `yarn build`
+5. Run `pnpm build`
 
 ## Deployment
 
