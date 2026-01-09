@@ -17,10 +17,6 @@ export default defineConfig({
         advancedChunks: {
           groups: [
             {
-              test: /node_modules\/air-datepicker/,
-              name: "air-datepicker",
-            },
-            {
               test: /node_modules\/temporal-polyfill/,
               name: "temporal-polyfill",
             },
