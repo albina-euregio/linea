@@ -8,7 +8,8 @@ export default defineConfig({
     license: { fileName: "license.json" },
     lib: {
       entry: "./src/main.ts",
-      formats: ["es"],
+      formats: ["es", "cjs"],
+      name: "@albina-euregio/linea",
     },
     sourcemap: true,
     rolldownOptions: {

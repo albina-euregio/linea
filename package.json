@@ -16,6 +16,8 @@
     "src/",
     "dist/"
   ],
+  "main": "./dist/linea.cjs",
+  "module": "./dist/linea.js",
   "dependencies": {
     "air-datepicker": "^3.6.0",
     "temporal-polyfill": "^0.3.0",
