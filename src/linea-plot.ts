@@ -284,10 +284,7 @@ export class LineaPlot extends HTMLElement {
     const src = this.getAttribute(attribute) ?? "";
     let srcs: string[] =
       src.startsWith("[") || src.startsWith("'") ? (JSON.parse(src) as string[]) : [src];
-    if (!(srcs instanceof Array)) {
-      srcs = [srcs];
-      this.backgroundColors = [];
-    }
+
     if (srcs.length == 0) {
       throw "Empty src array!";
     }
@@ -298,16 +295,10 @@ export class LineaPlot extends HTMLElement {
       this.lazysrcs = srcs;
     }
     this.results = [];
-    this.minTime = +Infinity;
-    this.maxTime = -Infinity;
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
-      if (this.minTime > result.timestamps[0]) {
-        this.minTime = result.timestamps[0];
-      }
-      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
-        this.maxTime = result.timestamps[result.timestamps.length - 1];
-      }
+      this.minTime = result.timestamps[0];
+      this.maxTime = result.timestamps[result.timestamps.length - 1];
       this.results.push(result);
     }
     this.#generalizeData();
