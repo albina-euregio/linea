@@ -73,6 +73,8 @@ export class LineaPlot extends HTMLElement {
   private exportModal!: ExportModal;
   private daterange!: HTMLInputElement;
 
+  private attributeQueue: Promise<void> = Promise.resolve();
+
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   private dp;
 
@@ -231,23 +233,22 @@ export class LineaPlot extends HTMLElement {
 
   attributeChangedCallback(name: string) {
     if (this.isLoaded && name === "src") {
-      this.isLoaded = false;
-      for (const lc of this.lineacharts) {
-        this.removeChild(lc);
-      }
-      this.lineacharts = [];
-      this.results = [];
-      this.minTime = +Infinity;
-      this.maxTime = -Infinity;
-      this.fetchAndStoreData()
-        .then(() => {
-          this.#initAfterDataStorage();
-          this.#lazyLoad();
-          this.isLoaded = true;
-        })
-        .catch((_) => {
-          this.isLoaded = true;
-        });
+      this.attributeQueue = this.attributeQueue.then(async () => {
+        for (const lc of this.lineacharts) {
+          this.removeChild(lc);
+        }
+        this.lineacharts = [];
+        this.results = [];
+        this.minTime = +Infinity;
+        this.maxTime = -Infinity;
+        this.fetchAndStoreData()
+          .then(() => {
+            this.#initAfterDataStorage();
+            this.#lazyLoad();
+            this.isLoaded = true;
+          })
+          .catch((_) => {});
+      });
     }
   }
 
