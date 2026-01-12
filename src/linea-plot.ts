@@ -755,22 +755,22 @@ export class LineaPlot extends HTMLElement {
     let locale;
     switch (i18n.lang) {
       case "en":
-        locale = (await import("air-datepicker/locale/en")).default; // English
+        locale = await import("air-datepicker/locale/en"); // English
         break;
       case "ca":
-        locale = (await import("air-datepicker/locale/ca")).default; // Catalan
+        locale = await import("air-datepicker/locale/ca"); // Catalan
         break;
       case "de":
-        locale = (await import("air-datepicker/locale/de")).default; // German
+        locale = await import("air-datepicker/locale/de"); // German
         break;
       case "es":
-        locale = (await import("air-datepicker/locale/es")).default; // Spanish
+        locale = await import("air-datepicker/locale/es"); // Spanish
         break;
       case "fr":
-        locale = (await import("air-datepicker/locale/fr")).default; // French
+        locale = await import("air-datepicker/locale/fr"); // French
         break;
       case "it":
-        locale = (await import("air-datepicker/locale/it")).default; // Italian
+        locale = await import("air-datepicker/locale/it"); // Italian
         break;
       case "oc":
         locale = {
@@ -813,20 +813,21 @@ export class LineaPlot extends HTMLElement {
         };
         break;
       case "pl":
-        locale = (await import("air-datepicker/locale/pl")).default; // Polish
+        locale = await import("air-datepicker/locale/pl"); // Polish
         break;
       case "sk":
-        locale = (await import("air-datepicker/locale/sk")).default; // Slovak
+        locale = await import("air-datepicker/locale/sk"); // Slovak
         break;
       case "sl":
-        locale = (await import("air-datepicker/locale/sl")).default; // Slovenian
+        locale = await import("air-datepicker/locale/sl"); // Slovenian
         break;
       default:
-        locale = (await import("air-datepicker/locale/en")).default; // Default to English if no match
+        locale = await import("air-datepicker/locale/en"); // Default to English if no match
         break;
     }
+
     this.dp.update({
-      locale: locale,
+      locale: locale.default.default,
     });
   }
 }
