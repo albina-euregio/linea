@@ -239,7 +239,6 @@ export class LineaPlot extends HTMLElement {
       this.results = [];
       this.minTime = +Infinity;
       this.maxTime = -Infinity;
-      console.log("attribute changed ", this.childNodes.length);
       this.fetchAndStoreData()
         .then(() => {
           this.#initAfterDataStorage();
