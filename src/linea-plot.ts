@@ -245,7 +245,9 @@ export class LineaPlot extends HTMLElement {
           this.#lazyLoad();
           this.isLoaded = true;
         })
-        .catch((_) => {});
+        .catch((_) => {
+          this.isLoaded = true;
+        });
     }
   }
 
@@ -383,7 +385,7 @@ export class LineaPlot extends HTMLElement {
       const filteredTimestamps = res.timestamps.filter(
         (t) => t >= startTimestamp && t <= endTimestamp,
       );
-      this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
+      this.lineacharts[i]?.setData(filteredTimestamps, filteredValues as Values);
     }
   }
 
