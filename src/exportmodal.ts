@@ -406,7 +406,7 @@ export class ExportModal {
       } else if (this.exportdata.type === "text/html") {
         code = [
           new ClipboardItem({
-            "text/plain": this.exportdata.blob,
+            "text/html": this.exportdata.blob,
           }),
         ];
       }
