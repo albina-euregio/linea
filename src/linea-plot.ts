@@ -119,12 +119,12 @@ export class LineaPlot extends HTMLElement {
             }
         }
 
-        .tooltip {
+        .linea-tooltip {
           position: relative;
           display: inline-block;
         }
 
-        .tooltip .tooltiptext {
+        .linea-tooltip .linea-tooltiptext {
           visibility: hidden;
           width: 120px;
           background-color: #555;
@@ -141,7 +141,7 @@ export class LineaPlot extends HTMLElement {
           transition: opacity 0.3s;
         }
 
-        .tooltip .tooltiptext::after {
+        .linea-tooltip .linea-tooltiptext::after {
           content: "";
           position: absolute;
           bottom: 100%;
@@ -152,7 +152,7 @@ export class LineaPlot extends HTMLElement {
           border-color: transparent transparent #555 transparent;
         }
 
-        .tooltip:hover .tooltiptext {
+        .linea-tooltip:hover .linea-tooltiptext {
           visibility: visible;
           opacity: 1;
         }
@@ -429,8 +429,8 @@ export class LineaPlot extends HTMLElement {
       const previous = document.createElement("button");
       previous.classList.add("toggle-btn");
       previous.classList.add("controls-dates-inputs");
-      previous.classList.add("tooltip");
-      previous.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
+      previous.classList.add("linea-tooltip");
+      previous.innerHTML = `&larr;<span class='linea-tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowLeft") {
           previous.click();
@@ -460,8 +460,8 @@ export class LineaPlot extends HTMLElement {
       const next = document.createElement("button");
       next.classList.add("toggle-btn");
       next.classList.add("controls-dates-inputs");
-      next.classList.add("tooltip");
-      next.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
+      next.classList.add("linea-tooltip");
+      next.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           next.click();
@@ -514,9 +514,9 @@ export class LineaPlot extends HTMLElement {
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
         <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </svg><span class="tooltiptext">${i18n.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`;
+        </svg><span class="linea-tooltiptext">${i18n.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`;
       enlargebtn.classList.add("toggle-btn");
-      enlargebtn.classList.add("tooltip");
+      enlargebtn.classList.add("linea-tooltip");
       enlargebtn.addEventListener("click", () => {
         this.#setStartEndDateToMinMax();
         this.filterAndUpdateData();
