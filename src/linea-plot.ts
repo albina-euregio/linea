@@ -74,6 +74,8 @@ export class LineaPlot extends HTMLElement {
   private daterange!: HTMLInputElement;
   private styleTag!: HTMLStyleElement;
 
+  private attributeQueue: Promise<void> = Promise.resolve();
+
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   private dp;
 
@@ -90,6 +92,26 @@ export class LineaPlot extends HTMLElement {
     this.styleTag = document.createElement("style");
 
     this.styleTag.textContent = `
+        linea-plot {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        linea-plot > div:empty {
+          display: none;
+        }
+
+        linea-plot > div {
+          background-color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 10px;
+          border-radius: 6px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
         linea-plot:focus {
           outline: none;
         }
@@ -121,12 +143,12 @@ export class LineaPlot extends HTMLElement {
             }
         }
 
-        .tooltip {
+        .linea-tooltip {
           position: relative;
           display: inline-block;
         }
 
-        .tooltip .tooltiptext {
+        .linea-tooltip .linea-tooltiptext {
           visibility: hidden;
           width: 120px;
           background-color: #555;
@@ -143,7 +165,7 @@ export class LineaPlot extends HTMLElement {
           transition: opacity 0.3s;
         }
 
-        .tooltip .tooltiptext::after {
+        .linea-tooltip .linea-tooltiptext::after {
           content: "";
           position: absolute;
           bottom: 100%;
@@ -154,7 +176,7 @@ export class LineaPlot extends HTMLElement {
           border-color: transparent transparent #555 transparent;
         }
 
-        .tooltip:hover .tooltiptext {
+        .linea-tooltip:hover .linea-tooltiptext {
           visibility: visible;
           opacity: 1;
         }
@@ -233,22 +255,22 @@ export class LineaPlot extends HTMLElement {
 
   attributeChangedCallback(name: string) {
     if (this.isLoaded && name === "src") {
-      this.isLoaded = false;
-      for (const lc of this.lineacharts) {
-        this.removeChild(lc);
-      }
-      this.lineacharts = [];
-      this.results = [];
-      this.minTime = +Infinity;
-      this.maxTime = -Infinity;
-      console.log("attribute changed ", this.childNodes.length);
-      this.fetchAndStoreData()
-        .then(() => {
-          this.#initAfterDataStorage();
-          this.#lazyLoad();
-          this.isLoaded = true;
-        })
-        .catch((_) => {});
+      this.attributeQueue = this.attributeQueue.then(async () => {
+        for (const lc of this.lineacharts) {
+          this.removeChild(lc);
+        }
+        this.lineacharts = [];
+        this.results = [];
+        this.minTime = +Infinity;
+        this.maxTime = -Infinity;
+        this.fetchAndStoreData()
+          .then(() => {
+            this.#initAfterDataStorage();
+            this.#lazyLoad();
+            this.isLoaded = true;
+          })
+          .catch((_) => {});
+      });
     }
   }
 
@@ -284,10 +306,7 @@ export class LineaPlot extends HTMLElement {
     const src = this.getAttribute(attribute) ?? "";
     let srcs: string[] =
       src.startsWith("[") || src.startsWith("'") ? (JSON.parse(src) as string[]) : [src];
-    if (!(srcs instanceof Array)) {
-      srcs = [srcs];
-      this.backgroundColors = [];
-    }
+
     if (srcs.length == 0) {
       throw "Empty src array!";
     }
@@ -298,16 +317,10 @@ export class LineaPlot extends HTMLElement {
       this.lazysrcs = srcs;
     }
     this.results = [];
-    this.minTime = +Infinity;
-    this.maxTime = -Infinity;
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
-      if (this.minTime > result.timestamps[0]) {
-        this.minTime = result.timestamps[0];
-      }
-      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
-        this.maxTime = result.timestamps[result.timestamps.length - 1];
-      }
+      this.minTime = result.timestamps[0];
+      this.maxTime = result.timestamps[result.timestamps.length - 1];
       this.results.push(result);
     }
     this.#generalizeData();
@@ -386,7 +399,7 @@ export class LineaPlot extends HTMLElement {
       const filteredTimestamps = res.timestamps.filter(
         (t) => t >= startTimestamp && t <= endTimestamp,
       );
-      this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
+      this.lineacharts[i]?.setData(filteredTimestamps, filteredValues as Values);
     }
   }
 
@@ -431,8 +444,8 @@ export class LineaPlot extends HTMLElement {
       const previous = document.createElement("button");
       previous.classList.add("toggle-btn");
       previous.classList.add("controls-dates-inputs");
-      previous.classList.add("tooltip");
-      previous.innerHTML = `&larr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
+      previous.classList.add("linea-tooltip");
+      previous.innerHTML = `&larr;<span class='linea-tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowLeft") {
           previous.click();
@@ -462,8 +475,8 @@ export class LineaPlot extends HTMLElement {
       const next = document.createElement("button");
       next.classList.add("toggle-btn");
       next.classList.add("controls-dates-inputs");
-      next.classList.add("tooltip");
-      next.innerHTML = `&rarr;<span class='tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
+      next.classList.add("linea-tooltip");
+      next.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           next.click();
@@ -516,9 +529,9 @@ export class LineaPlot extends HTMLElement {
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
         <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </svg><span class="tooltiptext">${i18n.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`;
+        </svg><span class="linea-tooltiptext">${i18n.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`;
       enlargebtn.classList.add("toggle-btn");
-      enlargebtn.classList.add("tooltip");
+      enlargebtn.classList.add("linea-tooltip");
       enlargebtn.addEventListener("click", () => {
         this.#setStartEndDateToMinMax();
         this.filterAndUpdateData();
@@ -756,22 +769,22 @@ export class LineaPlot extends HTMLElement {
     let locale;
     switch (i18n.lang) {
       case "en":
-        locale = (await import("air-datepicker/locale/en")).default; // English
+        locale = await import("air-datepicker/locale/en"); // English
         break;
       case "ca":
-        locale = (await import("air-datepicker/locale/ca")).default; // Catalan
+        locale = await import("air-datepicker/locale/ca"); // Catalan
         break;
       case "de":
-        locale = (await import("air-datepicker/locale/de")).default; // German
+        locale = await import("air-datepicker/locale/de"); // German
         break;
       case "es":
-        locale = (await import("air-datepicker/locale/es")).default; // Spanish
+        locale = await import("air-datepicker/locale/es"); // Spanish
         break;
       case "fr":
-        locale = (await import("air-datepicker/locale/fr")).default; // French
+        locale = await import("air-datepicker/locale/fr"); // French
         break;
       case "it":
-        locale = (await import("air-datepicker/locale/it")).default; // Italian
+        locale = await import("air-datepicker/locale/it"); // Italian
         break;
       case "oc":
         locale = {
@@ -814,20 +827,21 @@ export class LineaPlot extends HTMLElement {
         };
         break;
       case "pl":
-        locale = (await import("air-datepicker/locale/pl")).default; // Polish
+        locale = await import("air-datepicker/locale/pl"); // Polish
         break;
       case "sk":
-        locale = (await import("air-datepicker/locale/sk")).default; // Slovak
+        locale = await import("air-datepicker/locale/sk"); // Slovak
         break;
       case "sl":
-        locale = (await import("air-datepicker/locale/sl")).default; // Slovenian
+        locale = await import("air-datepicker/locale/sl"); // Slovenian
         break;
       default:
-        locale = (await import("air-datepicker/locale/en")).default; // Default to English if no match
+        locale = await import("air-datepicker/locale/en"); // Default to English if no match
         break;
     }
+
     this.dp.update({
-      locale: locale,
+      locale: locale.default.default,
     });
   }
 }
