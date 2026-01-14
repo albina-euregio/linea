@@ -90,6 +90,26 @@ export class LineaPlot extends HTMLElement {
   connectedCallback() {
     const style = document.createElement("style");
     style.textContent = `
+        linea-plot {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        linea-plot > div:empty {
+          display: none;
+        }
+
+        linea-plot > div {
+          background-color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 10px;
+          border-radius: 6px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
         linea-plot:focus {
           outline: none;
         }
