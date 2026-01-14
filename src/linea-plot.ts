@@ -72,6 +72,7 @@ export class LineaPlot extends HTMLElement {
 
   private exportModal!: ExportModal;
   private daterange!: HTMLInputElement;
+  private styleTag!: HTMLStyleElement;
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   private dp;
@@ -86,8 +87,9 @@ export class LineaPlot extends HTMLElement {
   private maxTime: number = -Infinity;
 
   connectedCallback() {
-    const style = document.createElement("style");
-    style.textContent = `
+    this.styleTag = document.createElement("style");
+
+    this.styleTag.textContent = `
         linea-plot:focus {
           outline: none;
         }
@@ -210,7 +212,7 @@ export class LineaPlot extends HTMLElement {
           border-right-width: 2px;
         }
       `;
-    this.appendChild(style);
+    this.appendChild(this.styleTag);
     this.#addExportModal();
     this.#addControls();
     if (this.hasAttribute("data")) {
@@ -735,7 +737,8 @@ export class LineaPlot extends HTMLElement {
    */
   async #constructDatePicker() {
     const { default: AirDatepicker } = await import("air-datepicker");
-    import("air-datepicker/air-datepicker.css");
+    const css = await import("air-datepicker/air-datepicker.css?raw");
+    this.styleTag.textContent += css.default;
     this.dp = new AirDatepicker(this.daterange, {
       range: true,
       multipleDatesSeparator: " - ",
