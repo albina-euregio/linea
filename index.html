@@ -9,36 +9,18 @@
         font-family: Helvetica, sans-serif;
           margin: 20px;
       }
-      linea-plot,
-      linea-plot-year {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-
-        &>div:empty {
-          display: none;
-        }
-
-        &>div {
-          background-color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 10px;
-        }
-      }
     </style>
   </head>
 
   <body>
     <!-- src="/prototype/mock.data" -->
-    <!-- <linea-plot-year
+    <linea-plot-year
       src="https://api.avalanche.report/lawine/grafiken/smet/all/GGAL2.smet.gz"
       startDate="2024-09-01"
       endDate="2025-06-01"
       showTitle
     >
-    </linea-plot-year> -->
+    </linea-plot-year>
     <nav></nav>
     <linea-plot
       src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
