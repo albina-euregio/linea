@@ -73,6 +73,8 @@ export class LineaPlot extends HTMLElement {
   private exportModal!: ExportModal;
   private daterange!: HTMLInputElement;
 
+  private attributeQueue: Promise<void> = Promise.resolve();
+
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   private dp;
 
@@ -88,6 +90,26 @@ export class LineaPlot extends HTMLElement {
   connectedCallback() {
     const style = document.createElement("style");
     style.textContent = `
+        linea-plot {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        linea-plot > div:empty {
+          display: none;
+        }
+
+        linea-plot > div {
+          background-color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 10px;
+          border-radius: 6px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
         linea-plot:focus {
           outline: none;
         }
@@ -231,22 +253,22 @@ export class LineaPlot extends HTMLElement {
 
   attributeChangedCallback(name: string) {
     if (this.isLoaded && name === "src") {
-      this.isLoaded = false;
-      for (const lc of this.lineacharts) {
-        this.removeChild(lc);
-      }
-      this.lineacharts = [];
-      this.results = [];
-      this.minTime = +Infinity;
-      this.maxTime = -Infinity;
-      console.log("attribute changed ", this.childNodes.length);
-      this.fetchAndStoreData()
-        .then(() => {
-          this.#initAfterDataStorage();
-          this.#lazyLoad();
-          this.isLoaded = true;
-        })
-        .catch((_) => {});
+      this.attributeQueue = this.attributeQueue.then(async () => {
+        for (const lc of this.lineacharts) {
+          this.removeChild(lc);
+        }
+        this.lineacharts = [];
+        this.results = [];
+        this.minTime = +Infinity;
+        this.maxTime = -Infinity;
+        this.fetchAndStoreData()
+          .then(() => {
+            this.#initAfterDataStorage();
+            this.#lazyLoad();
+            this.isLoaded = true;
+          })
+          .catch((_) => {});
+      });
     }
   }
 
@@ -282,10 +304,7 @@ export class LineaPlot extends HTMLElement {
     const src = this.getAttribute(attribute) ?? "";
     let srcs: string[] =
       src.startsWith("[") || src.startsWith("'") ? (JSON.parse(src) as string[]) : [src];
-    if (!(srcs instanceof Array)) {
-      srcs = [srcs];
-      this.backgroundColors = [];
-    }
+
     if (srcs.length == 0) {
       throw "Empty src array!";
     }
@@ -296,16 +315,10 @@ export class LineaPlot extends HTMLElement {
       this.lazysrcs = srcs;
     }
     this.results = [];
-    this.minTime = +Infinity;
-    this.maxTime = -Infinity;
     for (const src in srcs) {
       let result = await fetchSMET(srcs[src]);
-      if (this.minTime > result.timestamps[0]) {
-        this.minTime = result.timestamps[0];
-      }
-      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
-        this.maxTime = result.timestamps[result.timestamps.length - 1];
-      }
+      this.minTime = result.timestamps[0];
+      this.maxTime = result.timestamps[result.timestamps.length - 1];
       this.results.push(result);
     }
     this.#generalizeData();
@@ -384,7 +397,7 @@ export class LineaPlot extends HTMLElement {
       const filteredTimestamps = res.timestamps.filter(
         (t) => t >= startTimestamp && t <= endTimestamp,
       );
-      this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
+      this.lineacharts[i]?.setData(filteredTimestamps, filteredValues as Values);
     }
   }
 

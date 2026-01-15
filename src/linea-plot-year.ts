@@ -90,7 +90,14 @@ export class LineaPlotYear extends AbstractLineaChart {
     );
 
     const style = document.createElement("style");
-    style.textContent = css;
+    style.textContent =
+      css +
+      `
+        linea-plot-year {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }`;
     const plot_HS_year = document.createElement("div");
     const plot_NS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
