@@ -72,6 +72,7 @@ export class LineaPlot extends HTMLElement {
 
   private exportModal!: ExportModal;
   private daterange!: HTMLInputElement;
+  private styleTag!: HTMLStyleElement;
 
   private attributeQueue: Promise<void> = Promise.resolve();
 
@@ -88,8 +89,9 @@ export class LineaPlot extends HTMLElement {
   private maxTime: number = -Infinity;
 
   connectedCallback() {
-    const style = document.createElement("style");
-    style.textContent = `
+    this.styleTag = document.createElement("style");
+
+    this.styleTag.textContent = `
         linea-plot {
           display: flex;
           flex-direction: column;
@@ -232,7 +234,7 @@ export class LineaPlot extends HTMLElement {
           border-right-width: 2px;
         }
       `;
-    this.appendChild(style);
+    this.appendChild(this.styleTag);
     this.#addExportModal();
     this.#addControls();
     if (this.hasAttribute("data")) {
@@ -748,7 +750,8 @@ export class LineaPlot extends HTMLElement {
    */
   async #constructDatePicker() {
     const { default: AirDatepicker } = await import("air-datepicker");
-    import("air-datepicker/air-datepicker.css");
+    const css = await import("air-datepicker/air-datepicker.css?raw");
+    this.styleTag.textContent += css.default;
     this.dp = new AirDatepicker(this.daterange, {
       range: true,
       multipleDatesSeparator: " - ",
@@ -766,22 +769,22 @@ export class LineaPlot extends HTMLElement {
     let locale;
     switch (i18n.lang) {
       case "en":
-        locale = await import("air-datepicker/locale/en"); // English
+        locale = (await import("air-datepicker/locale/en")).default.default; // English
         break;
       case "ca":
-        locale = await import("air-datepicker/locale/ca"); // Catalan
+        locale = (await import("air-datepicker/locale/ca")).default.default; // Catalan
         break;
       case "de":
-        locale = await import("air-datepicker/locale/de"); // German
+        locale = (await import("air-datepicker/locale/de")).default.default; // German
         break;
       case "es":
-        locale = await import("air-datepicker/locale/es"); // Spanish
+        locale = (await import("air-datepicker/locale/es")).default.default; // Spanish
         break;
       case "fr":
-        locale = await import("air-datepicker/locale/fr"); // French
+        locale = (await import("air-datepicker/locale/fr")).default.default; // French
         break;
       case "it":
-        locale = await import("air-datepicker/locale/it"); // Italian
+        locale = (await import("air-datepicker/locale/it")).default.default; // Italian
         break;
       case "oc":
         locale = {
@@ -824,21 +827,21 @@ export class LineaPlot extends HTMLElement {
         };
         break;
       case "pl":
-        locale = await import("air-datepicker/locale/pl"); // Polish
+        locale = (await import("air-datepicker/locale/pl")).default.default; // Polish
         break;
       case "sk":
-        locale = await import("air-datepicker/locale/sk"); // Slovak
+        locale = (await import("air-datepicker/locale/sk")).default.default; // Slovak
         break;
       case "sl":
-        locale = await import("air-datepicker/locale/sl"); // Slovenian
+        locale = (await import("air-datepicker/locale/sl")).default.default; // Slovenian
         break;
       default:
-        locale = await import("air-datepicker/locale/en"); // Default to English if no match
+        locale = (await import("air-datepicker/locale/en")).default.default; // Default to English if no match
         break;
     }
 
     this.dp.update({
-      locale: locale.default.default,
+      locale: locale,
     });
   }
 }
