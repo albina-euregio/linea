@@ -1,7 +1,7 @@
 import type uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
@@ -32,6 +32,11 @@ export const opts_HS_PSUM: uPlot.Options = {
         );
       },
     ],
+    setSelect: [
+      (u) => {
+        OptsHelper.calculateAxisLimitsInZoom(u, [1]);
+      },
+    ],
   },
 
   scales: {
@@ -50,8 +55,16 @@ export const opts_HS_PSUM: uPlot.Options = {
     {
       scale: "y",
       splits: (u) => {
-        const max = u.scales.y.max ?? 0;
-        return max > 500 ? [0, 100, 200, 300, 400, 500] : [0, 50, 100, 150, 200, 250];
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [0, 0],
+          maxs: [250, 500],
+          splits: [
+            [0, 50, 100, 150, 200, 250],
+            [0, 100, 200, 300, 400, 500],
+          ],
+          splitcount: 6,
+        } as SplitOptions);
       },
       stroke: "#08519C",
     },

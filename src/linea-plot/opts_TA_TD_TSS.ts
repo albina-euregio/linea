@@ -1,7 +1,7 @@
 import type uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
@@ -51,11 +51,16 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.restore();
       },
     ],
+    setSelect: [
+      (u) => {
+        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3]);
+      },
+    ],
   },
 
   scales: {
     y: {
-      range: (u, dataMin, dataMax) => {
+      range: (_u, _dataMin, dataMax) => {
         return dataMax > 10 ? [-30, 30] : [-30, 10];
       },
     },
@@ -73,8 +78,16 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       stroke: "#DE2D26",
       grid: { show: true },
       splits: (u) => {
-        const max = u.scales.y.max ?? 0;
-        return max > 10 ? [-30, -20, -10, 0, 10, 20, 30] : [-30, -20, -10, 0, 10];
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [-30, -30],
+          maxs: [10, 30],
+          splits: [
+            [-30, -20, -10, 0, 10],
+            [-30, -20, -10, 0, 10, 20, 30],
+          ],
+          splitcount: 9,
+        } as SplitOptions);
       },
 
       values: (u, vals) => vals.map((v) => v.toString()),
@@ -85,6 +98,18 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       stroke: "#6aafd5",
       grid: {
         show: false,
+      },
+      splits: (u) => {
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [-30, -30],
+          maxs: [10, 30],
+          splits: [
+            [-30, -20, -10, 0, 10],
+            [-30, -20, -10, 0, 10, 20, 30],
+          ],
+          splitcount: 9,
+        } as SplitOptions);
       },
       values: (u, vals) => vals.map((v) => v.toString()),
     },
