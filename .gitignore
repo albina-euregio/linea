@@ -1,7 +1,6 @@
 /.idea
 /.local
 /.vscode
-/.yarn
 /*.log
 /dist
 /node_modules

@@ -7,74 +7,28 @@
     <style>
       body {
         font-family: Helvetica, sans-serif;
-        margin: 20px;
-      }
-      .controls {
-        text-align: center;
-      }
-      .toggle-btn {
-        padding: 10px 20px;
-        background-color: #ffffff;
-        color: #555555;
-        border: 2px solid #19aaff;
-        border-radius: 40px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 300;
-        transition:
-          background-color 0.3s ease,
-          color 0.3s ease;
-        &:hover {
-          background-color: #19aaff;
-          color: white;
-        }
-        &:active {
-          transform: translateY(1px);
-        }
-      }
-      linea-plot,
-      linea-plot-year {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        & > div:empty {
-          display: none;
-        }
-        & > div {
-          background-color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 10px;
-        }
+          margin: 20px;
       }
     </style>
   </head>
+
   <body>
     <!-- src="/prototype/mock.data" -->
-    <!-- <linea-plot-year
+    <linea-plot-year
       src="https://api.avalanche.report/lawine/grafiken/smet/all/GGAL2.smet.gz"
       startDate="2024-09-01"
       endDate="2025-06-01"
       showTitle
     >
-    </linea-plot-year> -->
+    </linea-plot-year>
     <nav></nav>
-
     <linea-plot
-      src="https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min?station_ids=11318&parameters=TL%2CFF%2CFFX%2CDD%2CP%2CRF%2CSCHNEE%2CTP&output_format=geojson&start=2025-12-12T00%3A00%3A00.000Z&end=2025-12-19T00%3A00%3A00.000Z"
+      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
+      lazysrc='["https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz"]'
       showsurfacehoarseries
       showtitle
       showexport
-      showdatepicker
-    >
-    </linea-plot>
-
-    <linea-plot
-      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz", "https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
-      showsurfacehoarseries
-      showtitle
-      showexport
+      showinteractiveblogexport
       showdatepicker
     >
     </linea-plot>

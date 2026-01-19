@@ -1,4 +1,4 @@
-import { StationData } from "./station-data";
+import { Result } from "./station-data";
 
 interface ParameterValues {
   name: string;
@@ -71,7 +71,7 @@ export interface Station {
   is_active: boolean;
 }
 
-export function parseGeosphereData(metadata: Metadata, collection: FeatureCollection): StationData {
+export function parseGeosphereData(metadata: Metadata, collection: FeatureCollection): Result {
   if (collection?.features?.length !== 1) throw new Error();
   const feature = collection?.features?.[0];
   const station = metadata.stations.find((s) => s.id === feature.properties.station);

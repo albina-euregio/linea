@@ -17,11 +17,11 @@ LINEA is featuring weather station visualization on:
 
 ## Contributing
 
-1. Install [NodeJS](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/)
-2. Run `yarn`
-3. Run `yarn dev`
+1. Install [NodeJS](https://nodejs.org/en/) and [pnpm](https://pnpm.io/)
+2. Run `pnpm install`
+3. Run `pnpm dev`
 4. Open browser at http://localhost:5173/
-5. Run `yarn build`
+5. Run `pnpm build`
 
 ## Deployment
 
@@ -60,6 +60,7 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
   If used with `showdatepicker` and `startdate` it will set the initial date range.
   If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
 - `showexport` - toggles if the export button is shown
+- `showinteractiveblogexport`- in combination with showexport` it shows a button to export just the linea-plot element with corresponding data. In the target platform the linea module has to be available to show the element.
 
 If startdate or enddate is missing it will show all data from the SMET file.
 If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
@@ -71,7 +72,12 @@ If the data from `src` is not a subset from `lazysrc`, the inital view for the u
 The export allows to create png and iframe files from the shown plots. There are selections available to export only specific stations or specific plots.
 For png export it is possible to adjust the width, height and title of the plot. The png file is in a similar style to the former wiskiplot with a combined title, legend at the bottom and a background color for the first station.
 
-An exported `iframe` is useable in a blog. To use in wordpress, place a _individual HTML_ block in a _group_ block. The _group_ block aligns the iframe correctly centered.
+An exported `Embed Code (iframe)` is useable in a website. To use in wordpress, place a _individual HTML_ block in a _group_ block. The _group_ block aligns the iframe correctly centered.
+
+The export option `Embed Code (blog)` is useable in a website, where the linea is already included. Therefore, per default it should not be shown.
+
+To export a user-defined set of weather stations visit the `exportservice.html` file. For the latest LINEA version it is available at https://albina-euregio.gitlab.io/linea/exportservice.html
+In the `exportservice.html` it is possible per default to just export the `linea-plot` element.
 
 #### Examples
 
@@ -79,9 +85,7 @@ Minimal working example:
 Shows the whole datset which is in the smet source file. Does not show surface hoar potential, datepickers, export functions.
 
 ```html
-<linea-plot
-    src='data/station1.smet'>
-</linea-plot>
+<linea-plot src="data/station1.smet"> </linea-plot>
 ```
 
 Maximum example, uses every available attribute:
@@ -90,13 +94,14 @@ Maximum example, uses every available attribute:
 <!-- Display all data with date picker -->
 <linea-plot
   src='["data/station1.smet", "data/station2.smet"]'
-  backgroundcolors = '["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
+  backgroundcolors='["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
   showdatepicker
   showsurfacehoarseries
   showtitle
   showexport
   startdate="2025-06-01T00:00[Europe/Berlin]"
-  enddate="2025-06-30T23:59[Europe/Berlin]">
+  enddate="2025-06-30T23:59[Europe/Berlin]"
+>
 </linea-plot>
 ```
 
@@ -105,9 +110,10 @@ Shows a fixed date span from the given smet file:
 ```html
 <!-- Fixed date view without picker -->
 <linea-plot
-    src="data/station1.smet"
-    startdate="2025-06-04T10:00[Europe/Berlin]"
-    enddate="2025-06-04T18:00[Europe/Berlin]">
+  src="data/station1.smet"
+  startdate="2025-06-04T10:00[Europe/Berlin]"
+  enddate="2025-06-04T18:00[Europe/Berlin]"
+>
 </linea-plot>
 ```
 
@@ -123,10 +129,11 @@ For yearly overviews, use the `<linea-plot-year>` component similarly:
 
 ```html
 <linea-plot-year
-    src="path/to/data.smet"
-    startDate="2023-01-01"
-    endDate="2023-12-31"
-    timeZone="CET"
-    showTitle>
+  src="path/to/data.smet"
+  startDate="2023-01-01"
+  endDate="2023-12-31"
+  timeZone="CET"
+  showTitle
+>
 </linea-plot-year>
 ```
