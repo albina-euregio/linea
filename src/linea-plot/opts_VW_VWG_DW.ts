@@ -59,8 +59,10 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   scales: {
     y: {
       range: (u, dataMin, dataMax) => {
-        let validMax = dataMax;
-        return validMax > 100 ? [0, 120] : [0, 100];
+        const closest = [100, 120, 160, 230, 300].reduce((prev, curr) =>
+          dataMax > prev && dataMax <= curr ? curr : prev,
+        );
+        return [0, closest];
       },
     },
     y2: {
@@ -77,11 +79,14 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       splits: (u) => {
         return OptsHelper.getSplits({
           uplot: u,
-          mins: [0, 0],
-          maxs: [100, 120],
+          mins: [0, 0, 0, 0, 0],
+          maxs: [100, 120, 160, 230, 300],
           splits: [
             [0, 25, 50, 75, 100],
             [0, 30, 60, 90, 120],
+            [0, 40, 80, 120, 160],
+            [0, 60, 120, 180, 230],
+            [0, 75, 150, 225, 300],
           ],
           splitcount: 5,
         } as SplitOptions);
