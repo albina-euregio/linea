@@ -1,7 +1,7 @@
 import type uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for Windgeschwindigkeit [km/h] & Windrichtung [˚]
@@ -50,12 +50,19 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         ctx.restore();
       },
     ],
+    setSelect: [
+      (u) => {
+        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2]);
+      },
+    ],
   },
   scales: {
     y: {
       range: (u, dataMin, dataMax) => {
-        let validMax = dataMax;
-        return validMax > 100 ? [0, 120] : [0, 100];
+        const closest = [100, 120, 160, 230, 300].reduce((prev, curr) =>
+          dataMax > prev && dataMax <= curr ? curr : prev,
+        );
+        return [0, closest];
       },
     },
     y2: {
@@ -70,8 +77,19 @@ export const opts_VW_VWG_DW: uPlot.Options = {
       stroke: "#00E2B6",
       grid: { show: true },
       splits: (u) => {
-        const max = u.scales.y.max ?? 0;
-        return max > 100 ? [0, 30, 60, 90, 120] : [0, 25, 50, 75, 100];
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [0, 0, 0, 0, 0],
+          maxs: [100, 120, 160, 230, 300],
+          splits: [
+            [0, 25, 50, 75, 100],
+            [0, 30, 60, 90, 120],
+            [0, 40, 80, 120, 160],
+            [0, 60, 120, 180, 230],
+            [0, 75, 150, 225, 300],
+          ],
+          splitcount: 5,
+        } as SplitOptions);
       },
       values: (u, vals) => vals.map((v) => v.toString()),
     },
