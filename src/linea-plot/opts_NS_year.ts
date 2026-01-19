@@ -37,7 +37,7 @@ export const opts_NS_year: uPlot.Options = {
 
   scales: {
     y: {
-      range: [0, 27],
+      range: [0, 75],
     },
   },
 
@@ -46,7 +46,7 @@ export const opts_NS_year: uPlot.Options = {
     {
       scale: "y",
       stroke: "#DE2D26",
-      splits: [0, 5, 10, 15, 20, 25],
+      splits: [0, 15, 30, 45, 60, 75],
     },
   ],
 

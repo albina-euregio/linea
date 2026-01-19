@@ -37,7 +37,7 @@ export const opts_HS_PSUM: uPlot.Options = {
   scales: {
     y: {
       range: (u, dataMin, dataMax) => {
-        return dataMin < 0 || dataMax > 250 ? [0, 500] : [0, 250];
+        return dataMax > 250 ? [0, 500] : [0, 250];
       },
     },
     y2: {
@@ -50,9 +50,8 @@ export const opts_HS_PSUM: uPlot.Options = {
     {
       scale: "y",
       splits: (u) => {
-        const min = u.scales.y.min;
-        const max = u.scales.y.max;
-        return min <= 0 && max >= 500 ? [0, 100, 200, 300, 400, 500] : [0, 50, 100, 150, 200, 250];
+        const max = u.scales.y.max ?? 0;
+        return max > 500 ? [0, 100, 200, 300, 400, 500] : [0, 50, 100, 150, 200, 250];
       },
       stroke: "#08519C",
     },
