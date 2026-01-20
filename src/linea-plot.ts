@@ -121,7 +121,7 @@ export class LineaPlot extends HTMLElement {
         }
 
         .toggle-btn {
-            padding: 10px 20px;
+            padding: 8px 10px;
             background-color: #ffffff;
             color: #555555;
             border: 2px solid #19aaff;
