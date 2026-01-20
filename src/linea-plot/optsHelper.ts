@@ -20,7 +20,7 @@ export class OptsHelper {
     leftFillStyle: string | CanvasGradient | CanvasPattern,
     rightFillStyle: string | CanvasGradient | CanvasPattern,
   ): CanvasRenderingContext2D {
-    const yPosition = 0;
+    const yPosition = 3;
 
     // Left Y-axis label
     const leftLabelOffset = leftLabel.length * 3 - 10;
@@ -68,7 +68,7 @@ export class OptsHelper {
       ms: 1, // timestamp multiplier that yields 1 millisecond
       width: 1040,
       height: 200,
-      padding: [20, -5, 0, -10],
+      padding: [20, 3, 0, -10],
       cursor: cursorOpts,
       legend: {
         show: true,
