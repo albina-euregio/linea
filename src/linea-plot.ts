@@ -96,6 +96,124 @@ export class LineaPlot extends HTMLElement {
           display: flex;
           flex-direction: column;
           gap: 20px;
+
+          .toggle-btn {
+              padding: 8px 10px;
+              background-color: #ffffff;
+              color: #555555;
+              border: 2px solid #19aaff;
+              border-radius: 40px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 300;
+              transition:
+                  background-color 0.3s ease,
+                  color 0.3s ease;
+
+              &:hover {
+                  background-color: #19aaff;
+                  color: white;
+              }
+
+              &:active {
+                  transform: translateY(1px);
+              }
+          }
+
+          .linea-tooltip {
+            position: relative;
+            display: inline-block;
+          }
+
+          .linea-tooltip .linea-tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            top: 135%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+          }
+
+          .linea-tooltip .linea-tooltiptext::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #555 transparent;
+          }
+
+          .linea-tooltip:hover .linea-tooltiptext {
+            visibility: visible;
+            opacity: 1;
+          }
+
+          .controls {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            row-gap: 6px;
+            column-gap: 6px;
+
+            input {
+              height: 2.25rem
+            }
+          }
+          
+          .controls-dates {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            row-gap: 4px;
+          }
+
+          .controls-break {
+            flex-basis: 0;
+            height: 0;
+          }
+
+          .controls-dates-inputs {
+            border-radius: 0;
+            border-right-width: 0px;
+          }
+
+          .controls-menu {
+            border-radius: 0px;
+            border-left-width: 1px;
+            border-right-width: 1px;
+          }
+
+          .dpclass {
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+            border-top-left-radius: 0px;
+            border-bottom-left-radius: 0px;
+            border-left-width: 1px;
+            border-right-width: 1px;
+          }
+          
+          .controls-dates > button:first-child {
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+            border-right-width: 1px;
+          }
+
+          .controls-dates > button:last-child {
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+            border-left-width: 1px;
+            border-right-width: 2px;
+          }
         }
 
         linea-plot > div:empty {
@@ -111,122 +229,6 @@ export class LineaPlot extends HTMLElement {
         
         linea-plot:focus {
           outline: none;
-        }
-        
-        .toggle-btn {
-            padding: 8px 10px;
-            background-color: #ffffff;
-            color: #555555;
-            border: 2px solid #19aaff;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 300;
-            transition:
-                background-color 0.3s ease,
-                color 0.3s ease;
-
-            &:hover {
-                background-color: #19aaff;
-                color: white;
-            }
-
-            &:active {
-                transform: translateY(1px);
-            }
-        }
-
-        .linea-tooltip {
-          position: relative;
-          display: inline-block;
-        }
-
-        .linea-tooltip .linea-tooltiptext {
-          visibility: hidden;
-          width: 120px;
-          background-color: #555;
-          color: #fff;
-          text-align: center;
-          border-radius: 6px;
-          padding: 5px 0;
-          position: absolute;
-          z-index: 1;
-          top: 135%;
-          left: 50%;
-          margin-left: -60px;
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-
-        .linea-tooltip .linea-tooltiptext::after {
-          content: "";
-          position: absolute;
-          bottom: 100%;
-          left: 50%;
-          margin-left: -5px;
-          border-width: 5px;
-          border-style: solid;
-          border-color: transparent transparent #555 transparent;
-        }
-
-        .linea-tooltip:hover .linea-tooltiptext {
-          visibility: visible;
-          opacity: 1;
-        }
-
-        .controls {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          text-align: center;
-          row-gap: 6px;
-          column-gap: 6px;
-        }
-        
-        .controls-dates {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: stretch;
-          row-gap: 4px;
-        }
-
-        .controls-break {
-          flex-basis: 0;
-          height: 0;
-        }
-
-        .controls-dates-inputs {
-          border-radius: 0;
-          border-right-width: 0px;
-        }
-
-        .controls-menu {
-          height: auto;
-          border-radius: 0px;
-          border-left-width: 1px;
-          border-right-width: 1px;
-        }
-
-        .dpclass {
-          border-top-right-radius: 0px;
-          border-bottom-right-radius: 0px;
-          border-top-left-radius: 0px;
-          border-bottom-left-radius: 0px;
-          border-left-width: 1px;
-          border-right-width: 1px;
-        }
-        
-        .controls-dates > button:first-child {
-          border-top-left-radius: 20px;
-          border-bottom-left-radius: 20px;
-          border-right-width: 1px;
-        }
-
-        .controls-dates > button:last-child {
-          border-top-right-radius: 20px;
-          border-bottom-right-radius: 20px;
-          border-left-width: 1px;
-          border-right-width: 2px;
         }
       `;
     this.appendChild(this.styleTag);
