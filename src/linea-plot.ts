@@ -204,9 +204,10 @@ export class LineaPlot extends HTMLElement {
         }
 
         .controls-menu {
-          border-radius = 0px;
-          border-left-width = 1px;
-          border-right-width = 1px;
+          height: auto;
+          border-radius: 0px;
+          border-left-width: 1px;
+          border-right-width: 1px;
         }
 
         .dpclass {
