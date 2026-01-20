@@ -756,6 +756,7 @@ export class LineaPlot extends HTMLElement {
       onSelect: (_) => {
         this.filterAndUpdateData();
       },
+      container: this,
     });
     this.#localizeDatePicker();
   }
