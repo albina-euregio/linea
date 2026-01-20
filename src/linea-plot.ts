@@ -115,11 +115,7 @@ export class LineaPlot extends HTMLElement {
         linea-plot:focus {
           outline: none;
         }
-
-        .controls {
-            text-align: center;
-        }
-
+        
         .toggle-btn {
             padding: 8px 10px;
             background-color: #ffffff;
@@ -184,7 +180,8 @@ export class LineaPlot extends HTMLElement {
         .controls {
           display: flex;
           flex-wrap: wrap;
-          align-items: left;
+          align-items: center;
+          text-align: center;
           row-gap: 6px;
           column-gap: 6px;
         }
