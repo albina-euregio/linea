@@ -48,7 +48,7 @@ export class TouchZoom {
           t.d = Math.sqrt((t1x - t0x) ** 2);
         }
       }
-      
+
       let selectRerenderTimeout: number | null = null;
 
       function updatePlots(plots: uPlot[], newMin: number, newMax: number) {
@@ -73,7 +73,6 @@ export class TouchZoom {
         }, 150);
       }
 
-
       function onMove(e: TouchEvent) {
         storePos(to, e);
 
@@ -92,16 +91,19 @@ export class TouchZoom {
               const dx = to.x - fr.x;
               const shift = (-dx / rect.width) * windowWidth;
 
-              let newMin = Math.max(dataMin, Math.min(u.scales.x.min + shift, dataMax - windowWidth));
+              let newMin = Math.max(
+                dataMin,
+                Math.min(u.scales.x.min + shift, dataMax - windowWidth),
+              );
               let newMax = newMin + windowWidth;
               updatePlots(plots, newMin, newMax);
-
             } else if (e.touches.length === 2) {
               // Two-finger PINCH ZOOM
               const xFactor = fr.dx / to.dx;
               const leftPct = to.x / rect.width;
               const nxRange = windowWidth * xFactor;
-              let nxMin = u.scales.x.min + (u.scales.x.max - u.scales.x.min) * leftPct - nxRange * leftPct;
+              let nxMin =
+                u.scales.x.min + (u.scales.x.max - u.scales.x.min) * leftPct - nxRange * leftPct;
               let nxMax = nxMin + nxRange;
 
               // clamp to data
@@ -113,7 +115,6 @@ export class TouchZoom {
           });
         }
       }
-
 
       over.addEventListener("touchstart", (e) => {
         rect = over.getBoundingClientRect();
