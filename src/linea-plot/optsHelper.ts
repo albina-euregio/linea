@@ -1,5 +1,6 @@
 import uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
+import { TouchZoom } from "./touchZoom";
 
 export interface SplitOptions {
   uplot: uPlot;
@@ -70,6 +71,7 @@ export class OptsHelper {
       height: 200,
       padding: [20, 3, 0, -10],
       cursor: cursorOpts,
+      plugins: [TouchZoom.touchZoomPlugin({})],
       legend: {
         show: true,
         live: true,

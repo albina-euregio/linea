@@ -154,8 +154,7 @@
 
     <script>
       const timestamp = [
-        1727733600, 1727734200, 1727734800, 1727735400, 1727736000, 1727736600,
-        1727737200,
+        1727733600, 1727734200, 1727734800, 1727735400, 1727736000, 1727736600, 1727737200,
       ];
       const TA = [-4, -13, -12.8, -3.7, -12.8, -12.8, -12.8];
       const RH = [89, 90, 91, 92, 93, 94, 95];
@@ -346,39 +345,9 @@
             values: [
               [31536000, "{YYYY}", null, null, null, null, null, null, 1],
               [2419200, "{MMM}", "\n{YYYY}", null, null, null, null, null, 1],
-              [
-                86400,
-                "{DD}. {MMM}",
-                "\n{YYYY}",
-                null,
-                null,
-                null,
-                null,
-                null,
-                1,
-              ],
-              [
-                3600,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
-              [
-                60,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
+              [86400, "{DD}. {MMM}", "\n{YYYY}", null, null, null, null, null, 1],
+              [3600, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
+              [60, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
               [
                 1,
                 ":{ss}",
@@ -543,39 +512,9 @@
             values: [
               [31536000, "{YYYY}", null, null, null, null, null, null, 1],
               [2419200, "{MMM}", "\n{YYYY}", null, null, null, null, null, 1], // Shows month as Jan, Feb, May, etc.
-              [
-                86400,
-                "{DD}. {MMM}",
-                "\n{YYYY}",
-                null,
-                null,
-                null,
-                null,
-                null,
-                1,
-              ], // e.g. 29. May
-              [
-                3600,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
-              [
-                60,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
+              [86400, "{DD}. {MMM}", "\n{YYYY}", null, null, null, null, null, 1], // e.g. 29. May
+              [3600, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
+              [60, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
               [
                 1,
                 ":{ss}",
@@ -596,9 +535,7 @@
             splits: (u) => {
               const min = u.scales.y.min;
               const max = u.scales.y.max;
-              return min <= 0 && max >= 120
-                ? [0, 30, 60, 90, 120]
-                : [0, 25, 50, 75, 100];
+              return min <= 0 && max >= 120 ? [0, 30, 60, 90, 120] : [0, 25, 50, 75, 100];
             },
             stroke: "#00E2B6",
             scale: "y",
@@ -705,39 +642,9 @@
             values: [
               [31536000, "{YYYY}", null, null, null, null, null, null, 1],
               [2419200, "{MMM}", "\n{YYYY}", null, null, null, null, null, 1],
-              [
-                86400,
-                "{DD}. {MMM}",
-                "\n{YYYY}",
-                null,
-                null,
-                null,
-                null,
-                null,
-                1,
-              ], // e.g. 29. May
-              [
-                3600,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
-              [
-                60,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
+              [86400, "{DD}. {MMM}", "\n{YYYY}", null, null, null, null, null, 1], // e.g. 29. May
+              [3600, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
+              [60, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
               [
                 1,
                 ":{ss}",
@@ -853,39 +760,9 @@
             values: [
               [31536000, "{YYYY}", null, null, null, null, null, null, 1],
               [2419200, "{MMM}", "\n{YYYY}", null, null, null, null, null, 1], // Shows month as Jan, Feb, May, etc.
-              [
-                86400,
-                "{DD}. {MMM}",
-                "\n{YYYY}",
-                null,
-                null,
-                null,
-                null,
-                null,
-                1,
-              ], // e.g. 29. May
-              [
-                3600,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
-              [
-                60,
-                "{HH}:{mm}",
-                "\n{DD}. {MMM} {YY}",
-                null,
-                "\n{DD}. {MMM}",
-                null,
-                null,
-                null,
-                1,
-              ],
+              [86400, "{DD}. {MMM}", "\n{YYYY}", null, null, null, null, null, 1], // e.g. 29. May
+              [3600, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
+              [60, "{HH}:{mm}", "\n{DD}. {MMM} {YY}", null, "\n{DD}. {MMM}", null, null, null, 1],
               [
                 1,
                 ":{ss}",
@@ -965,11 +842,7 @@
             data_HS_PSUM,
             document.getElementById("plot_HS_PSUM"),
           );
-          charts.RH_GR = new uPlot(
-            opts_RH_GR,
-            data_RH_GR,
-            document.getElementById("plot_RH_GR"),
-          );
+          charts.RH_GR = new uPlot(opts_RH_GR, data_RH_GR, document.getElementById("plot_RH_GR"));
         } catch (error) {
           console.error("Error initializing charts:", error);
         }
@@ -1033,9 +906,7 @@
         if (draggedElement !== this) {
           // Get the container
           const container = document.getElementById("plot-container");
-          const allWrappers = Array.from(
-            container.querySelectorAll(".plot-wrapper"),
-          );
+          const allWrappers = Array.from(container.querySelectorAll(".plot-wrapper"));
 
           // Find positions
           const draggedIndex = allWrappers.indexOf(draggedElement);
