@@ -1,4 +1,5 @@
 import uPlot from "uplot";
+import { OptsHelper } from "./optsHelper";
 
 /**
  * Creates a uPlot plugin that handles touch-based zooming and panning
@@ -20,104 +21,118 @@ import uPlot from "uplot";
  */
 export class TouchZoom {
   static touchZoomPlugin(opts) {
-    function init(u, opts, data) {
-      let over = u.over;
-      let rect, oxRange, oyRange, xVal, yVal;
-      let fr = { x: 0, y: 0, dx: 0, dy: 0 };
-      let to = { x: 0, y: 0, dx: 0, dy: 0 };
-
-      function storePos(t, e) {
-        let ts = e.touches;
-
-        let t0 = ts[0];
-        let t0x = t0.clientX - rect.left;
-        let t0y = t0.clientY - rect.top;
-
-        if (ts.length == 1) {
-          t.x = t0x;
-          t.y = t0y;
-          t.d = t.dx = t.dy = 1;
-        } else {
-          let t1 = e.touches[1];
-          let t1x = t1.clientX - rect.left;
-          let t1y = t1.clientY - rect.top;
-
-          let xMin = Math.min(t0x, t1x);
-          let yMin = Math.min(t0y, t1y);
-          let xMax = Math.max(t0x, t1x);
-          let yMax = Math.max(t0y, t1y);
-
-          // midpts
-          t.y = (yMin + yMax) / 2;
-          t.x = (xMin + xMax) / 2;
-
-          t.dx = xMax - xMin;
-          t.dy = yMax - yMin;
-
-          // dist
-          t.d = Math.sqrt(t.dx * t.dx + t.dy * t.dy);
-        }
-      }
+    function init(u: uPlot) {
+      const over = u.over;
+      let rect: DOMRect;
+      let oxRange: number, xVal: number;
+      let fr = { x: 0, dx: 0, d: 1 }; // first touch
+      let to = { x: 0, dx: 0, d: 1 }; // current touch
 
       let rafPending = false;
 
-      function zoom() {
-        rafPending = false;
+      function storePos(t: any, e: TouchEvent) {
+        const ts = e.touches;
+        const t0 = ts[0];
+        const t0x = t0.clientX - rect.left;
 
-        let left = to.x;
+        if (ts.length === 1) {
+          t.x = t0x;
+          t.dx = 1;
+          t.d = 1;
+        } else {
+          const t1 = ts[1];
+          const t1x = t1.clientX - rect.left;
 
-        let xFactor = fr.dx / to.dx;
-        let leftPct = left / rect.width;
-
-        let nxRange = oxRange * xFactor;
-        let nxMin = xVal - leftPct * nxRange;
-        let nxMax = nxMin + nxRange;
-
-        const plots: uPlot[] = uPlot.sync(u.cursor.sync.key).plots;
-
-        plots.forEach((plot) => {
-          plot.setScale("x", {
-            min: u.scales.x.min > nxMin ? u.scales.x.min : nxMin,
-            max: u.scales.x.max < nxMax ? u.scales.x.max : nxMax,
-          });
-        });
+          t.x = (t0x + t1x) / 2;
+          t.dx = Math.abs(t1x - t0x);
+          t.d = Math.sqrt((t1x - t0x) ** 2);
+        }
       }
 
-      function touchmove(e) {
+      let selectRerenderTimeout: number | null = null;
+
+      function updatePlots(plots: uPlot[], newMin: number, newMax: number) {
+        plots.forEach((plot) => {
+          plot.setScale("x", { min: newMin, max: newMax });
+        });
+
+        if (selectRerenderTimeout !== null) {
+          return;
+        }
+
+        selectRerenderTimeout = window.setTimeout(() => {
+          plots.forEach((plot) => {
+            plot.select.left = plot.valToPos(plot.scales.x.min, "x");
+            plot.select.width = plot.valToPos(plot.scales.x.max, "x") - plot.select.left;
+            plot.select.top = 0;
+            plot.select.height = plot.over.getBoundingClientRect().height;
+            plot.hooks.setSelect?.forEach((fn) => fn(plot));
+          });
+
+          selectRerenderTimeout = null;
+        }, 150);
+      }
+
+      function onMove(e: TouchEvent) {
         storePos(to, e);
 
         if (!rafPending) {
           rafPending = true;
-          requestAnimationFrame(zoom);
+          requestAnimationFrame(() => {
+            rafPending = false;
+
+            const plots: uPlot[] = uPlot.sync(u.cursor.sync.key).plots;
+            const dataMin = u.data[0][0];
+            const dataMax = u.data[0][u.data[0].length - 1];
+            const windowWidth = u.scales.x.max - u.scales.x.min;
+
+            if (e.touches.length === 1) {
+              // Single-finger PAN
+              const dx = to.x - fr.x;
+              const shift = (-dx / rect.width) * windowWidth;
+
+              let newMin = Math.max(
+                dataMin,
+                Math.min(u.scales.x.min + shift, dataMax - windowWidth),
+              );
+              let newMax = newMin + windowWidth;
+              updatePlots(plots, newMin, newMax);
+            } else if (e.touches.length === 2) {
+              // Two-finger PINCH ZOOM
+              const xFactor = fr.dx / to.dx;
+              const leftPct = to.x / rect.width;
+              const nxRange = windowWidth * xFactor;
+              let nxMin =
+                u.scales.x.min + (u.scales.x.max - u.scales.x.min) * leftPct - nxRange * leftPct;
+              let nxMax = nxMin + nxRange;
+
+              // clamp to data
+              nxMin = Math.max(dataMin, nxMin);
+              nxMax = Math.min(dataMax, nxMax);
+              if (nxMax - nxMin < 5) nxMax = nxMin + 5; // prevent collapsing
+              updatePlots(plots, nxMin, nxMax);
+            }
+          });
         }
       }
 
-      over.addEventListener("touchstart", function (e) {
+      over.addEventListener("touchstart", (e) => {
         rect = over.getBoundingClientRect();
-
         storePos(fr, e);
 
         oxRange = u.scales.x.max - u.scales.x.min;
-        oyRange = u.scales.y.max - u.scales.y.min;
+        xVal = u.posToVal(fr.x, "x");
 
-        let left = fr.x;
-        let top = fr.y;
-
-        xVal = u.posToVal(left, "x");
-        yVal = u.posToVal(top, "y");
-
-        document.addEventListener("touchmove", touchmove, { passive: true });
+        document.addEventListener("touchmove", onMove, { passive: true });
       });
 
-      over.addEventListener("touchend", function (e) {
-        document.removeEventListener("touchmove", touchmove, { passive: true });
+      over.addEventListener("touchend", () => {
+        document.removeEventListener("touchmove", onMove);
       });
     }
 
     return {
-      hooks: {
-        init,
-      },
+      hooks: { init },
     };
   }
 }

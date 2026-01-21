@@ -78,6 +78,7 @@ export class LineaPlot extends HTMLElement {
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   private dp;
+  private dpReady!: Promise<void>;
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
@@ -96,24 +97,8 @@ export class LineaPlot extends HTMLElement {
           display: flex;
           flex-direction: column;
           gap: 20px;
-        }
 
-        linea-plot > div:empty {
-          display: none;
-        }
-
-        linea-plot > div {
-          background-color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        
-        linea-plot:focus {
-          outline: none;
-        }
-        
-        .toggle-btn {
+          .toggle-btn {
             padding: 8px 10px;
             background-color: #ffffff;
             color: #555555;
@@ -122,133 +107,155 @@ export class LineaPlot extends HTMLElement {
             cursor: pointer;
             font-size: 14px;
             font-weight: 300;
-            transition:
-                background-color 0.3s ease,
-                color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
             &:hover {
-                background-color: #19aaff;
-                color: white;
+              background-color: #19aaff;
+              color: white;
             }
 
             &:active {
-                transform: translateY(1px);
+              transform: translateY(1px);
             }
-        }
+          }
 
-        .linea-tooltip {
-          position: relative;
-          display: inline-block;
-        }
+          .linea-tooltip {
+            position: relative;
+            display: inline-block;
 
-        .linea-tooltip .linea-tooltiptext {
-          visibility: hidden;
-          width: 120px;
-          background-color: #555;
-          color: #fff;
-          text-align: center;
-          border-radius: 6px;
-          padding: 5px 0;
-          position: absolute;
-          z-index: 1;
-          top: 135%;
-          left: 50%;
-          margin-left: -60px;
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
+            .linea-tooltiptext {
+              visibility: hidden;
+              width: 120px;
+              background-color: #555;
+              color: #fff;
+              text-align: center;
+              border-radius: 6px;
+              padding: 5px 0;
+              position: absolute;
+              z-index: 1;
+              top: 135%;
+              left: 50%;
+              margin-left: -60px;
+              opacity: 0;
+              transition: opacity 0.3s;
 
-        .linea-tooltip .linea-tooltiptext::after {
-          content: "";
-          position: absolute;
-          bottom: 100%;
-          left: 50%;
-          margin-left: -5px;
-          border-width: 5px;
-          border-style: solid;
-          border-color: transparent transparent #555 transparent;
-        }
+              &::after {
+                content: "";
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                margin-left: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent transparent #555 transparent;
+              }
+            }
 
-        .linea-tooltip:hover .linea-tooltiptext {
-          visibility: visible;
-          opacity: 1;
-        }
+            &:hover .linea-tooltiptext {
+              visibility: visible;
+              opacity: 1;
+            }
+          }
 
-        .controls {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          text-align: center;
-          row-gap: 6px;
-          column-gap: 6px;
-          padding: 20px;
-          border-radius: 6px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .controls-dates {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: stretch;
-          row-gap: 4px;
-        }
+          .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            row-gap: 6px;
+            column-gap: 6px;
 
-        .controls-break {
-          flex-basis: 0;
-          height: 0;
-        }
+            .controls-dates {
+              display: flex;
+              flex-wrap: nowrap;
+              align-items: stretch;
 
-        .controls-dates-inputs {
-          border-radius: 0;
-          border-right-width: 0px;
-        }
+              input,
+              button {
+                box-sizing: border-box;
+                height: 2.25rem;
+                line-height: 2.25rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0;
+              }
 
-        .controls-menu {
-          height: auto;
-          border-radius: 0px;
-          border-left-width: 1px;
-          border-right-width: 1px;
-        }
+              input {
+                flex: 1 1 auto;
+                border-radius: 0;
+                border-left-width: 1px;
+                border-right-width: 1px;
+              }
 
-        .dpclass {
-          border-top-right-radius: 0px;
-          border-bottom-right-radius: 0px;
-          border-top-left-radius: 0px;
-          border-bottom-left-radius: 0px;
-          border-left-width: 1px;
-          border-right-width: 1px;
-        }
-        
-        .controls-dates > button:first-child {
-          border-top-left-radius: 20px;
-          border-bottom-left-radius: 20px;
-          border-right-width: 1px;
-        }
+              button {
+                flex: 0 0 auto;
+              }
 
-        .controls-dates > button:last-child {
-          border-top-right-radius: 20px;
-          border-bottom-right-radius: 20px;
-          border-left-width: 1px;
-          border-right-width: 2px;
+              > button:first-child {
+                border-top-right-radius: 0px;
+                border-bottom-right-radius: 0px;
+                border-right-width: 1px;
+              }
+
+              > button:last-child {
+                border-top-left-radius: 0px;
+                border-bottom-left-radius: 0px;
+                border-left-width: 1px;
+              }
+            }
+
+            .controls-menu {
+              display: flex;
+
+              > button {
+                height: 2.25rem;
+                line-height: 2.25rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 0.5rem;
+              }
+            }
+          }
+          
+          > div:empty {
+            display: none;
+          }
+          
+          > div {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
+          &:focus {
+            outline: none;
+          }
         }
       `;
     this.appendChild(this.styleTag);
-    this.#addExportModal();
     this.#addControls();
-    if (this.hasAttribute("data")) {
-      this.storeDataFromAttribute();
-      this.#initAfterDataStorage();
-    } else {
-      this.fetchAndStoreData()
-        .then(() => {
-          this.#initAfterDataStorage();
-          this.#lazyLoad();
-        })
-        .catch((_) => {});
-    }
-    this.tabIndex = 0;
-    this.focus();
-    this.isLoaded = true;
+    this.#addExportModal();
+    this.dpReady?.then(() => {
+      if (this.hasAttribute("data")) {
+        this.storeDataFromAttribute();
+        this.#initAfterDataStorage();
+      } else {
+        this.fetchAndStoreData()
+          .then(() => {
+            this.#initAfterDataStorage();
+            this.#lazyLoad();
+          })
+          .catch((_) => {});
+      }
+      this.tabIndex = 0;
+      this.focus();
+      this.isLoaded = true;
+    });
   }
 
   attributeChangedCallback(name: string) {
@@ -287,6 +294,7 @@ export class LineaPlot extends HTMLElement {
     } else {
       this.#setStartEndDateToMinMax();
     }
+    this.filterAndUpdateData();
     if (!this.hasAttribute("showdatepicker")) {
       this.#handleFixedDateView();
     }
@@ -746,18 +754,26 @@ export class LineaPlot extends HTMLElement {
   /**
    * cosntructs the AirDatePicker
    */
-  async #constructDatePicker() {
-    const { default: AirDatepicker } = await import("air-datepicker");
-    const css = await import("air-datepicker/air-datepicker.css?raw");
-    this.styleTag.textContent += css.default;
-    this.dp = new AirDatepicker(this.daterange, {
-      range: true,
-      multipleDatesSeparator: " - ",
-      onSelect: (_) => {
-        this.filterAndUpdateData();
-      },
-    });
-    this.#localizeDatePicker();
+  #constructDatePicker() {
+    this.dpReady = (async () => {
+      const { default: AirDatepicker } = await import("air-datepicker");
+      const css = await import("air-datepicker/air-datepicker.css?raw");
+      this.styleTag.textContent += css.default;
+
+      this.dp = new AirDatepicker(this.daterange, {
+        range: true,
+        multipleDatesSeparator: " - ",
+        onSelect: () => this.filterAndUpdateData(),
+        container: this,
+        autoClose: true,
+      });
+      await this.#localizeDatePicker();
+      //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener
+      this.daterange.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        this.dp.visible ? this.dp.hide() : this.dp.show();
+      });
+    })();
   }
 
   /**
