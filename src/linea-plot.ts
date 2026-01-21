@@ -78,6 +78,7 @@ export class LineaPlot extends HTMLElement {
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   private dp;
+  private dpReady!: Promise<void>;
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
@@ -232,22 +233,24 @@ export class LineaPlot extends HTMLElement {
         }
       `;
     this.appendChild(this.styleTag);
-    this.#addExportModal();
     this.#addControls();
-    if (this.hasAttribute("data")) {
-      this.storeDataFromAttribute();
-      this.#initAfterDataStorage();
-    } else {
-      this.fetchAndStoreData()
-        .then(() => {
-          this.#initAfterDataStorage();
-          this.#lazyLoad();
-        })
-        .catch((_) => {});
-    }
-    this.tabIndex = 0;
-    this.focus();
-    this.isLoaded = true;
+    this.#addExportModal();
+    this.dpReady?.then(() => {
+      if (this.hasAttribute("data")) {
+        this.storeDataFromAttribute();
+        this.#initAfterDataStorage();
+      } else {
+        this.fetchAndStoreData()
+          .then(() => {
+            this.#initAfterDataStorage();
+            this.#lazyLoad();
+          })
+          .catch((_) => {});
+      }
+      this.tabIndex = 0;
+      this.focus();
+      this.isLoaded = true;
+    });
   }
 
   attributeChangedCallback(name: string) {
@@ -286,6 +289,7 @@ export class LineaPlot extends HTMLElement {
     } else {
       this.#setStartEndDateToMinMax();
     }
+    this.filterAndUpdateData();
     if (!this.hasAttribute("showdatepicker")) {
       this.#handleFixedDateView();
     }
@@ -745,19 +749,21 @@ export class LineaPlot extends HTMLElement {
   /**
    * cosntructs the AirDatePicker
    */
-  async #constructDatePicker() {
-    const { default: AirDatepicker } = await import("air-datepicker");
-    const css = await import("air-datepicker/air-datepicker.css?raw");
-    this.styleTag.textContent += css.default;
-    this.dp = new AirDatepicker(this.daterange, {
-      range: true,
-      multipleDatesSeparator: " - ",
-      onSelect: (_) => {
-        this.filterAndUpdateData();
-      },
-      container: this,
-    });
-    this.#localizeDatePicker();
+  #constructDatePicker() {
+    this.dpReady = (async () => {
+      const { default: AirDatepicker } = await import("air-datepicker");
+      const css = await import("air-datepicker/air-datepicker.css?raw");
+      this.styleTag.textContent += css.default;
+
+      this.dp = new AirDatepicker(this.daterange, {
+        range: true,
+        multipleDatesSeparator: " - ",
+        onSelect: () => this.filterAndUpdateData(),
+        container: this,
+      });
+
+      await this.#localizeDatePicker();
+    })();
   }
 
   /**
