@@ -765,9 +765,14 @@ export class LineaPlot extends HTMLElement {
         multipleDatesSeparator: " - ",
         onSelect: () => this.filterAndUpdateData(),
         container: this,
+        autoClose: true,
       });
-
       await this.#localizeDatePicker();
+      //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener
+      this.daterange.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        this.dp.visible ? this.dp.hide() : this.dp.show();
+      });
     })();
   }
 
