@@ -112,10 +112,9 @@ export class OptsHelper {
         ? 1
         : d.filter((v) => u.scales.y.min < v && v <= u.scales.y.max).length / d.length;
     });
-    if (counts.some((c) => c < 0.33)) {
+    if (counts.some((c) => c < 0.66)) {
       const datamax = Math.max(...filteredData.map((d) => Math.max(...d)));
       const datamin = Math.min(...filteredData.map((d) => Math.min(...d)));
-      console.log(datamin, datamax, Math.floor(datamin / 10) * 10, Math.ceil(datamax / 10) * 10);
       u.setScale("y", { min: Math.floor(datamin / 10) * 10, max: Math.ceil(datamax / 10) * 10 });
       u.redraw();
     }
