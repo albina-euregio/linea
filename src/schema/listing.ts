@@ -37,28 +37,34 @@ export const FeaturePropertiesSchema = z
       .describe("For legacy PNG plots: name of plot which includes this station"),
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
-    ISWR: number.describe("Incoming Short Wave Radiation in W/m²"),
-    RSWR: number.describe("Reflected Short Wave Radiation in W/m²"),
-    ILWR: number.describe("Incoming Long Wave Radiation in W/m²"),
-    OLWR: number.describe("Outgoing Long Wave Radiation in W/m²"),
-    HS: number.describe("Snow height in m"),
-    HSD24: number.describe("Difference in snow height over the last 24h in m"),
-    HSD48: number.describe("Difference in snow height over the last 48h in m"),
-    HSD72: number.describe("Difference in snow height over the last 72h in m"),
-    P: number.describe("Air pressure in Pa"),
-    TA_MAX: number.describe("Max. air temperature over the last 24h in Kelvin"),
-    TA_MIN: number.describe("Min. air temperature over the last 24h in Kelvin"),
-    TA: number.describe("Air temperature in Kelvin"),
-    PSUM_24: number.describe("Precipitation summed over the last 24h in mm"),
-    PSUM_48: number.describe("Precipitation summed over the last 48h in mm"),
-    PSUM_6: number.describe("Precipitation summed over the last 6h in mm"),
-    PSUM_72: number.describe("Precipitation summed over the last 72h in mm"),
-    TSS: number.describe("Temperature Snow Surface in Kelvin"),
+    ISWR: number.describe("Incoming Short Wave Radiation in W/m²").meta({ unit: "W/m²" }),
+    RSWR: number.describe("Reflected Short Wave Radiation in W/m²").meta({ unit: "W/m²" }),
+    ILWR: number.describe("Incoming Long Wave Radiation in W/m²").meta({ unit: "W/m²" }),
+    OLWR: number.describe("Outgoing Long Wave Radiation in W/m²").meta({ unit: "W/m²" }),
+    HS: number.describe("Snow height in m").meta({ unit: "m" }),
+    HSD24: number.describe("Difference in snow height over the last 24h in m").meta({ unit: "m" }),
+    HSD48: number.describe("Difference in snow height over the last 48h in m").meta({ unit: "m" }),
+    HSD72: number.describe("Difference in snow height over the last 72h in m").meta({ unit: "m" }),
+    P: number.describe("Air pressure in Pa").meta({ unit: "Pa" }),
+    TA_MAX: number.describe("Max. air temperature over the last 24h in Kelvin").meta({ unit: "K" }),
+    TA_MIN: number.describe("Min. air temperature over the last 24h in Kelvin").meta({ unit: "K" }),
+    TA: number.describe("Air temperature in Kelvin").meta({ unit: "K" }),
+    PSUM_24: number.describe("Precipitation summed over the last 24h in mm").meta({ unit: "mm" }),
+    PSUM_48: number.describe("Precipitation summed over the last 48h in mm").meta({ unit: "mm" }),
+    PSUM_6: number.describe("Precipitation summed over the last 6h in mm").meta({ unit: "mm" }),
+    PSUM_72: number.describe("Precipitation summed over the last 72h in mm").meta({ unit: "mm" }),
+    TSS: number.describe("Temperature Snow Surface in Kelvin").meta({ unit: "K" }),
     RH: number.describe("Relative humidity between 0 and 1"),
-    TD: number.describe("Dew point temperature in Kelvin"),
-    VW_MAX: number.describe("Max. wind velocity (optionally max over the last 3h) in m/s"),
-    VW: number.describe("Wind velocity (optionally as average over the last 3h) in m/s"),
-    DW: number.describe("Wind direction (optionally average over the last 3h) in °"),
+    TD: number.describe("Dew point temperature in Kelvin").meta({ unit: "K" }),
+    VW_MAX: number
+      .describe("Max. wind velocity (optionally max over the last 3h) in m/s")
+      .meta({ unit: "m/s" }),
+    VW: number
+      .describe("Wind velocity (optionally as average over the last 3h) in m/s")
+      .meta({ unit: "m/s" }),
+    DW: number
+      .describe("Wind direction (optionally average over the last 3h) in °")
+      .meta({ unit: "°" }),
   })
   .describe("The properties of a weather station including measured values");
 

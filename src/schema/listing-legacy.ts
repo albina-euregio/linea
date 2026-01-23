@@ -26,26 +26,34 @@ export const FeaturePropertiesSchema = z
       .describe("Station region as defined by avalanche warning service"),
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
-    GS_O: number.describe("Incoming radiation in W/m²"),
-    GS_U: number.describe("Outgoing radiation in W/m²"),
-    HS: number.describe("Snow height in cm"),
-    HSD24: number.describe("Difference in snow height over the last 24h in cm"),
-    HSD48: number.describe("Difference in snow height over the last 48h in cm"),
-    HSD72: number.describe("Difference in snow height over the last 72h in cm"),
-    LD: number.describe("Air pressure in hPa"),
-    LT_MAX: number.describe("Max. air temperature over the last 24h in °C"),
-    LT_MIN: number.describe("Min. air temperature over the last 24h in °C"),
-    LT: number.describe("Air temperature in °C"),
-    N24: number.describe("Precipitation over the last 24h in mm"),
-    N48: number.describe("Precipitation over the last 48h in mm"),
-    N6: number.describe("Precipitation over the last 6h in mm"),
-    N72: number.describe("Precipitation over the last 72h in mm"),
-    OFT: number.describe("Surface temperature in °C"),
-    RH: number.describe("Relative humidity in %"),
-    TD: number.describe("Dew point temperature in °C"),
-    WG_BOE: number.describe("Max. wind velocity (max over the last 3h) in km/h"),
-    WG: number.describe("Wind velocity (average over the last 3h) in km/h"),
-    WR: number.describe("Wind direction (average over the last 3h) in °"),
+    GS_O: number.describe("Incoming radiation in W/m²").meta({ unit: "W/m²" }),
+    GS_U: number.describe("Outgoing radiation in W/m²").meta({ unit: "W/m²" }),
+    HS: number.describe("Snow height in cm").meta({ unit: "cm" }),
+    HSD24: number
+      .describe("Difference in snow height over the last 24h in cm")
+      .meta({ unit: "cm" }),
+    HSD48: number
+      .describe("Difference in snow height over the last 48h in cm")
+      .meta({ unit: "cm" }),
+    HSD72: number
+      .describe("Difference in snow height over the last 72h in cm")
+      .meta({ unit: "cm" }),
+    LD: number.describe("Air pressure in hPa").meta({ unit: "hPa" }),
+    LT_MAX: number.describe("Max. air temperature over the last 24h in °C").meta({ unit: "°C" }),
+    LT_MIN: number.describe("Min. air temperature over the last 24h in °C").meta({ unit: "°C" }),
+    LT: number.describe("Air temperature in °C").meta({ unit: "°C" }),
+    N24: number.describe("Precipitation over the last 24h in mm").meta({ unit: "mm" }),
+    N48: number.describe("Precipitation over the last 48h in mm").meta({ unit: "mm" }),
+    N6: number.describe("Precipitation over the last 6h in mm").meta({ unit: "mm" }),
+    N72: number.describe("Precipitation over the last 72h in mm").meta({ unit: "mm" }),
+    OFT: number.describe("Surface temperature in °C").meta({ unit: "°C" }),
+    RH: number.describe("Relative humidity in %").meta({ unit: "%" }),
+    TD: number.describe("Dew point temperature in °C").meta({ unit: "°C" }),
+    WG_BOE: number
+      .describe("Max. wind velocity (max over the last 3h) in km/h")
+      .meta({ unit: "km/h" }),
+    WG: number.describe("Wind velocity (average over the last 3h) in km/h").meta({ unit: "km/h" }),
+    WR: number.describe("Wind direction (average over the last 3h) in °").meta({ unit: "°" }),
   })
   .describe("The properties of a weather station including measured values");
 
