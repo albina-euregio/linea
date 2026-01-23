@@ -25,6 +25,24 @@ export type Unit =
   // intensity (power per area)
   | "W/m²";
 
+class Quantity<U extends Unit> {
+  constructor(
+    public value: number,
+    public unit: U,
+  ) {}
+
+  convertTo(toUnit: U) {
+    return transformUnit(this.value, this.unit, toUnit);
+  }
+}
+
+export class Temperature extends Quantity<"K" | "°C"> {}
+export class Length extends Quantity<"m" | "cm" | "mm"> {}
+export class Scalar extends Quantity<"1" | "%" | "°"> {}
+export class Speed extends Quantity<"m/s" | "km/h"> {}
+export class Pressure extends Quantity<"hPa" | "Pa"> {}
+export class Intensity extends Quantity<"W/m²"> {}
+
 export function unitTransformer(
   fromUnit: Unit,
   toUnit: Unit,
@@ -62,6 +80,10 @@ export function unitTransformer(
   throw new Error(`Unsupported transformation from ${fromUnit} to ${toUnit}`);
 }
 
-export function transformUnit(value: number | undefined | null, fromUnit: Unit, toUnit: Unit) {
+export function transformUnit(
+  value: number | undefined | null,
+  fromUnit: Unit,
+  toUnit: Unit,
+): number | undefined | null {
   return isFinite(value) ? unitTransformer(fromUnit, toUnit)(value) : value;
 }
