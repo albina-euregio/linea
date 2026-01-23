@@ -431,6 +431,7 @@ export class LineaPlot extends HTMLElement {
    */
   #addControls() {
     if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport")) {
+      this.dpReady = Promise.resolve();
       return;
     }
     const controls = document.createElement("div");
