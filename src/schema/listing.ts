@@ -62,17 +62,22 @@ export const FeaturePropertiesSchema = z
   })
   .describe("The properties of a weather station including measured values");
 
+export const GeometrySchema = z.object({
+  type: z.enum(["Point"]),
+  coordinates: z.union([
+    z.tuple([z.number().describe("Longitude"), z.number().describe("Latitude")]),
+    z.tuple([
+      z.number().describe("Longitude"),
+      z.number().describe("Latitude"),
+      z.number().describe("Altitude"),
+    ]),
+  ]),
+});
+
 export const FeatureSchema = z
   .object({
     type: z.enum(["Feature"]),
-    geometry: z.union([
-      z.tuple([z.number().describe("Longitude"), z.number().describe("Latitude")]),
-      z.tuple([
-        z.number().describe("Longitude"),
-        z.number().describe("Latitude"),
-        z.number().describe("Altitude"),
-      ]),
-    ]),
+    geometry: GeometrySchema,
     properties: FeaturePropertiesSchema,
     id: z.union([z.uuid(), z.string()]).describe("The ID/UUID of the station"),
   })
