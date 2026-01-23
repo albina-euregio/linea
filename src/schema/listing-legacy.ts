@@ -14,6 +14,8 @@ export const FeaturePropertiesSchema0 = z
     Beobachtungsbeginn: z.string().nullish().describe("Observation start year"),
     operator: z.string().nullish().describe("Station operator"),
     operatorLink: z.url().nullish().describe("Link to website of station operator"),
+    operatorLicense: z.string().nullish().describe("License under which data is provided"),
+    operatorLicenseLink: z.url().nullish().describe("Link to license"),
     plot: z
       .string()
       .nullish()
