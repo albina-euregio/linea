@@ -154,7 +154,7 @@ export const GeometrySchema = z.object({
 
 export const FeatureSchema = z
   .object({
-    type: z.enum(["Feature"]),
+    type: z.enum(["Feature"]).nullish(),
     geometry: GeometrySchema,
     properties: FeaturePropertiesSchema,
     id: z.union([z.uuid(), z.string()]).describe("The ID/UUID of the station"),
