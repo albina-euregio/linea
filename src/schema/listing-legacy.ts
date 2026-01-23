@@ -1,11 +1,12 @@
 import { z } from "zod";
+import { FeaturePropertiesSchema as ModernFeaturePropertiesSchema } from "./listing";
 
 const number = z
   .number()
   .nullish()
   .check(z.overwrite((v) => (v === -777 ? undefined : v)));
 
-export const FeaturePropertiesSchema = z
+export const FeaturePropertiesSchema0 = z
   .object({
     name: z.string().describe("Station name"),
     altitude: z.number().nullish().describe("Altitude above sea level"),
@@ -56,6 +57,29 @@ export const FeaturePropertiesSchema = z
     WR: number.describe("Wind direction (average over the last 3h) in °").meta({ unit: "°" }),
   })
   .describe("The properties of a weather station including measured values");
+
+export const FeaturePropertiesSchema = FeaturePropertiesSchema0.transform((p) =>
+  ModernFeaturePropertiesSchema.parse({
+    ...p,
+    startYear: p.Beobachtungsbeginn,
+    shortName: p["LWD-Nummer"],
+    microRegionID: p["LWD-Region"],
+    ISWR: p.GS_O,
+    RSWR: p.GS_U,
+    P: p.LD,
+    TA_MAX: p.LT_MAX,
+    TA_MIN: p.LT_MIN,
+    TA: p.LT,
+    PSUM_24: p.N24,
+    PSUM_48: p.N48,
+    PSUM_6: p.N6,
+    PSUM_72: p.N72,
+    TSS: p.OFT,
+    VW_MAX: p.WG_BOE,
+    VW: p.WG,
+    DW: p.WR,
+  }),
+);
 
 export const GeometrySchema = z.object({
   type: z.enum(["Point"]),
