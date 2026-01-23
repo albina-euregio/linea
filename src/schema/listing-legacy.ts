@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { FeaturePropertiesSchema as ModernFeaturePropertiesSchema } from "./listing";
+import { transformUnit } from "../units";
 
 const number = z
   .number()
@@ -58,28 +59,104 @@ export const FeaturePropertiesSchema0 = z
   })
   .describe("The properties of a weather station including measured values");
 
-export const FeaturePropertiesSchema = FeaturePropertiesSchema0.transform((p) =>
-  ModernFeaturePropertiesSchema.parse({
+export const FeaturePropertiesSchema = FeaturePropertiesSchema0.transform((p) => {
+  return ModernFeaturePropertiesSchema.parse({
     ...p,
     startYear: p.Beobachtungsbeginn,
     shortName: p["LWD-Nummer"],
     microRegionID: p["LWD-Region"],
-    ISWR: p.GS_O,
-    RSWR: p.GS_U,
-    P: p.LD,
-    TA_MAX: p.LT_MAX,
-    TA_MIN: p.LT_MIN,
-    TA: p.LT,
-    PSUM_24: p.N24,
-    PSUM_48: p.N48,
-    PSUM_6: p.N6,
-    PSUM_72: p.N72,
-    TSS: p.OFT,
-    VW_MAX: p.WG_BOE,
-    VW: p.WG,
-    DW: p.WR,
-  }),
-);
+    ISWR: transformUnit(
+      p.GS_O,
+      FeaturePropertiesSchema0.shape.GS_O.meta().unit,
+      ModernFeaturePropertiesSchema.shape.ISWR.meta().unit,
+    ),
+    RSWR: transformUnit(
+      p.GS_U,
+      FeaturePropertiesSchema0.shape.GS_U.meta().unit,
+      ModernFeaturePropertiesSchema.shape.RSWR.meta().unit,
+    ),
+    HS: transformUnit(
+      p.HS,
+      FeaturePropertiesSchema0.shape.HS.meta().unit,
+      ModernFeaturePropertiesSchema.shape.HS.meta().unit,
+    ),
+    HSD24: transformUnit(
+      p.HSD24,
+      FeaturePropertiesSchema0.shape.HSD24.meta().unit,
+      ModernFeaturePropertiesSchema.shape.HSD24.meta().unit,
+    ),
+    HSD48: transformUnit(
+      p.HSD48,
+      FeaturePropertiesSchema0.shape.HSD48.meta().unit,
+      ModernFeaturePropertiesSchema.shape.HSD48.meta().unit,
+    ),
+    HSD72: transformUnit(
+      p.HSD72,
+      FeaturePropertiesSchema0.shape.HSD72.meta().unit,
+      ModernFeaturePropertiesSchema.shape.HSD72.meta().unit,
+    ),
+    P: transformUnit(
+      p.LD,
+      FeaturePropertiesSchema0.shape.LD.meta().unit,
+      ModernFeaturePropertiesSchema.shape.P.meta().unit,
+    ),
+    TA_MAX: transformUnit(
+      p.LT_MAX,
+      FeaturePropertiesSchema0.shape.LT_MAX.meta().unit,
+      ModernFeaturePropertiesSchema.shape.TA_MAX.meta().unit,
+    ),
+    TA_MIN: transformUnit(
+      p.LT_MIN,
+      FeaturePropertiesSchema0.shape.LT_MIN.meta().unit,
+      ModernFeaturePropertiesSchema.shape.TA_MIN.meta().unit,
+    ),
+    TA: transformUnit(
+      p.LT,
+      FeaturePropertiesSchema0.shape.LT.meta().unit,
+      ModernFeaturePropertiesSchema.shape.TA.meta().unit,
+    ),
+    PSUM_6: transformUnit(
+      p.N6,
+      FeaturePropertiesSchema0.shape.N6.meta().unit,
+      ModernFeaturePropertiesSchema.shape.PSUM_6.meta().unit,
+    ),
+    PSUM_24: transformUnit(
+      p.N24,
+      FeaturePropertiesSchema0.shape.N24.meta().unit,
+      ModernFeaturePropertiesSchema.shape.PSUM_24.meta().unit,
+    ),
+    PSUM_48: transformUnit(
+      p.N48,
+      FeaturePropertiesSchema0.shape.N48.meta().unit,
+      ModernFeaturePropertiesSchema.shape.PSUM_48.meta().unit,
+    ),
+    PSUM_72: transformUnit(
+      p.N72,
+      FeaturePropertiesSchema0.shape.N72.meta().unit,
+      ModernFeaturePropertiesSchema.shape.PSUM_72.meta().unit,
+    ),
+    TSS: transformUnit(
+      p.OFT,
+      FeaturePropertiesSchema0.shape.OFT.meta().unit,
+      ModernFeaturePropertiesSchema.shape.TSS.meta().unit,
+    ),
+    VW_MAX: transformUnit(
+      p.WG_BOE,
+      FeaturePropertiesSchema0.shape.WG_BOE.meta().unit,
+      ModernFeaturePropertiesSchema.shape.VW_MAX.meta().unit,
+    ),
+    VW: transformUnit(
+      p.WG,
+      FeaturePropertiesSchema0.shape.WG.meta().unit,
+      ModernFeaturePropertiesSchema.shape.VW.meta().unit,
+    ),
+    DW: transformUnit(
+      p.WR,
+      FeaturePropertiesSchema0.shape.WR.meta().unit,
+      ModernFeaturePropertiesSchema.shape.DW.meta().unit,
+    ),
+  } satisfies z.infer<typeof ModernFeaturePropertiesSchema>);
+});
 
 export const GeometrySchema = z.object({
   type: z.enum(["Point"]),
