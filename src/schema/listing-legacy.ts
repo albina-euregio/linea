@@ -7,7 +7,7 @@ const number = z
   .nullish()
   .check(z.overwrite((v) => (v === -777 ? undefined : v)));
 
-export const FeaturePropertiesSchema0 = z
+export const FeaturePropertiesSchema = z
   .object({
     name: z.string().describe("Station name"),
     altitude: z.number().nullish().describe("Altitude above sea level"),
@@ -111,36 +111,35 @@ export const FeaturePropertiesSchema0 = z
       .transform((v) => new Scalar(v, "°"))
       .meta({ unit: "°" }),
   })
-  .describe("The properties of a weather station including measured values");
-
-export const FeaturePropertiesSchema = FeaturePropertiesSchema0.transform((p) => {
-  return ModernFeaturePropertiesSchema.parse({
-    ...p,
-    startYear: p.Beobachtungsbeginn,
-    shortName: p["LWD-Nummer"],
-    microRegionID: p["LWD-Region"],
-    ISWR: p.GS_O.convertTo(ModernFeaturePropertiesSchema.shape.ISWR.meta().unit as "W/m²"),
-    RSWR: p.GS_U.convertTo(ModernFeaturePropertiesSchema.shape.RSWR.meta().unit as "W/m²"),
-    HS: p.HS.convertTo(ModernFeaturePropertiesSchema.shape.HS.meta().unit as "m"),
-    HSD24: p.HSD24.convertTo(ModernFeaturePropertiesSchema.shape.HSD24.meta().unit as "m"),
-    HSD48: p.HSD48.convertTo(ModernFeaturePropertiesSchema.shape.HSD48.meta().unit as "m"),
-    HSD72: p.HSD72.convertTo(ModernFeaturePropertiesSchema.shape.HSD72.meta().unit as "m"),
-    P: p.LD.convertTo(ModernFeaturePropertiesSchema.shape.P.meta().unit as "Pa"),
-    TA_MAX: p.LT_MAX.convertTo(ModernFeaturePropertiesSchema.shape.TA_MAX.meta().unit as "K"),
-    TA_MIN: p.LT_MIN.convertTo(ModernFeaturePropertiesSchema.shape.TA_MIN.meta().unit as "K"),
-    TA: p.LT.convertTo(ModernFeaturePropertiesSchema.shape.TA.meta().unit as "K"),
-    PSUM_6: p.N6.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_6.meta().unit as "mm"),
-    PSUM_24: p.N24.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_24.meta().unit as "mm"),
-    PSUM_48: p.N48.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_48.meta().unit as "mm"),
-    PSUM_72: p.N72.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_72.meta().unit as "mm"),
-    TSS: p.OFT.convertTo(ModernFeaturePropertiesSchema.shape.TSS.meta().unit as "K"),
-    RH: p.RH.convertTo(ModernFeaturePropertiesSchema.shape.RH.meta().unit as "1"),
-    TD: p.TD.convertTo(ModernFeaturePropertiesSchema.shape.TD.meta().unit as "K"),
-    VW_MAX: p.WG_BOE.convertTo(ModernFeaturePropertiesSchema.shape.VW_MAX.meta().unit as "m/s"),
-    VW: p.WG.convertTo(ModernFeaturePropertiesSchema.shape.VW.meta().unit as "m/s"),
-    DW: p.WR.convertTo(ModernFeaturePropertiesSchema.shape.DW.meta().unit as "°"),
-  } satisfies z.infer<typeof ModernFeaturePropertiesSchema>);
-});
+  .describe("The properties of a weather station including measured values")
+  .transform((p) =>
+    ModernFeaturePropertiesSchema.parse({
+      ...p,
+      startYear: p.Beobachtungsbeginn,
+      shortName: p["LWD-Nummer"],
+      microRegionID: p["LWD-Region"],
+      ISWR: p.GS_O.convertTo(ModernFeaturePropertiesSchema.shape.ISWR.meta().unit as "W/m²"),
+      RSWR: p.GS_U.convertTo(ModernFeaturePropertiesSchema.shape.RSWR.meta().unit as "W/m²"),
+      HS: p.HS.convertTo(ModernFeaturePropertiesSchema.shape.HS.meta().unit as "m"),
+      HSD24: p.HSD24.convertTo(ModernFeaturePropertiesSchema.shape.HSD24.meta().unit as "m"),
+      HSD48: p.HSD48.convertTo(ModernFeaturePropertiesSchema.shape.HSD48.meta().unit as "m"),
+      HSD72: p.HSD72.convertTo(ModernFeaturePropertiesSchema.shape.HSD72.meta().unit as "m"),
+      P: p.LD.convertTo(ModernFeaturePropertiesSchema.shape.P.meta().unit as "Pa"),
+      TA_MAX: p.LT_MAX.convertTo(ModernFeaturePropertiesSchema.shape.TA_MAX.meta().unit as "K"),
+      TA_MIN: p.LT_MIN.convertTo(ModernFeaturePropertiesSchema.shape.TA_MIN.meta().unit as "K"),
+      TA: p.LT.convertTo(ModernFeaturePropertiesSchema.shape.TA.meta().unit as "K"),
+      PSUM_6: p.N6.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_6.meta().unit as "mm"),
+      PSUM_24: p.N24.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_24.meta().unit as "mm"),
+      PSUM_48: p.N48.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_48.meta().unit as "mm"),
+      PSUM_72: p.N72.convertTo(ModernFeaturePropertiesSchema.shape.PSUM_72.meta().unit as "mm"),
+      TSS: p.OFT.convertTo(ModernFeaturePropertiesSchema.shape.TSS.meta().unit as "K"),
+      RH: p.RH.convertTo(ModernFeaturePropertiesSchema.shape.RH.meta().unit as "1"),
+      TD: p.TD.convertTo(ModernFeaturePropertiesSchema.shape.TD.meta().unit as "K"),
+      VW_MAX: p.WG_BOE.convertTo(ModernFeaturePropertiesSchema.shape.VW_MAX.meta().unit as "m/s"),
+      VW: p.WG.convertTo(ModernFeaturePropertiesSchema.shape.VW.meta().unit as "m/s"),
+      DW: p.WR.convertTo(ModernFeaturePropertiesSchema.shape.DW.meta().unit as "°"),
+    } satisfies z.infer<typeof ModernFeaturePropertiesSchema>),
+  );
 
 export const GeometrySchema = z.object({
   type: z.enum(["Point"]),
