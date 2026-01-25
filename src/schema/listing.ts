@@ -60,15 +60,19 @@ export const FeaturePropertiesSchema = z
       .describe("Snow height in m")
       .transform((v) => new Length(v, "m"))
       .meta({ unit: "m" }),
-    HSD24: number
+    HSD_6: number
+      .describe("Difference in snow height over the last 6h in m")
+      .transform((v) => new Length(v, "m"))
+      .meta({ unit: "m" }),
+    HSD_24: number
       .describe("Difference in snow height over the last 24h in m")
       .transform((v) => new Length(v, "m"))
       .meta({ unit: "m" }),
-    HSD48: number
+    HSD_48: number
       .describe("Difference in snow height over the last 48h in m")
       .transform((v) => new Length(v, "m"))
       .meta({ unit: "m" }),
-    HSD72: number
+    HSD_72: number
       .describe("Difference in snow height over the last 72h in m")
       .transform((v) => new Length(v, "m"))
       .meta({ unit: "m" }),
@@ -88,16 +92,16 @@ export const FeaturePropertiesSchema = z
       .describe("Air temperature in Kelvin")
       .transform((v) => new Temperature(v, "K"))
       .meta({ unit: "K" }),
+    PSUM_6: number
+      .describe("Precipitation summed over the last 6h in mm")
+      .transform((v) => new Length(v, "mm"))
+      .meta({ unit: "mm" }),
     PSUM_24: number
       .describe("Precipitation summed over the last 24h in mm")
       .transform((v) => new Length(v, "mm"))
       .meta({ unit: "mm" }),
     PSUM_48: number
       .describe("Precipitation summed over the last 48h in mm")
-      .transform((v) => new Length(v, "mm"))
-      .meta({ unit: "mm" }),
-    PSUM_6: number
-      .describe("Precipitation summed over the last 6h in mm")
       .transform((v) => new Length(v, "mm"))
       .meta({ unit: "mm" }),
     PSUM_72: number

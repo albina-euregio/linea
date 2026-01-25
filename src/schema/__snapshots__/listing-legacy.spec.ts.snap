@@ -20,15 +20,19 @@ exports[`parse legacy 1`] = `
       "unit": "m",
       "value": 0.41600000000000004,
     },
-    "HSD24": Length {
+    "HSD_24": Length {
       "unit": "m",
       "value": -0.037000000000000005,
     },
-    "HSD48": Length {
+    "HSD_48": Length {
       "unit": "m",
       "value": -0.0138,
     },
-    "HSD72": Length {
+    "HSD_6": Length {
+      "unit": "m",
+      "value": undefined,
+    },
+    "HSD_72": Length {
       "unit": "m",
       "value": -0.018799999999999997,
     },
