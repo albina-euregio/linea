@@ -138,7 +138,7 @@ export const FeaturePropertiesSchema = z
       VW_MAX: p.WG_BOE.convertTo(ModernFeaturePropertiesSchema.shape.VW_MAX.meta().unit as "m/s"),
       VW: p.WG.convertTo(ModernFeaturePropertiesSchema.shape.VW.meta().unit as "m/s"),
       DW: p.WR.convertTo(ModernFeaturePropertiesSchema.shape.DW.meta().unit as "°"),
-    } satisfies z.infer<typeof ModernFeaturePropertiesSchema>),
+    } satisfies z.input<typeof ModernFeaturePropertiesSchema>),
   );
 
 export const GeometrySchema = z.object({
