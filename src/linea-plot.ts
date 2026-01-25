@@ -1,6 +1,6 @@
 import { i18n } from "./i18n";
-import { fetchSMET } from "./smet-data";
-import type { Result, Values } from "./station-data";
+import { fetchSMET } from "./data/smet-data";
+import type { Result, Values } from "./data/station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 
 /**
@@ -78,7 +78,6 @@ export class LineaPlot extends HTMLElement {
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   private dp;
-  private dpReady!: Promise<void>;
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
@@ -89,7 +88,7 @@ export class LineaPlot extends HTMLElement {
   private minTime: number = +Infinity;
   private maxTime: number = -Infinity;
 
-  connectedCallback() {
+  async connectedCallback() {
     this.styleTag = document.createElement("style");
 
     this.styleTag.textContent = `
@@ -238,24 +237,22 @@ export class LineaPlot extends HTMLElement {
         }
       `;
     this.appendChild(this.styleTag);
-    this.#addControls();
+    await this.#addControls();
     this.#addExportModal();
-    this.dpReady?.then(() => {
-      if (this.hasAttribute("data")) {
-        this.storeDataFromAttribute();
-        this.#initAfterDataStorage();
-      } else {
-        this.fetchAndStoreData()
-          .then(() => {
-            this.#initAfterDataStorage();
-            this.#lazyLoad();
-          })
-          .catch((_) => {});
-      }
-      this.tabIndex = 0;
-      this.focus();
-      this.isLoaded = true;
-    });
+    if (this.hasAttribute("data")) {
+      this.storeDataFromAttribute();
+      this.#initAfterDataStorage();
+    } else {
+      this.fetchAndStoreData()
+        .then(() => {
+          this.#initAfterDataStorage();
+          this.#lazyLoad();
+        })
+        .catch((_) => {});
+    }
+    this.tabIndex = 0;
+    this.focus();
+    this.isLoaded = true;
   }
 
   attributeChangedCallback(name: string) {
@@ -429,7 +426,7 @@ export class LineaPlot extends HTMLElement {
    * enlarge shows all available data and is shown when the datepicker is there too
    * export exports the drawed canvas on the screen, see @class ExportModal
    */
-  #addControls() {
+  async #addControls() {
     if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport")) {
       return;
     }
@@ -547,7 +544,7 @@ export class LineaPlot extends HTMLElement {
     controls.appendChild(menu);
     this.appendChild(controls);
 
-    this.#constructDatePicker();
+    await this.#constructDatePicker();
     this.focus();
   }
 
@@ -754,26 +751,24 @@ export class LineaPlot extends HTMLElement {
   /**
    * cosntructs the AirDatePicker
    */
-  #constructDatePicker() {
-    this.dpReady = (async () => {
-      const { default: AirDatepicker } = await import("air-datepicker");
-      const css = await import("air-datepicker/air-datepicker.css?raw");
-      this.styleTag.textContent += css.default;
+  async #constructDatePicker() {
+    const { default: AirDatepicker } = await import("air-datepicker");
+    const css = await import("air-datepicker/air-datepicker.css?raw");
+    this.styleTag.textContent += css.default;
 
-      this.dp = new AirDatepicker(this.daterange, {
-        range: true,
-        multipleDatesSeparator: " - ",
-        onSelect: () => this.filterAndUpdateData(),
-        container: this,
-        autoClose: true,
-      });
-      await this.#localizeDatePicker();
-      //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener
-      this.daterange.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        this.dp.visible ? this.dp.hide() : this.dp.show();
-      });
-    })();
+    this.dp = new AirDatepicker(this.daterange, {
+      range: true,
+      multipleDatesSeparator: " - ",
+      onSelect: () => this.filterAndUpdateData(),
+      container: this,
+      autoClose: true,
+    });
+    await this.#localizeDatePicker();
+    //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener
+    this.daterange.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      this.dp.visible ? this.dp.hide() : this.dp.show();
+    });
   }
 
   /**

@@ -1,5 +1,6 @@
 import { parseGeosphereData } from "./geosphere-data";
 import type { ParameterType, Result, Units, Values } from "./station-data";
+import { unitTransformer } from "./units";
 
 const DEFAULT_UNITS: Units = {
   P: "Pa",
@@ -22,11 +23,11 @@ const DEFAULT_UNITS: Units = {
 };
 
 const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number }> = {
-  K: { to: "°C", convert: (v) => v - 273.15 },
-  m: { to: "cm", convert: (v) => v * 100 },
-  "1": { to: "%", convert: (v) => v * 100 },
-  "m/s": { to: "km/h", convert: (v) => v * 3.6 },
-  mm: { to: "mm", convert: (v) => v },
+  K: { to: "°C", convert: unitTransformer("K", "°C") },
+  m: { to: "cm", convert: unitTransformer("m", "cm") },
+  "1": { to: "%", convert: unitTransformer("1", "%") },
+  "m/s": { to: "km/h", convert: unitTransformer("m/s", "km/h") },
+  mm: { to: "mm", convert: unitTransformer("mm", "mm") },
 };
 
 export async function fetchSMET(url: string): Promise<Result> {

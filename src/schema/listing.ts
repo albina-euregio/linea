@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Intensity, Length, Pressure, Scalar, Speed, Temperature } from "../data/units";
 
 const number = z
   .number()
@@ -30,6 +31,8 @@ export const FeaturePropertiesSchema = z
 
     operator: z.string().nullish().describe("Station operator"),
     operatorLink: z.url().nullish().describe("Link to website of station operator"),
+    operatorLicense: z.string().nullish().describe("License under which data is provided"),
+    operatorLicenseLink: z.url().nullish().describe("Link to license"),
 
     plot: z
       .string()
@@ -37,42 +40,117 @@ export const FeaturePropertiesSchema = z
       .describe("For legacy PNG plots: name of plot which includes this station"),
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
-    ISWR: number.describe("Incoming Short Wave Radiation in W/m²"),
-    RSWR: number.describe("Reflected Short Wave Radiation in W/m²"),
-    ILWR: number.describe("Incoming Long Wave Radiation in W/m²"),
-    OLWR: number.describe("Outgoing Long Wave Radiation in W/m²"),
-    HS: number.describe("Snow height in m"),
-    HSD24: number.describe("Difference in snow height over the last 24h in m"),
-    HSD48: number.describe("Difference in snow height over the last 48h in m"),
-    HSD72: number.describe("Difference in snow height over the last 72h in m"),
-    P: number.describe("Air pressure in Pa"),
-    TA_MAX: number.describe("Max. air temperature over the last 24h in Kelvin"),
-    TA_MIN: number.describe("Min. air temperature over the last 24h in Kelvin"),
-    TA: number.describe("Air temperature in Kelvin"),
-    PSUM_24: number.describe("Precipitation summed over the last 24h in mm"),
-    PSUM_48: number.describe("Precipitation summed over the last 48h in mm"),
-    PSUM_6: number.describe("Precipitation summed over the last 6h in mm"),
-    PSUM_72: number.describe("Precipitation summed over the last 72h in mm"),
-    TSS: number.describe("Temperature Snow Surface in Kelvin"),
-    RH: number.describe("Relative humidity between 0 and 1"),
-    TD: number.describe("Dew point temperature in Kelvin"),
-    VW_MAX: number.describe("Max. wind velocity (optionally max over the last 3h) in m/s"),
-    VW: number.describe("Wind velocity (optionally as average over the last 3h) in m/s"),
-    DW: number.describe("Wind direction (optionally average over the last 3h) in °"),
+    ISWR: number
+      .describe("Incoming Short Wave Radiation in W/m²")
+      .transform((v) => new Intensity(v, "W/m²"))
+      .meta({ unit: "W/m²" }),
+    RSWR: number
+      .describe("Reflected Short Wave Radiation in W/m²")
+      .transform((v) => new Intensity(v, "W/m²"))
+      .meta({ unit: "W/m²" }),
+    ILWR: number
+      .describe("Incoming Long Wave Radiation in W/m²")
+      .transform((v) => new Intensity(v, "W/m²"))
+      .meta({ unit: "W/m²" }),
+    OLWR: number
+      .describe("Outgoing Long Wave Radiation in W/m²")
+      .transform((v) => new Intensity(v, "W/m²"))
+      .meta({ unit: "W/m²" }),
+    HS: number
+      .describe("Snow height in m")
+      .transform((v) => new Length(v, "m"))
+      .meta({ unit: "m" }),
+    HSD_6: number
+      .describe("Difference in snow height over the last 6h in m")
+      .transform((v) => new Length(v, "m"))
+      .meta({ unit: "m" }),
+    HSD_24: number
+      .describe("Difference in snow height over the last 24h in m")
+      .transform((v) => new Length(v, "m"))
+      .meta({ unit: "m" }),
+    HSD_48: number
+      .describe("Difference in snow height over the last 48h in m")
+      .transform((v) => new Length(v, "m"))
+      .meta({ unit: "m" }),
+    HSD_72: number
+      .describe("Difference in snow height over the last 72h in m")
+      .transform((v) => new Length(v, "m"))
+      .meta({ unit: "m" }),
+    P: number
+      .describe("Air pressure in Pa")
+      .transform((v) => new Pressure(v, "Pa"))
+      .meta({ unit: "Pa" }),
+    TA_MAX: number
+      .describe("Max. air temperature over the last 24h in Kelvin")
+      .transform((v) => new Temperature(v, "K"))
+      .meta({ unit: "K" }),
+    TA_MIN: number
+      .describe("Min. air temperature over the last 24h in Kelvin")
+      .transform((v) => new Temperature(v, "K"))
+      .meta({ unit: "K" }),
+    TA: number
+      .describe("Air temperature in Kelvin")
+      .transform((v) => new Temperature(v, "K"))
+      .meta({ unit: "K" }),
+    PSUM_6: number
+      .describe("Precipitation summed over the last 6h in mm")
+      .transform((v) => new Length(v, "mm"))
+      .meta({ unit: "mm" }),
+    PSUM_24: number
+      .describe("Precipitation summed over the last 24h in mm")
+      .transform((v) => new Length(v, "mm"))
+      .meta({ unit: "mm" }),
+    PSUM_48: number
+      .describe("Precipitation summed over the last 48h in mm")
+      .transform((v) => new Length(v, "mm"))
+      .meta({ unit: "mm" }),
+    PSUM_72: number
+      .describe("Precipitation summed over the last 72h in mm")
+      .transform((v) => new Length(v, "mm"))
+      .meta({ unit: "mm" }),
+    TSS: number
+      .describe("Temperature Snow Surface in Kelvin")
+      .transform((v) => new Temperature(v, "K"))
+      .meta({ unit: "K" }),
+    RH: number
+      .describe("Relative humidity between 0 and 1")
+      .transform((v) => new Scalar(v, "1"))
+      .meta({ unit: "1" }),
+    TD: number
+      .describe("Dew point temperature in Kelvin")
+      .transform((v) => new Temperature(v, "K"))
+      .meta({ unit: "K" }),
+    VW_MAX: number
+      .describe("Max. wind velocity (optionally max over the last 3h) in m/s")
+      .transform((v) => new Speed(v, "m/s"))
+      .meta({ unit: "m/s" }),
+    VW: number
+      .describe("Wind velocity (optionally as average over the last 3h) in m/s")
+      .transform((v) => new Speed(v, "m/s"))
+      .meta({ unit: "m/s" }),
+    DW: number
+      .describe("Wind direction (optionally average over the last 3h) in °")
+      .transform((v) => new Scalar(v, "°"))
+      .meta({ unit: "°" }),
   })
   .describe("The properties of a weather station including measured values");
+
+export const GeometrySchema = z.object({
+  type: z.enum(["Point"]),
+  coordinates: z.union([
+    z.tuple([z.number().describe("Longitude"), z.number().describe("Latitude")]),
+    z.tuple([
+      z.number().describe("Longitude"),
+      z.number().describe("Latitude"),
+      z.number().describe("Altitude"),
+    ]),
+  ]),
+});
 
 export const FeatureSchema = z
   .object({
     type: z.enum(["Feature"]),
-    geometry: z.union([
-      z.tuple([z.number().describe("Longitude"), z.number().describe("Latitude")]),
-      z.tuple([
-        z.number().describe("Longitude"),
-        z.number().describe("Latitude"),
-        z.number().describe("Altitude"),
-      ]),
-    ]),
+    geometry: GeometrySchema,
     properties: FeaturePropertiesSchema,
     id: z.union([z.uuid(), z.string()]).describe("The ID/UUID of the station"),
   })

@@ -1,0 +1,118 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parse legacy 1`] = `
+{
+  "geometry": {
+    "coordinates": [
+      11.335489,
+      47.052267,
+      2180,
+    ],
+    "type": "Point",
+  },
+  "id": "6cb4697c-2e0a-7214-6f8c-9af46ee648f3",
+  "properties": {
+    "DW": Scalar {
+      "unit": "°",
+      "value": undefined,
+    },
+    "HS": Length {
+      "unit": "m",
+      "value": 0.41600000000000004,
+    },
+    "HSD_24": Length {
+      "unit": "m",
+      "value": -0.037000000000000005,
+    },
+    "HSD_48": Length {
+      "unit": "m",
+      "value": -0.0138,
+    },
+    "HSD_6": Length {
+      "unit": "m",
+      "value": undefined,
+    },
+    "HSD_72": Length {
+      "unit": "m",
+      "value": -0.018799999999999997,
+    },
+    "ILWR": Intensity {
+      "unit": "W/m²",
+      "value": undefined,
+    },
+    "ISWR": Intensity {
+      "unit": "W/m²",
+      "value": 45,
+    },
+    "OLWR": Intensity {
+      "unit": "W/m²",
+      "value": undefined,
+    },
+    "P": Pressure {
+      "unit": "Pa",
+      "value": undefined,
+    },
+    "PSUM_24": Length {
+      "unit": "mm",
+      "value": undefined,
+    },
+    "PSUM_48": Length {
+      "unit": "mm",
+      "value": undefined,
+    },
+    "PSUM_6": Length {
+      "unit": "mm",
+      "value": undefined,
+    },
+    "PSUM_72": Length {
+      "unit": "mm",
+      "value": undefined,
+    },
+    "RH": Scalar {
+      "unit": "1",
+      "value": 0.982,
+    },
+    "RSWR": Intensity {
+      "unit": "W/m²",
+      "value": undefined,
+    },
+    "TA": Temperature {
+      "unit": "K",
+      "value": 269.04999999999995,
+    },
+    "TA_MAX": Temperature {
+      "unit": "K",
+      "value": 271.15,
+    },
+    "TA_MIN": Temperature {
+      "unit": "K",
+      "value": 268.75,
+    },
+    "TD": Temperature {
+      "unit": "K",
+      "value": 268.80899999999997,
+    },
+    "TSS": Temperature {
+      "unit": "K",
+      "value": 269.45,
+    },
+    "VW": Speed {
+      "unit": "m/s",
+      "value": undefined,
+    },
+    "VW_MAX": Speed {
+      "unit": "m/s",
+      "value": undefined,
+    },
+    "date": 2026-01-25T08:20:00.000Z,
+    "microRegionID": "AT-07-22 Stubaier Alpen Mitte",
+    "name": "Gallreideschrofen",
+    "operator": "LWD Tirol",
+    "operatorLink": "https://lawine.tirol.gv.at/",
+    "plot": "gallreideschrofen",
+    "shortName": "GGAL2",
+    "startYear": "2008",
+  },
+  "type": "Feature",
+}
+`;
