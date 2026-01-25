@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Intensity, Length, Pressure, Scalar, Speed, Temperature } from "../units";
+import { Intensity, Length, Pressure, Scalar, Speed, Temperature } from "../data/units";
 
 const number = z
   .number()

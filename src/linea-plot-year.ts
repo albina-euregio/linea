@@ -28,8 +28,8 @@ import {
   opts_DATAPOINTS_year,
   opts_DATAPOINTS_amount_year,
 } from "./linea-plot/opts_datapoints_year.ts";
-import { fetchSMET } from "./smet-data";
-import { YearData } from "./year-data.ts";
+import { fetchSMET } from "./data/smet-data";
+import { YearData } from "./data/year-data";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart.ts";
 
 /**

@@ -2,7 +2,7 @@ import uPlot from "uplot";
 import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
 import { LineaChart } from "./linea-plot/LineaChart";
-import { Result } from "./smet-data";
+import { Result } from "./data/station-data";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
