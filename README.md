@@ -3,10 +3,9 @@
 Visualizations of meteorological data, such as automated weather stations. The view is defined by the [LAWIS](https://https://www.lawis.at/) work group.
 The data has to be available as smet-file, see the [specification of the smet format](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf).
 
-The package offers two [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to show:
+The package offers one [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to show:
 
 - `<linea-plot src="...smet">` is rendering weather station data using [uPlot](https://github.com/leeoniya/uPlot), see **Usage** for its usage.
-- `<linea-plot-year src="...smet">` shows yearly overviews of weather stations, aggregating for the different input parameters
 
 ## Featuring
 
@@ -46,8 +45,10 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
 #### Attributes
 
 - `data` {string} - JSON-encoded array of Result objects (optional, either this or the `src` attribute)
-- `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute)
+- `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute or `wintersrc` in combination with `showonlywinter`)
 - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from Happens after the component is rendered and has the data from the `src` attribute (data from `src`attribute is replaced by data from `lazysrc` attribute). The data from `src` should be a subset from `lazysrc`. (optional)
+- `wintersrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch winter data from (optional). If missing, there is no option to switch to the yearly overviews.
+- `showonlywinter` {string} - When present, just the winter view is shown. Just in combination with `wintersrc`.
 - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
 - `showtitle` {boolean} - When present, display the station name and altitude as title
 - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
@@ -117,23 +118,17 @@ Shows a fixed date span from the given smet file:
 </linea-plot>
 ```
 
-#### `<linea-plot-year>`
+#### `<linea-plot>` yearly overview
 
-For yearly overviews, use the `<linea-plot-year>` component similarly:
-
-- `src` {string} - Path to SMET file with snow height and weather data
-- `startDate` {string} - Start date in ISO format (YYYY-MM-DD)
-- `endDate` {string} - End date in ISO format (YYYY-MM-DD)
-- `timeZone` {string} - IANA time zone identifier for data aggregation, optional
-- `showTitle` {boolean} - If present, displays station name and altitude, optional
+For yearly overviews, use the `<linea-plot>` component like this:
 
 ```html
-<linea-plot-year
-  src="path/to/data.smet"
-  startDate="2023-01-01"
-  endDate="2023-12-31"
-  timeZone="CET"
+<linea-plot
+  wintersrc="path/to/data.smet"
+  startdate="2025-06-04T00:00[Europe/Berlin]"
+  enddate="2025-06-04T00:00[Europe/Berlin]"
   showTitle
+  showonlywinter
 >
-</linea-plot-year>
+</linea-plot>
 ```

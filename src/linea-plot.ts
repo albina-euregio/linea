@@ -16,6 +16,8 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * - `data` {string} - JSON-encoded array of @class Result objects (optional, either this or the `src` attribute)
  * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute)
  * - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to lazy fetch data from after loading the component and the data from `src` (optional)
+ * - `wintersrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch winter data from (optional)
+ * - `showonlywinter` {string} - When present, just the winter view is shown. Just in combination with `wintersrc`.
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
  * - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
@@ -50,6 +52,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
  * <!-- Fixed date view without picker -->
  * <linea-plot 
  *   src='["data/station1.smet"]'
+ *   wintersrc='["data/station1_winter.smet"]'
  *   startdate="2025-06-04T10:00[Europe/Berlin]"
  *   enddate="2025-06-04T18:00[Europe/Berlin]">
  * </linea-plot>
@@ -81,6 +84,7 @@ export class LineaPlot extends HTMLElement {
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
+  wintersrcs: string[] = [];
   lineacharts: LineaChart[] = [] as LineaChart[];
   results: Result[] = [] as Result[];
 
