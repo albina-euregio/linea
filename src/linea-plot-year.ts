@@ -31,6 +31,7 @@ import {
 import { fetchSMET } from "./data/smet-data";
 import { YearData } from "./data/year-data";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart.ts";
+import { Result } from "./data/station-data";
 
 /**
  * A custom HTML element that renders yearly overview plots for weather station data.
@@ -67,46 +68,35 @@ import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart.ts";
  * @attribute {string} [timeZone="CET"] - IANA time zone identifier for data aggregation
  * @attribute {boolean} [showTitle] - If present, displays station name and altitude
  */
-export class LineaPlotYear extends AbstractLineaChart {
-  static observedAttributes = ["src"];
-
-  connectedCallback() {
-    this.renderPlots().catch((e) => console.error(e));
+export class LineaYearChart extends AbstractLineaChart {
+  constructor(
+    readonly result: Result,
+    private showTitle: boolean,
+    backgroundColor: string,
+  ) {
+    super(backgroundColor);
+    this.createPlots().catch((e) => console.error(e));
   }
 
-  attributeChangedCallback(name: string) {
-    if (name === "src" || name == "timeRangeMilli") {
-      this.renderPlots().catch((e) => console.error(e));
-    }
-  }
-
-  async renderPlots() {
+  async createPlots() {
     if (!globalThis.Temporal) {
       await import("temporal-polyfill/global");
     }
+    const { station, altitude, timestamps, values } = this.result;
+
     this.resizeObserver.unobserve(this);
-    const { station, altitude, timestamps, values } = await fetchSMET(
-      this.getAttribute("src") ?? "",
-    );
 
     const style = document.createElement("style");
-    style.textContent =
-      css +
-      `
-        linea-plot-year {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }`;
+    style.textContent = css;
     const plot_HS_year = document.createElement("div");
     const plot_NS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
     const plot_DATAPOINTS_year = document.createElement("div");
     this.replaceChildren(style, plot_HS_year, plot_NS_year, plot_TEMP_year, plot_DATAPOINTS_year);
 
-    const startDate = Temporal.PlainDate.from(this.getAttribute("startDate")!);
-    const endDate = Temporal.PlainDate.from(this.getAttribute("endDate")!);
-    const timeZone = this.getAttribute("timeZone") || "CET";
+    const startDate = Temporal.PlainDate.from("2025-10-31");
+    const endDate = Temporal.PlainDate.from("2026-05-01");
+    const timeZone = "CET";
 
     if (values.HS) {
       const yearDataHS = YearData.from(timeZone, startDate, endDate, timestamps, values.HS);
@@ -130,12 +120,17 @@ export class LineaPlotYear extends AbstractLineaChart {
         const yearDataPSUM = YearData.from(timeZone, startDate, endDate, timestamps, values.PSUM);
         this.addSeries(p, opts_HS_year_PSUM, yearDataPSUM.values);
       }
+      this.modifyDrawHook(p, this.backgroundColor);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:precipitation"));
+
       const pDatapoints = new uPlot(
         opts_DATAPOINTS_year,
         [yearDataHS.timestamps],
         plot_DATAPOINTS_year,
       );
       this.addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearDataHS.amount);
+      this.modifyDrawHook(pDatapoints, this.backgroundColor);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:datapoints"));
     }
 
     if (values.NS) {
@@ -150,6 +145,8 @@ export class LineaPlotYear extends AbstractLineaChart {
         );
       }
       this.addSeries(pNewSnow, opts_NS_year_series, yearDataNS.values);
+      this.modifyDrawHook(pNewSnow, this.backgroundColor);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:newsnow"));
     }
 
     if (values.TA) {
@@ -163,15 +160,13 @@ export class LineaPlotYear extends AbstractLineaChart {
         const yearDataTD = YearData.from(timeZone, startDate, endDate, timestamps, values.TD);
         this.addSeries(pTemp, opts_DEW_year_current, yearDataTD.values);
       }
+      this.modifyDrawHook(pTemp, this.backgroundColor);
+      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:temperature"));
     }
 
     this.resizePlots(this.clientWidth, this.style);
     this.resizeObserver.observe(this);
   }
-
-  disconnectedCallback() {
-    this.resizeObserver.unobserve(this);
-  }
 }
 
-customElements.define("linea-plot-year", LineaPlotYear);
+customElements.define("linea-year-chart", LineaYearChart);

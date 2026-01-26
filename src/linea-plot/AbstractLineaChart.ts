@@ -4,6 +4,12 @@ export abstract class AbstractLineaChart extends HTMLElement {
   plotnames: string[] = [];
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
 
+  constructor(
+    protected backgroundColor: string
+  ) {
+    super();
+  }
+
   resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
     this.plots.forEach((p) =>
       p.setSize({
@@ -32,5 +38,26 @@ export abstract class AbstractLineaChart extends HTMLElement {
     }
     plot.addSeries({ ...series, show: !!data?.length });
     plot.data.push(data);
+  }
+
+  modifyDrawHook(p: uPlot, backgroundColor: string) {
+    p.hooks.draw = p.hooks.draw || [];
+    p.hooks.draw.unshift((u) => {
+      const { left, top, width, height } = u.bbox;
+      const ctx = u.ctx;
+      ctx.save();
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(left, top, width, height);
+      ctx.restore();
+    });
+  }
+
+  setBackgroundColor(color: string) {
+    this.backgroundColor = color;
+    this.plots.forEach((p) => p.redraw());
+  }
+
+  getBackgroundColor(): string {
+    return this.backgroundColor;
   }
 }
