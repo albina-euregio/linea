@@ -2,6 +2,37 @@ import { i18n } from "./i18n";
 import { fetchSMET } from "./data/smet-data";
 import type { Result, Values } from "./data/station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
+import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
+import { LineaYearChart } from "./linea-plot-year";
+import { YearData } from "./data/year-data";
+import uPlot from "uplot";
+import {
+  opts_HS_year_current,
+  opts_HS_year_max,
+  opts_HS_year_median,
+  opts_HS_year_min,
+  opts_HS_year_PSUM,
+  opts_HS_year,
+} from "./linea-plot/opts_HS_PSUM_year";
+import {
+  opts_TEMP_year,
+  opts_DEW_year_current,
+  opts_TEMP_year_current,
+  opts_TEMP_year_max,
+  opts_TEMP_year_median,
+  opts_TEMP_year_min,
+} from "./linea-plot/opts_TEMP_year";
+
+import {
+  opts_NS_year,
+  opts_NS_year_series,
+  opts_NS_year_snow_cover,
+} from "./linea-plot/opts_NS_year";
+
+import {
+  opts_DATAPOINTS_year,
+  opts_DATAPOINTS_amount_year,
+} from "./linea-plot/opts_datapoints_year";
 
 /**
  * LineaPlot Web Component
@@ -85,12 +116,16 @@ export class LineaPlot extends HTMLElement {
   srcs: string[] = [];
   lazysrcs: string[] = [];
   wintersrcs: string[] = [];
-  lineacharts: LineaChart[] = [] as LineaChart[];
+  lineacharts: AbstractLineaChart[] = [] as AbstractLineaChart[];
   results: Result[] = [] as Result[];
+  winterresults: Result[] = [] as Result[];
+  winterview: boolean = false;
 
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
   private minTime: number = +Infinity;
   private maxTime: number = -Infinity;
+  private minTimeWinter: number = +Infinity;
+  private maxTimeWinter: number = -Infinity;
 
   async connectedCallback() {
     this.styleTag = document.createElement("style");
@@ -243,16 +278,20 @@ export class LineaPlot extends HTMLElement {
     this.appendChild(this.styleTag);
     await this.#addControls();
     this.#addExportModal();
-    if (this.hasAttribute("data")) {
-      this.storeDataFromAttribute();
-      this.#initAfterDataStorage();
+    if (this.hasAttribute("wintersrc") && this.hasAttribute("showonlywinter")) {
+      this.#switchToWinterView();
     } else {
-      this.fetchAndStoreData()
-        .then(() => {
-          this.#initAfterDataStorage();
-          this.#lazyLoad();
-        })
-        .catch((_) => {});
+      if (this.hasAttribute("data")) {
+        this.storeDataFromAttribute();
+        this.#initAfterDataStorage();
+      } else {
+        this.fetchAndStoreData()
+          .then(() => {
+            this.#initAfterDataStorage();
+            this.#lazyLoad();
+          })
+          .catch((_) => {});
+      }
     }
     this.tabIndex = 0;
     this.focus();
@@ -303,7 +342,8 @@ export class LineaPlot extends HTMLElement {
 
   /**
    * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
-   * If a other attribute is given it uses this one instead of src
+   * If a other attribute is given it uses this one instead of src.
+   * If the `src`attribute is `wintersrc`, the fetched data is stored in winterresults, minTimeWinter, maxTimeWinter.
    * @param attribute {string} - attribute to fetch the data from, default is "src"
    */
   async fetchAndStoreData(attribute: string = "src") {
@@ -322,36 +362,66 @@ export class LineaPlot extends HTMLElement {
       this.srcs = srcs;
     } else if (attribute == "lazysrc") {
       this.lazysrcs = srcs;
+    } else if (attribute == "wintersrc") {
+      this.wintersrcs = srcs;
     }
-    this.results = [];
-    for (const src in srcs) {
-      let result = await fetchSMET(srcs[src]);
-      this.minTime = result.timestamps[0];
-      this.maxTime = result.timestamps[result.timestamps.length - 1];
-      this.results.push(result);
+    if (attribute == "wintersrc") {
+      this.winterresults = [];
+      for (const src in srcs) {
+        let result = await fetchSMET(srcs[src]);
+        this.minTimeWinter = Math.min(this.minTimeWinter, result.timestamps[0]);
+        this.maxTimeWinter = Math.max(
+          this.maxTimeWinter,
+          result.timestamps[result.timestamps.length - 1],
+        );
+        this.winterresults.push(result);
+      }
+    } else {
+      this.results = [];
+      for (const src in srcs) {
+        let result = await fetchSMET(srcs[src]);
+        this.minTime = Math.min(this.minTime, result.timestamps[0]);
+        this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
+        this.results.push(result);
+      }
+      this.#generalizeData();
+      this.#updateValidDateInputs();
     }
-    this.#generalizeData();
-    this.#updateValidDateInputs();
   }
 
   /**
    *
    */
   storeDataFromAttribute() {
-    const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
-    this.results = results;
-    this.minTime = +Infinity;
-    this.maxTime = -Infinity;
-    for (const result of results) {
-      if (this.minTime > result.timestamps[0]) {
-        this.minTime = result.timestamps[0];
+    if (this.hasAttribute("showonlywinter")) {
+      const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
+      this.winterresults = results;
+      this.minTimeWinter = +Infinity;
+      this.maxTimeWinter = -Infinity;
+      for (const result of results) {
+        if (this.minTimeWinter > result.timestamps[0]) {
+          this.minTimeWinter = result.timestamps[0];
+        }
+        if (this.maxTimeWinter < result.timestamps[result.timestamps.length - 1]) {
+          this.maxTimeWinter = result.timestamps[result.timestamps.length - 1];
+        }
       }
-      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
-        this.maxTime = result.timestamps[result.timestamps.length - 1];
+    } else {
+      const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
+      this.results = results;
+      this.minTime = +Infinity;
+      this.maxTime = -Infinity;
+      for (const result of results) {
+        if (this.minTime > result.timestamps[0]) {
+          this.minTime = result.timestamps[0];
+        }
+        if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
+          this.maxTime = result.timestamps[result.timestamps.length - 1];
+        }
       }
+      this.#generalizeData();
+      this.#updateValidDateInputs();
     }
-    this.#generalizeData();
-    this.#updateValidDateInputs();
   }
 
   /**
@@ -406,7 +476,7 @@ export class LineaPlot extends HTMLElement {
       const filteredTimestamps = res.timestamps.filter(
         (t) => t >= startTimestamp && t <= endTimestamp,
       );
-      this.lineacharts[i]?.setData(filteredTimestamps, filteredValues as Values);
+      (this.lineacharts[i] as LineaChart).setData(filteredTimestamps, filteredValues as Values);
     }
   }
 
@@ -529,6 +599,20 @@ export class LineaPlot extends HTMLElement {
       });
       menu.appendChild(exportbtn);
     }
+    if (this.hasAttribute("wintersrc") && !this.hasAttribute("showonlywinter")) {
+      const winterviewbtn = document.createElement("button");
+      winterviewbtn.id = "winterviewbtn";
+      winterviewbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:winterview:winter")}`;
+      winterviewbtn.classList.add("toggle-btn");
+      winterviewbtn.addEventListener("click", () => {
+        if (!this.winterview) {
+          this.#switchToWinterView();
+        } else {
+          this.#switchToStationView();
+        }
+      });
+      menu.appendChild(winterviewbtn);
+    }
     if (this.hasAttribute("showdatepicker")) {
       const enlargebtn = document.createElement("button");
       enlargebtn.innerHTML = `<svg width="13px" height="13px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -607,6 +691,38 @@ export class LineaPlot extends HTMLElement {
       // set the common timeline to all results
       res.timestamps = allTimestamps.slice();
     }
+  }
+
+  #switchToWinterView() {
+    this.fetchAndStoreData("wintersrc").then(() => {
+      for (const i in this.winterresults) {
+        const lcy = new LineaYearChart(
+          this.winterresults[i],
+          true,
+          this.backgroundColors[i] ?? "#00000000",
+        );
+        for (const lc of this.lineacharts) {
+          this.removeChild(lc);
+        }
+        this.lineacharts = [];
+        this.lineacharts.push(lcy);
+        this.appendChild(lcy);
+      }
+      document.getElementById("winterviewbtn").innerHTML =
+        `${i18n.message("dialog:weather-station-diagram:controls:value:winterview:station")}`;
+      this.winterview = true;
+    });
+  }
+
+  #switchToStationView() {
+    for (const lc of this.lineacharts) {
+      this.removeChild(lc);
+    }
+    this.lineacharts = [];
+    this.#initAfterDataStorage();
+    document.getElementById("winterviewbtn").innerHTML =
+      `${i18n.message("dialog:weather-station-diagram:controls:value:winterview:winter")}`;
+    this.winterview = false;
   }
 
   /**
@@ -736,6 +852,17 @@ export class LineaPlot extends HTMLElement {
   }
 
   #getDatePickerStartDate(): Temporal.ZonedDateTime {
+    if (!this.dp) {
+      if (this.winterview) {
+        return Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+          i18n.timezone(),
+        );
+      } else {
+        return Temporal.Instant.fromEpochMilliseconds(this.minTimeWinter).toZonedDateTimeISO(
+          i18n.timezone(),
+        );
+      }
+    }
     const date: Date = this.dp.selectedDates[0];
     date.setHours(0);
     date.setMinutes(0);
@@ -743,6 +870,17 @@ export class LineaPlot extends HTMLElement {
   }
 
   #getDatePickerEndDate(): Temporal.ZonedDateTime {
+    if (!this.dp) {
+      if (this.winterview) {
+        return Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+          i18n.timezone(),
+        );
+      } else {
+        return Temporal.Instant.fromEpochMilliseconds(this.maxTimeWinter).toZonedDateTimeISO(
+          i18n.timezone(),
+        );
+      }
+    }
     let date: Date;
     if (this.dp.selectedDates.length == 1) {
       date = this.dp.selectedDates[0];
