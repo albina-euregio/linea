@@ -13,12 +13,6 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`;
         var labely2 = "";
         var labelColor1 = "#00ff55ff";
@@ -29,7 +23,6 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
           labely2,
           u.bbox.left,
           u.bbox.width,
-          canvasHeight,
           labelColor1,
           labelColor2,
         );

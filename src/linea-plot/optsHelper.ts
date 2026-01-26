@@ -17,10 +17,13 @@ export class OptsHelper {
     rightLabel: string,
     chartLeft: number,
     chartWidth: number,
-    canvasHeight: number,
     leftFillStyle: string | CanvasGradient | CanvasPattern,
     rightFillStyle: string | CanvasGradient | CanvasPattern,
   ): CanvasRenderingContext2D {
+    ctx.save();
+    ctx.textBaseline = "top";
+
+    const canvasHeight = ctx.canvas.height;
     const yPosition = 3;
 
     // Left Y-axis label

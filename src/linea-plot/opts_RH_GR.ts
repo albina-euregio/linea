@@ -12,10 +12,6 @@ export const opts_RH_GR: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.textBaseline = "top";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`;
         var labelColor1 = "#6aafd5";
@@ -26,7 +22,6 @@ export const opts_RH_GR: uPlot.Options = {
           labely2,
           u.bbox.left,
           u.bbox.width,
-          canvasHeight,
           labelColor1,
           labelColor2,
         );

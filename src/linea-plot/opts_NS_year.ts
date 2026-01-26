@@ -13,23 +13,8 @@ export const opts_NS_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:newsnow")} (cm)`;
-        OptsHelper.UpdateAxisLabels(
-          ctx,
-          labely1,
-          "",
-          u.bbox.left,
-          u.bbox.width,
-          canvasHeight,
-          "#DE2D26",
-          "",
-        );
+        OptsHelper.UpdateAxisLabels(ctx, labely1, "", u.bbox.left, u.bbox.width, "#DE2D26", "");
         ctx.restore();
       },
     ],
