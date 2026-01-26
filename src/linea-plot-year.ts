@@ -16,7 +16,7 @@ import {
   opts_TEMP_year_max,
   opts_TEMP_year_median,
   opts_TEMP_year_min,
-} from "./linea-plot/opts_TEMP_year.ts";
+} from "./linea-plot/opts_TEMP_year";
 
 import {
   opts_NS_year,
@@ -27,10 +27,9 @@ import {
 import {
   opts_DATAPOINTS_year,
   opts_DATAPOINTS_amount_year,
-} from "./linea-plot/opts_datapoints_year.ts";
-import { fetchSMET } from "./data/smet-data";
+} from "./linea-plot/opts_datapoints_year";
 import { YearData } from "./data/year-data";
-import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart.ts";
+import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 import { Result } from "./data/station-data";
 
 /**

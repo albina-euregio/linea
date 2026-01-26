@@ -37,7 +37,6 @@ import { Result } from "./data/station-data";
  * exportModal.show();
  */
 export class ExportModal {
-  private exportOptions: HTMLDivElement;
   private exportSettings: HTMLDivElement;
   private exportResult: HTMLDivElement;
   private exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;

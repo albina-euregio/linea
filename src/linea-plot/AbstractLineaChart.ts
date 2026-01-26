@@ -4,9 +4,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
   plotnames: string[] = [];
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
 
-  constructor(
-    protected backgroundColor: string
-  ) {
+  constructor(protected backgroundColor: string) {
     super();
   }
 
