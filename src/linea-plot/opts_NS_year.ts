@@ -9,6 +9,7 @@ import { OptsHelper } from "./optsHelper";
 
 export const opts_NS_year: uPlot.Options = {
   ...OptsHelper.getLineaOptions(),
+  padding: [20, 43, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {
