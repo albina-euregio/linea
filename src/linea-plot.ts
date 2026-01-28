@@ -4,35 +4,6 @@ import type { Result, Values } from "./data/station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 import { LineaYearChart } from "./linea-plot/LineaYearChart";
-import { YearData } from "./data/year-data";
-import uPlot from "uplot";
-import {
-  opts_HS_year_current,
-  opts_HS_year_max,
-  opts_HS_year_median,
-  opts_HS_year_min,
-  opts_HS_year_PSUM,
-  opts_HS_year,
-} from "./linea-plot/opts_HS_PSUM_year";
-import {
-  opts_TEMP_year,
-  opts_DEW_year_current,
-  opts_TEMP_year_current,
-  opts_TEMP_year_max,
-  opts_TEMP_year_median,
-  opts_TEMP_year_min,
-} from "./linea-plot/opts_TEMP_year";
-
-import {
-  opts_NS_year,
-  opts_NS_year_series,
-  opts_NS_year_snow_cover,
-} from "./linea-plot/opts_NS_year";
-
-import {
-  opts_DATAPOINTS_year,
-  opts_DATAPOINTS_amount_year,
-} from "./linea-plot/opts_datapoints_year";
 
 /**
  * LineaPlot Web Component
@@ -1100,7 +1071,11 @@ export class LineaPlot extends HTMLElement {
     //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener
     this.daterange.addEventListener("touchstart", (e) => {
       e.preventDefault();
-      this.dp.visible ? this.dp.hide() : this.dp.show();
+      if (this.dp.visible) {
+        this.dp.hide();
+      } else {
+        this.dp.show();
+      }
     });
   }
 

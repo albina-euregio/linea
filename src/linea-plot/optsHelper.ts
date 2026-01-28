@@ -23,7 +23,6 @@ export class OptsHelper {
     ctx.save();
     ctx.textBaseline = "top";
 
-    const canvasHeight = ctx.canvas.height;
     const yPosition = 3;
 
     // Left Y-axis label
