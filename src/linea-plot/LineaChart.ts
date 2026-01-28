@@ -10,15 +10,13 @@ import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
 export class LineaChart extends AbstractLineaChart {
-  private drawedTitle: boolean = false;
-
   constructor(
     readonly result: Result,
-    private showTitle: boolean,
+    showTitle: boolean,
     private showSurfaceHoarSeries: boolean,
     backgroundColor: string,
   ) {
-    super(backgroundColor);
+    super(backgroundColor, showTitle, result);
     this.createPlots().catch((e) => console.error(e));
   }
 
@@ -28,7 +26,7 @@ export class LineaChart extends AbstractLineaChart {
     let i = 0;
     if (this.result.values.TA || this.result.values.TD || this.result.values.TSS) {
       if (this.showSurfaceHoarSeries && this.result.values.TD && this.result.values.TSS) {
-        this.#updateData(this.plots[i], [
+        this.updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
             (this.result.values.TA && this.result.values.RH
@@ -40,7 +38,7 @@ export class LineaChart extends AbstractLineaChart {
           }),
         ]);
       } else {
-        this.#updateData(this.plots[i], [
+        this.updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
             (this.result.values.TA && this.result.values.RH
@@ -52,7 +50,7 @@ export class LineaChart extends AbstractLineaChart {
       i += 1;
     }
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
-      this.#updateData(this.plots[i], [
+      this.updateData(this.plots[i], [
         this.result.values.VW,
         this.result.values.VW_MAX,
         this.#filterDWData(this.result.values.DW),
@@ -60,27 +58,13 @@ export class LineaChart extends AbstractLineaChart {
       i += 1;
     }
     if (this.result.values.HS || this.result.values.PSUM) {
-      this.#updateData(this.plots[i], [this.result.values.HS, this.result.values.PSUM]);
+      this.updateData(this.plots[i], [this.result.values.HS, this.result.values.PSUM]);
       i += 1;
     }
     if (this.result.values.RH || this.result.values.ISWR) {
-      this.#updateData(this.plots[i], [this.result.values.RH, this.result.values.ISWR]);
+      this.updateData(this.plots[i], [this.result.values.RH, this.result.values.ISWR]);
     }
     this.resizePlots(this.clientWidth, this.style);
-  }
-
-  #updateData(plot: uPlot, values: (number | null)[][]) {
-    let data = [this.result.timestamps];
-    for (const element of values) {
-      data.push(element ?? this.#createNullArray());
-    }
-    plot.setData(data);
-  }
-
-  #createNullArray() {
-    let nulls: number | null[] = [];
-    this.result.timestamps.forEach(() => nulls.push(null));
-    return nulls;
   }
 
   async createPlots() {

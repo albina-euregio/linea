@@ -1,12 +1,21 @@
 import uPlot from "uplot";
+import { Result, Values } from "../data/station-data";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
 
-  constructor(protected backgroundColor: string) {
+  protected drawedTitle: boolean = false;
+
+  constructor(
+    protected backgroundColor: string,
+    protected showTitle: boolean,
+    protected result: Result,
+  ) {
     super();
   }
+
+  abstract setData(timestamps: number[], values: Values);
 
   resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
     this.plots.forEach((p) =>
@@ -24,6 +33,23 @@ export abstract class AbstractLineaChart extends HTMLElement {
       style.fontSize = `${12 * scale}px`;
       style.padding = `${6 * scale}px ${10 * scale}px`;
     }
+  }
+
+  protected updateData(plot: uPlot, values: (number | null)[][], appendTimestamps: boolean = true) {
+    let data = [];
+    if (appendTimestamps) {
+      data.push(this.result.timestamps);
+    }
+    for (const element of values) {
+      data.push(element ?? this.#createNullArray());
+    }
+    plot.setData(data);
+  }
+
+  #createNullArray() {
+    let nulls: number | null[] = [];
+    this.result.timestamps.forEach(() => nulls.push(null));
+    return nulls;
   }
 
   addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
