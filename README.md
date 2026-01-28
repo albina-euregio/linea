@@ -123,12 +123,7 @@ Shows a fixed date span from the given smet file:
 For yearly overviews, use the `<linea-plot>` component like this:
 
 ```html
-<linea-plot
-  wintersrc='["/prototype/mock.data"]'
-  showtitle
-  showexport
-  showdatepicker
-  showonlywinter
->
+<!-- Handle winterview -->
+<linea-plot wintersrc="/prototype/mock.data" showtitle showexport showdatepicker showonlywinter>
 </linea-plot>
 ```
