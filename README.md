@@ -124,10 +124,10 @@ For yearly overviews, use the `<linea-plot>` component like this:
 
 ```html
 <linea-plot
-  wintersrc="path/to/data.smet"
-  startdate="2025-06-04T00:00[Europe/Berlin]"
-  enddate="2025-06-04T00:00[Europe/Berlin]"
-  showTitle
+  wintersrc='["/prototype/mock.data"]'
+  showtitle
+  showexport
+  showdatepicker
   showonlywinter
 >
 </linea-plot>
