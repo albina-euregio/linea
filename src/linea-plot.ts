@@ -274,6 +274,52 @@ export class LineaPlot extends HTMLElement {
             outline: none;
           }
         }
+        
+        .winterview-btn {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.5em 1em;
+          cursor: pointer;
+          overflow: hidden;
+        }
+
+        .winterview-btn .winterview-btn-loader {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          place-items: center;
+          background: rgba(255, 255, 255, 0.6);
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 10;
+        }
+
+        .winterview-btn.loading .winterview-btn-loader {
+          opacity: 1;
+        }
+
+        .winterview-btn.loading .winterview-btn-label {
+          visibility: hidden;
+        }
+
+        .winterview-btn-spinner {
+          width: 1em;
+          height: 1em;
+          border: 2px solid #000;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: spin 0.7s linear infinite;
+          transform-origin: center;
+          will-change: transform;
+          display: block;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
       `;
     this.appendChild(this.styleTag);
     await this.#addControls();
@@ -624,19 +670,46 @@ export class LineaPlot extends HTMLElement {
     if (this.hasAttribute("wintersrc") && !this.hasAttribute("showonlywinter")) {
       const winterviewbtn = document.createElement("button");
       winterviewbtn.id = "winterviewbtn";
-      winterviewbtn.innerHTML = i18n.message(
+      winterviewbtn.classList.add("toggle-btn");
+      winterviewbtn.classList.add("winterview-btn");
+      winterviewbtn.setAttribute("aria-busy", "false");
+      winterviewbtn.setAttribute("type", "button");
+
+      const label = document.createElement("span");
+      label.className = "winterview-btn-label";
+      label.textContent = i18n.message(
         "dialog:weather-station-diagram:controls:value:winterview:winter",
       );
-      winterviewbtn.classList.add("toggle-btn");
+
+      const loader = document.createElement("span");
+      loader.className = "winterview-btn-loader";
+      loader.setAttribute("aria-hidden", "true");
+
+      const spinner = document.createElement("span");
+      spinner.className = "winterview-btn-spinner";
+      loader.appendChild(spinner);
+
+      winterviewbtn.append(label, loader);
       winterviewbtn.addEventListener("click", () => {
+        if (winterviewbtn.classList.contains("loading")) return;
+
+        winterviewbtn.classList.add("loading");
+        winterviewbtn.disabled = true;
+
         if (!this.winterview) {
-          this.#switchToWinterView();
-          winterviewbtn.innerHTML = i18n.message(
-            "dialog:weather-station-diagram:controls:value:winterview:station",
-          );
+          this.#switchToWinterView().then(() => {
+            winterviewbtn.classList.remove("loading");
+            winterviewbtn.disabled = false;
+
+            label.textContent = i18n.message(
+              "dialog:weather-station-diagram:controls:value:winterview:station",
+            );
+          });
         } else {
           this.#switchToStationView();
-          winterviewbtn.innerHTML = i18n.message(
+          winterviewbtn.classList.remove("loading");
+          winterviewbtn.disabled = false;
+          label.textContent = i18n.message(
             "dialog:weather-station-diagram:controls:value:winterview:winter",
           );
         }
@@ -727,17 +800,19 @@ export class LineaPlot extends HTMLElement {
   oldStartDate: Temporal.ZonedDateTime;
   oldEndDate: Temporal.ZonedDateTime;
 
-  #switchToWinterView() {
+  async #switchToWinterView() {
     if (this.winterresults.length == 0) {
-      this.fetchAndStoreData("wintersrc").then(() => {
-        this.#renderWinter();
-      });
-    } else {
-      this.#renderWinter();
+      await this.fetchAndStoreData("wintersrc");
     }
+    this.#renderWinter();
   }
 
   #renderWinter() {
+    if (!this.hasAttribute("showonlywinter")) {
+      this.oldDateFormat = this.dp.locale.dateFormat;
+      this.oldStartDate = this.#getDatePickerStartDate();
+      this.oldEndDate = this.#getDatePickerEndDate();
+    }
     const [startDate, endDate] = this.#getWinterDates();
     for (const i in this.winterresults) {
       const lcy = new LineaYearChart(
@@ -796,9 +871,6 @@ export class LineaPlot extends HTMLElement {
    * // Returns: [2024-11-01T00:00:00+00:00, 2025-04-30T00:00:00+00:00]
    */
   #getWinterDates(): [Temporal.ZonedDateTime, Temporal.ZonedDateTime] {
-    this.oldDateFormat = this.dp.locale.dateFormat;
-    this.oldStartDate = this.#getDatePickerStartDate();
-    this.oldEndDate = this.#getDatePickerEndDate();
     // get today and decide:
     // if after october 31th, select next season (11-01 to 04-30 of next year)
     // else select this season
