@@ -1,2 +1,2 @@
 import "./linea-plot";
-import "./linea-plot-year";
+import "./linea-plot/LineaYearChart";

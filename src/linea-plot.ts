@@ -3,7 +3,7 @@ import { fetchSMET } from "./data/smet-data";
 import type { Result, Values } from "./data/station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
-import { LineaYearChart } from "./linea-plot-year";
+import { LineaYearChart } from "./linea-plot/LineaYearChart";
 import { YearData } from "./data/year-data";
 import uPlot from "uplot";
 import {
@@ -533,21 +533,32 @@ export class LineaPlot extends HTMLElement {
         const end = this.#dateToZonedDateTime(this.dp.selectedDates[1]);
         if (!start || !end) return;
         next.disabled = false;
-        let newEnd = end.subtract({ days: 1 });
-        let newStart = start.subtract({ days: 1 });
-        if (newStart.toInstant().epochMilliseconds < this.minTime) {
-          newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-            i18n.timezone(),
-          );
-          previous.disabled = true;
-          newEnd = end;
-        } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
-          this.#setStartEndDateToMinMax();
-          this.filterAndUpdateData();
-          return;
+        if (!this.winterview) {
+          let newEnd = end.subtract({ days: 1 });
+          let newStart = start.subtract({ days: 1 });
+          if (newStart.toInstant().epochMilliseconds < this.minTime) {
+            newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+              i18n.timezone(),
+            );
+            previous.disabled = true;
+            newEnd = end;
+          } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
+            this.#setStartEndDateToMinMax();
+            this.filterAndUpdateData();
+            return;
+          }
+          this.#updateDatepickerStartEndDate(newStart, newEnd);
+          this.filterAndUpdateData(newStart, newEnd);
+        } else {
+          let newEnd = end.subtract({ years: 1 });
+          let newStart = start.subtract({ years: 1 });
+          if (newStart.toInstant().epochMilliseconds < this.minTimeWinter) {
+            previous.disabled = true;
+            return;
+          }
+          this.#updateDatepickerStartEndDate(newStart, newEnd);
+          this.#updateWinterPlots();
         }
-        this.#updateDatepickerStartEndDate(newStart, newEnd);
-        this.filterAndUpdateData(newStart, newEnd);
       });
       const next = document.createElement("button");
       next.classList.add("toggle-btn");
@@ -564,21 +575,32 @@ export class LineaPlot extends HTMLElement {
         const end = this.#dateToZonedDateTime(this.dp.selectedDates[1]);
         if (!start || !end) return;
         previous.disabled = false;
-        let newStart = start.add({ days: 1 });
-        let newEnd = end.add({ days: 1 });
-        if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
-          newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-            i18n.timezone(),
-          );
-          next.disabled = true;
-          newStart = start;
-        } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
-          this.#setStartEndDateToMinMax();
-          this.filterAndUpdateData();
-          return;
+        if (!this.winterview) {
+          let newStart = start.add({ days: 1 });
+          let newEnd = end.add({ days: 1 });
+          if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
+            newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+              i18n.timezone(),
+            );
+            next.disabled = true;
+            newStart = start;
+          } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
+            this.#setStartEndDateToMinMax();
+            this.filterAndUpdateData();
+            return;
+          }
+          this.#updateDatepickerStartEndDate(newStart, newEnd);
+          this.filterAndUpdateData(newStart, newEnd);
+        } else {
+          let newEnd = end.add({ years: 1 });
+          let newStart = start.add({ years: 1 });
+          if (newStart.toInstant().epochMilliseconds > this.maxTimeWinter) {
+            next.disabled = true;
+            return;
+          }
+          this.#updateDatepickerStartEndDate(newStart, newEnd);
+          this.#updateWinterPlots();
         }
-        this.#updateDatepickerStartEndDate(newStart, newEnd);
-        this.filterAndUpdateData(newStart, newEnd);
       });
       controlsdates.appendChild(previous);
       controlsdates.appendChild(this.daterange);
@@ -602,13 +624,21 @@ export class LineaPlot extends HTMLElement {
     if (this.hasAttribute("wintersrc") && !this.hasAttribute("showonlywinter")) {
       const winterviewbtn = document.createElement("button");
       winterviewbtn.id = "winterviewbtn";
-      winterviewbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:winterview:winter")}`;
+      winterviewbtn.innerHTML = i18n.message(
+        "dialog:weather-station-diagram:controls:value:winterview:winter",
+      );
       winterviewbtn.classList.add("toggle-btn");
       winterviewbtn.addEventListener("click", () => {
         if (!this.winterview) {
           this.#switchToWinterView();
+          winterviewbtn.innerHTML = i18n.message(
+            "dialog:weather-station-diagram:controls:value:winterview:station",
+          );
         } else {
           this.#switchToStationView();
+          winterviewbtn.innerHTML = i18n.message(
+            "dialog:weather-station-diagram:controls:value:winterview:winter",
+          );
         }
       });
       menu.appendChild(winterviewbtn);
@@ -693,25 +723,43 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  oldDateFormat: string;
+  oldStartDate: Temporal.ZonedDateTime;
+  oldEndDate: Temporal.ZonedDateTime;
+
   #switchToWinterView() {
-    this.fetchAndStoreData("wintersrc").then(() => {
-      for (const i in this.winterresults) {
-        const lcy = new LineaYearChart(
-          this.winterresults[i],
-          true,
-          this.backgroundColors[i] ?? "#00000000",
-        );
-        for (const lc of this.lineacharts) {
-          this.removeChild(lc);
-        }
-        this.lineacharts = [];
-        this.lineacharts.push(lcy);
-        this.appendChild(lcy);
+    if (this.winterresults.length == 0) {
+      this.fetchAndStoreData("wintersrc").then(() => {
+        this.#renderWinter();
+      });
+    } else {
+      this.#renderWinter();
+    }
+  }
+
+  #renderWinter() {
+    const [startDate, endDate] = this.#getWinterDates();
+    for (const i in this.winterresults) {
+      const lcy = new LineaYearChart(
+        this.winterresults[i],
+        true,
+        this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
+        startDate.toPlainDate(),
+        endDate.toPlainDate(),
+      );
+      for (const lc of this.lineacharts) {
+        this.removeChild(lc);
       }
-      document.getElementById("winterviewbtn").innerHTML =
-        `${i18n.message("dialog:weather-station-diagram:controls:value:winterview:station")}`;
-      this.winterview = true;
+      this.lineacharts = [];
+      this.lineacharts.push(lcy);
+      this.appendChild(lcy);
+    }
+
+    this.dp.update({
+      dateFormat: "yyyy",
     });
+    this.#updateDatepickerStartEndDate(startDate, endDate);
+    this.winterview = true;
   }
 
   #switchToStationView() {
@@ -720,9 +768,67 @@ export class LineaPlot extends HTMLElement {
     }
     this.lineacharts = [];
     this.#initAfterDataStorage();
-    document.getElementById("winterviewbtn").innerHTML =
-      `${i18n.message("dialog:weather-station-diagram:controls:value:winterview:winter")}`;
+
+    this.dp.update({
+      dateFormat: this.oldDateFormat,
+    });
+    this.dp.disabled = false;
+    this.#updateDatepickerStartEndDate(this.oldStartDate, this.oldEndDate);
     this.winterview = false;
+  }
+
+  /**
+   * Determines the winter season date range based on the current date.
+   *
+   * If the current date is after October 31st, returns the winter season from November 1st
+   * of the current year to April 30th of the next year. Otherwise, returns the winter season
+   * from November 1st of the previous year to April 30th of the current year.
+   *
+   * Also stores the current datepicker format and start/end dates for restoration when
+   * switching back from winter view.
+   *
+   * @returns {[Temporal.ZonedDateTime, Temporal.ZonedDateTime]} A tuple containing the start
+   * date (November 1st) and end date (April 30th) of the winter season in the configured timezone
+   *
+   * @example
+   * // If today is November 15, 2024
+   * const [start, end] = this.#getWinterDates();
+   * // Returns: [2024-11-01T00:00:00+00:00, 2025-04-30T00:00:00+00:00]
+   */
+  #getWinterDates(): [Temporal.ZonedDateTime, Temporal.ZonedDateTime] {
+    this.oldDateFormat = this.dp.locale.dateFormat;
+    this.oldStartDate = this.#getDatePickerStartDate();
+    this.oldEndDate = this.#getDatePickerEndDate();
+    // get today and decide:
+    // if after october 31th, select next season (11-01 to 04-30 of next year)
+    // else select this season
+    const today = Temporal.Now.plainDateISO();
+    const currentYear = today.year;
+    const octoberThirtyfirst = Temporal.PlainDate.from(`${currentYear}-10-31`);
+
+    let winterStartYear = currentYear;
+    let winterEndYear = currentYear + 1;
+
+    if (Temporal.PlainDate.compare(today, octoberThirtyfirst) > 0) {
+      winterStartYear = currentYear;
+      winterEndYear = currentYear + 1;
+    } else {
+      winterStartYear = currentYear - 1;
+      winterEndYear = currentYear;
+    }
+    return [
+      Temporal.PlainDate.from(`${winterStartYear}-11-01`).toZonedDateTime(i18n.timezone()),
+      Temporal.PlainDate.from(`${winterEndYear}-04-30`).toZonedDateTime(i18n.timezone()),
+    ];
+  }
+
+  #updateWinterPlots() {
+    for (const lc of this.lineacharts) {
+      (lc as LineaYearChart).updateStartEndDate(
+        this.#getDatePickerStartDate(),
+        this.#getDatePickerEndDate(),
+      );
+    }
   }
 
   /**
@@ -785,16 +891,20 @@ export class LineaPlot extends HTMLElement {
    *
    * set the Input fields to the widthest available timespan
    */
-  #setStartEndDateToMinMax() {
+  #setStartEndDateToMinMax(winter: boolean = false) {
     if (!this.daterange || !this.dp) {
       return;
     }
-    const minDate = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-      i18n.timezone(),
-    );
-    const maxDate = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-      i18n.timezone(),
-    );
+    let min, max;
+    if (winter) {
+      min = this.minTimeWinter;
+      max = this.maxTimeWinter;
+    } else {
+      min = this.minTime;
+      max = this.maxTime;
+    }
+    const minDate = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(i18n.timezone());
+    const maxDate = Temporal.Instant.fromEpochMilliseconds(max).toZonedDateTimeISO(i18n.timezone());
     this.#updateDatepickerStartEndDate(minDate, maxDate);
   }
 
@@ -901,7 +1011,16 @@ export class LineaPlot extends HTMLElement {
     this.dp = new AirDatepicker(this.daterange, {
       range: true,
       multipleDatesSeparator: " - ",
-      onSelect: () => this.filterAndUpdateData(),
+      onSelect: () => {
+        if (!this.winterview) {
+          this.filterAndUpdateData();
+        }
+      },
+      onShow: () => {
+        if (this.winterview) {
+          requestAnimationFrame(() => this.dp.hide());
+        }
+      },
       container: this,
       autoClose: true,
     });
