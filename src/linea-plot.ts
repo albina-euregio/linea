@@ -218,6 +218,7 @@ export class LineaPlot extends HTMLElement {
 
             .controls-menu {
               display: flex;
+              gap: 6px;
 
               > button {
                 height: 2.25rem;
