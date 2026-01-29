@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for snow-height/year [cm]
@@ -23,7 +23,9 @@ export const opts_NS_year: uPlot.Options = {
 
   scales: {
     y: {
-      range: [0, 75],
+      range: (u, dataMin, dataMax) => {
+        return [0, 70];
+      },
     },
   },
 
@@ -32,7 +34,15 @@ export const opts_NS_year: uPlot.Options = {
     {
       scale: "y",
       stroke: "#DE2D26",
-      splits: [0, 15, 30, 45, 60, 75],
+      splits: (u) => {
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [0],
+          maxs: [70],
+          splits: [[0, 20, 40, 60]],
+          splitcount: 9,
+        } as SplitOptions);
+      },
     },
   ],
 
