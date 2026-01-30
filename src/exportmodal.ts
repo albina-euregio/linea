@@ -549,9 +549,12 @@ export class ExportModal {
       resultsFiltered.push(result);
     });
 
+    const dataUrl = await this.#exportAllPlotsToPNG(exports, true);
+
     let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
-      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`);
+      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
+      .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
 
     if (this.lineaPlot.winterview) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
@@ -588,7 +591,7 @@ export class ExportModal {
     };
   }
 
-  #exportAsLineaPlotElement() {
+  async #exportAsLineaPlotElement() {
     const resultsFiltered: Result[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
@@ -632,15 +635,17 @@ export class ExportModal {
     });
 
     this.exportResult.style.display = "block";
-    const lineaelement = `<linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle />`;
 
-    document.getElementById("exportCode").innerHTML = lineaelement;
+    let template = await import("./blogtemplate.html?raw").then((m) => m.default);
+    template = template.replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`);
+
+    document.getElementById("exportCode").innerHTML = template;
 
     this.exportdata = {
-      blob: new Blob([lineaelement], {
+      blob: new Blob([template], {
         type: "text/plain",
       }),
-      data: lineaelement,
+      data: template,
       filename: "linea-chart.html",
       type: "text/plain",
     };
@@ -691,7 +696,7 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }) {
+  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }, noshow: boolean = false) {
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
@@ -813,18 +818,20 @@ export class ExportModal {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
       lineachart.resizeObserver.observe(lineachart);
     }
-
-    outCanvas.toBlob((blobdata) => {
-      this.exportdata = {
-        blob: blobdata,
-        data: outCanvas.toDataURL(),
-        filename: "linea-chart.png",
-        type: "image/png",
-      };
-    });
-    document.getElementById("exportCode").innerHTML =
-      `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
-    document.getElementById("exportResult").style.display = "block";
+    if (!noshow) {
+      outCanvas.toBlob((blobdata) => {
+        this.exportdata = {
+          blob: blobdata,
+          data: outCanvas.toDataURL(),
+          filename: "linea-chart.png",
+          type: "image/png",
+        };
+      });
+      document.getElementById("exportCode").innerHTML =
+        `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+      document.getElementById("exportResult").style.display = "block";
+    }
+    return outCanvas.toDataURL();
   }
 
   /**

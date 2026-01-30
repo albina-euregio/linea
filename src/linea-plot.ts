@@ -1007,7 +1007,7 @@ export class LineaPlot extends HTMLElement {
 
   #getDatePickerStartDate(): Temporal.ZonedDateTime {
     if (!this.dp) {
-      if (this.winterview) {
+      if (!this.winterview) {
         return Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
           i18n.timezone(),
         );
@@ -1025,7 +1025,7 @@ export class LineaPlot extends HTMLElement {
 
   #getDatePickerEndDate(): Temporal.ZonedDateTime {
     if (!this.dp) {
-      if (this.winterview) {
+      if (!this.winterview) {
         return Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
           i18n.timezone(),
         );
