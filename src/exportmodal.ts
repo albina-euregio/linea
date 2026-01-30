@@ -404,11 +404,20 @@ export class ExportModal {
       } else if (this.exportdata.type === "text/html") {
         code = [
           new ClipboardItem({
-            "text/html": this.exportdata.blob,
+            "text/plain": this.exportdata.blob,
+          }),
+        ];
+      } else if (this.exportdata.type === "text/plain") {
+        code = [
+          new ClipboardItem({
+            "text/plain": this.exportdata.blob,
           }),
         ];
       }
     } else {
+      console.error(
+        "Couldn't save clipboard item, no matching content type " + this.exportdata.type + "!",
+      );
       return;
     }
     navigator.clipboard
@@ -571,11 +580,11 @@ export class ExportModal {
 
     this.exportdata = {
       blob: new Blob([iframecode], {
-        type: "text/html",
+        type: "text/plain",
       }),
       data: iframecode,
       filename: "linea-chart.html",
-      type: "text/html",
+      type: "text/plain",
     };
   }
 
@@ -629,11 +638,11 @@ export class ExportModal {
 
     this.exportdata = {
       blob: new Blob([lineaelement], {
-        type: "text/html",
+        type: "text/plain",
       }),
       data: lineaelement,
       filename: "linea-chart.html",
-      type: "text/html",
+      type: "text/plain",
     };
   }
 
