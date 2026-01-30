@@ -276,7 +276,6 @@ export class ExportModal {
             </div>`,
     );
 
-    this.exportOptions = this.modal.querySelector(".export-options") as HTMLDivElement;
     this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
     this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
 
