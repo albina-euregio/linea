@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for snow-height/year [cm]
@@ -28,16 +28,27 @@ export const opts_HS_year: uPlot.Options = {
         );
       },
     ],
+    setSelect: [
+      (u) => {
+        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3, 4]);
+      },
+    ],
   },
 
   scales: {
     y: {
-      range: (u, dataMin, dataMax) => {
-        return dataMax > 500 ? [0, 1000] : [0, 500];
+      range: (_u, _dataMin, dataMax) => {
+        if (dataMax > 500) {
+          return [0, 1000];
+        } else if (dataMax > 250) {
+          return [0, 500];
+        } else {
+          return [0, 250];
+        }
       },
     },
     y2: {
-      range: (u, dataMin, dataMax) => {
+      range: (_u, _dataMin, dataMax) => {
         return dataMax > 100 ? [0, 150] : [0, 100];
       },
     },
@@ -49,8 +60,17 @@ export const opts_HS_year: uPlot.Options = {
       scale: "y",
       stroke: "#DE2D26",
       splits: (u) => {
-        const max = u.scales.y.max ?? 0;
-        return max > 500 ? [0, 200, 400, 600, 800, 1000] : [0, 100, 200, 300, 400, 500];
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [0, 0, 0],
+          maxs: [250, 500, 1000],
+          splits: [
+            [0, 50, 100, 150, 200, 250],
+            [0, 100, 200, 300, 400, 500],
+            [0, 200, 400, 600, 800, 1000],
+          ],
+          splitcount: 9,
+        } as SplitOptions);
       },
     },
     {
@@ -58,8 +78,19 @@ export const opts_HS_year: uPlot.Options = {
       stroke: "#6aafd5",
       side: 1,
       splits: (u) => {
-        const max = u.scales.y2.max ?? 0;
-        return max > 100 ? [0, 30, 60, 90, 120, 150] : [0, 20, 40, 60, 80, 100];
+        return OptsHelper.getSplits(
+          {
+            uplot: u,
+            mins: [0, 0],
+            maxs: [100, 150],
+            splits: [
+              [0, 20, 40, 60, 80, 100],
+              [0, 30, 60, 90, 120, 150],
+            ],
+            splitcount: 0,
+          } as SplitOptions,
+          "y2",
+        );
       },
       grid: {
         show: false,
