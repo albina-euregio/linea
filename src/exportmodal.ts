@@ -3,6 +3,7 @@ import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { Result } from "./data/station-data";
+import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -548,8 +549,12 @@ export class ExportModal {
       }
       resultsFiltered.push(result);
     });
+    let totalCanvases = 0;
+    this.#getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.#getCheckedPlotIndices(index).length;
+    });
 
-    const dataUrl = await this.#exportAllPlotsToPNG(exports, true);
+    const dataUrl: string = await this.#exportAllPlotsToPNG({width: 750, heightPerCanvas: 200, title: this.#generateTitleString()}, true);
 
     let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
@@ -838,10 +843,10 @@ export class ExportModal {
    * Retrieves all currently selected/active LineaCharts based on checkbox state.
    *
    * @private
-   * @returns {LineaChart[]} Array of active LineaChart instances
+   * @returns {AbstractLineaChart[]} Array of active AbstractLineaChart instances
    */
-  #getActiveLineacharts(): LineaChart[] {
-    const activeCharts: LineaChart[] = [];
+  #getActiveLineacharts(): AbstractLineaChart[] {
+    const activeCharts: AbstractLineaChart[] = [];
     const indices = this.#getCheckedDiagramIndices();
     let i = 0;
     for (const lineachart of this.lineaPlot.lineacharts) {
