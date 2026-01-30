@@ -570,11 +570,6 @@ export class ExportModal {
       binary += String.fromCharCode(uint8Array[i]);
     }
 
-    let totalCanvases = 0;
-    this.#getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.#getCheckedPlotIndices(index).length;
-    });
-
     this.exportResult.style.display = "block";
     const iframecode = `<iframe
           src="data:text/html;base64,${btoa(binary)}"
