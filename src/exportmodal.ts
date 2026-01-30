@@ -554,7 +554,10 @@ export class ExportModal {
       totalCanvases += this.#getCheckedPlotIndices(index).length;
     });
 
-    const dataUrl: string = await this.#exportAllPlotsToPNG({width: 750, heightPerCanvas: 200, title: this.#generateTitleString()}, true);
+    const dataUrl: string = await this.#exportAllPlotsToPNG(
+      { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
+      true,
+    );
 
     let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
@@ -569,11 +572,6 @@ export class ExportModal {
     for (let i = 0; i < uint8Array.byteLength; i++) {
       binary += String.fromCharCode(uint8Array[i]);
     }
-
-    let totalCanvases = 0;
-    this.#getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.#getCheckedPlotIndices(index).length;
-    });
 
     this.exportResult.style.display = "block";
     const iframecode = `<iframe
