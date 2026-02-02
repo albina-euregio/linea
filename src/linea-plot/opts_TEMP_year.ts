@@ -4,7 +4,7 @@ import { i18n } from "../i18n";
 import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for temperature/year [cm]
  */
 
 export const opts_TEMP_year: uPlot.Options = {
@@ -14,7 +14,7 @@ export const opts_TEMP_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (cm)`;
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`;
         OptsHelper.UpdateAxisLabels(ctx, labely1, "", u.bbox.left, u.bbox.width, "#DE2D26", "");
         ctx.restore();
       },

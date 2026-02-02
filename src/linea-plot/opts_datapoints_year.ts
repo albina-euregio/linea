@@ -4,7 +4,7 @@ import { i18n } from "../i18n";
 import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for datapoints/year [cm]
  */
 
 export const opts_DATAPOINTS_year: uPlot.Options = {
