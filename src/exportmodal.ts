@@ -299,6 +299,7 @@ export class ExportModal {
       (this.modal.querySelector("#btnExportInteractiveBlog") as HTMLElement).addEventListener(
         "click",
         () => {
+          this.#resetCopyToClipboardButton();
           this.#exportAsLineaPlotElement();
         },
       );
@@ -306,11 +307,13 @@ export class ExportModal {
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "none";
+      this.#resetCopyToClipboardButton();
       this.#exportAsIframe();
     });
 
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "grid";
+      this.#resetCopyToClipboardButton();
       this.#exportAllPlotsToPNG(this.#getExportSettings());
     });
 
@@ -384,10 +387,20 @@ export class ExportModal {
   }
 
   /**
+   * Resets the copyToClipboard Button
+   */
+  #resetCopyToClipboardButton() {
+    const btn = document.querySelector(".copy-btn") as HTMLButtonElement;
+    btn.style.background = "#3498db";
+    btn.innerText = i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard");
+  }
+
+  /**
    * Copies the exported content to the system clipboard.
    *
    * Supports copying both PNG images and HTML content formats.
    * Provides visual feedback by temporarily changing the button text and color.
+   * Provides for content type of text/html a text/plain fallback, generated from the exportdata.data
    *
    * @private
    * @returns {void}
@@ -399,19 +412,20 @@ export class ExportModal {
       if (this.exportdata.type === "image/png") {
         code = [
           new ClipboardItem({
-            "image/png": this.exportdata.blob,
+            ["image/png"]: this.exportdata.blob,
           }),
         ];
       } else if (this.exportdata.type === "text/html") {
         code = [
           new ClipboardItem({
-            "text/plain": this.exportdata.blob,
+            ["text/html"]: this.exportdata.blob,
+            ["text/plain"]: new Blob([this.exportdata.data], { type: "text/plain" }),
           }),
         ];
       } else if (this.exportdata.type === "text/plain") {
         code = [
           new ClipboardItem({
-            "text/plain": this.exportdata.blob,
+            ["text/plain"]: this.exportdata.blob,
           }),
         ];
       }
@@ -586,11 +600,11 @@ export class ExportModal {
 
     this.exportdata = {
       blob: new Blob([iframecode], {
-        type: "text/plain",
+        type: "text/html",
       }),
       data: iframecode,
       filename: "linea-chart.html",
-      type: "text/plain",
+      type: "text/html",
     };
   }
 
@@ -646,11 +660,11 @@ export class ExportModal {
 
     this.exportdata = {
       blob: new Blob([template], {
-        type: "text/plain",
+        type: "text/html",
       }),
       data: template,
       filename: "linea-chart.html",
-      type: "text/plain",
+      type: "text/html",
     };
   }
 
