@@ -107,7 +107,7 @@ export class LineaYearChart extends AbstractLineaChart {
             yearDataHS.maxValues,
             yearDataHS.medianValues,
             yearDataHS.values,
-            yearDataPSUM.values,
+            yearDataPSUM.values.map((v) => v == 0 ? null : v),
           ],
           false,
         );
@@ -141,8 +141,8 @@ export class LineaYearChart extends AbstractLineaChart {
           this.plots[i],
           [
             yearDataHS.timestamps,
-            yearDataHS.values.map((v) => (v == 0 || Number.isNaN(v) ? 1000 : -1000)),
-            yearDataNS.values,
+            yearDataHS.values.map((v) => (v && v > 0 ? 1000 : -1000)),
+            yearDataNS.values.map((v) => v == 0 ? null : v),
           ],
           false,
         );
@@ -246,7 +246,7 @@ export class LineaYearChart extends AbstractLineaChart {
           this.startDate,
           this.endDate,
           timestamps,
-          values.PSUM,
+          values.PSUM.map((v) => v == 0 ? null : v),
         );
         this.addSeries(p, opts_HS_year_PSUM, yearDataPSUM.values);
       }
@@ -303,10 +303,10 @@ export class LineaYearChart extends AbstractLineaChart {
         this.addSeries(
           pNewSnow,
           opts_NS_year_snow_cover,
-          yearDataHS.values.map((v) => (v == 0 || Number.isNaN(v) ? 1000 : -1000)),
+          yearDataHS.values.map((v) => (v && v > 0 ? 1000 : -1000)),
         );
       }
-      this.addSeries(pNewSnow, opts_NS_year_series, yearDataNS.values);
+      this.addSeries(pNewSnow, opts_NS_year_series, yearDataNS.values.map((v) => v == 0 ? null : v));
       this.modifyDrawHook(pNewSnow, this.backgroundColor);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:newsnow"));
     }
