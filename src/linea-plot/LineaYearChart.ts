@@ -26,8 +26,6 @@ import { AbstractLineaChart } from "./AbstractLineaChart";
 import { Result, Values } from "../data/station-data";
 
 /**
- * A custom HTML element that renders yearly overview plots for weather station data.
- *
  * This component creates interactive uPlot diagrams displaying:
  * - Snow height (HS) with min/median/max aggregates and precipitation (PSUM)
  * - New snow (NS) with snow cover overlay
@@ -39,26 +37,9 @@ import { Result, Values } from "../data/station-data";
  * Data is aggregated by calendar day and rendered between specified date ranges.
  * Requires Temporal API for date handling.
  *
- * @example
- * ```html
- * <linea-plot-year
- *   src="path/to/data.smet"
- *   startDate="2023-01-01"
- *   endDate="2023-12-31"
- *   timeZone="CET"
- *   showTitle>
- * </linea-plot-year>
- * ```
  *
  * @extends AbstractLineaChart
  *
- * @customElement linea-plot-year
- *
- * @attribute {string} src - Path to SMET file with snow height and weather data
- * @attribute {string} startDate - Start date in ISO format (YYYY-MM-DD)
- * @attribute {string} endDate - End date in ISO format (YYYY-MM-DD)
- * @attribute {string} [timeZone="CET"] - IANA time zone identifier for data aggregation
- * @attribute {boolean} [showTitle] - If present, displays station name and altitude
  */
 export class LineaYearChart extends AbstractLineaChart {
   constructor(
