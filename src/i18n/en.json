@@ -54,5 +54,6 @@
   "dialog:weather-station-diagram:plotnames:precipitation": "Precipitation",
   "dialog:weather-station-diagram:plotnames:humidity_gr": "Humidity&GR",
   "dialog:weather-station-diagram:plotnames:datapoints": "Datapoints",
-  "dialog:weather-station-diagram:plotnames:newsnow": "New Snow"
+  "dialog:weather-station-diagram:plotnames:newsnow": "New Snow",
+  "dialog:weather-station-diagram:title:since": "since"
 }
