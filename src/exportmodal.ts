@@ -37,7 +37,6 @@ import { Result } from "./data/station-data";
  * exportModal.show();
  */
 export class ExportModal {
-  private exportOptions: HTMLDivElement;
   private exportSettings: HTMLDivElement;
   private exportResult: HTMLDivElement;
   private exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;
@@ -489,41 +488,66 @@ export class ExportModal {
         values: {},
         units: {},
       };
-      activeplots.forEach((index) => {
-        if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:temperature")
-        ) {
-          result.values.TA = lc.result.values.TA ?? [];
-          result.values.TD = lc.result.values.TD ?? [];
-          result.values.TSS = lc.result.values.TSS ?? [];
-        } else if (
-          lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
-        ) {
-          result.values.VW = lc.result.values.VW ?? [];
-          result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
-          result.values.DW = lc.result.values.DW ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
-        ) {
-          result.values.RH = lc.result.values.RH ?? [];
-          result.values.ISWR = lc.result.values.ISWR ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
-        ) {
-          result.values.HS = lc.result.values.HS ?? [];
-          result.values.PSUM = lc.result.values.PSUM ?? [];
-        }
-      });
+      if (this.lineaPlot.winterview) {
+        activeplots.forEach((index) => {
+          if (
+            lc.plotnames[index] ===
+            i18n.message("dialog:weather-station-diagram:plotnames:temperature")
+          ) {
+            result.values.TA = lc.result.values.TA ?? [];
+            result.values.TD = lc.result.values.TD ?? [];
+          } else if (
+            lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:newsnow")
+          ) {
+            result.values.NS = lc.result.values.NS;
+          } else if (
+            lc.plotnames[index] ===
+            i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
+          ) {
+            result.values.HS = lc.result.values.HS ?? [];
+            result.values.PSUM = lc.result.values.PSUM ?? [];
+          }
+        });
+      } else {
+        activeplots.forEach((index) => {
+          if (
+            lc.plotnames[index] ===
+            i18n.message("dialog:weather-station-diagram:plotnames:temperature")
+          ) {
+            result.values.TA = lc.result.values.TA ?? [];
+            result.values.TD = lc.result.values.TD ?? [];
+            result.values.TSS = lc.result.values.TSS ?? [];
+          } else if (
+            lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
+          ) {
+            result.values.VW = lc.result.values.VW ?? [];
+            result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
+            result.values.DW = lc.result.values.DW ?? [];
+          } else if (
+            lc.plotnames[index] ===
+            i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
+          ) {
+            result.values.RH = lc.result.values.RH ?? [];
+            result.values.ISWR = lc.result.values.ISWR ?? [];
+          } else if (
+            lc.plotnames[index] ===
+            i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
+          ) {
+            result.values.HS = lc.result.values.HS ?? [];
+            result.values.PSUM = lc.result.values.PSUM ?? [];
+          }
+        });
+      }
       resultsFiltered.push(result);
     });
 
-    const html = iframeTemplate
+    let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
       .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`);
 
+    if (this.lineaPlot.winterview) {
+      html = html.replace("<linea-plot", "<linea-plot showonlywinter");
+    }
     const uint8Array = new TextEncoder().encode(html);
     let binary = "";
     for (let i = 0; i < uint8Array.byteLength; i++) {

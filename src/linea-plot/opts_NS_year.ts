@@ -1,35 +1,21 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for new snow/year [cm]
  */
 
 export const opts_NS_year: uPlot.Options = {
   ...OptsHelper.getLineaOptions(),
+  padding: [20, 52, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:newsnow")} (cm)`;
-        OptsHelper.UpdateAxisLabels(
-          ctx,
-          labely1,
-          "",
-          u.bbox.left,
-          u.bbox.width,
-          canvasHeight,
-          "#DE2D26",
-          "",
-        );
+        OptsHelper.UpdateAxisLabels(ctx, labely1, "", u.bbox.left, u.bbox.width, "#DE2D26", "");
         ctx.restore();
       },
     ],
@@ -37,7 +23,9 @@ export const opts_NS_year: uPlot.Options = {
 
   scales: {
     y: {
-      range: [0, 75],
+      range: (u, dataMin, dataMax) => {
+        return [0, 70];
+      },
     },
   },
 
@@ -46,7 +34,15 @@ export const opts_NS_year: uPlot.Options = {
     {
       scale: "y",
       stroke: "#DE2D26",
-      splits: [0, 15, 30, 45, 60, 75],
+      splits: (u) => {
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [0],
+          maxs: [70],
+          splits: [[0, 20, 40, 60]],
+          splitcount: 9,
+        } as SplitOptions);
+      },
     },
   ],
 
@@ -71,9 +67,9 @@ export const opts_NS_year_series: uPlot.Series = {
 
 export const opts_NS_year_snow_cover: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:snowcover"),
-  stroke: "#rgba(222, 45, 38, 0.2)",
-  width: 2,
   scale: "y",
-  fill: "rgba(222, 45, 38, 0.2)",
+  points: { show: false },
+  stroke: "rgba(222, 45, 38, .4)",
+  fill: "rgba(222, 45, 38, .15)",
   value: () => "-",
 };

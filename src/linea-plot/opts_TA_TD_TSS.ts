@@ -12,10 +12,6 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.textBaseline = "top";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`;
         var labelColor1 = "#DE2D26";
@@ -27,7 +23,6 @@ export const opts_TA_TD_TSS: uPlot.Options = {
           labely2,
           u.bbox.left,
           u.bbox.width,
-          canvasHeight,
           labelColor1,
           labelColor2,
         );

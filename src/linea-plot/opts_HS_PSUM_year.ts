@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for snow-height/year [cm]
@@ -13,15 +13,9 @@ export const opts_HS_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
-        var labelColor1 = "#DE2D26";
+        var labelColor1 = "#08519C";
         var labelColor2 = "#6aafd5";
         OptsHelper.UpdateAxisLabels(
           ctx,
@@ -29,22 +23,32 @@ export const opts_HS_year: uPlot.Options = {
           labely2,
           u.bbox.left,
           u.bbox.width,
-          canvasHeight,
           labelColor1,
           labelColor2,
         );
+      },
+    ],
+    setSelect: [
+      (u) => {
+        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3, 4]);
       },
     ],
   },
 
   scales: {
     y: {
-      range: (u, dataMin, dataMax) => {
-        return dataMax > 500 ? [0, 1000] : [0, 500];
+      range: (_u, _dataMin, dataMax) => {
+        if (dataMax > 500) {
+          return [0, 1000];
+        } else if (dataMax > 250) {
+          return [0, 500];
+        } else {
+          return [0, 250];
+        }
       },
     },
     y2: {
-      range: (u, dataMin, dataMax) => {
+      range: (_u, _dataMin, dataMax) => {
         return dataMax > 100 ? [0, 150] : [0, 100];
       },
     },
@@ -54,10 +58,19 @@ export const opts_HS_year: uPlot.Options = {
     timeAxis,
     {
       scale: "y",
-      stroke: "#DE2D26",
+      stroke: "#08519C",
       splits: (u) => {
-        const max = u.scales.y.max ?? 0;
-        return max > 500 ? [0, 200, 400, 600, 800, 1000] : [0, 100, 200, 300, 400, 500];
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [0, 0, 0],
+          maxs: [250, 500, 1000],
+          splits: [
+            [0, 50, 100, 150, 200, 250],
+            [0, 100, 200, 300, 400, 500],
+            [0, 200, 400, 600, 800, 1000],
+          ],
+          splitcount: 9,
+        } as SplitOptions);
       },
     },
     {
@@ -65,8 +78,19 @@ export const opts_HS_year: uPlot.Options = {
       stroke: "#6aafd5",
       side: 1,
       splits: (u) => {
-        const max = u.scales.y2.max ?? 0;
-        return max > 100 ? [0, 30, 60, 90, 120, 150] : [0, 20, 40, 60, 80, 100];
+        return OptsHelper.getSplits(
+          {
+            uplot: u,
+            mins: [0, 0],
+            maxs: [100, 150],
+            splits: [
+              [0, 20, 40, 60, 80, 100],
+              [0, 30, 60, 90, 120, 150],
+            ],
+            splitcount: 0,
+          } as SplitOptions,
+          "y2",
+        );
       },
       grid: {
         show: false,
@@ -108,7 +132,7 @@ const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
 export const opts_HS_year_min = baseHsSeries("HS_min", "#d9dcdc", 2);
 export const opts_HS_year_max = baseHsSeries("HS_max", "#d9dcdc", 0);
 export const opts_HS_year_median = baseHsSeries("HS_median", "#878787", 2);
-export const opts_HS_year_current = baseHsSeries("HS", "#ff0000", 2);
+export const opts_HS_year_current = baseHsSeries("HS", "#08519C", 2);
 
 export const opts_HS_year_PSUM: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),

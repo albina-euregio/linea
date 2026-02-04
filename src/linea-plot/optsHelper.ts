@@ -1,6 +1,7 @@
 import uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { TouchZoom } from "./touchZoom";
+import { file } from "zod";
 
 export interface SplitOptions {
   uplot: uPlot;
@@ -17,10 +18,12 @@ export class OptsHelper {
     rightLabel: string,
     chartLeft: number,
     chartWidth: number,
-    canvasHeight: number,
     leftFillStyle: string | CanvasGradient | CanvasPattern,
     rightFillStyle: string | CanvasGradient | CanvasPattern,
   ): CanvasRenderingContext2D {
+    ctx.save();
+    ctx.textBaseline = "top";
+
     const yPosition = 3;
 
     // Left Y-axis label
@@ -108,25 +111,34 @@ export class OptsHelper {
       return false;
     }
 
-    const filteredData = indices.map((i) => u.data[i].slice(startIdx, endIdx + 1));
+    const filteredData = indices.map((i) =>
+      u.data[i] ? u.data[i].slice(startIdx, endIdx + 1) : [],
+    );
     const counts = filteredData.map((d) => {
+      d = d.filter((v: number) => !Number.isNaN(v));
       return d.length == 0
         ? 1
-        : d.filter((v) => u.scales.y.min < v && v <= u.scales.y.max).length / d.length;
+        : d.filter((v: number) => u.scales.y.min < v && v <= u.scales.y.max).length / d.length;
     });
     if (counts.some((c) => c < 0.66)) {
-      const datamax = Math.max(...filteredData.map((d) => Math.max(...d)));
-      const datamin = Math.min(...filteredData.map((d) => Math.min(...d)));
+      let datamax = Math.max(...filteredData.map((d) => Math.max(...d)));
+      let datamin = Math.min(...filteredData.map((d) => Math.min(...d)));
+      if (Number.isNaN(datamin)) {
+        datamin = u.scales.y.min;
+      }
+      if (Number.isNaN(datamax)) {
+        datamax = u.scales.y.max;
+      }
       u.setScale("y", { min: Math.floor(datamin / 10) * 10, max: Math.ceil(datamax / 10) * 10 });
       u.redraw();
     }
   }
 
-  static getSplits(splitopotions: SplitOptions): number[] {
+  static getSplits(splitopotions: SplitOptions, axes: string = "y"): number[] {
     const { uplot, mins, maxs, splits } = splitopotions;
 
-    const min = uplot.scales.y.min ?? 0;
-    const max = uplot.scales.y.max ?? 0;
+    const min = uplot.scales[axes].min ?? 0;
+    const max = uplot.scales[axes].max ?? 0;
 
     for (let i = 0; i < maxs.length; i++) {
       if (min >= mins[i] && max <= maxs[i]) {

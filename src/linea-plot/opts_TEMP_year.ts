@@ -1,10 +1,10 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for temperature/year [cm]
  */
 
 export const opts_TEMP_year: uPlot.Options = {
@@ -13,31 +13,35 @@ export const opts_TEMP_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-
-        const canvasHeight = u.ctx.canvas.height;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (cm)`;
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:TA")} (°C)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TSS")} (°C)`;
         OptsHelper.UpdateAxisLabels(
           ctx,
           labely1,
-          "",
+          labely2,
           u.bbox.left,
           u.bbox.width,
-          canvasHeight,
           "#DE2D26",
-          "",
+          "#FC9272",
         );
         ctx.restore();
+      },
+    ],
+    setSelect: [
+      (u) => {
+        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3, 4]);
       },
     ],
   },
 
   scales: {
     y: {
-      range: (u, dataMin, dataMax) => {
+      range: (_u, _dataMin, dataMax) => {
+        return dataMax > 20 ? [-30, 30] : [-30, 20];
+      },
+    },
+    y2: {
+      range: (_u, _dataMin, dataMax) => {
         return dataMax > 20 ? [-30, 30] : [-30, 20];
       },
     },
@@ -49,8 +53,39 @@ export const opts_TEMP_year: uPlot.Options = {
       scale: "y",
       stroke: "#DE2D26",
       splits: (u) => {
-        const max = u.scales.y.max ?? 0;
-        return max > 20 ? [-30, -20, -10, 0, 10, 20, 30] : [-30, -20, -10, 0, 10, 20];
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [-30, -30],
+          maxs: [10, 30],
+          splits: [
+            [-30, -20, -10, 0, 10],
+            [-30, -20, -10, 0, 10, 20, 30],
+          ],
+          splitcount: 9,
+        } as SplitOptions);
+      },
+    },
+    {
+      scale: "y2",
+      stroke: "#FC9272",
+      side: 1,
+      splits: (u) => {
+        return OptsHelper.getSplits(
+          {
+            uplot: u,
+            mins: [-30, -30],
+            maxs: [10, 30],
+            splits: [
+              [-30, -20, -10, 0, 10],
+              [-30, -20, -10, 0, 10, 20, 30],
+            ],
+            splitcount: 9,
+          } as SplitOptions,
+          "y2",
+        );
+      },
+      grid: {
+        show: false,
       },
     },
   ],
@@ -87,4 +122,4 @@ export const opts_TEMP_year_min = baseTempSeries("TEMP_min", "#d9dcdc", 2);
 export const opts_TEMP_year_max = baseTempSeries("TEMP_max", "#d9dcdc", 0);
 export const opts_TEMP_year_median = baseTempSeries("TEMP_median", "#878787", 2);
 export const opts_TEMP_year_current = baseTempSeries("TEMP", "#DE2D26", 2);
-export const opts_DEW_year_current = baseTempSeries("TD", "#6aafd5", 2);
+export const opts_DEW_year_current = baseTempSeries("TSS", "#FC9272", 2);

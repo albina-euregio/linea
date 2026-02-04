@@ -12,10 +12,6 @@ export const opts_HS_PSUM: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.textBaseline = "top";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
         var labelColor1 = "#08519C";
@@ -26,7 +22,6 @@ export const opts_HS_PSUM: uPlot.Options = {
           labely2,
           u.bbox.left,
           u.bbox.width,
-          canvasHeight,
           labelColor1,
           labelColor2,
         );

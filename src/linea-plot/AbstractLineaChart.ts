@@ -1,8 +1,23 @@
 import uPlot from "uplot";
+import { Result, Values } from "../data/station-data";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
+
+  protected drawedTitle: boolean = false;
+
+  constructor(
+    protected backgroundColor: string,
+    protected showTitle: boolean,
+    protected result: Result,
+  ) {
+    super();
+  }
+
+  abstract setData(timestamps: number[], values: Values);
+
+  protected abstract getStationTitle(): {};
 
   resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
     this.plots.forEach((p) =>
@@ -22,6 +37,23 @@ export abstract class AbstractLineaChart extends HTMLElement {
     }
   }
 
+  protected updateData(plot: uPlot, values: (number | null)[][], appendTimestamps: boolean = true) {
+    let data = [];
+    if (appendTimestamps) {
+      data.push(this.result.timestamps);
+    }
+    for (const element of values) {
+      data.push(element ?? this.#createNullArray());
+    }
+    plot.setData(data);
+  }
+
+  #createNullArray() {
+    let nulls: number | null[] = [];
+    this.result.timestamps.forEach(() => nulls.push(null));
+    return nulls;
+  }
+
   addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
     if (!this.plots.includes(plot)) {
       this.plots.push(plot);
@@ -32,5 +64,26 @@ export abstract class AbstractLineaChart extends HTMLElement {
     }
     plot.addSeries({ ...series, show: !!data?.length });
     plot.data.push(data);
+  }
+
+  modifyDrawHook(p: uPlot, backgroundColor: string) {
+    p.hooks.draw = p.hooks.draw || [];
+    p.hooks.draw.unshift((u) => {
+      const { left, top, width, height } = u.bbox;
+      const ctx = u.ctx;
+      ctx.save();
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(left, top, width, height);
+      ctx.restore();
+    });
+  }
+
+  setBackgroundColor(color: string) {
+    this.backgroundColor = color;
+    this.plots.forEach((p) => p.redraw());
+  }
+
+  getBackgroundColor(): string {
+    return this.backgroundColor;
   }
 }

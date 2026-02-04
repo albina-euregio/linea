@@ -1,5 +1,4 @@
 import uPlot from "uplot";
-import { OptsHelper } from "./optsHelper";
 
 /**
  * Creates a uPlot plugin that handles touch-based zooming and panning
@@ -20,11 +19,10 @@ import { OptsHelper } from "./optsHelper";
  * Modified from: https://leeoniya.github.io/uPlot/demos/zoom-touch.html
  */
 export class TouchZoom {
-  static touchZoomPlugin(opts) {
+  static touchZoomPlugin() {
     function init(u: uPlot) {
       const over = u.over;
       let rect: DOMRect;
-      let oxRange: number, xVal: number;
       let fr = { x: 0, dx: 0, d: 1 }; // first touch
       let to = { x: 0, dx: 0, d: 1 }; // current touch
 

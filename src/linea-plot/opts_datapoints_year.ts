@@ -1,24 +1,19 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for datapoints/year [cm]
  */
 
 export const opts_DATAPOINTS_year: uPlot.Options = {
   ...OptsHelper.getLineaOptions(),
+  padding: [20, 52, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        ctx.save();
-        ctx.font = "bold 0.9vm sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-
-        const canvasHeight = u.ctx.canvas.height;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`;
         var labely2 = "";
         var labelColor1 = "#00ff55ff";
@@ -29,18 +24,28 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
           labely2,
           u.bbox.left,
           u.bbox.width,
-          canvasHeight,
           labelColor1,
           labelColor2,
         );
+      },
+    ],
+    setSelect: [
+      (u) => {
+        OptsHelper.calculateAxisLimitsInZoom(u, [1]);
       },
     ],
   },
 
   scales: {
     y: {
-      range: (u, dataMin, dataMax) => {
-        return dataMax > 50 ? [0, 65] : [0, 50];
+      range: (_u, _dataMin, dataMax) => {
+        if (dataMax > 70) {
+          return [0, 90];
+        } else if (dataMax > 50) {
+          return [0, 70];
+        } else if (dataMax > 30) {
+          return [0, 50];
+        } else return [0, 30];
       },
     },
   },
@@ -51,8 +56,18 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
       scale: "y",
       stroke: "#00ff55ff",
       splits: (u) => {
-        const max = u.scales.y.max ?? 0;
-        return max > 50 ? [0, 10, 20, 30, 40, 50, 60] : [0, 10, 20, 30, 40, 50];
+        return OptsHelper.getSplits({
+          uplot: u,
+          mins: [0, 0, 0, 0],
+          maxs: [30, 50, 70, 90],
+          splits: [
+            [0, 10, 20, 30],
+            [0, 15, 30, 45],
+            [0, 20, 40, 60],
+            [0, 25, 50, 75],
+          ],
+          splitcount: 9,
+        } as SplitOptions);
       },
     },
   ],
