@@ -81,11 +81,7 @@ export class LineaChart extends AbstractLineaChart {
       const p = new uPlot(
         {
           ...opts_HS_PSUM,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [this.result.timestamps],
         plot_HS_PSUM,
@@ -101,11 +97,7 @@ export class LineaChart extends AbstractLineaChart {
       const p = new uPlot(
         {
           ...opts_VW_VWG_DW,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [this.result.timestamps],
         plot_VW_VWG_DW,
@@ -127,11 +119,7 @@ export class LineaChart extends AbstractLineaChart {
       const p = new uPlot(
         {
           ...opts_TA_TD_TSS,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [this.result.timestamps],
         plot_TA_TD_TSS,
@@ -162,11 +150,7 @@ export class LineaChart extends AbstractLineaChart {
       const p = new uPlot(
         {
           ...opts_RH_GR,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [this.result.timestamps],
         plot_RH_GR,
@@ -190,6 +174,14 @@ export class LineaChart extends AbstractLineaChart {
     let density = Math.ceil(values.length / 7500);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
     return out;
+  }
+
+  protected getStationTitle(): {} {
+    return this.showTitle && !this.drawedTitle
+      ? {
+          title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+        }
+      : {};
   }
 }
 

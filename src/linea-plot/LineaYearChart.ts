@@ -207,7 +207,7 @@ export class LineaYearChart extends AbstractLineaChart {
       const p = new uPlot(
         {
           ...opts_HS_year,
-          ...this.#getStationTitle(),
+          ...this.getStationTitle(),
         },
         [yearDataHS.timestamps],
         plot_HS_year,
@@ -233,7 +233,7 @@ export class LineaYearChart extends AbstractLineaChart {
       const pDatapoints = new uPlot(
         {
           ...opts_DATAPOINTS_year,
-          ...this.#getStationTitle(),
+          ...this.getStationTitle(),
         },
         [yearDataHS.timestamps],
         plot_DATAPOINTS_year,
@@ -255,7 +255,7 @@ export class LineaYearChart extends AbstractLineaChart {
       let pNewSnow = new uPlot(
         {
           ...opts_NS_year,
-          ...this.#getStationTitle(),
+          ...this.getStationTitle(),
         },
         [yearDataNS.timestamps],
         plot_NS_year,
@@ -295,7 +295,7 @@ export class LineaYearChart extends AbstractLineaChart {
       const pTemp = new uPlot(
         {
           ...opts_TEMP_year,
-          ...this.#getStationTitle(),
+          ...this.getStationTitle(),
         },
         [yearDataTA.timestamps],
         plot_TEMP_year,
@@ -323,7 +323,7 @@ export class LineaYearChart extends AbstractLineaChart {
     this.resizeObserver.observe(this);
   }
 
-  #getStationTitle() {
+  protected getStationTitle(): {} {
     return this.showTitle && !this.drawedTitle
       ? {
           title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m), ${i18n.message("dialog:weather-station-diagram:title:since")} ${new Date(this.result.timestamps[0]).getFullYear()}`,
