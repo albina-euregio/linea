@@ -300,7 +300,7 @@ export class ExportModal {
         "click",
         () => {
           this.#resetCopyToClipboardButton();
-          this.#exportAsLineaPlotElement();
+          this.#exportAsBlogElement();
         },
       );
     }
@@ -489,15 +489,10 @@ export class ExportModal {
   }
 
   /**
-   * Handles iframe export functionality.
-   *
-   * @private
-   * @returns {void}
-   * @todo Implement iframe export logic
+   * Generates the code which can be included into an iframe.
+   * @returns Promise<string> - html code to insert into an iframe
    */
-  async #exportAsIframe() {
-    const exports = this.#getExportSettings();
-
+  async #generateIFrameHTML(): Promise<string> {
     const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
 
     const resultsFiltered: Result[] = [];
@@ -563,10 +558,6 @@ export class ExportModal {
       }
       resultsFiltered.push(result);
     });
-    let totalCanvases = 0;
-    this.#getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.#getCheckedPlotIndices(index).length;
-    });
 
     const dataUrl: string = await this.#exportAllPlotsToPNG(
       { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
@@ -581,13 +572,26 @@ export class ExportModal {
     if (this.lineaPlot.winterview) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
-    const uint8Array = new TextEncoder().encode(html);
-    let binary = "";
-    for (let i = 0; i < uint8Array.byteLength; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
-    }
+    return html;
+  }
 
-    this.exportResult.style.display = "block";
+  /**
+   * Handles iframe export functionality.
+   *
+   * @private
+   * @returns {void}
+   * @todo Implement iframe export logic
+   */
+  async #exportAsIframe() {
+    const exports = this.#getExportSettings();
+    const html = await this.#generateIFrameHTML();
+    const binary = ExportModal.#toBinary(html);
+
+    let totalCanvases = 0;
+    this.#getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.#getCheckedPlotIndices(index).length;
+    });
+
     const iframecode = `<iframe
           src="data:text/html;base64,${btoa(binary)}"
           frameborder="0" 
@@ -596,6 +600,7 @@ export class ExportModal {
           title="${exports.title}">
       </iframe>`;
 
+    this.exportResult.style.display = "block";
     document.getElementById("exportCode").innerHTML = iframecode;
 
     this.exportdata = {
@@ -608,63 +613,27 @@ export class ExportModal {
     };
   }
 
-  async #exportAsLineaPlotElement() {
-    const resultsFiltered: Result[] = [];
+  async #exportAsBlogElement() {
+    const exports = this.#getExportSettings();
+    const html = await this.#generateIFrameHTML();
+    const binary = ExportModal.#toBinary(html);
 
-    this.#getActiveLineacharts().forEach((lc, index) => {
-      const activeplots = this.#getCheckedPlotIndices(index);
-      let result: Result = {
-        station: lc.result.station,
-        altitude: lc.result.altitude,
-        timestamps: lc.result.timestamps,
-        values: {},
-        units: {},
-      };
-      activeplots.forEach((index) => {
-        if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:temperature")
-        ) {
-          result.values.TA = lc.result.values.TA ?? [];
-          result.values.TD = lc.result.values.TD ?? [];
-          result.values.TSS = lc.result.values.TSS ?? [];
-        } else if (
-          lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
-        ) {
-          result.values.VW = lc.result.values.VW ?? [];
-          result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
-          result.values.DW = lc.result.values.DW ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
-        ) {
-          result.values.RH = lc.result.values.RH ?? [];
-          result.values.ISWR = lc.result.values.ISWR ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
-        ) {
-          result.values.HS = lc.result.values.HS ?? [];
-          result.values.PSUM = lc.result.values.PSUM ?? [];
-        }
-      });
-      resultsFiltered.push(result);
+    let totalCanvases = 0;
+    this.#getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.#getCheckedPlotIndices(index).length;
     });
 
+    const iframeshortcode = `[lineaplotblog frameborder="0" scrolling="no" style="width: 100%; height: ${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px;border:none;overflow:hidden;" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+
     this.exportResult.style.display = "block";
-
-    let template = await import("./blogtemplate.html?raw").then((m) => m.default);
-    template = template.replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`);
-
-    document.getElementById("exportCode").innerHTML = template;
-
+    document.getElementById("exportCode").innerHTML = `<p>${iframeshortcode}</p>`;
     this.exportdata = {
-      blob: new Blob([template], {
-        type: "text/html",
+      blob: new Blob([iframeshortcode], {
+        type: "text/plain",
       }),
-      data: template,
-      filename: "linea-chart.html",
-      type: "text/html",
+      data: iframeshortcode,
+      filename: "shortcode.txt",
+      type: "text/plain",
     };
   }
 
@@ -913,5 +882,20 @@ export class ExportModal {
       heightPerCanvas: parseInt(heightInput.value),
       title: titleInput.value,
     };
+  }
+
+  /**
+   * Converts a string to binary
+   *
+   * @param s string to convert
+   * @returns converted string to binary
+   */
+  static #toBinary(s: string): string {
+    const uint8Array = new TextEncoder().encode(s);
+    let binary = "";
+    for (let i = 0; i < uint8Array.byteLength; i++) {
+      binary += String.fromCharCode(uint8Array[i]);
+    }
+    return binary;
   }
 }
