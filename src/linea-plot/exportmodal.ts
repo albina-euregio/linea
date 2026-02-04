@@ -235,6 +235,11 @@ export class ExportModal {
                         <h4>${i18n.message("dialog:weather-station-diagram:controls:button:interactiveblog")}</h4>
                         <p>${i18n.message("dialog:weather-station-diagram:controls:button:interactiveblog:sub")}</p>
                     </div>
+
+                    <div class="export-option" id="btnExportSmet">
+                        <h4>${i18n.message("dialog:weather-station-diagram:controls:button:smet")}</h4>
+                        <p>${i18n.message("dialog:weather-station-diagram:controls:button:smet:sub")}</p>
+                    </div>
                 </div>
     
                 <div class="export-settings" id="exportSettings" style="display:none;">
@@ -303,6 +308,10 @@ export class ExportModal {
         },
       );
     }
+
+    this.modal.querySelector("#btnExportSmet")?.addEventListener("click", () => {
+      this.#exportAsSMET();
+    });
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "none";
@@ -461,9 +470,14 @@ export class ExportModal {
     if (!this.exportdata) {
       return;
     }
+    this.#download(URL.createObjectURL(this.exportdata.blob));
+  }
+
+  #download(url: string, download: string = this.exportdata?.filename ?? "file.txt") {
+    console.log(url);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(this.exportdata.blob);
-    a.download = this.exportdata.filename;
+    a.href = url;
+    a.download = download;
     a.target = "_tab";
     a.click();
   }
@@ -485,6 +499,30 @@ export class ExportModal {
     a.href = URL.createObjectURL(this.exportdata.blob);
     a.target = "_blank";
     a.click();
+  }
+
+  /**
+   *
+   */
+  #exportAsSMET() {
+    console.log("pressed");
+    if (this.lineaPlot.winterview) {
+      this.#downloadSMETS(this.lineaPlot.wintersrcs);
+    } else {
+      if (this.lineaPlot.hasAttribute("lazysrc")) {
+        this.#downloadSMETS(this.lineaPlot.lazysrcs);
+      } else {
+        this.#downloadSMETS(this.lineaPlot.srcs);
+      }
+    }
+  }
+
+  async #downloadSMETS(srcs: string[]) {
+    for (const src of srcs) {
+      this.#download(src, src.split("/")[-1]);
+      await new Promise(requestAnimationFrame);
+      await new Promise((r) => setTimeout(r, 1000));
+    }
   }
 
   /**

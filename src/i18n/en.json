@@ -44,6 +44,8 @@
   "dialog:weather-station-diagram:controls:button:iframe:sub": "HTML code to embed the chart in a webpage",
   "dialog:weather-station-diagram:controls:button:interactiveblog": "Embed Code (blog)",
   "dialog:weather-station-diagram:controls:button:interactiveblog:sub": "HTML code to embed as interactive element into the blog",
+  "dialog:weather-station-diagram:controls:button:smet": "SMET",
+  "dialog:weather-station-diagram:controls:button:smet:sub": "Raw data in .smet format",
   "dialog:weather-station-diagram:controls:button:copytoclipboard": "Copy",
   "dialog:weather-station-diagram:controls:button:copytoclipboard:clicked": "Copy",
   "dialog:weather-station-diagram:controls:button:download": "Download",
