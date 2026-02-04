@@ -4,12 +4,12 @@ import { i18n } from "../i18n";
 import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for datapoints/year [cm]
  */
 
 export const opts_DATAPOINTS_year: uPlot.Options = {
   ...OptsHelper.getLineaOptions(),
-  padding: [20, 43, 0, -10],
+  padding: [20, 52, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {

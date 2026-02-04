@@ -30,8 +30,8 @@
   "dialog:weather-station-diagram:controls:tooltips:previous": "Previous day",
   "dialog:weather-station-diagram:controls:tooltips:wholetimespan": "Show whole available timespan",
   "dialog:weather-station-diagram:controls:value:export": "Export",
-  "dialog:weather-station-diagram:controls:value:winterview:winter": "Winter View",
-  "dialog:weather-station-diagram:controls:value:winterview:station": "Station View",
+  "dialog:weather-station-diagram:controls:value:winterview:winter": "Winterstats",
+  "dialog:weather-station-diagram:controls:value:winterview:station": "Stationview",
   "dialog:weather-station-diagram:controls:label:exportsettings": "Export Settings",
   "dialog:weather-station-diagram:controls:label:heightpercanvas": "Height per canvas",
   "dialog:weather-station-diagram:controls:label:width": "Width (only PNG)",
@@ -54,5 +54,6 @@
   "dialog:weather-station-diagram:plotnames:precipitation": "Precipitation",
   "dialog:weather-station-diagram:plotnames:humidity_gr": "Humidity&GR",
   "dialog:weather-station-diagram:plotnames:datapoints": "Datapoints",
-  "dialog:weather-station-diagram:plotnames:newsnow": "New Snow"
+  "dialog:weather-station-diagram:plotnames:newsnow": "New Snow",
+  "dialog:weather-station-diagram:title:since": "since"
 }

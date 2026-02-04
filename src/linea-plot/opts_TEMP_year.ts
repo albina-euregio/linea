@@ -4,18 +4,26 @@ import { i18n } from "../i18n";
 import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for temperature/year [cm]
  */
 
 export const opts_TEMP_year: uPlot.Options = {
   ...OptsHelper.getLineaOptions(),
-  padding: [20, 43, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (cm)`;
-        OptsHelper.UpdateAxisLabels(ctx, labely1, "", u.bbox.left, u.bbox.width, "#DE2D26", "");
+        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:TA")} (°C)`;
+        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TSS")} (°C)`;
+        OptsHelper.UpdateAxisLabels(
+          ctx,
+          labely1,
+          labely2,
+          u.bbox.left,
+          u.bbox.width,
+          "#DE2D26",
+          "#FC9272",
+        );
         ctx.restore();
       },
     ],
@@ -28,6 +36,11 @@ export const opts_TEMP_year: uPlot.Options = {
 
   scales: {
     y: {
+      range: (_u, _dataMin, dataMax) => {
+        return dataMax > 20 ? [-30, 30] : [-30, 20];
+      },
+    },
+    y2: {
       range: (_u, _dataMin, dataMax) => {
         return dataMax > 20 ? [-30, 30] : [-30, 20];
       },
@@ -50,6 +63,29 @@ export const opts_TEMP_year: uPlot.Options = {
           ],
           splitcount: 9,
         } as SplitOptions);
+      },
+    },
+    {
+      scale: "y2",
+      stroke: "#FC9272",
+      side: 1,
+      splits: (u) => {
+        return OptsHelper.getSplits(
+          {
+            uplot: u,
+            mins: [-30, -30],
+            maxs: [10, 30],
+            splits: [
+              [-30, -20, -10, 0, 10],
+              [-30, -20, -10, 0, 10, 20, 30],
+            ],
+            splitcount: 9,
+          } as SplitOptions,
+          "y2",
+        );
+      },
+      grid: {
+        show: false,
       },
     },
   ],
@@ -86,4 +122,4 @@ export const opts_TEMP_year_min = baseTempSeries("TEMP_min", "#d9dcdc", 2);
 export const opts_TEMP_year_max = baseTempSeries("TEMP_max", "#d9dcdc", 0);
 export const opts_TEMP_year_median = baseTempSeries("TEMP_median", "#878787", 2);
 export const opts_TEMP_year_current = baseTempSeries("TEMP", "#DE2D26", 2);
-export const opts_DEW_year_current = baseTempSeries("TD", "#6aafd5", 2);
+export const opts_DEW_year_current = baseTempSeries("TSS", "#FC9272", 2);

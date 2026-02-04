@@ -15,7 +15,7 @@ export const opts_HS_year: uPlot.Options = {
         const ctx = u.ctx;
         var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
         var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
-        var labelColor1 = "#DE2D26";
+        var labelColor1 = "#08519C";
         var labelColor2 = "#6aafd5";
         OptsHelper.UpdateAxisLabels(
           ctx,
@@ -58,7 +58,7 @@ export const opts_HS_year: uPlot.Options = {
     timeAxis,
     {
       scale: "y",
-      stroke: "#DE2D26",
+      stroke: "#08519C",
       splits: (u) => {
         return OptsHelper.getSplits({
           uplot: u,
@@ -132,7 +132,7 @@ const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
 export const opts_HS_year_min = baseHsSeries("HS_min", "#d9dcdc", 2);
 export const opts_HS_year_max = baseHsSeries("HS_max", "#d9dcdc", 0);
 export const opts_HS_year_median = baseHsSeries("HS_median", "#878787", 2);
-export const opts_HS_year_current = baseHsSeries("HS", "#ff0000", 2);
+export const opts_HS_year_current = baseHsSeries("HS", "#08519C", 2);
 
 export const opts_HS_year_PSUM: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),

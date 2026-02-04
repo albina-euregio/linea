@@ -4,12 +4,12 @@ import { i18n } from "../i18n";
 import { OptsHelper, SplitOptions } from "./optsHelper";
 
 /**
- * uPlot options for snow-height/year [cm]
+ * uPlot options for new snow/year [cm]
  */
 
 export const opts_NS_year: uPlot.Options = {
   ...OptsHelper.getLineaOptions(),
-  padding: [20, 43, 0, -10],
+  padding: [20, 52, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {
@@ -67,9 +67,9 @@ export const opts_NS_year_series: uPlot.Series = {
 
 export const opts_NS_year_snow_cover: uPlot.Series = {
   label: i18n.message("dialog:weather-station-diagram:parameter:snowcover"),
-  stroke: "#rgba(222, 45, 38, 0.2)",
-  width: 2,
   scale: "y",
-  fill: "rgba(222, 45, 38, 0.2)",
+  points: { show: false },
+  stroke: "rgba(222, 45, 38, .4)",
+  fill: "rgba(222, 45, 38, .15)",
   value: () => "-",
 };

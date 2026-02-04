@@ -17,6 +17,8 @@ export abstract class AbstractLineaChart extends HTMLElement {
 
   abstract setData(timestamps: number[], values: Values);
 
+  protected abstract getStationTitle(): {};
+
   resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
     this.plots.forEach((p) =>
       p.setSize({

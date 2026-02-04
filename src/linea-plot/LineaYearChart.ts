@@ -26,12 +26,10 @@ import { AbstractLineaChart } from "./AbstractLineaChart";
 import { Result, Values } from "../data/station-data";
 
 /**
- * A custom HTML element that renders yearly overview plots for weather station data.
- *
  * This component creates interactive uPlot diagrams displaying:
  * - Snow height (HS) with min/median/max aggregates and precipitation (PSUM)
  * - New snow (NS) with snow cover overlay
- * - Temperature (TA) with min/median/max aggregates and dew point (TD)
+ * - Temperature (TA) with min/median/max aggregates and surface temperature (TSS)
  * - Data point counts for quality assessment
  *
  * @remarks
@@ -39,26 +37,9 @@ import { Result, Values } from "../data/station-data";
  * Data is aggregated by calendar day and rendered between specified date ranges.
  * Requires Temporal API for date handling.
  *
- * @example
- * ```html
- * <linea-plot-year
- *   src="path/to/data.smet"
- *   startDate="2023-01-01"
- *   endDate="2023-12-31"
- *   timeZone="CET"
- *   showTitle>
- * </linea-plot-year>
- * ```
  *
  * @extends AbstractLineaChart
  *
- * @customElement linea-plot-year
- *
- * @attribute {string} src - Path to SMET file with snow height and weather data
- * @attribute {string} startDate - Start date in ISO format (YYYY-MM-DD)
- * @attribute {string} endDate - End date in ISO format (YYYY-MM-DD)
- * @attribute {string} [timeZone="CET"] - IANA time zone identifier for data aggregation
- * @attribute {boolean} [showTitle] - If present, displays station name and altitude
  */
 export class LineaYearChart extends AbstractLineaChart {
   constructor(
@@ -107,7 +88,7 @@ export class LineaYearChart extends AbstractLineaChart {
             yearDataHS.maxValues,
             yearDataHS.medianValues,
             yearDataHS.values,
-            yearDataPSUM.values,
+            yearDataPSUM.values.map((v) => (v == 0 ? null : v)),
           ],
           false,
         );
@@ -141,8 +122,8 @@ export class LineaYearChart extends AbstractLineaChart {
           this.plots[i],
           [
             yearDataHS.timestamps,
-            yearDataHS.values.map((v) => (v == 0 || Number.isNaN(v) ? 1000 : -1000)),
-            yearDataNS.values,
+            yearDataHS.values.map((v) => (v && v > 0 ? 1000 : -1000)),
+            yearDataNS.values.map((v) => (v == 0 ? null : v)),
           ],
           false,
         );
@@ -159,7 +140,7 @@ export class LineaYearChart extends AbstractLineaChart {
         timestamps,
         values.TA,
       );
-      if (!this.result.values.TD) {
+      if (!this.result.values.TSS) {
         this.updateData(
           this.plots[i],
           [
@@ -172,12 +153,12 @@ export class LineaYearChart extends AbstractLineaChart {
           false,
         );
       } else {
-        const yearDataTD = YearData.from(
+        const yearDataTSS = YearData.from(
           i18n.timezone(),
           this.startDate,
           this.endDate,
           timestamps,
-          values.TD,
+          values.TSS,
         );
         this.updateData(
           this.plots[i],
@@ -187,7 +168,7 @@ export class LineaYearChart extends AbstractLineaChart {
             yearDataTA.maxValues,
             yearDataTA.medianValues,
             yearDataTA.values,
-            yearDataTD.values,
+            yearDataTSS.values,
           ],
           false,
         );
@@ -226,11 +207,7 @@ export class LineaYearChart extends AbstractLineaChart {
       const p = new uPlot(
         {
           ...opts_HS_year,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [yearDataHS.timestamps],
         plot_HS_year,
@@ -246,7 +223,7 @@ export class LineaYearChart extends AbstractLineaChart {
           this.startDate,
           this.endDate,
           timestamps,
-          values.PSUM,
+          values.PSUM.map((v) => (v == 0 ? null : v)),
         );
         this.addSeries(p, opts_HS_year_PSUM, yearDataPSUM.values);
       }
@@ -256,11 +233,7 @@ export class LineaYearChart extends AbstractLineaChart {
       const pDatapoints = new uPlot(
         {
           ...opts_DATAPOINTS_year,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [yearDataHS.timestamps],
         plot_DATAPOINTS_year,
@@ -282,11 +255,7 @@ export class LineaYearChart extends AbstractLineaChart {
       let pNewSnow = new uPlot(
         {
           ...opts_NS_year,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [yearDataNS.timestamps],
         plot_NS_year,
@@ -303,10 +272,14 @@ export class LineaYearChart extends AbstractLineaChart {
         this.addSeries(
           pNewSnow,
           opts_NS_year_snow_cover,
-          yearDataHS.values.map((v) => (v == 0 || Number.isNaN(v) ? 1000 : -1000)),
+          yearDataHS.values.map((v) => (v && v > 0 ? 1000 : -1000)),
         );
       }
-      this.addSeries(pNewSnow, opts_NS_year_series, yearDataNS.values);
+      this.addSeries(
+        pNewSnow,
+        opts_NS_year_series,
+        yearDataNS.values.map((v) => (v == 0 ? null : v)),
+      );
       this.modifyDrawHook(pNewSnow, this.backgroundColor);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:newsnow"));
     }
@@ -322,11 +295,7 @@ export class LineaYearChart extends AbstractLineaChart {
       const pTemp = new uPlot(
         {
           ...opts_TEMP_year,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${station} (${i18n.number(altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [yearDataTA.timestamps],
         plot_TEMP_year,
@@ -336,15 +305,15 @@ export class LineaYearChart extends AbstractLineaChart {
       this.addSeries(pTemp, opts_TEMP_year_max, yearDataTA.maxValues);
       this.addSeries(pTemp, opts_TEMP_year_median, yearDataTA.medianValues);
       this.addSeries(pTemp, opts_TEMP_year_current, yearDataTA.values);
-      if (values.TD) {
-        const yearDataTD = YearData.from(
+      if (values.TSS) {
+        const yearDataTSS = YearData.from(
           timeZone,
           this.startDate,
           this.endDate,
           timestamps,
-          values.TD,
+          values.TSS,
         );
-        this.addSeries(pTemp, opts_DEW_year_current, yearDataTD.values);
+        this.addSeries(pTemp, opts_DEW_year_current, yearDataTSS.values);
       }
       this.modifyDrawHook(pTemp, this.backgroundColor);
       this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:temperature"));
@@ -352,6 +321,14 @@ export class LineaYearChart extends AbstractLineaChart {
 
     this.resizePlots(this.clientWidth, this.style);
     this.resizeObserver.observe(this);
+  }
+
+  protected getStationTitle(): {} {
+    return this.showTitle && !this.drawedTitle
+      ? {
+          title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m), ${i18n.message("dialog:weather-station-diagram:title:since")} ${new Date(this.result.timestamps[0]).getFullYear()}`,
+        }
+      : {};
   }
 }
 
