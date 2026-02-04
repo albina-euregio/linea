@@ -10,12 +10,14 @@ export abstract class AbstractLineaChart extends HTMLElement {
   constructor(
     protected backgroundColor: string,
     protected showTitle: boolean,
-    protected result: Result,
+    public result: Result,
   ) {
     super();
   }
 
   abstract setData(timestamps: number[], values: Values);
+
+  protected abstract getStationTitle(): {};
 
   resizePlots(clientWidth: number, style: CSSStyleDeclaration, heightPerCanvas: number = NaN) {
     this.plots.forEach((p) =>

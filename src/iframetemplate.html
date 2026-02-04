@@ -5,61 +5,53 @@
     <title>linea</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
+      html,
       body {
-        font-family: Helvetica, sans-serif;
-        margin: 20px;
+        height: 100%; /* <--- crucial */
+        margin: 0;
       }
 
-      .controls {
-        text-align: center;
+      #chart-container {
+        position: relative;
+        width: 100%;
+        height: 100%; /* now 100% of body */
       }
 
-      .toggle-btn {
-        padding: 10px 20px;
-        background-color: #ffffff;
-        color: #555555;
-        border: 2px solid #19aaff;
-        border-radius: 40px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 300;
-        transition:
-          background-color 0.3s ease,
-          color 0.3s ease;
-
-        &:hover {
-          background-color: #19aaff;
-          color: white;
-        }
-
-        &:active {
-          transform: translateY(1px);
-        }
+      #linea {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
       }
 
-      linea-plot,
-      linea-plot-year {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-
-        & > div:empty {
-          display: none;
-        }
-
-        & > div {
-          background-color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 10px;
-        }
+      #fallback {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        z-index: 2;
       }
     </style>
   </head>
 
   <body>
-    <linea-plot data="" showsurfacehoarseries showtitle />
+    <div id="chart-container">
+      <img id="fallback" src="" />
+      <linea-plot data="" showsurfacehoarseries showtitle id="linea"></linea-plot>
+    </div>
+
     <script type="module" src="https://albina-euregio.gitlab.io/linea/linea.js"></script>
+    <script>
+      const linea = document.getElementById("linea");
+      const fallback = document.getElementById("fallback");
+
+      customElements.whenDefined("linea-plot").then(() => {
+        fallback.style.display = "none";
+      });
+    </script>
   </body>
 </html>

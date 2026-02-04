@@ -24,6 +24,18 @@ export class LineaChart extends AbstractLineaChart {
     this.result.timestamps = timestamps;
     this.result.values = values;
     let i = 0;
+    if (this.result.values.HS || this.result.values.PSUM) {
+      this.updateData(this.plots[i], [this.result.values.HS, this.result.values.PSUM]);
+      i += 1;
+    }
+    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
+      this.updateData(this.plots[i], [
+        this.result.values.VW,
+        this.result.values.VW_MAX,
+        this.#filterDWData(this.result.values.DW),
+      ]);
+      i += 1;
+    }
     if (this.result.values.TA || this.result.values.TD || this.result.values.TSS) {
       if (this.showSurfaceHoarSeries && this.result.values.TD && this.result.values.TSS) {
         this.updateData(this.plots[i], [
@@ -49,18 +61,6 @@ export class LineaChart extends AbstractLineaChart {
       }
       i += 1;
     }
-    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
-      this.updateData(this.plots[i], [
-        this.result.values.VW,
-        this.result.values.VW_MAX,
-        this.#filterDWData(this.result.values.DW),
-      ]);
-      i += 1;
-    }
-    if (this.result.values.HS || this.result.values.PSUM) {
-      this.updateData(this.plots[i], [this.result.values.HS, this.result.values.PSUM]);
-      i += 1;
-    }
     if (this.result.values.RH || this.result.values.ISWR) {
       this.updateData(this.plots[i], [this.result.values.RH, this.result.values.ISWR]);
     }
@@ -75,7 +75,40 @@ export class LineaChart extends AbstractLineaChart {
     const plot_VW_VWG_DW = document.createElement("div");
     const plot_HS_PSUM = document.createElement("div");
     const plot_RH_GR = document.createElement("div");
-    this.replaceChildren(style, plot_TA_TD_TSS, plot_VW_VWG_DW, plot_HS_PSUM, plot_RH_GR);
+    this.replaceChildren(style, plot_HS_PSUM, plot_VW_VWG_DW, plot_TA_TD_TSS, plot_RH_GR);
+
+    if (this.result.values.HS || this.result.values.PSUM) {
+      const p = new uPlot(
+        {
+          ...opts_HS_PSUM,
+          ...this.getStationTitle(),
+        },
+        [this.result.timestamps],
+        plot_HS_PSUM,
+      );
+      this.drawedTitle = true;
+      this.modifyDrawHook(p, this.backgroundColor);
+      this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
+      this.addSeries(p, opts_HS, this.result.values.HS);
+      this.addSeries(p, opts_PSUM, this.result.values.PSUM);
+    }
+
+    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
+      const p = new uPlot(
+        {
+          ...opts_VW_VWG_DW,
+          ...this.getStationTitle(),
+        },
+        [this.result.timestamps],
+        plot_VW_VWG_DW,
+      );
+      this.drawedTitle = true;
+      this.modifyDrawHook(p, this.backgroundColor);
+      this.plotnames.push(i18n.message("linea:plotnames:wind"));
+      this.addSeries(p, opts_VW, this.result.values.VW);
+      this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
+      this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
+    }
 
     if (this.result.values.TA) {
       const TD =
@@ -86,11 +119,7 @@ export class LineaChart extends AbstractLineaChart {
       const p = new uPlot(
         {
           ...opts_TA_TD_TSS,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [this.result.timestamps],
         plot_TA_TD_TSS,
@@ -117,56 +146,11 @@ export class LineaChart extends AbstractLineaChart {
       }
     }
 
-    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
-      const p = new uPlot(
-        {
-          ...opts_VW_VWG_DW,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
-        },
-        [this.result.timestamps],
-        plot_VW_VWG_DW,
-      );
-      this.drawedTitle = true;
-      this.modifyDrawHook(p, this.backgroundColor);
-      this.plotnames.push(i18n.message("linea:plotnames:wind"));
-      this.addSeries(p, opts_VW, this.result.values.VW);
-      this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
-      this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
-    }
-
-    if (this.result.values.HS || this.result.values.PSUM) {
-      const p = new uPlot(
-        {
-          ...opts_HS_PSUM,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
-        },
-        [this.result.timestamps],
-        plot_HS_PSUM,
-      );
-      this.drawedTitle = true;
-      this.modifyDrawHook(p, this.backgroundColor);
-      this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
-      this.addSeries(p, opts_HS, this.result.values.HS);
-      this.addSeries(p, opts_PSUM, this.result.values.PSUM);
-    }
-
     if (this.result.values.RH || this.result.values.ISWR) {
       const p = new uPlot(
         {
           ...opts_RH_GR,
-          ...(this.showTitle && !this.drawedTitle
-            ? {
-                title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-              }
-            : {}),
+          ...this.getStationTitle(),
         },
         [this.result.timestamps],
         plot_RH_GR,
@@ -190,6 +174,14 @@ export class LineaChart extends AbstractLineaChart {
     let density = Math.ceil(values.length / 7500);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
     return out;
+  }
+
+  protected getStationTitle(): {} {
+    return this.showTitle && !this.drawedTitle
+      ? {
+          title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+        }
+      : {};
   }
 }
 
