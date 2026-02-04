@@ -61,12 +61,12 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
   If used with `showdatepicker` and `startdate` it will set the initial date range.
   If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
 - `showexport` - toggles if the export button is shown
-- `showinteractiveblogexport`- in combination with showexport` it shows a button to export just the linea-plot element with corresponding data. In the target platform the linea module has to be available to show the element.
+- `showinteractiveblogexport`- in combination with `showexport` it shows a button to export a wordpress shortcode, which can be used together with the `linea-plot-blog.php` plugin for Wordpress. See Export options for more details.
 
 If startdate or enddate is missing it will show all data from the SMET file.
 If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
 
-If the data from `src` is not a subset from `lazysrc`, the inital view for the user is not changed after loading and replacing the data from `src` with data from `lazysrc` element. Available dates for the date picker are updated to timespan of data of `lazysrc` element. Clicking the previous/next week button for the first time lead to a zoom to the whole available timespan of the data of `lazysrc` element.#
+If the data from `src` is not a subset from `lazysrc`, the inital view for the user is not changed after loading and replacing the data from `src` with data from `lazysrc` element. Available dates for the date picker are updated to timespan of data of `lazysrc` element. Clicking the previous/next week button for the first time lead to a zoom to the whole available timespan of the data of `lazysrc` element.
 
 #### Export options
 
@@ -75,15 +75,12 @@ For png export it is possible to adjust the width, height and title of the plot.
 
 An exported `Embed Code (iframe)` is useable in a website. To use in wordpress, place a _individual HTML_ block in a _group_ block. The _group_ block aligns the iframe correctly centered.
 
-The export option `Embed Code (blog)` is useable in a website, where the linea is already included. Therefore, per default it should not be shown.
-
-To export a user-defined set of weather stations visit the `exportservice.html` file. For the latest LINEA version it is available at https://albina-euregio.gitlab.io/linea/exportservice.html
-In the `exportservice.html` it is possible per default to just export the `linea-plot` element.
+The export option `Embed Code (blog)` is useable in a wordpress blog, where the `linea-plot-blog.php` plugin is installed. Therefore, per default it should not be shown.
 
 #### Examples
 
 Minimal working example:
-Shows the whole datset which is in the smet source file. Does not show surface hoar potential, datepickers, export functions.
+Shows the whole dataset which is in the smet source file. Does not show surface hoar potential, datepickers, export functions.
 
 ```html
 <linea-plot src="data/station1.smet"> </linea-plot>
@@ -127,3 +124,12 @@ For yearly overviews, use the `<linea-plot>` component like this:
 <linea-plot wintersrc="/prototype/mock.data" showtitle showexport showdatepicker showonlywinter>
 </linea-plot>
 ```
+
+# Miscellaneous
+
+## Installing the wordpress plugin
+
+To install the wordpress `linea-plot-blog.php` plugin simply go to your wordpress installations `wp-content` folder and copy the plugin file into `mu-plugins` (create folder, if no exists). Then reload your webserver.
+For apache `systemctl reload apache2` is enough to load it.
+
+The plugin is neccessary, because wordpress disabled custom javascript for almost all users. For more details visit [the wordpress wp_kses documentation](https://developer.wordpress.org/reference/functions/wp_kses/).

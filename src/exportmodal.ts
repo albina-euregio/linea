@@ -3,6 +3,7 @@ import { i18n } from "./i18n";
 import { LineaPlot } from "./linea-plot";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { Result } from "./data/station-data";
+import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -276,7 +277,6 @@ export class ExportModal {
             </div>`,
     );
 
-    this.exportOptions = this.modal.querySelector(".export-options") as HTMLDivElement;
     this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
     this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
 
@@ -299,18 +299,21 @@ export class ExportModal {
       (this.modal.querySelector("#btnExportInteractiveBlog") as HTMLElement).addEventListener(
         "click",
         () => {
-          this.#exportAsLineaPlotElement();
+          this.#resetCopyToClipboardButton();
+          this.#exportAsBlogElement();
         },
       );
     }
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "none";
+      this.#resetCopyToClipboardButton();
       this.#exportAsIframe();
     });
 
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "grid";
+      this.#resetCopyToClipboardButton();
       this.#exportAllPlotsToPNG(this.#getExportSettings());
     });
 
@@ -384,10 +387,20 @@ export class ExportModal {
   }
 
   /**
+   * Resets the copyToClipboard Button
+   */
+  #resetCopyToClipboardButton() {
+    const btn = document.querySelector(".copy-btn") as HTMLButtonElement;
+    btn.style.background = "#3498db";
+    btn.innerText = i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard");
+  }
+
+  /**
    * Copies the exported content to the system clipboard.
    *
    * Supports copying both PNG images and HTML content formats.
    * Provides visual feedback by temporarily changing the button text and color.
+   * Provides for content type of text/html a text/plain fallback, generated from the exportdata.data
    *
    * @private
    * @returns {void}
@@ -399,17 +412,27 @@ export class ExportModal {
       if (this.exportdata.type === "image/png") {
         code = [
           new ClipboardItem({
-            "image/png": this.exportdata.blob,
+            ["image/png"]: this.exportdata.blob,
           }),
         ];
       } else if (this.exportdata.type === "text/html") {
         code = [
           new ClipboardItem({
-            "text/html": this.exportdata.blob,
+            ["text/html"]: this.exportdata.blob,
+            ["text/plain"]: new Blob([this.exportdata.data], { type: "text/plain" }),
+          }),
+        ];
+      } else if (this.exportdata.type === "text/plain") {
+        code = [
+          new ClipboardItem({
+            ["text/plain"]: this.exportdata.blob,
           }),
         ];
       }
     } else {
+      console.error(
+        "Couldn't save clipboard item, no matching content type " + this.exportdata.type + "!",
+      );
       return;
     }
     navigator.clipboard
@@ -466,15 +489,10 @@ export class ExportModal {
   }
 
   /**
-   * Handles iframe export functionality.
-   *
-   * @private
-   * @returns {void}
-   * @todo Implement iframe export logic
+   * Generates the code which can be included into an iframe.
+   * @returns Promise<string> - html code to insert into an iframe
    */
-  async #exportAsIframe() {
-    const exports = this.#getExportSettings();
-
+  async #generateIFrameHTML(): Promise<string> {
     const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
 
     const resultsFiltered: Result[] = [];
@@ -541,25 +559,39 @@ export class ExportModal {
       resultsFiltered.push(result);
     });
 
+    const dataUrl: string = await this.#exportAllPlotsToPNG(
+      { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
+      true,
+    );
+
     let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
-      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`);
+      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
+      .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
 
     if (this.lineaPlot.winterview) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
-    const uint8Array = new TextEncoder().encode(html);
-    let binary = "";
-    for (let i = 0; i < uint8Array.byteLength; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
-    }
+    return html;
+  }
+
+  /**
+   * Handles iframe export functionality.
+   *
+   * @private
+   * @returns {void}
+   * @todo Implement iframe export logic
+   */
+  async #exportAsIframe() {
+    const exports = this.#getExportSettings();
+    const html = await this.#generateIFrameHTML();
+    const binary = ExportModal.#toBinary(html);
 
     let totalCanvases = 0;
     this.#getCheckedDiagramIndices().forEach((index) => {
       totalCanvases += this.#getCheckedPlotIndices(index).length;
     });
 
-    this.exportResult.style.display = "block";
     const iframecode = `<iframe
           src="data:text/html;base64,${btoa(binary)}"
           frameborder="0" 
@@ -568,6 +600,7 @@ export class ExportModal {
           title="${exports.title}">
       </iframe>`;
 
+    this.exportResult.style.display = "block";
     document.getElementById("exportCode").innerHTML = iframecode;
 
     this.exportdata = {
@@ -580,61 +613,27 @@ export class ExportModal {
     };
   }
 
-  #exportAsLineaPlotElement() {
-    const resultsFiltered: Result[] = [];
+  async #exportAsBlogElement() {
+    const exports = this.#getExportSettings();
+    const html = await this.#generateIFrameHTML();
+    const binary = ExportModal.#toBinary(html);
 
-    this.#getActiveLineacharts().forEach((lc, index) => {
-      const activeplots = this.#getCheckedPlotIndices(index);
-      let result: Result = {
-        station: lc.result.station,
-        altitude: lc.result.altitude,
-        timestamps: lc.result.timestamps,
-        values: {},
-        units: {},
-      };
-      activeplots.forEach((index) => {
-        if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:temperature")
-        ) {
-          result.values.TA = lc.result.values.TA ?? [];
-          result.values.TD = lc.result.values.TD ?? [];
-          result.values.TSS = lc.result.values.TSS ?? [];
-        } else if (
-          lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
-        ) {
-          result.values.VW = lc.result.values.VW ?? [];
-          result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
-          result.values.DW = lc.result.values.DW ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
-        ) {
-          result.values.RH = lc.result.values.RH ?? [];
-          result.values.ISWR = lc.result.values.ISWR ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
-        ) {
-          result.values.HS = lc.result.values.HS ?? [];
-          result.values.PSUM = lc.result.values.PSUM ?? [];
-        }
-      });
-      resultsFiltered.push(result);
+    let totalCanvases = 0;
+    this.#getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.#getCheckedPlotIndices(index).length;
     });
 
+    const iframeshortcode = `[lineaplotblog frameborder="0" scrolling="no" style="width: 100%; height: ${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px;border:none;overflow:hidden;" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+
     this.exportResult.style.display = "block";
-    const lineaelement = `<linea-plot data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries showtitle />`;
-
-    document.getElementById("exportCode").innerHTML = lineaelement;
-
+    document.getElementById("exportCode").innerHTML = `<p>${iframeshortcode}</p>`;
     this.exportdata = {
-      blob: new Blob([lineaelement], {
-        type: "text/html",
+      blob: new Blob([iframeshortcode], {
+        type: "text/plain",
       }),
-      data: lineaelement,
-      filename: "linea-chart.html",
-      type: "text/html",
+      data: iframeshortcode,
+      filename: "shortcode.txt",
+      type: "text/plain",
     };
   }
 
@@ -683,7 +682,7 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }) {
+  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }, noshow: boolean = false) {
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
@@ -805,28 +804,30 @@ export class ExportModal {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
       lineachart.resizeObserver.observe(lineachart);
     }
-
-    outCanvas.toBlob((blobdata) => {
-      this.exportdata = {
-        blob: blobdata,
-        data: outCanvas.toDataURL(),
-        filename: "linea-chart.png",
-        type: "image/png",
-      };
-    });
-    document.getElementById("exportCode").innerHTML =
-      `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
-    document.getElementById("exportResult").style.display = "block";
+    if (!noshow) {
+      outCanvas.toBlob((blobdata) => {
+        this.exportdata = {
+          blob: blobdata,
+          data: outCanvas.toDataURL(),
+          filename: "linea-chart.png",
+          type: "image/png",
+        };
+      });
+      document.getElementById("exportCode").innerHTML =
+        `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+      document.getElementById("exportResult").style.display = "block";
+    }
+    return outCanvas.toDataURL();
   }
 
   /**
    * Retrieves all currently selected/active LineaCharts based on checkbox state.
    *
    * @private
-   * @returns {LineaChart[]} Array of active LineaChart instances
+   * @returns {AbstractLineaChart[]} Array of active AbstractLineaChart instances
    */
-  #getActiveLineacharts(): LineaChart[] {
-    const activeCharts: LineaChart[] = [];
+  #getActiveLineacharts(): AbstractLineaChart[] {
+    const activeCharts: AbstractLineaChart[] = [];
     const indices = this.#getCheckedDiagramIndices();
     let i = 0;
     for (const lineachart of this.lineaPlot.lineacharts) {
@@ -881,5 +882,20 @@ export class ExportModal {
       heightPerCanvas: parseInt(heightInput.value),
       title: titleInput.value,
     };
+  }
+
+  /**
+   * Converts a string to binary
+   *
+   * @param s string to convert
+   * @returns converted string to binary
+   */
+  static #toBinary(s: string): string {
+    const uint8Array = new TextEncoder().encode(s);
+    let binary = "";
+    for (let i = 0; i < uint8Array.byteLength; i++) {
+      binary += String.fromCharCode(uint8Array[i]);
+    }
+    return binary;
   }
 }
