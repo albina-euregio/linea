@@ -12,8 +12,8 @@ export const opts_VW_VWG_DW: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:VW")} (km/h)`;
-        var labely2 = i18n.message("dialog:weather-station-diagram:parameter:DW");
+        var labely1 = `${i18n.message("linea:parameter:VW")} (km/h)`;
+        var labely2 = i18n.message("linea:parameter:DW");
         var labelColor1 = "#00E2B6";
         var labelColor2 = "#084D40";
         OptsHelper.UpdateAxisLabels(
@@ -101,14 +101,14 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   ],
   series: [
     {
-      label: i18n.message("dialog:weather-station-diagram:unit:time"),
+      label: i18n.message("linea:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
 };
 
 export const opts_VW: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:VW"),
+  label: i18n.message("linea:parameter:VW"),
   stroke: "#00E2B6",
   scale: "y",
   width: 2,
@@ -116,7 +116,7 @@ export const opts_VW: uPlot.Series = {
 };
 
 export const opts_VW_MAX: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:VW_MAX"),
+  label: i18n.message("linea:parameter:VW_MAX"),
   stroke: "#00A484",
   scale: "y",
   width: 2,
@@ -124,7 +124,7 @@ export const opts_VW_MAX: uPlot.Series = {
 };
 
 export const opts_DW: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:DW"),
+  label: i18n.message("linea:parameter:DW"),
   stroke: "#084D40",
   paths: () => null,
   points: {

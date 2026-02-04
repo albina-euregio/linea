@@ -218,44 +218,44 @@ export class ExportModal {
       "beforeend",
       `<div class="export-modal-content">
                 <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
-                <h2>${i18n.message("dialog:weather-station-diagram:controls:label:exportchart")}</h2>
+                <h2>${i18n.message("linea:controls:label:exportchart")}</h2>
     
                 <div class="export-options">
                     <div class="export-option" id="btnExportIframe">
-                        <h4>${i18n.message("dialog:weather-station-diagram:controls:button:iframe")}</h4>
-                        <p>${i18n.message("dialog:weather-station-diagram:controls:button:iframe:sub")}</p>
+                        <h4>${i18n.message("linea:controls:button:iframe")}</h4>
+                        <p>${i18n.message("linea:controls:button:iframe:sub")}</p>
                     </div>
     
                     <div class="export-option" id="btnExportPNG">
-                        <h4>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage")}</h4>
-                        <p>${i18n.message("dialog:weather-station-diagram:controls:button:pngimage:sub")}</p>
+                        <h4>${i18n.message("linea:controls:button:pngimage")}</h4>
+                        <p>${i18n.message("linea:controls:button:pngimage:sub")}</p>
                     </div>
 
                     <div class="export-option" id="btnExportInteractiveBlog" style="display: none;">
-                        <h4>${i18n.message("dialog:weather-station-diagram:controls:button:interactiveblog")}</h4>
-                        <p>${i18n.message("dialog:weather-station-diagram:controls:button:interactiveblog:sub")}</p>
+                        <h4>${i18n.message("linea:controls:button:interactiveblog")}</h4>
+                        <p>${i18n.message("linea:controls:button:interactiveblog:sub")}</p>
                     </div>
                 </div>
     
                 <div class="export-settings" id="exportSettings" style="display:none;">
-                    <h4>${i18n.message("dialog:weather-station-diagram:controls:label:exportsettings")}</h4>
+                    <h4>${i18n.message("linea:controls:label:exportsettings")}</h4>
                     <div style="display: grid; gap: 15px;">
                         <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                           <div>
-                              <label for="exportWidth">${i18n.message("dialog:weather-station-diagram:controls:label:width")} (px)</label>
+                              <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
                               <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
                           </div>
                           <div>
-                              <label for="exportHeight">${i18n.message("dialog:weather-station-diagram:controls:label:heightpercanvas")} (px):</label>
+                              <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
                               <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
                           </div>
                           <div>
-                              <label for="exportTitle">${i18n.message("dialog:weather-station-diagram:controls:label:title")}</label>
+                              <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
                               <input type="text" id="exportTitle" value="">
                           </div>
                         </div>
                         <div>
-                            <label for="exportDiagrams">${i18n.message("dialog:weather-station-diagram:controls:label:selectdiagrams")}</label>
+                            <label for="exportDiagrams">${i18n.message("linea:controls:label:selectdiagrams")}</label>
                             <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
                             </div>
                         </div>
@@ -263,12 +263,12 @@ export class ExportModal {
                 </div>
     
                 <div id="exportResult" style="display:none;">
-                    <h3>${i18n.message("dialog:weather-station-diagram:controls:label:exportresult")}</h3>
+                    <h3>${i18n.message("linea:controls:label:exportresult")}</h3>
                     <div class="code-container">
                         <div class="code-container-buttons">
-                            <button class="copy-btn" id="copyExportBtn">${i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard")}</button>
-                            <button class="dwn-btn" id="downloadBtn">${i18n.message("dialog:weather-station-diagram:controls:button:download")}</button>
-                            <button class="open-btn" id="openBtn">${i18n.message("dialog:weather-station-diagram:controls:button:open")}</button>
+                            <button class="copy-btn" id="copyExportBtn">${i18n.message("linea:controls:button:copytoclipboard")}</button>
+                            <button class="dwn-btn" id="downloadBtn">${i18n.message("linea:controls:button:download")}</button>
+                            <button class="open-btn" id="openBtn">${i18n.message("linea:controls:button:open")}</button>
                         </div>
                         <pre id="exportCode"></pre>
                     </div>
@@ -417,7 +417,7 @@ export class ExportModal {
       .then(() => {
         const btn = document.querySelector(".copy-btn") as HTMLButtonElement;
         const originalText = btn.textContent;
-        btn.textContent = `${i18n.message("dialog:weather-station-diagram:controls:button:copytoclipboard:clicked")}`;
+        btn.textContent = `${i18n.message("linea:controls:button:copytoclipboard:clicked")}`;
         btn.style.background = "#27ae60";
         setTimeout(() => {
           btn.textContent = originalText;
@@ -490,49 +490,30 @@ export class ExportModal {
       };
       if (this.lineaPlot.winterview) {
         activeplots.forEach((index) => {
-          if (
-            lc.plotnames[index] ===
-            i18n.message("dialog:weather-station-diagram:plotnames:temperature")
-          ) {
+          if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
             result.values.TA = lc.result.values.TA ?? [];
             result.values.TD = lc.result.values.TD ?? [];
-          } else if (
-            lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:newsnow")
-          ) {
+          } else if (lc.plotnames[index] === i18n.message("linea:plotnames:newsnow")) {
             result.values.NS = lc.result.values.NS;
-          } else if (
-            lc.plotnames[index] ===
-            i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
-          ) {
+          } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
             result.values.HS = lc.result.values.HS ?? [];
             result.values.PSUM = lc.result.values.PSUM ?? [];
           }
         });
       } else {
         activeplots.forEach((index) => {
-          if (
-            lc.plotnames[index] ===
-            i18n.message("dialog:weather-station-diagram:plotnames:temperature")
-          ) {
+          if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
             result.values.TA = lc.result.values.TA ?? [];
             result.values.TD = lc.result.values.TD ?? [];
             result.values.TSS = lc.result.values.TSS ?? [];
-          } else if (
-            lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
-          ) {
+          } else if (lc.plotnames[index] === i18n.message("linea:plotnames:wind")) {
             result.values.VW = lc.result.values.VW ?? [];
             result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
             result.values.DW = lc.result.values.DW ?? [];
-          } else if (
-            lc.plotnames[index] ===
-            i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
-          ) {
+          } else if (lc.plotnames[index] === i18n.message("linea:plotnames:humidity_gr")) {
             result.values.RH = lc.result.values.RH ?? [];
             result.values.ISWR = lc.result.values.ISWR ?? [];
-          } else if (
-            lc.plotnames[index] ===
-            i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
-          ) {
+          } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
             result.values.HS = lc.result.values.HS ?? [];
             result.values.PSUM = lc.result.values.PSUM ?? [];
           }
@@ -593,29 +574,18 @@ export class ExportModal {
         units: {},
       };
       activeplots.forEach((index) => {
-        if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:temperature")
-        ) {
+        if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
           result.values.TA = lc.result.values.TA ?? [];
           result.values.TD = lc.result.values.TD ?? [];
           result.values.TSS = lc.result.values.TSS ?? [];
-        } else if (
-          lc.plotnames[index] === i18n.message("dialog:weather-station-diagram:plotnames:wind")
-        ) {
+        } else if (lc.plotnames[index] === i18n.message("linea:plotnames:wind")) {
           result.values.VW = lc.result.values.VW ?? [];
           result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
           result.values.DW = lc.result.values.DW ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr")
-        ) {
+        } else if (lc.plotnames[index] === i18n.message("linea:plotnames:humidity_gr")) {
           result.values.RH = lc.result.values.RH ?? [];
           result.values.ISWR = lc.result.values.ISWR ?? [];
-        } else if (
-          lc.plotnames[index] ===
-          i18n.message("dialog:weather-station-diagram:plotnames:precipitation")
-        ) {
+        } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
           result.values.HS = lc.result.values.HS ?? [];
           result.values.PSUM = lc.result.values.PSUM ?? [];
         }

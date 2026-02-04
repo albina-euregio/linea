@@ -12,8 +12,8 @@ export const opts_RH_GR: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:RH")} (%)`;
-        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:ISWR")} (W/m²)`;
+        var labely1 = `${i18n.message("linea:parameter:RH")} (%)`;
+        var labely2 = `${i18n.message("linea:parameter:ISWR")} (W/m²)`;
         var labelColor1 = "#6aafd5";
         var labelColor2 = "#DE2D26";
         OptsHelper.UpdateAxisLabels(
@@ -59,14 +59,14 @@ export const opts_RH_GR: uPlot.Options = {
   ],
   series: [
     {
-      label: i18n.message("dialog:weather-station-diagram:unit:time"),
+      label: i18n.message("linea:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
 };
 
 export const opts_RH: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:RH"),
+  label: i18n.message("linea:parameter:RH"),
   stroke: "#6aafd5",
   scale: "y",
   width: 2,
@@ -74,7 +74,7 @@ export const opts_RH: uPlot.Series = {
 };
 
 export const opts_ISWR: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:ISWR"),
+  label: i18n.message("linea:parameter:ISWR"),
   stroke: "#DE2D26",
   fill: "rgba(255,0,0,0.1)",
   scale: "y2",
