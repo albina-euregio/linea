@@ -14,7 +14,7 @@ export const opts_NS_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:newsnow")} (cm)`;
+        var labely1 = `${i18n.message("linea:parameter:newsnow")} (cm)`;
         OptsHelper.UpdateAxisLabels(ctx, labely1, "", u.bbox.left, u.bbox.width, "#DE2D26", "");
         ctx.restore();
       },
@@ -48,14 +48,14 @@ export const opts_NS_year: uPlot.Options = {
 
   series: [
     {
-      label: i18n.message("dialog:weather-station-diagram:unit:time"),
+      label: i18n.message("linea:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
 };
 
 export const opts_NS_year_series: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:newsnow"),
+  label: i18n.message("linea:parameter:newsnow"),
   paths: uPlot.paths.bars(),
   points: { show: false },
   stroke: "#DE2D26",
@@ -66,7 +66,7 @@ export const opts_NS_year_series: uPlot.Series = {
 };
 
 export const opts_NS_year_snow_cover: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:snowcover"),
+  label: i18n.message("linea:parameter:snowcover"),
   scale: "y",
   points: { show: false },
   stroke: "rgba(222, 45, 38, .4)",

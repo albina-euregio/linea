@@ -228,7 +228,7 @@ export class LineaYearChart extends AbstractLineaChart {
         this.addSeries(p, opts_HS_year_PSUM, yearDataPSUM.values);
       }
       this.modifyDrawHook(p, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:precipitation"));
+      this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
 
       const pDatapoints = new uPlot(
         {
@@ -241,7 +241,7 @@ export class LineaYearChart extends AbstractLineaChart {
       this.drawedTitle = true;
       this.addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearDataHS.amount);
       this.modifyDrawHook(pDatapoints, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:datapoints"));
+      this.plotnames.push(i18n.message("linea:plotnames:datapoints"));
     }
 
     if (values.NS) {
@@ -281,7 +281,7 @@ export class LineaYearChart extends AbstractLineaChart {
         yearDataNS.values.map((v) => (v == 0 ? null : v)),
       );
       this.modifyDrawHook(pNewSnow, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:newsnow"));
+      this.plotnames.push(i18n.message("linea:plotnames:newsnow"));
     }
 
     if (values.TA) {
@@ -316,7 +316,7 @@ export class LineaYearChart extends AbstractLineaChart {
         this.addSeries(pTemp, opts_DEW_year_current, yearDataTSS.values);
       }
       this.modifyDrawHook(pTemp, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:temperature"));
+      this.plotnames.push(i18n.message("linea:plotnames:temperature"));
     }
 
     this.resizePlots(this.clientWidth, this.style);
@@ -326,7 +326,7 @@ export class LineaYearChart extends AbstractLineaChart {
   protected getStationTitle(): {} {
     return this.showTitle && !this.drawedTitle
       ? {
-          title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m), ${i18n.message("dialog:weather-station-diagram:title:since")} ${new Date(this.result.timestamps[0]).getFullYear()}`,
+          title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m), ${i18n.message("linea:title:since")} ${new Date(this.result.timestamps[0]).getFullYear()}`,
         }
       : {};
   }
