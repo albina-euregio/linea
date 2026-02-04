@@ -119,14 +119,14 @@ export class ExportModal {
             
             .export-options {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
                 gap: 15px;
-                margin: 20px 0;
+                margin: 10px 0;
             }
             
             .export-option {
                 background: #3498db;
-                padding: 20px;
+                padding: 10px;
                 border-radius: 8px;
                 text-align: center;
                 cursor: pointer;
