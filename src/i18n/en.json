@@ -44,6 +44,8 @@
   "linea:controls:button:iframe:sub": "HTML code to embed the chart in a webpage",
   "linea:controls:button:interactiveblog": "Embed Code (blog)",
   "linea:controls:button:interactiveblog:sub": "HTML code to embed as interactive element into the blog",
+  "linea:controls:button:smet": "SMET",
+  "linea:controls:button:smet:sub": "Raw data in .smet format",
   "linea:controls:button:copytoclipboard": "Copy",
   "linea:controls:button:copytoclipboard:clicked": "Copy",
   "linea:controls:button:download": "Download",

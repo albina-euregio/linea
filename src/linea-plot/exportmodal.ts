@@ -1,9 +1,8 @@
 import uPlot from "uplot";
-import { i18n } from "./i18n";
-import { LineaPlot } from "./linea-plot";
-import { LineaChart } from "./linea-plot/LineaChart";
-import { Result } from "./data/station-data";
-import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
+import { i18n } from "../i18n";
+import { LineaPlot } from "../linea-plot";
+import { Result } from "../data/station-data";
+import { AbstractLineaChart } from "./AbstractLineaChart";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -120,14 +119,14 @@ export class ExportModal {
             
             .export-options {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
                 gap: 15px;
-                margin: 20px 0;
+                margin: 10px 0;
             }
             
             .export-option {
                 background: #3498db;
-                padding: 20px;
+                padding: 10px;
                 border-radius: 8px;
                 text-align: center;
                 cursor: pointer;
@@ -236,6 +235,11 @@ export class ExportModal {
                         <h4>${i18n.message("linea:controls:button:interactiveblog")}</h4>
                         <p>${i18n.message("linea:controls:button:interactiveblog:sub")}</p>
                     </div>
+
+                    <div class="export-option" id="btnExportSmet">
+                        <h4>${i18n.message("linea:controls:button:smet")}</h4>
+                        <p>${i18n.message("linea:controls:button:smet:sub")}</p>
+                    </div>
                 </div>
     
                 <div class="export-settings" id="exportSettings" style="display:none;">
@@ -304,6 +308,10 @@ export class ExportModal {
         },
       );
     }
+
+    this.modal.querySelector("#btnExportSmet")?.addEventListener("click", () => {
+      this.#exportAsSMET();
+    });
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       document.getElementById("exportSizes").style.display = "none";
@@ -462,9 +470,14 @@ export class ExportModal {
     if (!this.exportdata) {
       return;
     }
+    this.#download(URL.createObjectURL(this.exportdata.blob));
+  }
+
+  #download(url: string, download: string = this.exportdata?.filename ?? "file.txt") {
+    console.log(url);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(this.exportdata.blob);
-    a.download = this.exportdata.filename;
+    a.href = url;
+    a.download = download;
     a.target = "_tab";
     a.click();
   }
@@ -486,6 +499,30 @@ export class ExportModal {
     a.href = URL.createObjectURL(this.exportdata.blob);
     a.target = "_blank";
     a.click();
+  }
+
+  /**
+   *
+   */
+  #exportAsSMET() {
+    console.log("pressed");
+    if (this.lineaPlot.winterview) {
+      this.#downloadSMETS(this.lineaPlot.wintersrcs);
+    } else {
+      if (this.lineaPlot.hasAttribute("lazysrc")) {
+        this.#downloadSMETS(this.lineaPlot.lazysrcs);
+      } else {
+        this.#downloadSMETS(this.lineaPlot.srcs);
+      }
+    }
+  }
+
+  async #downloadSMETS(srcs: string[]) {
+    for (const src of srcs) {
+      this.#download(src, src.split("/")[-1]);
+      await new Promise(requestAnimationFrame);
+      await new Promise((r) => setTimeout(r, 1000));
+    }
   }
 
   /**
