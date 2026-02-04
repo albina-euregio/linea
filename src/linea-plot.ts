@@ -4,7 +4,7 @@ import type { Result, Values } from "./data/station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 import { LineaYearChart } from "./linea-plot/LineaYearChart";
-import { ExportModal } from "./exportmodal";
+import { ExportModal } from "./linea-plot/exportmodal";
 
 /**
  * LineaPlot Web Component
@@ -506,7 +506,7 @@ export class LineaPlot extends HTMLElement {
     if (!this.hasAttribute("showexport")) {
       return;
     }
-    const { ExportModal } = await import("./exportmodal");
+    const { ExportModal } = await import("./linea-plot/exportmodal");
     this.exportModal = new ExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }

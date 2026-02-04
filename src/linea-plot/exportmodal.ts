@@ -1,9 +1,8 @@
 import uPlot from "uplot";
-import { i18n } from "./i18n";
-import { LineaPlot } from "./linea-plot";
-import { LineaChart } from "./linea-plot/LineaChart";
-import { Result } from "./data/station-data";
-import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
+import { i18n } from "../i18n";
+import { LineaPlot } from "../linea-plot";
+import { Result } from "../data/station-data";
+import { AbstractLineaChart } from "./AbstractLineaChart";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
