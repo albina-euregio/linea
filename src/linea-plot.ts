@@ -827,15 +827,15 @@ export class LineaPlot extends HTMLElement {
   /**
    * Determines the winter season date range based on the current date.
    *
-   * If the current date is after October 31st, returns the winter season from November 1st
-   * of the current year to April 30th of the next year. Otherwise, returns the winter season
-   * from November 1st of the previous year to April 30th of the current year.
+   * If the current date is after October 1st, returns the winter season from October 1st
+   * of the current year to July 1st of the next year. Otherwise, returns the winter season
+   * from Ocotber 1st of the previous year to July 1st of the current year.
    *
    * Also stores the current datepicker format and start/end dates for restoration when
    * switching back from winter view.
    *
    * @returns {[Temporal.ZonedDateTime, Temporal.ZonedDateTime]} A tuple containing the start
-   * date (November 1st) and end date (April 30th) of the winter season in the configured timezone
+   * date (october 1st) and end date (July 1th) of the winter season in the configured timezone
    *
    * @example
    * // If today is November 15, 2024
@@ -844,11 +844,11 @@ export class LineaPlot extends HTMLElement {
    */
   #getWinterDates(): [Temporal.ZonedDateTime, Temporal.ZonedDateTime] {
     // get today and decide:
-    // if after october 31th, select next season (11-01 to 04-30 of next year)
+    // if after september 30th, select next season (10-01 to 07-01 of next year)
     // else select this season
     const today = Temporal.Now.plainDateISO();
     const currentYear = today.year;
-    const octoberThirtyfirst = Temporal.PlainDate.from(`${currentYear}-10-31`);
+    const octoberThirtyfirst = Temporal.PlainDate.from(`${currentYear}-10-01`);
 
     let winterStartYear = currentYear;
     let winterEndYear = currentYear + 1;
@@ -861,8 +861,8 @@ export class LineaPlot extends HTMLElement {
       winterEndYear = currentYear;
     }
     return [
-      Temporal.PlainDate.from(`${winterStartYear}-11-01`).toZonedDateTime(i18n.timezone()),
-      Temporal.PlainDate.from(`${winterEndYear}-04-30`).toZonedDateTime(i18n.timezone()),
+      Temporal.PlainDate.from(`${winterStartYear}-10-01`).toZonedDateTime(i18n.timezone()),
+      Temporal.PlainDate.from(`${winterEndYear}-07-01`).toZonedDateTime(i18n.timezone()),
     ];
   }
 
