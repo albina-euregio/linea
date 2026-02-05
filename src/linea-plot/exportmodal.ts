@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
-import { Result } from "../data/station-data";
+import type { Result } from "../data/station-data";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
 /**

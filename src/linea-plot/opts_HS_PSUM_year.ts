@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper, SplitOptions } from "./optsHelper";
+import { OptsHelper, type SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for snow-height/year [cm]
