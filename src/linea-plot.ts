@@ -5,6 +5,7 @@ import { LineaChart } from "./linea-plot/LineaChart";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 import { LineaYearChart } from "./linea-plot/LineaYearChart";
 import type { ExportModal } from "./linea-plot/exportmodal";
+import type AirDatepicker from "air-datepicker";
 
 /**
  * LineaPlot Web Component
@@ -83,7 +84,7 @@ export class LineaPlot extends HTMLElement {
   private attributeQueue: Promise<void> = Promise.resolve();
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
-  private dp;
+  private dp: AirDatepicker | undefined;
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
