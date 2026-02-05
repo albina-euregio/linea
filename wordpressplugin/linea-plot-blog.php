@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-function robust_iframe_shortcode( $atts, $content = null ) {
+function lineaplotblog( $atts, $content = null ) {
 
     $atts = shortcode_atts(
         [
@@ -68,4 +68,4 @@ function robust_iframe_shortcode( $atts, $content = null ) {
     return $html;
 }
 
-add_shortcode( 'lineaplotblog', 'robust_iframe_shortcode' );
+add_shortcode( 'lineaplotblog', 'lineaplotblog' );
