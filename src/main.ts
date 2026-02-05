@@ -1,2 +1,3 @@
 import "./linea-plot";
-import "./linea-plot/LineaYearChart";
+import "./schema/listing.ts";
+import "./schema/listing-legacy.ts";
