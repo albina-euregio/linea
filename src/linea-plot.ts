@@ -4,7 +4,7 @@ import type { Result, Values } from "./data/station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 import { LineaYearChart } from "./linea-plot/LineaYearChart";
-import { ExportModal } from "./linea-plot/exportmodal";
+import type { ExportModal } from "./linea-plot/exportmodal";
 
 /**
  * LineaPlot Web Component
