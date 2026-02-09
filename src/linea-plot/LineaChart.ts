@@ -17,7 +17,6 @@ export class LineaChart extends AbstractLineaChart {
     backgroundColor: string,
   ) {
     super(backgroundColor, showTitle, result);
-    console.log(result.station, showSurfaceHoarSeries);
     this.createPlots().catch((e) => console.error(e));
   }
 
