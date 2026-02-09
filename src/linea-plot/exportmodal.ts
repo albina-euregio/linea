@@ -529,9 +529,7 @@ export class ExportModal {
    * Generates the code which can be included into an iframe.
    * @returns Promise<string> - html code to insert into an iframe
    */
-  async #generateIFrameHTML(): Promise<string> {
-    const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
-
+  async #generateInteractiveExportData(): Promise<{ resultsFiltered: Result[]; dataUrl: string }> {
     const resultsFiltered: Result[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
@@ -581,16 +579,7 @@ export class ExportModal {
       { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
       true,
     );
-
-    let html = iframeTemplate
-      .replace('lang="en"', `lang="${i18n.lang}"`)
-      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
-      .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
-
-    if (this.lineaPlot.winterview) {
-      html = html.replace("<linea-plot", "<linea-plot showonlywinter");
-    }
-    return html;
+    return { resultsFiltered, dataUrl };
   }
 
   /**
@@ -602,7 +591,19 @@ export class ExportModal {
    */
   async #exportAsIframe() {
     const exports = this.#getExportSettings();
-    const html = await this.#generateIFrameHTML();
+
+    const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
+
+    const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
+    let html = iframeTemplate
+      .replace('lang="en"', `lang="${i18n.lang}"`)
+      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
+      .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
+
+    if (this.lineaPlot.winterview) {
+      html = html.replace("<linea-plot", "<linea-plot showonlywinter");
+    }
+
     const binary = ExportModal.#toBinary(html);
 
     let totalCanvases = 0;
@@ -633,7 +634,11 @@ export class ExportModal {
 
   async #exportAsBlogElement() {
     const exports = this.#getExportSettings();
-    const html = await this.#generateIFrameHTML();
+    const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
+
+    const html = `<img style="position: absolute; inset: 0; width: 100%; z-index: 1;" src="${dataUrl}"/>
+                  <linea-plot style="position: relative; width: 100%; object-fit: contain; z-index: 2;" data="${JSON.stringify(resultsFiltered)}" showsurfacehoarseries="" showtitle="" tabindex="0" />`;
+
     const binary = ExportModal.#toBinary(html);
 
     let totalCanvases = 0;
@@ -641,7 +646,7 @@ export class ExportModal {
       totalCanvases += this.#getCheckedPlotIndices(index).length;
     });
 
-    const iframeshortcode = `[lineaplotblog frameborder="0" scrolling="no" style="width: 100%; height: ${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px;border:none;overflow:hidden;" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+    const iframeshortcode = `[lineaplotblog height="${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
     document.getElementById("exportCode").innerHTML = `<p>${iframeshortcode}</p>`;
