@@ -1,4 +1,4 @@
-import { Result } from "./station-data";
+import type { Result } from "./station-data";
 
 interface ParameterValues {
   name: string;

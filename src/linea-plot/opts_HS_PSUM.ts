@@ -1,7 +1,7 @@
 import type uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper, SplitOptions } from "./optsHelper";
+import { OptsHelper, type SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
@@ -12,8 +12,8 @@ export const opts_HS_PSUM: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:HS")} (cm)`;
-        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:PSUM")} (mm)`;
+        var labely1 = `${i18n.message("linea:parameter:HS")} (cm)`;
+        var labely2 = `${i18n.message("linea:parameter:PSUM")} (mm)`;
         var labelColor1 = "#08519C";
         var labelColor2 = "#6aafd5";
         OptsHelper.UpdateAxisLabels(
@@ -76,14 +76,14 @@ export const opts_HS_PSUM: uPlot.Options = {
 
   series: [
     {
-      label: i18n.message("dialog:weather-station-diagram:unit:time"),
+      label: i18n.message("linea:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
 };
 
 export const opts_HS: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:HS"),
+  label: i18n.message("linea:parameter:HS"),
   stroke: "#08519C",
   scale: "y",
   width: 2,
@@ -91,7 +91,7 @@ export const opts_HS: uPlot.Series = {
 };
 
 export const opts_PSUM: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:PSUM"),
+  label: i18n.message("linea:parameter:PSUM"),
   stroke: "#6aafd5",
   fill: "rgba(106, 175, 213, 0.3)",
   scale: "y2",

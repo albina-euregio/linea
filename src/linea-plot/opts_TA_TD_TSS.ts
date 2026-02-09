@@ -1,7 +1,7 @@
 import type uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper, SplitOptions } from "./optsHelper";
+import { OptsHelper, type SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
@@ -12,8 +12,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:unit:temperature")} (°C)`;
-        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TD")} (°C)`;
+        var labely1 = `${i18n.message("linea:unit:temperature")} (°C)`;
+        var labely2 = `${i18n.message("linea:parameter:TD")} (°C)`;
         var labelColor1 = "#DE2D26";
         var labelColor2 = "#6aafd5";
 
@@ -116,7 +116,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
   series: [
     {
-      label: i18n.message("dialog:weather-station-diagram:unit:time"),
+      label: i18n.message("linea:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
@@ -131,12 +131,12 @@ const createSeries = (labelKey: any, color: string): uPlot.Series => ({
   value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "°C")),
 });
 
-export const opts_TA = createSeries("dialog:weather-station-diagram:unit:temperature", "#DE2D26");
-export const opts_TD = createSeries("dialog:weather-station-diagram:parameter:TD", "#6aafd5");
-export const opts_TSS = createSeries("dialog:weather-station-diagram:parameter:TSS", "#FC9272");
+export const opts_TA = createSeries("linea:unit:temperature", "#DE2D26");
+export const opts_TD = createSeries("linea:parameter:TD", "#6aafd5");
+export const opts_TSS = createSeries("linea:parameter:TSS", "#FC9272");
 
 export const opts_SurfaceHoar: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:SH:potential"),
+  label: i18n.message("linea:parameter:SH:potential"),
   width: 2,
   scale: "yhidden",
   spanGaps: false,
@@ -146,6 +146,6 @@ export const opts_SurfaceHoar: uPlot.Series = {
     v == null
       ? "-"
       : v > 0
-        ? i18n.message("dialog:weather-station-diagram:parameter:SH:present")
-        : i18n.message("dialog:weather-station-diagram:parameter:SH:present:not"),
+        ? i18n.message("linea:parameter:SH:present")
+        : i18n.message("linea:parameter:SH:present:not"),
 };

@@ -5,7 +5,7 @@ import { opts_DW, opts_VW, opts_VW_MAX, opts_VW_VWG_DW } from "./opts_VW_VWG_DW"
 import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
 import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
 import { dewPoint } from "./dewPoint";
-import { Result, Values } from "../data/station-data";
+import type { Result, Values } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./AbstractLineaChart";
 
@@ -88,7 +88,7 @@ export class LineaChart extends AbstractLineaChart {
       );
       this.drawedTitle = true;
       this.modifyDrawHook(p, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:precipitation"));
+      this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
       this.addSeries(p, opts_HS, this.result.values.HS);
       this.addSeries(p, opts_PSUM, this.result.values.PSUM);
     }
@@ -104,7 +104,7 @@ export class LineaChart extends AbstractLineaChart {
       );
       this.drawedTitle = true;
       this.modifyDrawHook(p, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:wind"));
+      this.plotnames.push(i18n.message("linea:plotnames:wind"));
       this.addSeries(p, opts_VW, this.result.values.VW);
       this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
       this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
@@ -127,7 +127,7 @@ export class LineaChart extends AbstractLineaChart {
       this.drawedTitle = true;
 
       this.modifyDrawHook(p, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:temperature"));
+      this.plotnames.push(i18n.message("linea:plotnames:temperature"));
       this.addSeries(p, opts_TA, this.result.values.TA);
       this.addSeries(p, opts_TD, TD);
 
@@ -157,7 +157,7 @@ export class LineaChart extends AbstractLineaChart {
       );
       this.drawedTitle = true;
       this.modifyDrawHook(p, this.backgroundColor);
-      this.plotnames.push(i18n.message("dialog:weather-station-diagram:plotnames:humidity_gr"));
+      this.plotnames.push(i18n.message("linea:plotnames:humidity_gr"));
       this.addSeries(p, opts_RH, this.result.values.RH);
       this.addSeries(p, opts_ISWR, this.result.values.ISWR);
     }

@@ -4,7 +4,8 @@ import type { Result, Values } from "./data/station-data";
 import { LineaChart } from "./linea-plot/LineaChart";
 import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
 import { LineaYearChart } from "./linea-plot/LineaYearChart";
-import { ExportModal } from "./exportmodal";
+import type { ExportModal } from "./linea-plot/exportmodal";
+import type AirDatepicker from "air-datepicker";
 
 /**
  * LineaPlot Web Component
@@ -83,7 +84,7 @@ export class LineaPlot extends HTMLElement {
   private attributeQueue: Promise<void> = Promise.resolve();
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
-  private dp;
+  private dp: AirDatepicker | undefined;
 
   srcs: string[] = [];
   lazysrcs: string[] = [];
@@ -506,7 +507,7 @@ export class LineaPlot extends HTMLElement {
     if (!this.hasAttribute("showexport")) {
       return;
     }
-    const { ExportModal } = await import("./exportmodal");
+    const { ExportModal } = await import("./linea-plot/exportmodal");
     this.exportModal = new ExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }
@@ -541,7 +542,7 @@ export class LineaPlot extends HTMLElement {
       previous.classList.add("toggle-btn");
       previous.classList.add("controls-dates-inputs");
       previous.classList.add("linea-tooltip");
-      previous.innerHTML = `&larr;<span class='linea-tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:previous")}</span>`;
+      previous.innerHTML = `&larr;<span class='linea-tooltiptext'>${i18n.message("linea:controls:tooltips:previous")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowLeft") {
           previous.click();
@@ -583,7 +584,7 @@ export class LineaPlot extends HTMLElement {
       next.classList.add("toggle-btn");
       next.classList.add("controls-dates-inputs");
       next.classList.add("linea-tooltip");
-      next.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("dialog:weather-station-diagram:controls:tooltips:next")}</span>`;
+      next.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("linea:controls:tooltips:next")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           next.click();
@@ -629,7 +630,7 @@ export class LineaPlot extends HTMLElement {
     menu.classList.add("controls-menu");
     if (this.hasAttribute("showexport")) {
       const exportbtn = document.createElement("button");
-      exportbtn.innerHTML = `${i18n.message("dialog:weather-station-diagram:controls:value:export")}`;
+      exportbtn.innerHTML = `${i18n.message("linea:controls:value:export")}`;
       exportbtn.classList.add("toggle-btn");
       exportbtn.addEventListener("click", () => {
         if (this.lineacharts.length == 0) {
@@ -650,9 +651,7 @@ export class LineaPlot extends HTMLElement {
 
       const label = document.createElement("span");
       label.className = "winterview-btn-label";
-      label.textContent = i18n.message(
-        "dialog:weather-station-diagram:controls:value:winterview:winter",
-      );
+      label.textContent = i18n.message("linea:controls:value:winterview:winter");
 
       const loader = document.createElement("span");
       loader.className = "winterview-btn-loader";
@@ -674,17 +673,13 @@ export class LineaPlot extends HTMLElement {
             winterviewbtn.classList.remove("loading");
             winterviewbtn.disabled = false;
 
-            label.textContent = i18n.message(
-              "dialog:weather-station-diagram:controls:value:winterview:station",
-            );
+            label.textContent = i18n.message("linea:controls:value:winterview:station");
           });
         } else {
           this.#switchToStationView();
           winterviewbtn.classList.remove("loading");
           winterviewbtn.disabled = false;
-          label.textContent = i18n.message(
-            "dialog:weather-station-diagram:controls:value:winterview:winter",
-          );
+          label.textContent = i18n.message("linea:controls:value:winterview:winter");
         }
       });
       menu.appendChild(winterviewbtn);
@@ -696,7 +691,7 @@ export class LineaPlot extends HTMLElement {
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
         <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
         <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </svg><span class="linea-tooltiptext">${i18n.message("dialog:weather-station-diagram:controls:tooltips:wholetimespan")}</span>`;
+        </svg><span class="linea-tooltiptext">${i18n.message("linea:controls:tooltips:wholetimespan")}</span>`;
       enlargebtn.classList.add("toggle-btn");
       enlargebtn.classList.add("linea-tooltip");
       enlargebtn.addEventListener("click", () => {

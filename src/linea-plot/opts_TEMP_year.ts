@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper, SplitOptions } from "./optsHelper";
+import { OptsHelper, type SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for temperature/year [cm]
@@ -13,8 +13,8 @@ export const opts_TEMP_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:TA")} (°C)`;
-        var labely2 = `${i18n.message("dialog:weather-station-diagram:parameter:TSS")} (°C)`;
+        var labely1 = `${i18n.message("linea:parameter:TA")} (°C)`;
+        var labely2 = `${i18n.message("linea:parameter:TSS")} (°C)`;
         OptsHelper.UpdateAxisLabels(
           ctx,
           labely1,
@@ -92,7 +92,7 @@ export const opts_TEMP_year: uPlot.Options = {
 
   series: [
     {
-      label: i18n.message("dialog:weather-station-diagram:unit:time"),
+      label: i18n.message("linea:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
@@ -110,7 +110,7 @@ export const opts_TEMP_year: uPlot.Options = {
 };
 
 const baseTempSeries = (key: string, color: string, width = 2): uPlot.Series => ({
-  label: i18n.message(`dialog:weather-station-diagram:parameter:${key}`),
+  label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
   width,
   points: { show: false },

@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { timeAxis } from "./timeAxisOpts";
 import { i18n } from "../i18n";
-import { OptsHelper, SplitOptions } from "./optsHelper";
+import { OptsHelper, type SplitOptions } from "./optsHelper";
 
 /**
  * uPlot options for datapoints/year [cm]
@@ -14,7 +14,7 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount")}`;
+        var labely1 = `${i18n.message("linea:parameter:DATAPOINTS:amount")}`;
         var labely2 = "";
         var labelColor1 = "#00ff55ff";
         var labelColor2 = "";
@@ -74,18 +74,17 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
 
   series: [
     {
-      label: i18n.message("dialog:weather-station-diagram:unit:time"),
+      label: i18n.message("linea:unit:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
 };
 
 export const opts_DATAPOINTS_amount_year: uPlot.Series = {
-  label: i18n.message("dialog:weather-station-diagram:parameter:DATAPOINTS:amount"),
+  label: i18n.message("linea:parameter:DATAPOINTS:amount"),
   stroke: "#00ff55ff",
   width: 2,
   points: { show: false },
   scale: "y",
-  value: (u, v) =>
-    i18n.number(v, {}, i18n.message("dialog:weather-station-diagram:unit:DATAPOINTS")),
+  value: (u, v) => i18n.number(v, {}, i18n.message("linea:unit:DATAPOINTS")),
 };
