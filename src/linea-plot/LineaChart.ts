@@ -175,7 +175,7 @@ export class LineaChart extends AbstractLineaChart {
   /**
    * Uses the objects data to calculate the surface hoar series data.
    * Filters for surface hoar potential which is longer than 1 hour
-   * 
+   *
    * @returns The surface hoar data for the charts data
    */
   #generateSurfaceHoarData(): number[] {
@@ -190,11 +190,7 @@ export class LineaChart extends AbstractLineaChart {
         const startIdx = i;
         let endIdx = i;
 
-        while (
-          endIdx + 1 < len &&
-          TD[endIdx + 1] < 0 &&
-          TSS[endIdx + 1] < TD[endIdx + 1]
-        ) {
+        while (endIdx + 1 < len && TD[endIdx + 1] < 0 && TSS[endIdx + 1] < TD[endIdx + 1]) {
           endIdx++;
         }
 
