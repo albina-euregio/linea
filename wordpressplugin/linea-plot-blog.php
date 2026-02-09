@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Iframe Shortcode for integration of LineaPlot
-Description: Adds a secure [lineaplotblog] shortcode with support for long data URLs.
-Version: 1.0
+Description: Adds a shortcode [lineaplotblog] to render base64-encoded HTML
+Version: 1.2
 Author: Fynn Renner
 */
 
@@ -10,62 +10,41 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-function robust_iframe_shortcode( $atts, $content = null ) {
+function lineaplotblog_shortcode( $atts, $content = null ) {
 
     $atts = shortcode_atts(
         [
-            'src'         => '',
-            'width'       => '100%',
-            'height'      => '450',
-            'scrolling'   => 'no',
-            'frameborder' => '0',
-            'title'       => '',
-            'style'       => '',
-            'loading'     => 'lazy',
-            'sandbox'     => '',
+            'height' => '450px',
+            'title'  => ''
         ],
         $atts,
         'lineaplotblog'
     );
 
-    // If src attribute is empty, try shortcode body
-    $src = trim( $atts['src'] );
-    if ( empty( $src ) && $content ) {
-        $src = trim( $content );
-    }
-
-    if ( empty( $src ) ) {
+    if ( empty( $content ) ) {
         return '';
     }
 
-    // Allow only https or data URLs
-    if ( ! preg_match( '#^(https?:|data:)#i', $src ) ) {
-        return '';
+    // Remove accidental spaces in base64 which can come from JavaScripts dataurls
+    // see https://www.php.net/manual/en/function.base64-decode.php
+    $encodedData = str_replace(' ', '+', trim($content));
+		
+	if ( str_starts_with($encodedData, 'data:text/html;base64,') ) {
+		$encodedData = substr($encodedData, strlen('data:text/html;base64,'));
+	}
+
+    $decodedData = base64_decode($encodedData, true);
+
+    if ( $decodedData === false ) {
+		error_log( 'LineaPlot shortcode: Base64 decode failed. Content: ' . substr($encodedData, 0, 100) . '...' );
+		return '<!-- Invalid base64 content -->';
     }
 
-    $html  = '<iframe';
-    $html .= ' src="' . esc_attr( $src ) . '"';
-    $html .= ' width="' . esc_attr( $atts['width'] ) . '"';
-    $html .= ' height="' . esc_attr( $atts['height'] ) . '"';
-    $html .= ' scrolling="' . esc_attr( $atts['scrolling'] ) . '"';
-    $html .= ' frameborder="' . esc_attr( $atts['frameborder'] ) . '"';
-    $html .= ' loading="' . esc_attr( $atts['loading'] ) . '"';
-
-    if ( ! empty( $atts['title'] ) ) {
-        $html .= ' title="' . esc_attr( $atts['title'] ) . '"';
-    }
-
-    if ( ! empty( $atts['style'] ) ) {
-        $html .= ' style="' . esc_attr( $atts['style'] ) . '"';
-    }
-
-    if ( ! empty( $atts['sandbox'] ) ) {
-        $html .= ' sandbox="' . esc_attr( $atts['sandbox'] ) . '"';
-    }
-
-    $html .= ' allowfullscreen></iframe>';
+    $html  = '<div style="position: relative; width: 100%; height: ' . esc_attr( $atts['height'] ) . ';">';
+    $html .= $decodedData;
+    $html .= '</div>';
 
     return $html;
 }
 
-add_shortcode( 'lineaplotblog', 'robust_iframe_shortcode' );
+add_shortcode( 'lineaplotblog', 'lineaplotblog_shortcode' );
