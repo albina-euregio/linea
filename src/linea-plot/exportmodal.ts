@@ -499,7 +499,6 @@ export class ExportModal {
    *
    */
   #exportAsSMET() {
-    console.log("pressed");
     if (this.lineaPlot.winterview) {
       this.#downloadSMETS(this.lineaPlot.wintersrcs);
     } else {
@@ -659,7 +658,7 @@ export class ExportModal {
         type: "text/plain",
       }),
       data: iframeshortcode,
-      filename: this.#generateFilename() + "txt",
+      filename: this.#generateFilename() + ".txt",
       type: "text/plain",
     };
   }
