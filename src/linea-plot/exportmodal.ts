@@ -248,11 +248,11 @@ export class ExportModal {
                         <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                           <div>
                               <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
-                              <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
+                              <input type="number" id="exportWidth" value="1000" min="400" max="2600" step="100">
                           </div>
                           <div>
                               <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
-                              <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
+                              <input type="number" id="exportHeight" value="200" min="150" max="600" step="50">
                           </div>
                           <div>
                               <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
@@ -380,12 +380,6 @@ export class ExportModal {
       .join("");
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
-    (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
-      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width,
-    );
-    (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
-      this.lineaPlot.lineacharts[0].plots[0].height,
-    );
     this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
       cb.addEventListener("change", () => {
         (document.getElementById("exportTitle") as HTMLInputElement)!.value =
@@ -505,7 +499,6 @@ export class ExportModal {
    *
    */
   #exportAsSMET() {
-    console.log("pressed");
     if (this.lineaPlot.winterview) {
       this.#downloadSMETS(this.lineaPlot.wintersrcs);
     } else {
@@ -590,6 +583,10 @@ export class ExportModal {
    * @todo Implement iframe export logic
    */
   async #exportAsIframe() {
+    if (this.#getActiveLineacharts().length == 0) {
+      alert("Nothing to export!");
+      return;
+    }
     const exports = this.#getExportSettings();
 
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
@@ -627,12 +624,16 @@ export class ExportModal {
         type: "text/html",
       }),
       data: iframecode,
-      filename: "linea-chart.html",
+      filename: this.#generateFilename() + ".html",
       type: "text/html",
     };
   }
 
   async #exportAsBlogElement() {
+    if (this.#getActiveLineacharts().length == 0) {
+      alert("Nothing to export!");
+      return;
+    }
     const exports = this.#getExportSettings();
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
 
@@ -657,7 +658,7 @@ export class ExportModal {
         type: "text/plain",
       }),
       data: iframeshortcode,
-      filename: "shortcode.txt",
+      filename: this.#generateFilename() + ".txt",
       type: "text/plain",
     };
   }
@@ -689,6 +690,36 @@ export class ExportModal {
   }
 
   /**
+   * Generates a filename for the active, exported lineacharts using their title.
+   * Format:
+   * [Date of last timestamp]_[titles of stations]-[# Days]d
+   * e.g. 20260212_Kapall-7d
+   */
+  #generateFilename(): string {
+    const charts = this.#getActiveLineacharts();
+    const titles = charts.map((c) => c.result.station);
+
+    const timestamps: number[] = charts[0].result.timestamps.filter(Boolean);
+    if (timestamps.length === 0) {
+      return titles.join("_");
+    }
+
+    const firstTs = timestamps[0];
+    const lastTs = timestamps[timestamps.length - 1];
+
+    const date = Temporal.Instant.fromEpochMilliseconds(lastTs).toZonedDateTimeISO(i18n.timezone());
+
+    const dateString =
+      date.year.toString().padStart(4, "0") +
+      date.month.toString().padStart(2, "0") +
+      date.day.toString().padStart(2, "0");
+
+    const durationDays = Math.round((lastTs - firstTs) / 86_400_000);
+
+    return `${dateString}_${titles.join("_")}-${durationDays}d`;
+  }
+
+  /**
    * Exports all active LineaChart plots to a single PNG image.
    *
    * Combines multiple plot canvases into a single PNG file with:
@@ -708,6 +739,12 @@ export class ExportModal {
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
   async #exportAllPlotsToPNG({ width, heightPerCanvas, title }, noshow: boolean = false) {
+    const activeLinecharts = this.#getActiveLineacharts();
+    if (activeLinecharts.length == 0) {
+      alert("Nothing to export!");
+      return;
+    }
+
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
@@ -716,11 +753,6 @@ export class ExportModal {
       (width * this.lineaPlot.lineacharts[0].clientWidth) /
       this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
 
-    const activeLinecharts = this.#getActiveLineacharts();
-    if (activeLinecharts.length == 0) {
-      alert("Nothing to export!");
-      return;
-    }
     let oldBackgroundColor = "";
     if (activeLinecharts.length == 1) {
       oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
@@ -834,7 +866,7 @@ export class ExportModal {
         this.exportdata = {
           blob: blobdata,
           data: outCanvas.toDataURL(),
-          filename: "linea-chart.png",
+          filename: this.#generateFilename() + ".png",
           type: "image/png",
         };
       });
