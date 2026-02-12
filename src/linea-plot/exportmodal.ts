@@ -584,6 +584,10 @@ export class ExportModal {
    * @todo Implement iframe export logic
    */
   async #exportAsIframe() {
+    if (this.#getActiveLineacharts().length == 0) {
+      alert("Nothing to export!");
+      return;
+    }
     const exports = this.#getExportSettings();
 
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
@@ -627,6 +631,10 @@ export class ExportModal {
   }
 
   async #exportAsBlogElement() {
+    if (this.#getActiveLineacharts().length == 0) {
+      alert("Nothing to export!");
+      return;
+    }
     const exports = this.#getExportSettings();
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
 
@@ -702,6 +710,12 @@ export class ExportModal {
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
   async #exportAllPlotsToPNG({ width, heightPerCanvas, title }, noshow: boolean = false) {
+    const activeLinecharts = this.#getActiveLineacharts();
+    if (activeLinecharts.length == 0) {
+      alert("Nothing to export!");
+      return;
+    }
+
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
     const legendItems = {};
@@ -710,11 +724,6 @@ export class ExportModal {
       (width * this.lineaPlot.lineacharts[0].clientWidth) /
       this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
 
-    const activeLinecharts = this.#getActiveLineacharts();
-    if (activeLinecharts.length == 0) {
-      alert("Nothing to export!");
-      return;
-    }
     let oldBackgroundColor = "";
     if (activeLinecharts.length == 1) {
       oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
@@ -838,8 +847,6 @@ export class ExportModal {
     }
     return outCanvas.toDataURL();
   }
-
-  #generateFilename();
 
   /**
    * Retrieves all currently selected/active LineaCharts based on checkbox state.
