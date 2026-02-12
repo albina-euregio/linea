@@ -248,11 +248,11 @@ export class ExportModal {
                         <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                           <div>
                               <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
-                              <input type="number" id="exportWidth" value="1100" min="400" max="2600" step="100">
+                              <input type="number" id="exportWidth" value="1000" min="400" max="2600" step="100">
                           </div>
                           <div>
                               <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
-                              <input type="number" id="exportHeight" value="300" min="150" max="600" step="50">
+                              <input type="number" id="exportHeight" value="200" min="150" max="600" step="50">
                           </div>
                           <div>
                               <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
@@ -380,12 +380,6 @@ export class ExportModal {
       .join("");
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
-    (document.getElementById("exportWidth") as HTMLInputElement)!.value = String(
-      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width,
-    );
-    (document.getElementById("exportHeight") as HTMLInputElement)!.value = String(
-      this.lineaPlot.lineacharts[0].plots[0].height,
-    );
     this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
       cb.addEventListener("change", () => {
         (document.getElementById("exportTitle") as HTMLInputElement)!.value =
@@ -844,6 +838,8 @@ export class ExportModal {
     }
     return outCanvas.toDataURL();
   }
+
+  #generateFilename();
 
   /**
    * Retrieves all currently selected/active LineaCharts based on checkbox state.
