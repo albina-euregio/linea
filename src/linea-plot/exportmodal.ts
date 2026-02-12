@@ -625,7 +625,7 @@ export class ExportModal {
         type: "text/html",
       }),
       data: iframecode,
-      filename: "linea-chart.html",
+      filename: this.#generateFilename() + ".html",
       type: "text/html",
     };
   }
@@ -659,7 +659,7 @@ export class ExportModal {
         type: "text/plain",
       }),
       data: iframeshortcode,
-      filename: "shortcode.txt",
+      filename: this.#generateFilename() + "txt",
       type: "text/plain",
     };
   }
@@ -688,6 +688,36 @@ export class ExportModal {
       }
     });
     return title;
+  }
+
+  /**
+   * Generates a filename for the active, exported lineacharts using their title.
+   * Format:
+   * [Date of last timestamp]_[titles of stations]-[# Days]d
+   * e.g. 20260212_Kapall-7d
+   */
+  #generateFilename(): string {
+    const charts = this.#getActiveLineacharts();
+    const titles = charts.map((c) => c.result.station);
+
+    const timestamps: number[] = charts[0].result.timestamps.filter(Boolean);
+    if (timestamps.length === 0) {
+      return titles.join("_");
+    }
+
+    const firstTs = timestamps[0];
+    const lastTs = timestamps[timestamps.length - 1];
+
+    const date = Temporal.Instant.fromEpochMilliseconds(lastTs).toZonedDateTimeISO(i18n.timezone());
+
+    const dateString =
+      date.year.toString().padStart(4, "0") +
+      date.month.toString().padStart(2, "0") +
+      date.day.toString().padStart(2, "0");
+
+    const durationDays = Math.round((lastTs - firstTs) / 86_400_000);
+
+    return `${dateString}_${titles.join("_")}-${durationDays}d`;
   }
 
   /**
@@ -837,7 +867,7 @@ export class ExportModal {
         this.exportdata = {
           blob: blobdata,
           data: outCanvas.toDataURL(),
-          filename: "linea-chart.png",
+          filename: this.#generateFilename() + ".png",
           type: "image/png",
         };
       });
