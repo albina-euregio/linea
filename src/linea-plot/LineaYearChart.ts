@@ -117,7 +117,7 @@ export class LineaYearChart extends AbstractLineaChart {
         timestamps,
         values.NS,
       );
-      if (this.result.values.HS) {
+      if (yearDataHS) {
         this.updateData(
           this.plots[i],
           [
@@ -128,7 +128,7 @@ export class LineaYearChart extends AbstractLineaChart {
           false,
         );
       } else {
-        this.updateData(this.plots[i], [yearDataHS.timestamps, yearDataNS.values], false);
+        this.updateData(this.plots[i], [yearDataNS.timestamps, yearDataNS.values], false);
       }
       i += 1;
     }
