@@ -10,13 +10,18 @@ import { i18n } from "../i18n";
 import { AbstractLineaChart } from "./abstract-linea-chart";
 
 export class LineaChart extends AbstractLineaChart {
+  readonly result: Result;
+  private showSurfaceHoarSeries: boolean;
+
   constructor(
-    readonly result: Result,
+    result: Result,
     showTitle: boolean,
-    private showSurfaceHoarSeries: boolean,
+    showSurfaceHoarSeries: boolean,
     backgroundColor: string,
   ) {
     super(backgroundColor, showTitle, result);
+    this.result = result;
+    this.showSurfaceHoarSeries = showSurfaceHoarSeries;
     this.createPlots().catch((e) => console.error(e));
   }
 
@@ -165,7 +170,7 @@ export class LineaChart extends AbstractLineaChart {
     this.resizeObserver.unobserve(this);
   }
 
-  #filterDWData(values: number[]): (number | null)[] {
+  #filterDWData(values: (number | null)[]): (number | null)[] {
     let density = Math.ceil(values.length / 7500);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
     return out;
