@@ -1,10 +1,10 @@
 import { i18n } from "./i18n";
 import { fetchSMET } from "./data/smet-data";
 import type { Result, Values } from "./data/station-data";
-import { LineaChart } from "./linea-plot/LineaChart";
-import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
-import { LineaYearChart } from "./linea-plot/LineaYearChart";
-import type { ExportModal } from "./linea-plot/exportmodal";
+import { LineaChart } from "./linea-plot/linea-chart";
+import { AbstractLineaChart } from "./linea-plot/abstract-linea-chart";
+import { LineaYearChart } from "./linea-plot/linea-year-chart";
+import type { ExportModal } from "./linea-plot/export-modal";
 import type AirDatepicker from "air-datepicker";
 
 /**
@@ -507,7 +507,7 @@ export class LineaPlot extends HTMLElement {
     if (!this.hasAttribute("showexport")) {
       return;
     }
-    const { ExportModal } = await import("./linea-plot/exportmodal");
+    const { ExportModal } = await import("./linea-plot/export-modal");
     this.exportModal = new ExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }

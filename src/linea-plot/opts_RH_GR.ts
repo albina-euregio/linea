@@ -1,7 +1,7 @@
 import type uPlot from "uplot";
-import { timeAxis } from "./timeAxisOpts";
+import { timeAxis } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./optsHelper";
+import { OptsHelper } from "./opts-helper";
 
 /**
  * uPlot options for Relative Luftfeuchtigkeit [%] & Globalstrahlung [W/m²]

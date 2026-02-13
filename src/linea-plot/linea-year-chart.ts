@@ -22,7 +22,7 @@ import { opts_NS_year, opts_NS_year_series, opts_NS_year_snow_cover } from "./op
 
 import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year } from "./opts_datapoints_year";
 import { YearData } from "../data/year-data";
-import { AbstractLineaChart } from "./AbstractLineaChart";
+import { AbstractLineaChart } from "./abstract-linea-chart";
 import type { Result, Values } from "../data/station-data";
 
 /**

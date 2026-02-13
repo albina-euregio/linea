@@ -4,10 +4,10 @@ import { opts_TA, opts_TA_TD_TSS, opts_TD, opts_TSS, opts_SurfaceHoar } from "./
 import { opts_DW, opts_VW, opts_VW_MAX, opts_VW_VWG_DW } from "./opts_VW_VWG_DW";
 import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
 import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
-import { dewPoint } from "./dewPoint";
+import { dewPoint } from "./dew-point";
 import type { Result, Values } from "../data/station-data";
 import { i18n } from "../i18n";
-import { AbstractLineaChart } from "./AbstractLineaChart";
+import { AbstractLineaChart } from "./abstract-linea-chart";
 
 export class LineaChart extends AbstractLineaChart {
   constructor(
