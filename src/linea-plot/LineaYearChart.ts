@@ -42,14 +42,21 @@ import type { Result, Values } from "../data/station-data";
  *
  */
 export class LineaYearChart extends AbstractLineaChart {
+  readonly result: Result;
+  public startDate: Temporal.PlainDate;
+  public endDate: Temporal.PlainDate;
+
   constructor(
-    readonly result: Result,
+    result: Result,
     showTitle: boolean,
     backgroundColor: string,
-    public startDate: Temporal.PlainDate,
-    public endDate: Temporal.PlainDate,
+    startDate: Temporal.PlainDate,
+    endDate: Temporal.PlainDate,
   ) {
     super(backgroundColor, showTitle, result);
+    this.result = result;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.createPlots().catch((e) => console.error(e));
   }
 
@@ -182,7 +189,7 @@ export class LineaYearChart extends AbstractLineaChart {
     if (!globalThis.Temporal) {
       await import("temporal-polyfill/global");
     }
-    const { station, altitude, timestamps, values } = this.result;
+    const { timestamps, values } = this.result;
 
     this.resizeObserver.unobserve(this);
 

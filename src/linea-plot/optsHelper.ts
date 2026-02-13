@@ -1,7 +1,6 @@
 import uPlot from "uplot";
 import { cursorOpts } from "./cursorOpts";
 import { TouchZoom } from "./touchZoom";
-import { file } from "zod";
 
 export interface SplitOptions {
   uplot: uPlot;
@@ -82,17 +81,6 @@ export class OptsHelper {
         markers: {
           fill: (u: any, seriesIdx: number) =>
             u.series[seriesIdx].stroke(u, seriesIdx) ?? u.series[seriesIdx].stroke(u, seriesIdx),
-          values: (u: any, seriesIdx: number, values: any) => {
-            let result: any = {};
-            u.series.forEach((s: any, i: number) => {
-              if (i === 0) {
-                result[s.label || s.name] = values[i];
-              } else {
-                result[s.label] = values[i] + (s.unit ? ` ${s.unit}` : "");
-              }
-            });
-            return result;
-          },
         },
       },
     };
@@ -115,10 +103,10 @@ export class OptsHelper {
       u.data[i] ? u.data[i].slice(startIdx, endIdx + 1) : [],
     );
     const counts = filteredData.map((d) => {
-      d = d.filter((v: number) => !Number.isNaN(v));
+      d = d.filter((v) => !Number.isNaN(v));
       return d.length == 0
         ? 1
-        : d.filter((v: number) => u.scales.y.min < v && v <= u.scales.y.max).length / d.length;
+        : d.filter((v) => u.scales.y.min < v && v <= u.scales.y.max).length / d.length;
     });
     if (counts.some((c) => c < 0.66)) {
       let datamax = Math.max(...filteredData.map((d) => Math.max(...d)));

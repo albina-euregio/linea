@@ -23,7 +23,7 @@ export const opts_NS_year: uPlot.Options = {
 
   scales: {
     y: {
-      range: (u, dataMin, dataMax) => {
+      range: (_u, _dataMin, _dataMax) => {
         return [0, 70];
       },
     },
