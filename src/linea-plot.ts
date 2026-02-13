@@ -72,6 +72,7 @@ import type AirDatepicker from "air-datepicker";
  * - Null value handling for missing data points
  * - Export charts as png
  * - Automatic calculations of surface hoar potential if data is present
+ * - Showing a overview over the winter
  */
 export class LineaPlot extends HTMLElement {
   static observedAttributes = ["src"];
@@ -410,7 +411,7 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   *
+   * Stores data from the `linea-plot` webcomponents `data`attribute.
    */
   storeDataFromAttribute() {
     if (this.hasAttribute("showonlywinter")) {
@@ -501,7 +502,7 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   *
+   * Adds the exportmodal to the DOM and to this object.
    */
   async #addExportModal() {
     if (!this.hasAttribute("showexport")) {
@@ -764,9 +765,12 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
-  oldDateFormat: string;
-  oldStartDate: Temporal.ZonedDateTime;
-  oldEndDate: Temporal.ZonedDateTime;
+  /**
+   * These variables are needed to make the switch from the station view to the winter view.
+   */
+  private oldDateFormat: string = "";
+  private oldStartDate: Temporal.ZonedDateTime;
+  private oldEndDate: Temporal.ZonedDateTime;
 
   async #switchToWinterView() {
     if (this.winterresults.length == 0) {
@@ -775,6 +779,9 @@ export class LineaPlot extends HTMLElement {
     this.#renderWinter();
   }
 
+  /**
+   * Renders the winter view
+   */
   #renderWinter() {
     if (!this.hasAttribute("showonlywinter")) {
       this.oldDateFormat = this.dp.locale.dateFormat;
@@ -805,6 +812,10 @@ export class LineaPlot extends HTMLElement {
     this.winterview = true;
   }
 
+
+  /**
+   * 
+   */
   #switchToStationView() {
     for (const lc of this.lineacharts) {
       this.removeChild(lc);
