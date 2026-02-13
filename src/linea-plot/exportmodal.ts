@@ -683,7 +683,7 @@ export class ExportModal {
     titles.forEach((t, i) => {
       title += t.station + " (" + t.altitude + "m)";
       if (!(titles.length == i + 1)) {
-        title += " — ";
+        title += " – ";
       }
     });
     return title;
