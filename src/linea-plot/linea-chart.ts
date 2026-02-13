@@ -1,22 +1,26 @@
 import uPlot from "uplot";
-import css from "uplot/dist/uPlot.min.css?raw";
 import { opts_TA, opts_TA_TD_TSS, opts_TD, opts_TSS, opts_SurfaceHoar } from "./opts_TA_TD_TSS";
 import { opts_DW, opts_VW, opts_VW_MAX, opts_VW_VWG_DW } from "./opts_VW_VWG_DW";
 import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
 import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
-import { dewPoint } from "./dewPoint";
+import { dewPoint } from "./dew-point";
 import type { Result, Values } from "../data/station-data";
 import { i18n } from "../i18n";
-import { AbstractLineaChart } from "./AbstractLineaChart";
+import { AbstractLineaChart } from "./abstract-linea-chart";
 
 export class LineaChart extends AbstractLineaChart {
+  readonly result: Result;
+  private showSurfaceHoarSeries: boolean;
+
   constructor(
-    readonly result: Result,
+    result: Result,
     showTitle: boolean,
-    private showSurfaceHoarSeries: boolean,
+    showSurfaceHoarSeries: boolean,
     backgroundColor: string,
   ) {
     super(backgroundColor, showTitle, result);
+    this.result = result;
+    this.showSurfaceHoarSeries = showSurfaceHoarSeries;
     this.createPlots().catch((e) => console.error(e));
   }
 
@@ -67,13 +71,11 @@ export class LineaChart extends AbstractLineaChart {
 
   async createPlots() {
     this.resizeObserver.unobserve(this);
-    const style = document.createElement("style");
-    style.textContent = css;
     const plot_TA_TD_TSS = document.createElement("div");
     const plot_VW_VWG_DW = document.createElement("div");
     const plot_HS_PSUM = document.createElement("div");
     const plot_RH_GR = document.createElement("div");
-    this.replaceChildren(style, plot_HS_PSUM, plot_VW_VWG_DW, plot_TA_TD_TSS, plot_RH_GR);
+    this.replaceChildren(plot_HS_PSUM, plot_VW_VWG_DW, plot_TA_TD_TSS, plot_RH_GR);
 
     if (this.result.values.HS || this.result.values.PSUM) {
       const p = new uPlot(
@@ -165,7 +167,7 @@ export class LineaChart extends AbstractLineaChart {
     this.resizeObserver.unobserve(this);
   }
 
-  #filterDWData(values: number[]): (number | null)[] {
+  #filterDWData(values: (number | null)[]): (number | null)[] {
     let density = Math.ceil(values.length / 7500);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
     return out;

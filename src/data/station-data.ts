@@ -39,7 +39,7 @@ export enum ParameterType {
 
 export type Units = Record<ParameterType, string>;
 
-export type Values = Record<ParameterType, number[]>;
+export type Values = Record<ParameterType, (number | null)[]>;
 
 export type Result = {
   station: string;

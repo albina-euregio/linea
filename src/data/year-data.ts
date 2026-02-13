@@ -3,9 +3,9 @@ if (!globalThis.Temporal) {
 }
 
 export class YearData {
-  monthDayData = new Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>();
+  monthDayData = new Map<ReturnType<Temporal.PlainMonthDay["toString"]>, (number | null)[]>();
   dates: Temporal.PlainDate[] = [];
-  values: number[] = [];
+  values: (number | null)[] = [];
   timeZone: string = "";
 
   get timestamps(): number[] {
@@ -16,9 +16,9 @@ export class YearData {
   }
 
   #aggFor(
-    map: Map<ReturnType<Temporal.PlainMonthDay["toString"]>, number[]>,
+    map: Map<ReturnType<Temporal.PlainMonthDay["toString"]>, (number | null)[]>,
     f: (...values: number[]) => number,
-  ): number[] {
+  ): (number | null)[] {
     return this.dates.map((d) => {
       let monthDay = d.toPlainMonthDay().toString();
       if (d.inLeapYear && monthDay === "02-29") {
@@ -26,25 +26,25 @@ export class YearData {
         monthDay = d.subtract({ days: 1 }).toPlainMonthDay().toString();
       }
       const arr = map.get(monthDay) ?? [];
-      const finite = arr.filter(Number.isFinite);
+      const finite = arr.filter(Number.isFinite) as number[];
       if (finite.length === 0) return NaN;
       return f(...finite);
     });
   }
 
-  get amount(): number[] {
+  get amount(): (number | null)[] {
     return this.#aggFor(this.monthDayData, (...v) => v.filter(Number.isFinite).length);
   }
 
-  get maxValues(): number[] {
+  get maxValues(): (number | null)[] {
     return this.#aggFor(this.monthDayData, Math.max);
   }
 
-  get minValues(): number[] {
+  get minValues(): (number | null)[] {
     return this.#aggFor(this.monthDayData, Math.min);
   }
 
-  get medianValues(): number[] {
+  get medianValues(): (number | null)[] {
     return this.#aggFor(
       this.monthDayData,
       (...v) => v.sort((a, b) => a - b)[Math.floor(v.length / 2)],
@@ -56,7 +56,7 @@ export class YearData {
     startDate: Temporal.PlainDate,
     endDate: Temporal.PlainDate,
     timestamps: number[],
-    values: number[],
+    values: (number | null)[],
   ): YearData {
     const yearData = new YearData();
     yearData.timeZone = timeZone;

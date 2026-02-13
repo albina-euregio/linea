@@ -1,5 +1,4 @@
 import uPlot from "uplot";
-import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "../i18n";
 import {
   opts_HS_year_current,
@@ -22,7 +21,7 @@ import { opts_NS_year, opts_NS_year_series, opts_NS_year_snow_cover } from "./op
 
 import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year } from "./opts_datapoints_year";
 import { YearData } from "../data/year-data";
-import { AbstractLineaChart } from "./AbstractLineaChart";
+import { AbstractLineaChart } from "./abstract-linea-chart";
 import type { Result, Values } from "../data/station-data";
 
 /**
@@ -42,14 +41,21 @@ import type { Result, Values } from "../data/station-data";
  *
  */
 export class LineaYearChart extends AbstractLineaChart {
+  readonly result: Result;
+  public startDate: Temporal.PlainDate;
+  public endDate: Temporal.PlainDate;
+
   constructor(
-    readonly result: Result,
+    result: Result,
     showTitle: boolean,
     backgroundColor: string,
-    public startDate: Temporal.PlainDate,
-    public endDate: Temporal.PlainDate,
+    startDate: Temporal.PlainDate,
+    endDate: Temporal.PlainDate,
   ) {
     super(backgroundColor, showTitle, result);
+    this.result = result;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.createPlots().catch((e) => console.error(e));
   }
 
@@ -117,7 +123,7 @@ export class LineaYearChart extends AbstractLineaChart {
         timestamps,
         values.NS,
       );
-      if (this.result.values.HS) {
+      if (yearDataHS) {
         this.updateData(
           this.plots[i],
           [
@@ -128,7 +134,7 @@ export class LineaYearChart extends AbstractLineaChart {
           false,
         );
       } else {
-        this.updateData(this.plots[i], [yearDataHS.timestamps, yearDataNS.values], false);
+        this.updateData(this.plots[i], [yearDataNS.timestamps, yearDataNS.values], false);
       }
       i += 1;
     }
@@ -182,17 +188,15 @@ export class LineaYearChart extends AbstractLineaChart {
     if (!globalThis.Temporal) {
       await import("temporal-polyfill/global");
     }
-    const { station, altitude, timestamps, values } = this.result;
+    const { timestamps, values } = this.result;
 
     this.resizeObserver.unobserve(this);
 
-    const style = document.createElement("style");
-    style.textContent = css;
     const plot_HS_year = document.createElement("div");
     const plot_NS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
     const plot_DATAPOINTS_year = document.createElement("div");
-    this.replaceChildren(style, plot_HS_year, plot_NS_year, plot_TEMP_year, plot_DATAPOINTS_year);
+    this.replaceChildren(plot_HS_year, plot_NS_year, plot_TEMP_year, plot_DATAPOINTS_year);
 
     const timeZone = i18n.timezone();
 

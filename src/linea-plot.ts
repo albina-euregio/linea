@@ -1,12 +1,13 @@
 import { i18n } from "./i18n";
 import { fetchSMET } from "./data/smet-data";
 import type { Result, Values } from "./data/station-data";
-import { LineaChart } from "./linea-plot/LineaChart";
-import { AbstractLineaChart } from "./linea-plot/AbstractLineaChart";
-import { LineaYearChart } from "./linea-plot/LineaYearChart";
-import type { ExportModal } from "./linea-plot/exportmodal";
+import { LineaChart } from "./linea-plot/linea-chart";
+import { AbstractLineaChart } from "./linea-plot/abstract-linea-chart";
+import { LineaYearChart } from "./linea-plot/linea-year-chart";
+import type { ExportModal } from "./linea-plot/export-modal";
 import type AirDatepicker from "air-datepicker";
-
+import css from "./linea-plot.css?inline";
+import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 /**
  * LineaPlot Web Component
  * 
@@ -72,6 +73,7 @@ import type AirDatepicker from "air-datepicker";
  * - Null value handling for missing data points
  * - Export charts as png
  * - Automatic calculations of surface hoar potential if data is present
+ * - Showing a overview over the winter
  */
 export class LineaPlot extends HTMLElement {
   static observedAttributes = ["src"];
@@ -103,216 +105,23 @@ export class LineaPlot extends HTMLElement {
   async connectedCallback() {
     this.styleTag = document.createElement("style");
 
-    this.styleTag.textContent = `
-        linea-plot {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-
-          .toggle-btn {
-            padding: 8px 10px;
-            background-color: #ffffff;
-            color: #555555;
-            border: 2px solid #19aaff;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 300;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            &:hover {
-              background-color: #19aaff;
-              color: white;
-            }
-
-            &:active {
-              transform: translateY(1px);
-            }
-          }
-
-          .linea-tooltip {
-            position: relative;
-            display: inline-block;
-
-            .linea-tooltiptext {
-              visibility: hidden;
-              width: 120px;
-              background-color: #555;
-              color: #fff;
-              text-align: center;
-              border-radius: 6px;
-              padding: 5px 0;
-              position: absolute;
-              z-index: 1;
-              top: 135%;
-              left: 50%;
-              margin-left: -60px;
-              opacity: 0;
-              transition: opacity 0.3s;
-
-              &::after {
-                content: "";
-                position: absolute;
-                bottom: 100%;
-                left: 50%;
-                margin-left: -5px;
-                border-width: 5px;
-                border-style: solid;
-                border-color: transparent transparent #555 transparent;
-              }
-            }
-
-            &:hover .linea-tooltiptext {
-              visibility: visible;
-              opacity: 1;
-            }
-          }
-
-          .controls {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            row-gap: 6px;
-            column-gap: 6px;
-
-            .controls-dates {
-              display: flex;
-              flex-wrap: nowrap;
-              align-items: stretch;
-
-              input,
-              button {
-                box-sizing: border-box;
-                height: 2.25rem;
-                line-height: 2.25rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0;
-              }
-
-              input {
-                flex: 1 1 auto;
-                border-radius: 0;
-                border-left-width: 1px;
-                border-right-width: 1px;
-              }
-
-              button {
-                flex: 0 0 auto;
-              }
-
-              > button:first-child {
-                border-top-right-radius: 0px;
-                border-bottom-right-radius: 0px;
-                border-right-width: 1px;
-              }
-
-              > button:last-child {
-                border-top-left-radius: 0px;
-                border-bottom-left-radius: 0px;
-                border-left-width: 1px;
-              }
-            }
-
-            .controls-menu {
-              display: flex;
-              gap: 6px;
-
-              > button {
-                height: 2.25rem;
-                line-height: 2.25rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0 0.5rem;
-              }
-            }
-          }
-          
-          > div:empty {
-            display: none;
-          }
-          
-          > div {
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-
-          &:focus {
-            outline: none;
-          }
-        }
-        
-        .winterview-btn {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0.5em 1em;
-          cursor: pointer;
-          overflow: hidden;
-        }
-
-        .winterview-btn .winterview-btn-loader {
-          position: absolute;
-          inset: 0;
-          display: grid;
-          place-items: center;
-          background: rgba(255, 255, 255, 0.6);
-          pointer-events: none;
-          opacity: 0;
-          transition: opacity 0.2s ease;
-          z-index: 10;
-        }
-
-        .winterview-btn.loading .winterview-btn-loader {
-          opacity: 1;
-        }
-
-        .winterview-btn.loading .winterview-btn-label {
-          visibility: hidden;
-        }
-
-        .winterview-btn-spinner {
-          width: 1em;
-          height: 1em;
-          border: 2px solid #000;
-          border-top-color: transparent;
-          border-radius: 50%;
-          animation: spin 0.7s linear infinite;
-          transform-origin: center;
-          will-change: transform;
-          display: block;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `;
-    this.appendChild(this.styleTag);
+    this.styleTag.textContent = [css, cssuPlot].join(" ");
+    this.append(this.styleTag);
     await this.#addControls();
     this.#addExportModal();
-    if (this.hasAttribute("wintersrc") && this.hasAttribute("showonlywinter")) {
-      this.#switchToWinterView();
+
+    if (this.hasAttribute("data")) {
+      this.storeDataFromAttribute();
+      this.#initAfterDataStorage();
     } else {
-      if (this.hasAttribute("data")) {
-        this.storeDataFromAttribute();
+      this.fetchAndStoreData(this.hasAttribute("showonlywinter") ? "wintersrc" : "src").then(() => {
         this.#initAfterDataStorage();
-      } else {
-        this.fetchAndStoreData()
-          .then(() => {
-            this.#initAfterDataStorage();
-            this.#lazyLoad();
-          })
-          .catch((_) => {});
-      }
+        if (!this.hasAttribute("showonlywinter")) {
+          this.#lazyLoad();
+        }
+      });
     }
+
     this.tabIndex = 0;
     this.focus();
     this.isLoaded = true;
@@ -344,19 +153,23 @@ export class LineaPlot extends HTMLElement {
    */
   #initAfterDataStorage() {
     this.#updateValidDateInputs();
-    this.render();
-    if (
-      this.hasAttribute("showdatepicker") &&
-      this.hasAttribute("startdate") &&
-      this.hasAttribute("enddate")
-    ) {
-      this.#setStartEndDateToAttributes();
+    if (this.hasAttribute("showonlywinter")) {
+      this.#switchToWinterView();
     } else {
-      this.#setStartEndDateToMinMax();
-    }
-    this.filterAndUpdateData();
-    if (!this.hasAttribute("showdatepicker")) {
-      this.#handleFixedDateView();
+      this.render();
+      if (
+        this.hasAttribute("showdatepicker") &&
+        this.hasAttribute("startdate") &&
+        this.hasAttribute("enddate")
+      ) {
+        this.#setStartEndDateToAttributes();
+      } else {
+        this.#setStartEndDateToMinMax();
+      }
+      this.filterAndUpdateData();
+      if (!this.hasAttribute("showdatepicker")) {
+        this.#handleFixedDateView();
+      }
     }
   }
 
@@ -410,11 +223,12 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   *
+   * Stores data from the `linea-plot` webcomponents `data`attribute.
    */
   storeDataFromAttribute() {
     if (this.hasAttribute("showonlywinter")) {
       const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
+      this.winterview = true;
       this.winterresults = results;
       this.minTimeWinter = +Infinity;
       this.maxTimeWinter = -Infinity;
@@ -445,7 +259,11 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * creates all LineaCharts and initializate them
+   * ---------------------------------------------
+   *        STATION VIEW
+   * ---------------------------------------------
+   *
+   * creates all LineaCharts and initialize them
    */
   render() {
     if (this.hasAttribute("backgroundcolors")) {
@@ -501,13 +319,13 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   *
+   * Adds the exportmodal to the DOM and to this object.
    */
   async #addExportModal() {
     if (!this.hasAttribute("showexport")) {
       return;
     }
-    const { ExportModal } = await import("./linea-plot/exportmodal");
+    const { ExportModal } = await import("./linea-plot/export-modal");
     this.exportModal = new ExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }
@@ -515,10 +333,10 @@ export class LineaPlot extends HTMLElement {
   /**
    * Adds the controls to the Plot:
    * - Datepicker with (previous|startDate|endDate|next)
-   * - Menu buttons with (export|enlarge)
+   * - Menu buttons with (export) (winterstats)
    *
-   * enlarge shows all available data and is shown when the datepicker is there too
    * export exports the drawed canvas on the screen, see @class ExportModal
+   * winterstats show the overview of the year, see @class LineaYearChart
    */
   async #addControls() {
     if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport")) {
@@ -764,9 +582,12 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
-  oldDateFormat: string;
-  oldStartDate: Temporal.ZonedDateTime;
-  oldEndDate: Temporal.ZonedDateTime;
+  /**
+   * These variables are needed to make the switch from the station view to the winter view.
+   */
+  private oldDateFormat: string = "";
+  private oldStartDate: Temporal.ZonedDateTime;
+  private oldEndDate: Temporal.ZonedDateTime;
 
   async #switchToWinterView() {
     if (this.winterresults.length == 0) {
@@ -775,8 +596,11 @@ export class LineaPlot extends HTMLElement {
     this.#renderWinter();
   }
 
+  /**
+   * Renders the winter view
+   */
   #renderWinter() {
-    if (!this.hasAttribute("showonlywinter")) {
+    if (!this.hasAttribute("showonlywinter") && this.dp) {
       this.oldDateFormat = this.dp.locale.dateFormat;
       this.oldStartDate = this.#getDatePickerStartDate();
       this.oldEndDate = this.#getDatePickerEndDate();
@@ -797,14 +621,18 @@ export class LineaPlot extends HTMLElement {
       this.lineacharts.push(lcy);
       this.appendChild(lcy);
     }
-
-    this.dp.update({
-      dateFormat: "yyyy",
-    });
-    this.#updateDatepickerStartEndDate(startDate, endDate);
+    if (this.dp) {
+      this.dp.update({
+        dateFormat: "yyyy",
+      });
+      this.#updateDatepickerStartEndDate(startDate, endDate);
+    }
     this.winterview = true;
   }
 
+  /**
+   *
+   */
   #switchToStationView() {
     for (const lc of this.lineacharts) {
       this.removeChild(lc);
@@ -876,15 +704,15 @@ export class LineaPlot extends HTMLElement {
    * @returns
    */
   #updateValidDateInputs() {
-    if (!this.daterange) {
+    if (!this.dp) {
       return;
     }
-    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-      i18n.timezone(),
-    );
-    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-      i18n.timezone(),
-    );
+    const minTime = Temporal.Instant.fromEpochMilliseconds(
+      this.hasAttribute("showonlywinter") ? this.minTimeWinter : this.minTime,
+    ).toZonedDateTimeISO(i18n.timezone());
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(
+      this.hasAttribute("showonlywinter") ? this.maxTimeWinter : this.maxTime,
+    ).toZonedDateTimeISO(i18n.timezone());
     this.#updateDatePickerMinMax(minTime, maxTime);
   }
 
@@ -931,12 +759,12 @@ export class LineaPlot extends HTMLElement {
    *
    * set the Input fields to the widthest available timespan
    */
-  #setStartEndDateToMinMax(winter: boolean = false) {
+  #setStartEndDateToMinMax() {
     if (!this.daterange || !this.dp) {
       return;
     }
     let min, max;
-    if (winter) {
+    if (this.hasAttribute("showonlywinter") || this.winterview) {
       min = this.minTimeWinter;
       max = this.maxTimeWinter;
     } else {

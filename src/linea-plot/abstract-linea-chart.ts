@@ -6,16 +6,18 @@ export abstract class AbstractLineaChart extends HTMLElement {
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
 
   protected drawedTitle: boolean = false;
+  protected backgroundColor: string;
+  protected showTitle: boolean;
+  public result: Result;
 
-  constructor(
-    protected backgroundColor: string,
-    protected showTitle: boolean,
-    public result: Result,
-  ) {
+  constructor(backgroundColor: string, showTitle: boolean, result: Result) {
     super();
+    this.backgroundColor = backgroundColor;
+    this.showTitle = showTitle;
+    this.result = result;
   }
 
-  abstract setData(timestamps: number[], values: Values);
+  abstract setData(timestamps: number[], values: Values): void;
 
   protected abstract getStationTitle(): {};
 
@@ -54,7 +56,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
     return nulls;
   }
 
-  addSeries(plot: uPlot, series: uPlot.Series, data: number[]) {
+  addSeries(plot: uPlot, series: uPlot.Series, data: (number | null)[]) {
     if (!this.plots.includes(plot)) {
       this.plots.push(plot);
     }
