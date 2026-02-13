@@ -741,7 +741,8 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }, noshow: boolean = false) {
+  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }: {width: number, heightPerCanvas: number, title: string},
+                          noshow: boolean = false) {
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
       alert("Nothing to export!");
