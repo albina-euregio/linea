@@ -3,6 +3,7 @@ import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
 import type { Result } from "../data/station-data";
 import { AbstractLineaChart } from "./abstract-linea-chart";
+import css from "./export-modal.css?inline";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -40,6 +41,8 @@ export class ExportModal {
   private exportSettings: HTMLDivElement;
   private exportResult: HTMLDivElement;
   private exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;
+  readonly modal: HTMLDivElement;
+  private lineaPlot: LineaPlot;
 
   /**
    * Creates an instance of ExportModal and initializes the modal UI.
@@ -53,165 +56,13 @@ export class ExportModal {
    * @param {HTMLDivElement} modal - The modal container element
    * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
    */
-  constructor(
-    readonly modal: HTMLDivElement,
-    private lineaPlot: LineaPlot,
-  ) {
-    const style: HTMLStyleElement = document.createElement("style");
-    style.textContent = `
-            label {
-                margin-bottom: 8px;
-                font-weight: 600;
-                color: #black;
-                font-size: 14px;
-            }
-            
-            input {
-                padding: 12px;
-                border: 2px solid #F5F5F5;
-                border-radius: 8px;
-                font-size: 14px;
-                background: #black;
-                color: black;
-                transition: border-color 0.3s ease;
-            }
-            
-            input:focus {
-                outline: none;
-                border-color: #19abff;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-            
-            .export-modal {
-                display: none;
-                position: fixed;
-                z-index: 1000;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background-color: #ffffff;
-            }
-            
-            .export-modal-content {
-                background-color: #ffffff;
-                margin: 5% auto;
-                padding: 20px;
-                border-radius: 12px;
-                width: 90%;
-                max-width: 800px;
-                max-height: 80vh;
-                overflow-y: auto;
-            }
-            
-            .export-close {
-                color: #aaa;
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-                cursor: pointer;
-                line-height: 1;
-            }
-            
-            .export-close:hover {
-                color: #fff;
-            }
-            
-            .export-options {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: 15px;
-                margin: 10px 0;
-            }
-            
-            .export-option {
-                background: #3498db;
-                padding: 10px;
-                border-radius: 8px;
-                text-align: center;
-                cursor: pointer;
-                transition: background 0.3s ease;
-            }
-            
-            .export-option:hover {
-                background: #444;
-            }
-            
-            .export-option h4 {
-                margin: 0 0 10px 0;
-                color: #ffffff;
-            }
-            
-            .export-option p {
-                margin: 0;
-                font-size: 13px;
-                color: #ffffff;
-            }
-            
-            .code-container {
-                background: #ffffff;
-                border: 1px solid #444;
-                border-radius: 8px;
-                padding: 15px;
-                margin: 15px 0;
-            }
-            
-            .code-container-buttons {
-                display: flex;
-                gap: 4px;
-                justify-content: flex-end;
-                margin-bottom: 10px;
-            }
-            
-            .code-container pre {
-                margin: 0;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-                font-family: 'Monaco', 'Consolas', monospace;
-                font-size: 12px;
-                color: #000000;
-            }
-            
-            .code-container button {
-                background: #3498db;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-            
-            .code-container button:hover {
-                background: #2980b9;
-            }
-            
-            .export-settings {
-                background: #ffffff;
-                padding: 15px;
-                border-radius: 8px;
-                margin: 15px 0;
-                display: flex;
-                flex-direction: column;
-            }
-            
-            .export-settings h4 {
-                margin: 0 0 15px 0;
-                color: #3498db;
-            }
-            
-            .export-settings label {
-                margin-bottom: 5px;
-            }
+  constructor(modal: HTMLDivElement, lineaPlot: LineaPlot) {
+    this.modal = modal;
+    this.lineaPlot = lineaPlot;
 
-            .export-settings input {
-                width: 100%;
-                max-width: 200px;
-            }
-            
-        `;
-    this.modal.appendChild(style);
-
+    const styleTag = document.createElement("style");
+    styleTag.textContent = css;
+    this.modal.appendChild(styleTag);
     this.modal.classList.add("export-modal");
     this.modal.id = "exportModal";
     this.modal.insertAdjacentHTML(
