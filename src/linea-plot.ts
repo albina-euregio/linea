@@ -446,7 +446,11 @@ export class LineaPlot extends HTMLElement {
   }
 
   /**
-   * creates all LineaCharts and initializate them
+   * ---------------------------------------------
+   *        STATION VIEW
+   * ---------------------------------------------
+   * 
+   * creates all LineaCharts and initialize them
    */
   render() {
     if (this.hasAttribute("backgroundcolors")) {
@@ -516,10 +520,10 @@ export class LineaPlot extends HTMLElement {
   /**
    * Adds the controls to the Plot:
    * - Datepicker with (previous|startDate|endDate|next)
-   * - Menu buttons with (export|enlarge)
+   * - Menu buttons with (export) (winterstats)
    *
-   * enlarge shows all available data and is shown when the datepicker is there too
    * export exports the drawed canvas on the screen, see @class ExportModal
+   * winterstats show the overview of the year, see @class LineaYearChart
    */
   async #addControls() {
     if (!this.hasAttribute("showdatepicker") && !this.hasAttribute("showexport")) {
@@ -812,9 +816,8 @@ export class LineaPlot extends HTMLElement {
     this.winterview = true;
   }
 
-
   /**
-   * 
+   *
    */
   #switchToStationView() {
     for (const lc of this.lineacharts) {

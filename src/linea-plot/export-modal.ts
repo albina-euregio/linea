@@ -641,9 +641,9 @@ export class ExportModal {
                     <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
                     <linea-plot style="position: absolute; inset: 0; z-index: 2;" data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
                   </div>`;
-    
+
     if (this.lineaPlot.winterview) {
-      html = html.replace('<linea-plot ', '<linea-plot showonlywinter');
+      html = html.replace("<linea-plot ", "<linea-plot showonlywinter");
     }
     const binary = ExportModal.#toBinary(html);
 
@@ -741,8 +741,10 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG({ width, heightPerCanvas, title }: {width: number, heightPerCanvas: number, title: string},
-                          noshow: boolean = false) {
+  async #exportAllPlotsToPNG(
+    { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
+    noshow: boolean = false,
+  ) {
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
       alert("Nothing to export!");
