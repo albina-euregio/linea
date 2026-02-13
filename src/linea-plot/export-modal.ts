@@ -637,11 +637,14 @@ export class ExportModal {
     const exports = this.#getExportSettings();
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
 
-    const html = `<div data-lineaplot-wrapper>
+    let html = `<div data-lineaplot-wrapper>
                     <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
                     <linea-plot style="position: absolute; inset: 0; z-index: 2;" data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
                   </div>`;
-
+    
+    if (this.lineaPlot.winterview) {
+      html = html.replace('<linea-plot ', '<linea-plot showonlywinter');
+    }
     const binary = ExportModal.#toBinary(html);
 
     let totalCanvases = 0;
