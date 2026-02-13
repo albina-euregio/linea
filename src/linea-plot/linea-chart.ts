@@ -1,5 +1,4 @@
 import uPlot from "uplot";
-import css from "uplot/dist/uPlot.min.css?raw";
 import { opts_TA, opts_TA_TD_TSS, opts_TD, opts_TSS, opts_SurfaceHoar } from "./opts_TA_TD_TSS";
 import { opts_DW, opts_VW, opts_VW_MAX, opts_VW_VWG_DW } from "./opts_VW_VWG_DW";
 import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
@@ -72,13 +71,11 @@ export class LineaChart extends AbstractLineaChart {
 
   async createPlots() {
     this.resizeObserver.unobserve(this);
-    const style = document.createElement("style");
-    style.textContent = css;
     const plot_TA_TD_TSS = document.createElement("div");
     const plot_VW_VWG_DW = document.createElement("div");
     const plot_HS_PSUM = document.createElement("div");
     const plot_RH_GR = document.createElement("div");
-    this.replaceChildren(style, plot_HS_PSUM, plot_VW_VWG_DW, plot_TA_TD_TSS, plot_RH_GR);
+    this.replaceChildren(plot_HS_PSUM, plot_VW_VWG_DW, plot_TA_TD_TSS, plot_RH_GR);
 
     if (this.result.values.HS || this.result.values.PSUM) {
       const p = new uPlot(

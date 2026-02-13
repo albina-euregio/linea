@@ -7,6 +7,7 @@ import { LineaYearChart } from "./linea-plot/linea-year-chart";
 import type { ExportModal } from "./linea-plot/export-modal";
 import type AirDatepicker from "air-datepicker";
 import css from "./linea-plot.css?inline";
+import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 /**
  * LineaPlot Web Component
  * 
@@ -104,7 +105,7 @@ export class LineaPlot extends HTMLElement {
   async connectedCallback() {
     this.styleTag = document.createElement("style");
 
-    this.styleTag.textContent = css;
+    this.styleTag.textContent = [css, cssuPlot].join(" ");
     this.append(this.styleTag);
     await this.#addControls();
     this.#addExportModal();

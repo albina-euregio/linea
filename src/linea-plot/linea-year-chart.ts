@@ -1,5 +1,4 @@
 import uPlot from "uplot";
-import css from "uplot/dist/uPlot.min.css?raw";
 import { i18n } from "../i18n";
 import {
   opts_HS_year_current,
@@ -193,13 +192,11 @@ export class LineaYearChart extends AbstractLineaChart {
 
     this.resizeObserver.unobserve(this);
 
-    const style = document.createElement("style");
-    style.textContent = css;
     const plot_HS_year = document.createElement("div");
     const plot_NS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
     const plot_DATAPOINTS_year = document.createElement("div");
-    this.replaceChildren(style, plot_HS_year, plot_NS_year, plot_TEMP_year, plot_DATAPOINTS_year);
+    this.replaceChildren(plot_HS_year, plot_NS_year, plot_TEMP_year, plot_DATAPOINTS_year);
 
     const timeZone = i18n.timezone();
 
