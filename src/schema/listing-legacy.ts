@@ -164,7 +164,7 @@ export const FeatureSchema = z
 
 export const FeatureCollectionSchema = z
   .object({
-    type: z.enum(["FeatureCollection"]),
+    type: z.enum(["FeatureCollection"]).optional(),
     features: z.array(FeatureSchema),
     properties: z.any(),
   })
