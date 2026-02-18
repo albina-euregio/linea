@@ -23,6 +23,7 @@ export class TouchZoom {
     function init(u: uPlot) {
       const PAN_SPEED = 0.28;
       const ZOOM_SPEED = 0.5;
+      const MIN_VISIBLE_DATAPOINTS = 21;
 
       const over = u.over;
       let rect: DOMRect;
@@ -114,6 +115,24 @@ export class TouchZoom {
               if (nxMax - nxMin < 5) {
                 nxMax = nxMin + 5; // prevent collapsing
               }
+
+              // enforcing a maximum of MIN_VISIBLE_DATAPOINTS for better zooming experience
+              const visiblePoints = u.data[0].filter(
+                (x: number) => x >= nxMin && x <= nxMax,
+              ).length;
+              if (visiblePoints < MIN_VISIBLE_DATAPOINTS) {
+                const mid = (nxMin + nxMax) / 2;
+
+                const midIndex = u.data[0].findIndex((x: number) => x >= mid);
+                const half = Math.floor(MIN_VISIBLE_DATAPOINTS / 2);
+
+                const startIndex = Math.max(0, midIndex - half);
+                const endIndex = Math.min(u.data[0].length - 1, midIndex + half);
+
+                nxMin = u.data[0][startIndex];
+                nxMax = u.data[0][endIndex];
+              }
+
               updatePlots(plots, nxMin, nxMax);
             }
           });
