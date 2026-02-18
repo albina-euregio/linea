@@ -21,8 +21,10 @@ import uPlot from "uplot";
 export class TouchZoom {
   static touchZoomPlugin() {
     function init(u: uPlot) {
-      const over = u.over;
+      const PAN_SPEED = 0.28;
+      const ZOOM_SPEED = 0.5;
 
+      const over = u.over;
       let rect: DOMRect;
       let fr = { x: 0, dx: 0, d: 1 }; // first touch
       let to = { x: 0, dx: 0, d: 1 }; // current touch
@@ -88,7 +90,7 @@ export class TouchZoom {
             if (e.touches.length === 1) {
               // Single-finger PAN
               const dx = to.x - fr.x;
-              const shift = (-dx / rect.width) * windowWidth;
+              const shift = (-dx / rect.width) * windowWidth * PAN_SPEED;
 
               let newMin = Math.max(
                 dataMin,
@@ -98,7 +100,8 @@ export class TouchZoom {
               updatePlots(plots, newMin, newMax);
             } else if (e.touches.length === 2) {
               // Two-finger PINCH ZOOM
-              const xFactor = fr.dx / to.dx;
+              const xRawFactor = fr.dx / to.dx;
+              const xFactor = 1 + (xRawFactor - 1) * ZOOM_SPEED;
               const leftPct = to.x / rect.width;
               const nxRange = windowWidth * xFactor;
               let nxMin =
@@ -108,7 +111,9 @@ export class TouchZoom {
               // clamp to data
               nxMin = Math.max(dataMin, nxMin);
               nxMax = Math.min(dataMax, nxMax);
-              if (nxMax - nxMin < 5) nxMax = nxMin + 5; // prevent collapsing
+              if (nxMax - nxMin < 5) {
+                nxMax = nxMin + 5; // prevent collapsing
+              }
               updatePlots(plots, nxMin, nxMax);
             }
           });
