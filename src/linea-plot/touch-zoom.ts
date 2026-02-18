@@ -118,10 +118,6 @@ export class TouchZoom {
       over.addEventListener("touchstart", (e) => {
         rect = over.getBoundingClientRect();
         storePos(fr, e);
-
-        const oxRange = u.scales.x.max - u.scales.x.min;
-        const xVal = u.posToVal(fr.x, "x");
-
         document.addEventListener("touchmove", onMove, { passive: true });
       });
 
