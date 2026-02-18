@@ -73,7 +73,7 @@ export class OptsHelper {
       height: 200,
       padding: [20, 3, 0, -10],
       cursor: cursorOpts,
-      plugins: [TouchZoom.touchZoomPlugin({})],
+      plugins: [TouchZoom.touchZoomPlugin()],
       legend: {
         show: true,
         live: true,
