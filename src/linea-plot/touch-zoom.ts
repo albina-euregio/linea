@@ -22,6 +22,7 @@ export class TouchZoom {
   static touchZoomPlugin() {
     function init(u: uPlot) {
       const over = u.over;
+
       let rect: DOMRect;
       let fr = { x: 0, dx: 0, d: 1 }; // first touch
       let to = { x: 0, dx: 0, d: 1 }; // current touch
@@ -118,8 +119,8 @@ export class TouchZoom {
         rect = over.getBoundingClientRect();
         storePos(fr, e);
 
-        oxRange = u.scales.x.max - u.scales.x.min;
-        xVal = u.posToVal(fr.x, "x");
+        const oxRange = u.scales.x.max - u.scales.x.min;
+        const xVal = u.posToVal(fr.x, "x");
 
         document.addEventListener("touchmove", onMove, { passive: true });
       });
