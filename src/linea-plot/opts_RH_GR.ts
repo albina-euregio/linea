@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import { timeAxis } from "./opts_time_axis";
+import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { OptsHelper } from "./opts-helper";
 
@@ -30,6 +30,7 @@ export const opts_RH_GR: uPlot.Options = {
   },
 
   scales: {
+    x: timeScale,
     y: {
       range: [0, 100],
     },

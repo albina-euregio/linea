@@ -18,13 +18,12 @@ import uPlot from "uplot";
  *
  * Modified from: https://leeoniya.github.io/uPlot/demos/zoom-touch.html
  */
+const PAN_SPEED = 0.28;
+const ZOOM_SPEED = 0.5;
+export const MIN_VISIBLE_DATAPOINTS = 21;
 export class TouchZoom {
   static touchZoomPlugin() {
     function init(u: uPlot) {
-      const PAN_SPEED = 0.28;
-      const ZOOM_SPEED = 0.5;
-      const MIN_VISIBLE_DATAPOINTS = 21;
-
       const over = u.over;
       let rect: DOMRect;
       let fr = { x: 0, dx: 0, d: 1 }; // first touch

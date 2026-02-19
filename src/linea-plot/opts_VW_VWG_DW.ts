@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import { timeAxis } from "./opts_time_axis";
+import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { OptsHelper, type SplitOptions } from "./opts-helper";
 
@@ -52,6 +52,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
     ],
   },
   scales: {
+    x: timeScale,
     y: {
       range: (u, dataMin, dataMax) => {
         const closest = [100, 120, 160, 230, 300].reduce((prev, curr) =>

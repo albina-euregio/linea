@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { timeAxis } from "./opts_time_axis";
+import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { OptsHelper, type SplitOptions } from "./opts-helper";
 
@@ -36,6 +36,7 @@ export const opts_HS_year: uPlot.Options = {
   },
 
   scales: {
+    x: timeScale,
     y: {
       range: (_u, _dataMin, dataMax) => {
         if (dataMax > 500) {
