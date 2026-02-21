@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { timeAxis } from "./opts_time_axis";
+import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { OptsHelper, type SplitOptions } from "./opts-helper";
 
@@ -37,6 +37,7 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
   },
 
   scales: {
+    x: timeScale,
     y: {
       range: (_u, _dataMin, dataMax) => {
         if (dataMax > 70) {
@@ -84,7 +85,6 @@ export const opts_DATAPOINTS_amount_year: uPlot.Series = {
   label: i18n.message("linea:parameter:DATAPOINTS:amount"),
   stroke: "#00ff55ff",
   width: 2,
-  points: { show: false },
   scale: "y",
   value: (u, v) => i18n.number(v, {}, i18n.message("linea:unit:DATAPOINTS")),
 };

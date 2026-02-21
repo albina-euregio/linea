@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { timeAxis } from "./opts_time_axis";
+import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { OptsHelper, type SplitOptions } from "./opts-helper";
 
@@ -35,6 +35,7 @@ export const opts_TEMP_year: uPlot.Options = {
   },
 
   scales: {
+    x: timeScale,
     y: {
       range: (_u, _dataMin, dataMax) => {
         return dataMax > 20 ? [-30, 30] : [-30, 20];
@@ -113,13 +114,18 @@ const baseTempSeries = (key: string, color: string, width = 2): uPlot.Series => 
   label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
   width,
-  points: { show: false },
   scale: "y",
   value: (u, v) => i18n.number(v, {}, "°C"),
 });
 
-export const opts_TEMP_year_min = baseTempSeries("TEMP_min", "#d9dcdc", 2);
-export const opts_TEMP_year_max = baseTempSeries("TEMP_max", "#d9dcdc", 0);
+export const opts_TEMP_year_min = {
+  ...baseTempSeries("TEMP_min", "#d9dcdc", 2),
+  points: { show: false },
+};
+export const opts_TEMP_year_max = {
+  ...baseTempSeries("TEMP_max", "#d9dcdc", 0),
+  points: { show: false },
+};
 export const opts_TEMP_year_median = baseTempSeries("TEMP_median", "#878787", 2);
 export const opts_TEMP_year_current = baseTempSeries("TEMP", "#DE2D26", 2);
 export const opts_DEW_year_current = baseTempSeries("TSS", "#FC9272", 2);

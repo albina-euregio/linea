@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { timeAxis } from "./opts_time_axis";
+import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { OptsHelper, type SplitOptions } from "./opts-helper";
 
@@ -36,6 +36,7 @@ export const opts_HS_year: uPlot.Options = {
   },
 
   scales: {
+    x: timeScale,
     y: {
       range: (_u, _dataMin, dataMax) => {
         if (dataMax > 500) {
@@ -124,13 +125,18 @@ const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
   label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
   width,
-  points: { show: false },
   scale: "y",
   value: (u, v) => i18n.number(v, {}, "cm"),
 });
 
-export const opts_HS_year_min = baseHsSeries("HS_min", "#d9dcdc", 2);
-export const opts_HS_year_max = baseHsSeries("HS_max", "#d9dcdc", 0);
+export const opts_HS_year_min = {
+  ...baseHsSeries("HS_min", "#d9dcdc", 2),
+  points: { show: false },
+};
+export const opts_HS_year_max = {
+  ...baseHsSeries("HS_max", "#d9dcdc", 0),
+  points: { show: false },
+};
 export const opts_HS_year_median = baseHsSeries("HS_median", "#878787", 2);
 export const opts_HS_year_current = baseHsSeries("HS", "#08519C", 2);
 

@@ -143,48 +143,53 @@ linea-plot {
   &:focus {
     outline: none;
   }
-}
 
-.winterview-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5em 1em;
-  cursor: pointer;
-  overflow: hidden;
-}
+  .winterview-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    overflow: hidden;
+  }
 
-.winterview-btn .winterview-btn-loader {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.6);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 10;
-}
+  .winterview-btn .winterview-btn-loader {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+  }
 
-.winterview-btn.loading .winterview-btn-loader {
-  opacity: 1;
-}
+  .winterview-btn.loading .winterview-btn-loader {
+    opacity: 1;
+  }
 
-.winterview-btn.loading .winterview-btn-label {
-  visibility: hidden;
-}
+  .winterview-btn.loading .winterview-btn-label {
+    visibility: hidden;
+  }
 
-.winterview-btn-spinner {
-  width: 1em;
-  height: 1em;
-  border: 2px solid #000;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  transform-origin: center;
-  will-change: transform;
-  display: block;
+  .winterview-btn-spinner {
+    width: 1em;
+    height: 1em;
+    border: 2px solid #000;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    transform-origin: center;
+    will-change: transform;
+    display: block;
+  }
+
+  .u-under,
+  .u-over {
+    touch-action: pan-y;
+  }
 }
 
 @keyframes spin {
