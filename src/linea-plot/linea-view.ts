@@ -166,11 +166,6 @@ export abstract class LineaView {
   onSwitchFrom() {}
 
   /**
-   * Save the current state for potential restoration
-   */
-  saveState() {}
-
-  /**
    * Handle the click on the previous button in the datepicker
    */
   abstract previous(previous: HTMLButtonElement, next: HTMLButtonElement): void;
