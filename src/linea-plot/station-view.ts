@@ -70,7 +70,10 @@ export class StationView extends LineaView {
         },
       });
       (this.dp as any).disabled = false;
-      this.updateDatepickerStartEndDate(this.savedStartDate, this.savedEndDate);
+      this.updateDatepickerStartEndDate(
+        this.savedStartDate,
+        this.savedEndDate.subtract({ days: 1 }),
+      );
     }
   }
 
