@@ -658,9 +658,47 @@ export class ExportModal {
     const swatchSize = 18;
     const legendItemHeight = 22;
     const legendPadding = 20;
+    const labelFontSize = 16;
+    const legendLines: Array<{
+      items: Array<{ label: string; color: string; width: number }>;
+      startX: number;
+    }> = [];
+    //Calculate legend layout - try to fit as many items as possible into one line, then create new lines as needed.
+    if (Object.keys(legendItems).length > 0) {
+      const xStart = legendPadding * 2;
 
+      const ctx = canvases[0].getContext("2d")!;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = labelFontSize + "px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
+      let currentLine: Array<{ label: string; color: string; width: number }> = [];
+      let currentLineWidth = 0;
+
+      for (const [label, color] of Object.entries(legendItems)) {
+        const textwidth = ctx.measureText(label).width;
+        const itemWidth = swatchSize + 8 + textwidth + 10;
+
+        if (currentLineWidth + itemWidth > canvases[0].width - legendPadding * 2) {
+          if (currentLine.length > 0) {
+            legendLines.push({ items: currentLine, startX: xStart });
+            currentLine = [];
+            currentLineWidth = 0;
+          }
+        }
+        currentLine.push({ label, color, width: itemWidth });
+        currentLineWidth += itemWidth;
+      }
+
+      if (currentLine.length > 0) {
+        legendLines.push({ items: currentLine, startX: xStart });
+      }
+    }
+
+    const titleHeight = title ? 40 : 0;
     const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-    const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
+    const legendHeight = (legendLines.length * legendItemHeight * 3) / 2;
+    const totalHeight = titleHeight + chartsHeight + legendHeight;
 
     const outCanvas = document.createElement("canvas");
     outCanvas.width = canvases[0].width;
@@ -670,7 +708,6 @@ export class ExportModal {
     const ctx = outCanvas.getContext("2d")!;
     ctx.imageSmoothingEnabled = false;
     ctx.imageSmoothingQuality = "high";
-
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
 
@@ -691,33 +728,38 @@ export class ExportModal {
       y += c.height;
     }
 
-    if (Object.keys(legendItems).length > 0) {
-      const swatchSize = 18;
-      const xStart = legendPadding * 2;
-      let legendY = y + legendPadding + legendItemHeight / 2;
+    let lineIndex = 0;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.font = labelFontSize + "px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
 
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    for (const line of legendLines) {
+      const totalLineWidth = line.items.reduce((sum, item) => sum + item.width, 0);
+      const centeredStartX = (outCanvas.width - totalLineWidth) / 2;
 
-      let x = xStart;
-      for (const [label, color] of Object.entries(legendItems)) {
-        const textwidth = ctx.measureText(label).width;
-        if (x + swatchSize + 8 + textwidth > outCanvas.width) {
-          x = xStart;
-          legendY += legendItemHeight;
-        }
-
+      let x = centeredStartX;
+      for (const item of line.items) {
         // colored square
-        ctx.fillStyle = color;
-        ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
+        ctx.fillStyle = item.color;
+        ctx.fillRect(
+          x,
+          y + legendPadding + (lineIndex * legendItemHeight * 3) / 2 - swatchSize / 2,
+          swatchSize,
+          swatchSize,
+        );
 
         // label
         ctx.fillStyle = "#000";
-        ctx.fillText(label, x + swatchSize + 8, legendY);
-        x = x + swatchSize + 8 + textwidth + 10;
+        ctx.fillText(
+          item.label,
+          x + swatchSize + 8,
+          y + legendPadding + (lineIndex * legendItemHeight * 3) / 2,
+        );
+        x += item.width;
       }
+      lineIndex++;
     }
+
     if (activeLinecharts.length == 1) {
       activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
     }
