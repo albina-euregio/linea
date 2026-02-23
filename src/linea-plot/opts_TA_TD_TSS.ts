@@ -85,7 +85,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         } as SplitOptions);
       },
 
-      values: (u, vals) => vals.map((v) => v.toString()),
+      values: (_u, vals) => vals.map((v) => v.toString()),
     },
     {
       scale: "y",
@@ -106,7 +106,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
           splitcount: 9,
         } as SplitOptions);
       },
-      values: (u, vals) => vals.map((v) => v.toString()),
+      values: (_u, vals) => vals.map((v) => v.toString()),
     },
     {
       scale: "yhidden",
@@ -128,7 +128,7 @@ const createSeries = (labelKey: any, color: string): uPlot.Series => ({
   scale: "y",
   width: 2,
   spanGaps: false,
-  value: (u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "°C")),
+  value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "°C")),
 });
 
 export const opts_TA = createSeries("linea:unit:temperature", "#DE2D26");
@@ -142,7 +142,7 @@ export const opts_SurfaceHoar: uPlot.Series = {
   spanGaps: false,
   fill: "rgba(1, 0, 0, 0.1)",
   stroke: "rgba(0, 0, 0, 0.1)",
-  value: (u, v) =>
+  value: (_u, v) =>
     v == null
       ? "-"
       : v > 0
