@@ -435,7 +435,7 @@ export class ExportModal {
    */
   async #exportAsIframe() {
     if (this.#getActiveLineacharts().length == 0) {
-      alert("Nothing to export!");
+      alert(i18n.message("linea:message:noplotselected"));
       return;
     }
     const exports = this.#getExportSettings();
@@ -482,7 +482,7 @@ export class ExportModal {
 
   async #exportAsBlogElement() {
     if (this.#getActiveLineacharts().length == 0) {
-      alert("Nothing to export!");
+      alert(i18n.message("linea:message:noplotselected"));
       return;
     }
     const exports = this.#getExportSettings();
