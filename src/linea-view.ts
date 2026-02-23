@@ -34,7 +34,7 @@ export abstract class LineaView {
 
   /**
    * This method is called on each switching of views and is responsible for rendering the charts in the current view and updating the datepicker if available.
-   * It is important to note that this method can be called multiple times and should not create new charts or datepickers if they already exist, 
+   * It is important to note that this method can be called multiple times and should not create new charts or datepickers if they already exist,
    * but rather update the existing ones.
    */
   abstract show(): void;
@@ -184,22 +184,51 @@ export abstract class LineaView {
    */
   abstract previous(previous: HTMLButtonElement, next: HTMLButtonElement): void;
 
+  /**
+   * Handles the click on the next button in the datepicker
+   */
   abstract next(previous: HTMLButtonElement, next: HTMLButtonElement): void;
 
+  /**
+   * Selects the given timespan in the datepicker and updates the charts to show the data for this timespan.
+   * @param startDate  from where the data shall be shown
+   * @param endDate  to when the data shall be shown
+   */
   abstract select(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime): void;
 
+  /**
+   * Returns the start date currently selected in the datepicker.
+   */
   abstract getDatePickerStartDate(): Temporal.ZonedDateTime;
 
+  /**
+   * Returns the end date currently selected in the datepicker.
+   */
   abstract getDatePickerEndDate(): Temporal.ZonedDateTime;
 
+  /**
+   * Updates the datepicker to select the given start and end date and updates the charts to show the data for this timespan.
+   * @param startDate  from where the data shall be shown
+   * @param endDate  to when the data shall be shown
+   */
   updateDatepickerStartEndDate(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime) {
     this.dp?.selectDate([this.zonedDateTimeToDate(startDate), this.zonedDateTimeToDate(endDate)]);
   }
 
+  /**
+   * Provides a utility function to convert a Temporal.ZonedDateTime to a JavaScript Date object, which is needed for the AirDatepicker.
+   * @param value  the Temporal.ZonedDateTime to convert
+   * @returns  the corresponding JavaScript Date object
+   */
   zonedDateTimeToDate(value: Temporal.ZonedDateTime): Date {
     return new Date(value.toInstant().toString());
   }
 
+  /**
+   * Provides a utility function to convert a JavaScript Date object to a Temporal.ZonedDateTime, which is needed for handling the selected dates from the AirDatepicker.
+   * @param value  the JavaScript Date to convert
+   * @returns  the corresponding Temporal.ZonedDateTime object
+   */
   dateToZonedDateTime(value: Date): Temporal.ZonedDateTime {
     const instant = Temporal.Instant.from(value.toISOString());
     return instant.toZonedDateTimeISO(i18n.timezone());
