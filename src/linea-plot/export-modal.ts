@@ -711,15 +711,23 @@ export class ExportModal {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
 
+    //draw title
     if (title) {
       ctx.fillStyle = "#000";
-      ctx.font = "24px Arial";
       ctx.textAlign = "center";
-      const titlewidth = ctx.measureText(title).width;
-      if (width < titlewidth) {
-        ctx.font = "18px Arial";
+      ctx.textBaseline = "top";
+
+      let fontSize = 24;
+      ctx.font = `bold ${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`;
+      let titleWidth = ctx.measureText(title).width;
+
+      // Reduce font size until title fits
+      while (titleWidth > outCanvas.width - 40 && fontSize > 12) {
+        fontSize -= 2;
+        ctx.font = `bold ${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`;
+        titleWidth = ctx.measureText(title).width;
       }
-      ctx.fillText(title, outCanvas.width / 2, 40);
+      ctx.fillText(title, outCanvas.width / 2, 18);
     }
 
     let y = titleHeight;
