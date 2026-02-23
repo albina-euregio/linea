@@ -355,7 +355,7 @@ export class ExportModal {
 
   async #downloadSMETS(srcs: string[]) {
     for (const src of srcs) {
-      this.#download(src, src.split("/")[-1]);
+      this.#download(src, src.split("/")[src.split("/").length - 1]);
       await new Promise(requestAnimationFrame);
       await new Promise((r) => setTimeout(r, 1000));
     }
