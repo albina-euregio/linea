@@ -60,13 +60,6 @@ export class WinterView extends LineaView {
   }
 
   /**
-   * Save current state
-   */
-  saveState(): void {
-    // Winter view doesn't need to save state as it always shows the full season
-  }
-
-  /**
    * Called when switching to this view
    */
   onSwitchTo(): void {
@@ -79,18 +72,8 @@ export class WinterView extends LineaView {
         onSelect: () => {},
       });
       const [startDate, endDate] = this.#getWinterDates();
-      this.dp.selectDate([
-        this.#zonedDateTimeToDate(startDate),
-        this.#zonedDateTimeToDate(endDate),
-      ]);
+      this.dp.selectDate([this.zonedDateTimeToDate(startDate), this.zonedDateTimeToDate(endDate)]);
     }
-  }
-
-  /**
-   * Called when switching away from this view
-   */
-  onSwitchFrom(): void {
-    // Nothing to do when switching away
   }
 
   select(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime): void {
@@ -98,9 +81,35 @@ export class WinterView extends LineaView {
     this.filterAndUpdateData(startDate, endDate);
   }
 
+  getDatePickerStartDate(): Temporal.ZonedDateTime {
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length === 0) {
+      return Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
+        i18n.timezone(),
+      );
+    }
+    const date = new Date(this.dp.selectedDates[0]);
+    return this.dateToZonedDateTime(date);
+  }
+
+  getDatePickerEndDate(): Temporal.ZonedDateTime {
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length === 0) {
+      return Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
+        i18n.timezone(),
+      );
+    }
+    let date: Date;
+    if (this.dp.selectedDates.length == 1) {
+      date = new Date(this.dp.selectedDates[0]);
+    } else {
+      date = new Date(this.dp.selectedDates[1]);
+    }
+    return this.dateToZonedDateTime(date);
+  }
+
   previous(previous: HTMLButtonElement, next: HTMLButtonElement): void {
-    const start = this.dateToZonedDateTime(this.dp.selectedDates[0]);
-    const end = this.dateToZonedDateTime(this.dp.selectedDates[1]);
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length < 2) return;
+    const start = this.dateToZonedDateTime(new Date(this.dp.selectedDates[0]));
+    const end = this.dateToZonedDateTime(new Date(this.dp.selectedDates[1]));
     if (!start || !end) return;
     next.disabled = false;
     let newEnd = end.subtract({ years: 1 });
@@ -113,8 +122,9 @@ export class WinterView extends LineaView {
   }
 
   next(previous: HTMLButtonElement, next: HTMLButtonElement): void {
-    const start = this.dateToZonedDateTime(this.dp.selectedDates[0]);
-    const end = this.dateToZonedDateTime(this.dp.selectedDates[1]);
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length < 2) return;
+    const start = this.dateToZonedDateTime(new Date(this.dp.selectedDates[0]));
+    const end = this.dateToZonedDateTime(new Date(this.dp.selectedDates[1]));
     if (!start || !end) return;
     previous.disabled = false;
     let newEnd = end.add({ years: 1 });
@@ -165,9 +175,5 @@ export class WinterView extends LineaView {
       Temporal.PlainDate.from(`${winterStartYear}-10-01`).toZonedDateTime(i18n.timezone()),
       Temporal.PlainDate.from(`${winterEndYear}-07-01`).toZonedDateTime(i18n.timezone()),
     ];
-  }
-
-  #zonedDateTimeToDate(value: Temporal.ZonedDateTime): Date {
-    return new Date(value.toInstant().toString());
   }
 }

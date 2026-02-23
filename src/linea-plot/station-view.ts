@@ -8,7 +8,6 @@ import type { LineaPlot } from "../linea-plot";
  * Station View - displays non-winter station data with interactive filtering
  */
 export class StationView extends LineaView {
-  private lazysrcs: string[] = [];
   private savedStartDate: Temporal.ZonedDateTime | undefined;
   private savedEndDate: Temporal.ZonedDateTime | undefined;
   private savedDateFormat: string = "";
@@ -24,22 +23,14 @@ export class StationView extends LineaView {
    */
   async initialize() {
     if (this.lineaplot.hasAttribute("data")) {
-      console.warn("Data attribute is deprecated, please use src and lazysrc attributes instead.");
       this.results = JSON.parse(this.lineaplot.getAttribute("data") ?? "[]") as Result[];
     } else {
       this.results = await this.fetchData("src");
-      this.fetchData("lazysrc").then((lazyResults) => {
-        this.lazysrcs = this.srcs;
-        this.srcs = [];
-        this.results = lazyResults;
-      });
-    }
-  }
-
-  public show() {
-    this.clearCharts();
-    if (this.lineaplot.hasAttribute("backgroundcolors")) {
-      this.backgroundColors = JSON.parse(this.lineaplot.getAttribute("backgroundcolors") ?? "");
+      if (this.lineaplot.hasAttribute("lazysrc")) {
+        this.fetchData("lazysrc").then((lazyResults) => {
+          this.results = lazyResults;
+        });
+      }
     }
     for (const i in this.results) {
       const result = this.results[i];
@@ -50,67 +41,20 @@ export class StationView extends LineaView {
         this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
       );
       this.charts.push(lc);
-      this.lineaplot.appendChild(lc);
-      this.lineaplot.setStartEndDateTo(
-        result.timestamps[0],
-        result.timestamps[result.timestamps.length - 1],
-      );
     }
+  }
+
+  public show() {
+    if (this.lineaplot.hasAttribute("backgroundcolors")) {
+      this.backgroundColors = JSON.parse(this.lineaplot.getAttribute("backgroundcolors") ?? "");
+    }
+
+    for (const chart of this.charts) {
+      this.lineaplot.appendChild(chart);
+    }
+
+    this.lineaplot.setStartEndDateTo(this.minTime, this.maxTime);
     this.filterAndUpdateData();
-  }
-  /**
-   * Get the lazy sources
-   */
-  getLazySources(): string[] {
-    return this.lazysrcs;
-  }
-
-  /**
-   * Update results and recreate charts
-   */
-  updateResults(results: Result[]) {
-    this.results = results;
-  }
-
-  /**
-   * Filter and update data in all charts
-   */
-  filterAndUpdateData(
-    startDate: Temporal.ZonedDateTime = this.getDatePickerStartDate(),
-    endDate: Temporal.ZonedDateTime = this.getDatePickerEndDate(),
-  ): void {
-    const startTimestamp = startDate.toInstant().epochMilliseconds;
-    const endTimestamp = endDate.toInstant().epochMilliseconds;
-
-    for (let i = 0; i < this.charts.length; i++) {
-      const res = this.results[i];
-      if (res === undefined) {
-        continue;
-      }
-      let filteredValues: Record<string, (number | null)[]> = {};
-
-      for (const key in res.values) {
-        (filteredValues as any)[key] = (res.values as any)[key].filter(
-          (_t: any, j: number) =>
-            res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp,
-        );
-      }
-      const filteredTimestamps = res.timestamps.filter(
-        (t) => t >= startTimestamp && t <= endTimestamp,
-      );
-      this.charts[i].setData(filteredTimestamps, filteredValues as Values);
-    }
-  }
-
-  /**
-   * Save current state when switching away
-   */
-  saveState(): void {
-    if (this.dp) {
-      this.savedDateFormat = (this.dp as any).locale.dateFormat;
-      this.savedStartDate = this.getDatePickerStartDate();
-      this.savedEndDate = this.getDatePickerEndDate();
-    }
   }
 
   /**
@@ -134,17 +78,23 @@ export class StationView extends LineaView {
    * Called when switching away from this view
    */
   onSwitchFrom(): void {
-    this.saveState();
+    if (this.dp) {
+      this.savedDateFormat = (this.dp as any).locale.dateFormat;
+      this.savedStartDate = this.getDatePickerStartDate();
+      this.savedEndDate = this.getDatePickerEndDate();
+    }
   }
 
   select(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime) {
+    console.log("select", startDate, endDate);
     this.updateDatepickerStartEndDate(startDate, endDate);
     this.filterAndUpdateData(startDate, endDate);
   }
 
   previous(previous: HTMLButtonElement, next: HTMLButtonElement): void {
-    const start = this.dateToZonedDateTime(this.dp.selectedDates[0]);
-    const end = this.dateToZonedDateTime(this.dp.selectedDates[1]);
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length < 2) return;
+    const start = this.dateToZonedDateTime(new Date(this.dp.selectedDates[0]));
+    const end = this.dateToZonedDateTime(new Date(this.dp.selectedDates[1]));
     if (!start || !end) return;
     next.disabled = false;
     let newEnd = end.subtract({ days: 1 });
@@ -164,8 +114,9 @@ export class StationView extends LineaView {
   }
 
   next(previous: HTMLButtonElement, next: HTMLButtonElement): void {
-    const start = this.dateToZonedDateTime(this.dp.selectedDates[0]);
-    const end = this.dateToZonedDateTime(this.dp.selectedDates[1]);
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length < 2) return;
+    const start = this.dateToZonedDateTime(new Date(this.dp.selectedDates[0]));
+    const end = this.dateToZonedDateTime(new Date(this.dp.selectedDates[1]));
     if (!start || !end) return;
     previous.disabled = false;
     let newStart = start.add({ days: 1 });
@@ -185,28 +136,30 @@ export class StationView extends LineaView {
   }
 
   getDatePickerStartDate(): Temporal.ZonedDateTime {
-    if (!this.dp) {
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length === 0) {
       return Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
         i18n.timezone(),
       );
     }
-    const date: Date = this.dp.selectedDates[0];
+    // Create a copy to avoid mutating the datepicker's internal date
+    const date = new Date(this.dp.selectedDates[0]);
     date.setHours(0);
     date.setMinutes(0);
     return this.dateToZonedDateTime(date);
   }
 
   getDatePickerEndDate(): Temporal.ZonedDateTime {
-    if (!this.dp) {
+    if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length === 0) {
       return Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
         i18n.timezone(),
       );
     }
     let date: Date;
     if (this.dp.selectedDates.length == 1) {
-      date = this.dp.selectedDates[0];
+      // Create a copy to avoid any potential issues
+      date = new Date(this.dp.selectedDates[0]);
     } else {
-      date = this.dp.selectedDates[1];
+      date = new Date(this.dp.selectedDates[1]);
     }
     return this.dateToZonedDateTime(date).add({ days: 1 });
   }
