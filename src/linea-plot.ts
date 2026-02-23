@@ -314,7 +314,7 @@ export class LineaPlot extends HTMLElement {
       const filteredTimestamps = res.timestamps.filter(
         (t) => t >= startTimestamp && t <= endTimestamp,
       );
-      (this.lineacharts[i] as LineaChart).setData(filteredTimestamps, filteredValues as Values);
+      this.lineacharts[i].setData(filteredTimestamps, filteredValues as Values);
     }
   }
 
@@ -588,11 +588,14 @@ export class LineaPlot extends HTMLElement {
   private oldDateFormat: string = "";
   private oldStartDate: Temporal.ZonedDateTime;
   private oldEndDate: Temporal.ZonedDateTime;
+  private oldLineacharts: AbstractLineaChart[] = [];
 
   async #switchToWinterView() {
     if (this.winterresults.length == 0) {
       await this.fetchAndStoreData("wintersrc");
     }
+    // Store the current station view charts to restore later
+    this.oldLineacharts = [...this.lineacharts];
     this.#renderWinter();
   }
 
@@ -603,24 +606,28 @@ export class LineaPlot extends HTMLElement {
     if (!this.hasAttribute("showonlywinter") && this.dp) {
       this.oldDateFormat = this.dp.locale.dateFormat;
       this.oldStartDate = this.#getDatePickerStartDate();
-      this.oldEndDate = this.#getDatePickerEndDate();
+      this.oldEndDate = this.#getDatePickerEndDate().subtract({ days: 1 });
     }
+
+    // Remove all old station view charts BEFORE the loop
+    for (const lc of this.lineacharts) {
+      this.removeChild(lc);
+    }
+    this.lineacharts = [];
+
     const [startDate, endDate] = this.#getWinterDates();
     for (const i in this.winterresults) {
       const lcy = new LineaYearChart(
         this.winterresults[i],
         true,
-        this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
+        this.winterresults.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
         startDate.toPlainDate(),
         endDate.toPlainDate(),
       );
-      for (const lc of this.lineacharts) {
-        this.removeChild(lc);
-      }
-      this.lineacharts = [];
       this.lineacharts.push(lcy);
       this.appendChild(lcy);
     }
+
     if (this.dp) {
       this.dp.update({
         dateFormat: "yyyy",
@@ -638,7 +645,11 @@ export class LineaPlot extends HTMLElement {
       this.removeChild(lc);
     }
     this.lineacharts = [];
-    this.#initAfterDataStorage();
+
+    for (const oldChart of this.oldLineacharts) {
+      this.lineacharts.push(oldChart);
+      this.appendChild(oldChart);
+    }
 
     this.dp.update({
       dateFormat: this.oldDateFormat,
@@ -646,6 +657,8 @@ export class LineaPlot extends HTMLElement {
     this.dp.disabled = false;
     this.#updateDatepickerStartEndDate(this.oldStartDate, this.oldEndDate);
     this.winterview = false;
+
+    this.filterAndUpdateData();
   }
 
   /**
