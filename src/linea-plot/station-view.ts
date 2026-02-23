@@ -23,7 +23,7 @@ export class StationView extends LineaView {
    */
   async initialize() {
     if (this.lineaplot.hasAttribute("data")) {
-      this.results = JSON.parse(this.lineaplot.getAttribute("data") ?? "[]") as Result[];
+      this.loadFromDataAttribute();
     } else {
       this.results = await this.fetchData("src");
       if (this.lineaplot.hasAttribute("lazysrc")) {

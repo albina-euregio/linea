@@ -1,5 +1,4 @@
 import { i18n } from "../i18n";
-import type { Result } from "../data/station-data";
 import { LineaYearChart } from "./linea-year-chart";
 import { LineaView } from "./linea-view";
 import type { LineaPlot } from "../linea-plot";
@@ -17,7 +16,7 @@ export class WinterView extends LineaView {
    */
   async initialize(): Promise<void> {
     if (this.lineaplot.hasAttribute("data")) {
-      this.results = JSON.parse(this.lineaplot.getAttribute("data") ?? "[]") as Result[];
+      this.loadFromDataAttribute();
     } else {
       this.results = await this.fetchData("wintersrc");
     }
