@@ -20,12 +20,7 @@ export class WinterView extends LineaView {
     } else {
       this.results = await this.fetchData("wintersrc");
     }
-  }
 
-  /**
-   * Renders the winter view
-   */
-  show() {
     const [startDate, endDate] = this.#getWinterDates();
     for (const i in this.results) {
       const lcy = new LineaYearChart(
@@ -38,7 +33,16 @@ export class WinterView extends LineaView {
       this.charts.push(lcy);
       this.lineaplot.appendChild(lcy);
     }
+  }
 
+  /**
+   * Renders the winter view
+   */
+  show() {
+    const [startDate, endDate] = this.#getWinterDates();
+    for (const chart of this.charts) {
+      this.lineaplot.appendChild(chart);
+    }
     if (this.dp) {
       this.dp.update({
         dateFormat: "yyyy",
