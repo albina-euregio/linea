@@ -121,12 +121,12 @@ export const opts_HS_year: uPlot.Options = {
     },
   ],
 };
-const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
+const baseHsSeries = (key: string, color: string): uPlot.Series => ({
   label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
   width: 1.5,
   scale: "y",
-  value: (u, v) => i18n.number(v, {}, "cm"),
+  value: (_u, v) => i18n.number(v, {}, "cm"),
 });
 
 export const opts_HS_year_min = {
@@ -147,6 +147,6 @@ export const opts_HS_year_PSUM: uPlot.Series = {
   stroke: "#6aafd5",
   fill: "#6aafd5",
   scale: "y2",
-  value: (u, v) =>
+  value: (_u, v) =>
     v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "mm"),
 };

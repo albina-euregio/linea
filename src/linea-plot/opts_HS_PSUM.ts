@@ -37,7 +37,7 @@ export const opts_HS_PSUM: uPlot.Options = {
   scales: {
     x: timeScale,
     y: {
-      range: (u, dataMin, dataMax) => {
+      range: (_u, _dataMin, dataMax) => {
         return dataMax > 250 ? [0, 500] : [0, 250];
       },
     },
@@ -88,7 +88,7 @@ export const opts_HS: uPlot.Series = {
   stroke: "#08519C",
   scale: "y",
   width: 1.5,
-  value: (u, v) => i18n.number(v, {}, "cm"),
+  value: (_u, v) => i18n.number(v, {}, "cm"),
 };
 
 export const opts_PSUM: uPlot.Series = {
@@ -97,5 +97,5 @@ export const opts_PSUM: uPlot.Series = {
   fill: "rgba(106, 175, 213, 0.3)",
   scale: "y2",
   width: 1.5,
-  value: (u, v) => i18n.number(v, {}, "mm"),
+  value: (_u, v) => i18n.number(v, {}, "mm"),
 };

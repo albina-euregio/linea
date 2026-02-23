@@ -71,7 +71,7 @@ export const opts_RH: uPlot.Series = {
   stroke: "#8a7474",
   scale: "y",
   width: 1.5,
-  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
 };
 
 export const opts_ISWR: uPlot.Series = {
@@ -80,5 +80,5 @@ export const opts_ISWR: uPlot.Series = {
   fill: "rgba(255,0,0,0.1)",
   scale: "y2",
   width: 1,
-  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
 };

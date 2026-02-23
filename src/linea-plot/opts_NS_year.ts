@@ -62,7 +62,7 @@ export const opts_NS_year_series: uPlot.Series = {
   stroke: "#DE2D26",
   fill: "#DE2D26",
   scale: "y",
-  value: (u, v) =>
+  value: (_u, v) =>
     v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "cm"),
 };
 
