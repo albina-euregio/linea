@@ -294,27 +294,11 @@ export class LineaPlot extends HTMLElement {
       });
       menu.appendChild(winterviewbtn);
     }
-    if (this.hasAttribute("showdatepicker")) {
-      const enlargebtn = document.createElement("button");
-      enlargebtn.innerHTML = `<svg width="13px" height="13px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
-        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
-        <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </svg><span class="linea-tooltiptext">${i18n.message("linea:controls:tooltips:wholetimespan")}</span>`;
-      enlargebtn.classList.add("toggle-btn");
-      enlargebtn.classList.add("linea-tooltip");
-      enlargebtn.addEventListener("click", () => {
-        this.setStartEndDateToMinMax();
-        this.view.filterAndUpdateData();
-      });
-      // menu.appendChild(enlargebtn);
-    }
     controls.appendChild(menu);
     this.appendChild(controls);
     if (this.hasAttribute("showdatepicker")) {
       await this.#constructDatePicker();
-    } 
+    }
     this.focus();
   }
 
