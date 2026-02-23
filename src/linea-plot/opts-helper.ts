@@ -26,7 +26,7 @@ export class OptsHelper {
     const yPosition = 3;
 
     // Left Y-axis label
-    const leftLabelOffset = leftLabel.length * 3 - 10;
+    const leftLabelOffset = ctx.measureText(leftLabel).width / 2 - 10;
     const leftLabelX = chartLeft + leftLabelOffset;
 
     ctx.save();
@@ -43,7 +43,7 @@ export class OptsHelper {
     }
 
     // Right Y-axis label
-    const rightLabelOffset = rightLabel.length * 3 - 10;
+    const rightLabelOffset = ctx.measureText(rightLabel).width / 2 - 10;
     const rightLabelX = chartLeft + chartWidth - rightLabelOffset;
 
     let fontSize = ctx.font ? parseInt(ctx.font, 10) : 12;
