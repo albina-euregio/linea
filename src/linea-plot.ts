@@ -73,8 +73,6 @@ export class LineaPlot extends HTMLElement {
   view!: LineaView;
   private lineaViews!: Map<string, LineaView>;
 
-  private attributeQueue: Promise<void> = Promise.resolve();
-
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   public dp: AirDatepicker | undefined;
 
@@ -87,6 +85,32 @@ export class LineaPlot extends HTMLElement {
     this.append(this.styleTag);
     await this.#addControls();
     this.#addExportModal();
+
+    this.#loadViews();
+
+    this.tabIndex = 0;
+    this.focus();
+    this.isLoaded = true;
+  }
+
+  attributeChangedCallback(name: string) {
+    if (!this.isLoaded) {
+      return;
+    }
+    if (name === "src") {
+      this.#loadViews();
+    }
+  }
+
+  /**
+   * Reload all views with the new data from updated attributes
+   */
+  async #loadViews(): Promise<void> {
+    if (this.view) {
+      for (const chart of this.view.getCharts()) {
+        this.removeChild(chart);
+      }
+    }
 
     this.lineaViews = new Map();
     this.lineaViews.set("station", new StationView(this.backgroundColors, this));
@@ -102,17 +126,6 @@ export class LineaPlot extends HTMLElement {
 
     await this.view.initialize();
     this.view.show();
-
-    this.tabIndex = 0;
-    this.focus();
-    this.isLoaded = true;
-  }
-
-  attributeChangedCallback(name: string) {
-    if (!this.isLoaded) {
-      return;
-    }
-    // reimplemented attribute change handling with a queue to handle multiple changes in a row and to wait for the first one to finish before starting the next one
   }
 
   /**
