@@ -2,7 +2,7 @@ import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
 import type { Result } from "../data/station-data";
-import { AbstractLineaChart } from "./abstract-linea-chart";
+import { AbstractLineaChart } from "../abstract-linea-chart";
 import css from "./export-modal.css?inline";
 import { WinterView } from "./winter-view";
 

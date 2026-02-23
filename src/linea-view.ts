@@ -1,9 +1,9 @@
-import type { Result, Values } from "../data/station-data";
-import { fetchSMET } from "../data/smet-data";
+import type { Result, Values } from "./data/station-data";
+import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
-import type { LineaPlot } from "../linea-plot";
-import { i18n } from "../i18n";
+import type { LineaPlot } from "./linea-plot";
+import { i18n } from "./i18n";
 
 /**
  * Abstract base class for view implementations (Station view and Winter view)

@@ -1,6 +1,6 @@
 import { i18n } from "../i18n";
 import { LineaYearChart } from "./linea-year-chart";
-import { LineaView } from "./linea-view";
+import { LineaView } from "../linea-view";
 import type { LineaPlot } from "../linea-plot";
 
 /**

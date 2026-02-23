@@ -1,12 +1,12 @@
 import { i18n } from "./i18n";
-import { AbstractLineaChart } from "./linea-plot/abstract-linea-chart";
+import { AbstractLineaChart } from "./abstract-linea-chart";
 import { LineaYearChart } from "./linea-plot/linea-year-chart";
 import type { ExportModal } from "./linea-plot/export-modal";
 import type AirDatepicker from "air-datepicker";
 import css from "./linea-plot.css?inline";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import { WinterView } from "./linea-plot/winter-view";
-import type { LineaView } from "./linea-plot/linea-view";
+import type { LineaView } from "./linea-view";
 import { StationView } from "./linea-plot/station-view";
 /**
  * LineaPlot Web Component

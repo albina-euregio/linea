@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import type { Result, Values } from "../data/station-data";
+import type { Result, Values } from "./data/station-data";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
