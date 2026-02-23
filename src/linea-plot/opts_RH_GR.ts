@@ -70,7 +70,7 @@ export const opts_RH: uPlot.Series = {
   label: i18n.message("linea:parameter:RH"),
   stroke: "#8a7474",
   scale: "y",
-  width: 2,
+  width: 1.5,
   value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
 };
 

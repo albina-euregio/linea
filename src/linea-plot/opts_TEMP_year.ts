@@ -113,7 +113,7 @@ export const opts_TEMP_year: uPlot.Options = {
 const baseTempSeries = (key: string, color: string, width = 2): uPlot.Series => ({
   label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
-  width,
+  width: 1,
   scale: "y",
   value: (u, v) => i18n.number(v, {}, "°C"),
 });

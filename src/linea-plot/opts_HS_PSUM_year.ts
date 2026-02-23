@@ -124,7 +124,7 @@ export const opts_HS_year: uPlot.Options = {
 const baseHsSeries = (key: string, color: string, width = 2): uPlot.Series => ({
   label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
-  width,
+  width: 1.5,
   scale: "y",
   value: (u, v) => i18n.number(v, {}, "cm"),
 });

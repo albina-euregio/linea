@@ -112,7 +112,7 @@ export const opts_VW: uPlot.Series = {
   label: i18n.message("linea:parameter:VW"),
   stroke: "#00E2B6",
   scale: "y",
-  width: 2,
+  width: 1.5,
   value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
 };
 
@@ -120,7 +120,7 @@ export const opts_VW_MAX: uPlot.Series = {
   label: i18n.message("linea:parameter:VW_MAX"),
   stroke: "#00A484",
   scale: "y",
-  width: 2,
+  width: 1.5,
   value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
 };
 

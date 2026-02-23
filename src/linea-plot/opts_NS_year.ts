@@ -70,6 +70,7 @@ export const opts_NS_year_snow_cover: uPlot.Series = {
   label: i18n.message("linea:parameter:snowcover"),
   scale: "y",
   points: { show: false },
+  width: 0,
   stroke: "rgba(222, 45, 38, .4)",
   fill: "rgba(222, 45, 38, .15)",
   value: () => "-",

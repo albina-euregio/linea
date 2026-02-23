@@ -126,7 +126,7 @@ const createSeries = (labelKey: any, color: string): uPlot.Series => ({
   label: i18n.message(labelKey),
   stroke: color,
   scale: "y",
-  width: 2,
+  width: 1.5,
   spanGaps: false,
   value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "°C")),
 });
@@ -137,7 +137,7 @@ export const opts_TSS = createSeries("linea:parameter:TSS", "#FC9272");
 
 export const opts_SurfaceHoar: uPlot.Series = {
   label: i18n.message("linea:parameter:SH:potential"),
-  width: 2,
+  width: 0,
   scale: "yhidden",
   spanGaps: false,
   fill: "rgba(1, 0, 0, 0.1)",

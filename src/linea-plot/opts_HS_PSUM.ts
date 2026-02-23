@@ -87,7 +87,7 @@ export const opts_HS: uPlot.Series = {
   label: i18n.message("linea:parameter:HS"),
   stroke: "#08519C",
   scale: "y",
-  width: 2,
+  width: 1.5,
   value: (u, v) => i18n.number(v, {}, "cm"),
 };
 
@@ -96,6 +96,6 @@ export const opts_PSUM: uPlot.Series = {
   stroke: "#6aafd5",
   fill: "rgba(106, 175, 213, 0.3)",
   scale: "y2",
-  width: 1,
+  width: 1.5,
   value: (u, v) => i18n.number(v, {}, "mm"),
 };
