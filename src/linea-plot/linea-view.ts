@@ -59,6 +59,8 @@ export abstract class LineaView {
       this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
       results.push(result);
     }
+    this.#generalizeData();
+    this.#updateValidDateInputs();
     return results;
   }
 
