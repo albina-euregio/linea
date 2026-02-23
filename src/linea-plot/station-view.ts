@@ -1,5 +1,4 @@
 import { i18n } from "../i18n";
-import type { Result, Values } from "../data/station-data";
 import { LineaChart } from "./linea-chart";
 import { LineaView } from "./linea-view";
 import type { LineaPlot } from "../linea-plot";
@@ -25,11 +24,9 @@ export class StationView extends LineaView {
     if (this.lineaplot.hasAttribute("data")) {
       this.loadFromDataAttribute();
     } else {
-      this.results = await this.fetchData("src");
+      await this.fetchData("src");
       if (this.lineaplot.hasAttribute("lazysrc")) {
-        this.fetchData("lazysrc").then((lazyResults) => {
-          this.results = lazyResults;
-        });
+        this.fetchData("lazysrc");
       }
     }
     for (const i in this.results) {

@@ -44,7 +44,7 @@ export abstract class LineaView {
   /**
    * Fetch data from sources
    */
-  async fetchData(attribute: string): Promise<Result[]> {
+  async fetchData(attribute: string) {
     const src = this.lineaplot.getAttribute(attribute) ?? "";
     this.srcs = src.startsWith("[") || src.startsWith("'") ? (JSON.parse(src) as string[]) : [src];
 
@@ -59,9 +59,9 @@ export abstract class LineaView {
       this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
       results.push(result);
     }
+    this.results = results;
     this.#generalizeData();
     this.#updateValidDateInputs();
-    return results;
   }
 
   loadFromDataAttribute() {
@@ -122,6 +122,8 @@ export abstract class LineaView {
    */
   #generalizeData() {
     if (this.results.length === 0) {
+      console.log(this.results);
+      console.warn("No results to generalize");
       return;
     }
     const tsSet = new Set<number>();
