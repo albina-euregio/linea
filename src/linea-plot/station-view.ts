@@ -86,7 +86,6 @@ export class StationView extends LineaView {
   }
 
   select(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime) {
-    console.log("select", startDate, endDate);
     this.updateDatepickerStartEndDate(startDate, endDate);
     this.filterAndUpdateData(startDate, endDate);
   }
