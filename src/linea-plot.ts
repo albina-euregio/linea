@@ -312,8 +312,9 @@ export class LineaPlot extends HTMLElement {
     }
     controls.appendChild(menu);
     this.appendChild(controls);
-
-    await this.#constructDatePicker();
+    if (this.hasAttribute("showdatepicker")) {
+      await this.#constructDatePicker();
+    } 
     this.focus();
   }
 
