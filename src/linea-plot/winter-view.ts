@@ -18,7 +18,7 @@ export class WinterView extends LineaView {
     if (this.lineaplot.hasAttribute("data")) {
       this.loadFromDataAttribute();
     } else {
-      this.results = await this.fetchData("wintersrc");
+      await this.fetchData("wintersrc");
     }
 
     const [startDate, endDate] = this.#getWinterDates();
