@@ -32,6 +32,11 @@ export abstract class LineaView {
    */
   abstract initialize(): Promise<void>;
 
+  /**
+   * This method is called on each switching of views and is responsible for rendering the charts in the current view and updating the datepicker if available.
+   * It is important to note that this method can be called multiple times and should not create new charts or datepickers if they already exist, 
+   * but rather update the existing ones.
+   */
   abstract show(): void;
 
   /**
@@ -42,7 +47,10 @@ export abstract class LineaView {
   }
 
   /**
-   * Fetch data from sources
+   * Fetch data from sources and stores it into the results.
+   * Also updates the min and max time of the data and generalizes the data so that all results have the same timestamps with null values for missing data.
+   * Finally, it updates the valid date inputs in the LineaPlot.
+   * @param attribute the attribute from which to fetch the data (e.g. "src" or "wintersrc")
    */
   async fetchData(attribute: string) {
     const src = this.lineaplot.getAttribute(attribute) ?? "";
@@ -61,9 +69,15 @@ export abstract class LineaView {
     }
     this.results = results;
     this.#generalizeData();
-    this.#updateValidDateInputs();
+    this.lineaplot.updateValidDateInputs();
   }
 
+  /**
+   * Loads the data from the "data" attribute, which is expected to be a JSON string representing an array of Result objects.
+   * It also updates the min and max time of the data and generalizes the data so that all results have the same timestamps with null values for missing data.
+   * Finally, it updates the valid date inputs in the LineaPlot.
+   * This method is used when the data is directly provided in the HTML and no fetching from a source is needed.
+   */
   loadFromDataAttribute() {
     const results: Result[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
     this.results = results;
@@ -78,7 +92,7 @@ export abstract class LineaView {
       }
     }
     this.#generalizeData();
-    this.#updateValidDateInputs();
+    this.lineaplot.updateValidDateInputs();
   }
 
   /**
@@ -146,10 +160,6 @@ export abstract class LineaView {
       // set the common timeline to all results
       res.timestamps = allTimestamps.slice();
     }
-  }
-
-  #updateValidDateInputs() {
-    this.lineaplot.updateValidDateInputs();
   }
 
   /**
