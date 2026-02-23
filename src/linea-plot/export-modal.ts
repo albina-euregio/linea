@@ -598,7 +598,7 @@ export class ExportModal {
   ) {
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
-      alert("Nothing to export!");
+      alert(i18n.message("linea:message:noplotselected"));
       return;
     }
 
@@ -625,7 +625,10 @@ export class ExportModal {
 
     activeLinecharts.forEach((lineachart, index) => {
       const plotindices = this.#getCheckedPlotIndices(index);
-      const plots: uPlot[] = lineachart.plots.filter((v, i) => plotindices.includes(i));
+      if (plotindices.length == 0) {
+        return;
+      }
+      const plots: uPlot[] = lineachart.plots.filter((_v, i) => plotindices.includes(i));
       plots
         .map((p) => p.root.querySelector("canvas")!)
         .forEach((c) => {
@@ -647,8 +650,12 @@ export class ExportModal {
       );
     });
 
-    //build png
-    const titleHeight = title ? 40 : 0;
+    if (Object.keys(legendItems).length == 0) {
+      alert(i18n.message("linea:message:noplotselected"));
+      return;
+    }
+
+    const swatchSize = 18;
     const legendItemHeight = 22;
     const legendPadding = 20;
 

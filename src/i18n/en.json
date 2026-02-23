@@ -57,5 +57,6 @@
   "linea:plotnames:humidity_gr": "Humidity&GR",
   "linea:plotnames:datapoints": "Datapoints",
   "linea:plotnames:newsnow": "New Snow",
-  "linea:title:since": "since"
+  "linea:title:since": "since",
+  "linea:message:noplotselected": "Please select at least one plot to export."
 }
