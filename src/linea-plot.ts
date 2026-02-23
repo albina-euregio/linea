@@ -610,7 +610,7 @@ export class LineaPlot extends HTMLElement {
       const lcy = new LineaYearChart(
         this.winterresults[i],
         true,
-        this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
+        this.winterresults.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
         startDate.toPlainDate(),
         endDate.toPlainDate(),
       );
