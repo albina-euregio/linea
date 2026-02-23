@@ -158,17 +158,17 @@ export abstract class LineaView {
   /**
    * Called when switching to this view
    */
-  abstract onSwitchTo(): void;
+  onSwitchTo() {}
 
   /**
    * Called when switching away from this view
    */
-  abstract onSwitchFrom(): void;
+  onSwitchFrom() {}
 
   /**
    * Save the current state for potential restoration
    */
-  abstract saveState(): void;
+  saveState() {}
 
   /**
    * Handle the click on the previous button in the datepicker
