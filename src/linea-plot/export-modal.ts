@@ -4,6 +4,7 @@ import { LineaPlot } from "../linea-plot";
 import type { Result } from "../data/station-data";
 import { AbstractLineaChart } from "./abstract-linea-chart";
 import css from "./export-modal.css?inline";
+import { WinterView } from "./winter-view";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -211,7 +212,7 @@ export class ExportModal {
     this.exportSettings.style.display = "block";
     this.exportResult.style.display = "none";
 
-    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.lineacharts
+    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.view.charts
       .map((chart, index) => {
         let options = "";
         chart.plotnames.forEach((name, i) => {
@@ -319,7 +320,6 @@ export class ExportModal {
   }
 
   #download(url: string, download: string = this.exportdata?.filename ?? "file.txt") {
-    console.log(url);
     const a = document.createElement("a");
     a.href = url;
     a.download = download;
@@ -347,18 +347,10 @@ export class ExportModal {
   }
 
   /**
-   *
+   * Downloads all available SMET files
    */
   #exportAsSMET() {
-    if (this.lineaPlot.winterview) {
-      this.#downloadSMETS(this.lineaPlot.wintersrcs);
-    } else {
-      if (this.lineaPlot.hasAttribute("lazysrc")) {
-        this.#downloadSMETS(this.lineaPlot.lazysrcs);
-      } else {
-        this.#downloadSMETS(this.lineaPlot.srcs);
-      }
-    }
+    this.#downloadSMETS(this.lineaPlot.view.srcs);
   }
 
   async #downloadSMETS(srcs: string[]) {
@@ -385,7 +377,7 @@ export class ExportModal {
         values: {},
         units: {},
       };
-      if (this.lineaPlot.winterview) {
+      if (this.lineaPlot.view instanceof WinterView) {
         activeplots.forEach((index) => {
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
             result.values.TA = lc.result.values.TA ?? [];
@@ -448,7 +440,7 @@ export class ExportModal {
       .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
       .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
 
-    if (this.lineaPlot.winterview) {
+    if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
 
@@ -493,7 +485,7 @@ export class ExportModal {
                     <linea-plot style="position: absolute; inset: 0; z-index: 2;" data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
                   </div>`;
 
-    if (this.lineaPlot.winterview) {
+    if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot ", "<linea-plot showonlywinter");
     }
     const binary = ExportModal.#toBinary(html);
@@ -607,8 +599,8 @@ export class ExportModal {
     const legendItems = {};
 
     const parentWidth =
-      (width * this.lineaPlot.lineacharts[0].clientWidth) /
-      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
+      (width * this.lineaPlot.view.charts[0].clientWidth) /
+      this.lineaPlot.view.charts[0].plots[0].root.querySelector("canvas").width;
 
     let oldBackgroundColor = "";
     if (activeLinecharts.length == 1) {
@@ -616,8 +608,8 @@ export class ExportModal {
       activeLinecharts[0].setBackgroundColor("#00000000");
     }
     // has to be done after background color change, because uPlot canvas is redrawn on background color change
-    const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
-    for (const lineachart of this.lineaPlot.lineacharts) {
+    const initHeightPerCanvas = this.lineaPlot.view.charts[0].plots[0].height;
+    for (const lineachart of this.lineaPlot.view.charts) {
       lineachart.resizeObserver.unobserve(lineachart);
       lineachart.resizePlots(parentWidth, lineachart.style, heightPerCanvas);
       await new Promise((r) => setTimeout(r, 1));
@@ -771,7 +763,7 @@ export class ExportModal {
     if (activeLinecharts.length == 1) {
       activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
     }
-    for (const lineachart of this.lineaPlot.lineacharts) {
+    for (const lineachart of this.lineaPlot.view.charts) {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
       lineachart.resizeObserver.observe(lineachart);
     }
@@ -801,7 +793,7 @@ export class ExportModal {
     const activeCharts: AbstractLineaChart[] = [];
     const indices = this.#getCheckedDiagramIndices();
     let i = 0;
-    for (const lineachart of this.lineaPlot.lineacharts) {
+    for (const lineachart of this.lineaPlot.view.charts) {
       if (indices.includes(i)) {
         activeCharts.push(lineachart);
       }
