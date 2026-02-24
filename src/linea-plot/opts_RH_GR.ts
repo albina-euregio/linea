@@ -79,6 +79,6 @@ export const opts_ISWR: uPlot.Series = {
   stroke: "#DE2D26",
   fill: "rgba(255,0,0,0.1)",
   scale: "y2",
-  width: 1,
+  width: 1.5,
   value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
 };
