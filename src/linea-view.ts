@@ -67,9 +67,60 @@ export abstract class LineaView {
       this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
       results.push(result);
     }
-    this.results = results;
+    this.results = this.#mergeResults(results);
     this.#generalizeData();
     this.lineaplot.updateValidDateInputs();
+  }
+
+  /**
+   * Merges the results from the new fetch with the existing results in the view.
+   * Mainly implemented to integrate the lazy source data into the existing one.
+   * The first loaded data decides about the keys to show.
+   * @param newResults The results to integrate into the this.results.
+   * It is assumed that the order of the results in the newResults array corresponds to the order of the results in the this.results array.
+   *
+   * The merged data is stored in the this.result object.
+   * @return Result[] - The merged results
+   */
+  #mergeResults(newResults: Result[]): Result[] {
+    if (this.results.length === 0) {
+      return newResults;
+    }
+
+    const results: Result[] = [];
+    for (let i = 0; i < this.results.length; i++) {
+      const oldResult = this.results[i];
+      const newResult = newResults[i];
+      if (oldResult === undefined || newResult === undefined) {
+        continue;
+      }
+      const oldTimestamps = oldResult.timestamps;
+      const newTimestamps = newResult.timestamps;
+      const mergedTimestamps = [...new Set([...oldTimestamps, ...newTimestamps])].sort(
+        (a, b) => a - b,
+      );
+      const mergedValues: Values = {};
+      for (const key of Object.keys(oldResult.values)) {
+        mergedValues[key] = [];
+        for (const t of mergedTimestamps) {
+          const oldIndex = oldTimestamps.indexOf(t);
+          const newIndex = newTimestamps.indexOf(t);
+          if (oldIndex !== -1) {
+            mergedValues[key].push(oldResult.values[key][oldIndex]);
+          } else if (newIndex !== -1) {
+            mergedValues[key].push(newResult.values[key][newIndex]);
+          } else {
+            mergedValues[key].push(null);
+          }
+        }
+      }
+      results.push({
+        ...oldResult,
+        timestamps: mergedTimestamps,
+        values: mergedValues,
+      });
+    }
+    return results;
   }
 
   /**
