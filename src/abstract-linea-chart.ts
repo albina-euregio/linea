@@ -17,6 +17,15 @@ export abstract class AbstractLineaChart extends HTMLElement {
     this.result = result;
   }
 
+  connectedCallback() {
+    this.resizeObserver.observe(this);
+    this.resizePlots(this.clientWidth, this.style);
+  }
+
+  disconnectedCallback() {
+    this.resizeObserver.unobserve(this);
+  }
+
   abstract setData(timestamps: number[], values: Values): void;
 
   protected abstract getStationTitle(): {};
