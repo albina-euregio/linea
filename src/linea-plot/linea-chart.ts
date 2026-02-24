@@ -163,10 +163,6 @@ export class LineaChart extends AbstractLineaChart {
     this.resizeObserver.observe(this);
   }
 
-  disconnectedCallback() {
-    this.resizeObserver.unobserve(this);
-  }
-
   #filterDWData(values: (number | null)[]): (number | null)[] {
     let density = Math.ceil(values.length / 7500);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
