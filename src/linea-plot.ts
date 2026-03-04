@@ -119,7 +119,7 @@ export class LineaPlot extends HTMLElement {
 
     this.lineaViews = new Map();
     this.lineaViews.set("station", new StationView(this.backgroundColors, this));
-    if (this.hasAttribute("wintersrc") || this.hasAttribute("showonlywinter")) {
+    if (!this.#isWinterSrcsEmpty() || this.hasAttribute("showonlywinter")) {
       this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
     }
 
@@ -423,7 +423,7 @@ export class LineaPlot extends HTMLElement {
    */
   #updateWinterViewButton() {
     this.winterviewBtn.style.display =
-      this.hasAttribute("wintersrc") && !this.hasAttribute("showonlywinter") ? "block" : "none";
+      !this.#isWinterSrcsEmpty() && !this.hasAttribute("showonlywinter") ? "block" : "none";
     if (this.#getCurrentViewKey() === "winter") {
       this.winterviewBtnLabel.textContent = i18n.message("linea:controls:value:winterview:station");
     } else {
@@ -431,6 +431,30 @@ export class LineaPlot extends HTMLElement {
     }
     this.winterviewBtn.classList.remove("loading");
     this.winterviewBtn.disabled = false;
+  }
+
+  /**
+   * Check for empty wintersrc attribute
+   * @returns true if wintersrc is empty or invalid, false otherwise
+   */
+  #isWinterSrcsEmpty() {
+    const winterSrcs = this.getAttribute("wintersrc");
+    if (!winterSrcs) {
+      return true;
+    }
+    try {
+      const parsed = JSON.parse(winterSrcs);
+      if (Array.isArray(parsed)) {
+        return parsed.length === 0;
+      } else if (typeof parsed === "string") {
+        return parsed.trim() === "";
+      } else {
+        return true;
+      }
+    } catch (e) {
+      console.error("Invalid wintersrc attribute:", e);
+      return true;
+    }
   }
 
   /**
