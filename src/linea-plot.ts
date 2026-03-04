@@ -70,6 +70,9 @@ export class LineaPlot extends HTMLElement {
   private exportModal!: ExportModal;
   private daterange!: HTMLInputElement;
   private styleTag!: HTMLStyleElement;
+  private winterviewBtn!: HTMLButtonElement;
+  private winterviewBtnLabel!: HTMLSpanElement;
+
   view!: LineaView;
   private lineaViews!: Map<string, LineaView>;
 
@@ -97,8 +100,10 @@ export class LineaPlot extends HTMLElement {
     if (!this.isLoaded) {
       return;
     }
-    if (name === "src") {
-      this.#loadViews();
+    if (name === "src" || (name === "wintersrc" && this.hasAttribute("showonlywinter"))) {
+      this.#loadViews().then(() => {
+        this.#updateWinterViewButton();
+      });
     }
   }
 
@@ -113,18 +118,25 @@ export class LineaPlot extends HTMLElement {
     }
 
     this.lineaViews = new Map();
-    this.lineaViews.set("station", new StationView(this.backgroundColors, this));
-    if (this.hasAttribute("wintersrc") || this.hasAttribute("showonlywinter")) {
-      this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
+    if (!this.hasAttribute("showonlywinter")) {
+      this.lineaViews.set("station", new StationView(this.backgroundColors, this));
     }
+    this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
 
     if (this.hasAttribute("showonlywinter")) {
       this.view = this.lineaViews.get("winter")!;
     } else {
       this.view = this.lineaViews.get("station")!;
     }
-
-    await this.view.initialize();
+    try {
+      await this.view.initialize();
+    } catch (error: any) {
+      error == "Empty src array!"
+        ? console.warn("No data to load for the " + this.#getCurrentViewKey() + " view")
+        : console.error(error);
+      return;
+    }
+    this.view.onSwitchTo();
     this.view.show();
   }
 
@@ -146,7 +158,7 @@ export class LineaPlot extends HTMLElement {
   async #switchView(viewkey: string): Promise<void> {
     const view = this.lineaViews.get(viewkey);
     if (!view) {
-      throw new Error(viewkey + " view not available");
+      throw viewkey + " view not available";
     }
 
     this.view.onSwitchFrom();
@@ -251,49 +263,53 @@ export class LineaPlot extends HTMLElement {
       });
       menu.appendChild(exportbtn);
     }
-    if (this.hasAttribute("wintersrc") && !this.hasAttribute("showonlywinter")) {
-      const winterviewbtn = document.createElement("button");
-      winterviewbtn.id = "winterviewbtn";
-      winterviewbtn.classList.add("toggle-btn");
-      winterviewbtn.classList.add("winterview-btn");
-      winterviewbtn.setAttribute("aria-busy", "false");
-      winterviewbtn.setAttribute("type", "button");
+    this.winterviewBtn = document.createElement("button");
+    this.winterviewBtn.id = "winterviewbtn";
+    this.winterviewBtn.style.display = "none";
+    this.winterviewBtn.classList.add("toggle-btn");
+    this.winterviewBtn.classList.add("winterview-btn");
+    this.winterviewBtn.setAttribute("aria-busy", "false");
+    this.winterviewBtn.setAttribute("type", "button");
 
-      const label = document.createElement("span");
-      label.className = "winterview-btn-label";
-      label.textContent = i18n.message("linea:controls:value:winterview:winter");
+    this.winterviewBtnLabel = document.createElement("span");
+    this.winterviewBtnLabel.className = "winterview-btn-label";
+    this.winterviewBtnLabel.textContent = i18n.message("linea:controls:value:winterview:winter");
 
-      const loader = document.createElement("span");
-      loader.className = "winterview-btn-loader";
-      loader.setAttribute("aria-hidden", "true");
+    const loader = document.createElement("span");
+    loader.className = "winterview-btn-loader";
+    loader.setAttribute("aria-hidden", "true");
 
-      const spinner = document.createElement("span");
-      spinner.className = "winterview-btn-spinner";
-      loader.appendChild(spinner);
+    const spinner = document.createElement("span");
+    spinner.className = "winterview-btn-spinner";
+    loader.appendChild(spinner);
 
-      winterviewbtn.append(label, loader);
-      winterviewbtn.addEventListener("click", () => {
-        if (winterviewbtn.classList.contains("loading")) return;
+    this.winterviewBtn.append(this.winterviewBtnLabel, loader);
+    this.winterviewBtn.addEventListener("click", () => {
+      if (this.winterviewBtn.classList.contains("loading")) return;
 
-        winterviewbtn.classList.add("loading");
-        winterviewbtn.disabled = true;
+      this.winterviewBtn.classList.add("loading");
+      this.winterviewBtn.disabled = true;
 
-        const currentViewKey = this.#getCurrentViewKey();
-        if (currentViewKey === "station") {
-          this.#switchView("winter").then(() => {
-            winterviewbtn.classList.remove("loading");
-            winterviewbtn.disabled = false;
-            label.textContent = i18n.message("linea:controls:value:winterview:station");
-          });
-        } else {
-          this.#switchView("station");
-          winterviewbtn.classList.remove("loading");
-          winterviewbtn.disabled = false;
-          label.textContent = i18n.message("linea:controls:value:winterview:winter");
-        }
-      });
-      menu.appendChild(winterviewbtn);
-    }
+      const currentViewKey = this.#getCurrentViewKey();
+      if (currentViewKey === "station") {
+        this.#switchView("winter").then(() => {
+          this.winterviewBtn.classList.remove("loading");
+          this.winterviewBtn.disabled = false;
+          this.winterviewBtnLabel.textContent = i18n.message(
+            "linea:controls:value:winterview:station",
+          );
+        });
+      } else {
+        this.#switchView("station");
+        this.winterviewBtn.classList.remove("loading");
+        this.winterviewBtn.disabled = false;
+        this.winterviewBtnLabel.textContent = i18n.message(
+          "linea:controls:value:winterview:winter",
+        );
+      }
+    });
+    menu.appendChild(this.winterviewBtn);
+
     controls.appendChild(menu);
     this.appendChild(controls);
     if (this.hasAttribute("showdatepicker")) {
@@ -342,7 +358,7 @@ export class LineaPlot extends HTMLElement {
    *
    */
   setStartEndDateTo(min: number, max: number) {
-    if (!this.dp || !this.daterange) {
+    if (!this.dp || !this.daterange || min === +Infinity || max === -Infinity) {
       return;
     }
     const startDate = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(
@@ -400,6 +416,32 @@ export class LineaPlot extends HTMLElement {
         this.dp.show();
       }
     });
+  }
+
+  /**
+   * Checks if the winter view is available based on attributes
+   */
+  #updateWinterViewButton() {
+    this.winterviewBtn.style.display =
+      !this.#isWinterSrcsEmpty() && !this.hasAttribute("showonlywinter") ? "block" : "none";
+    if (this.#getCurrentViewKey() === "winter") {
+      this.winterviewBtnLabel.textContent = i18n.message("linea:controls:value:winterview:station");
+    } else {
+      this.winterviewBtnLabel.textContent = i18n.message("linea:controls:value:winterview:winter");
+    }
+    this.winterviewBtn.classList.remove("loading");
+    this.winterviewBtn.disabled = false;
+  }
+
+  /**
+   * Check for empty wintersrc attribute
+   * @returns true if wintersrc is empty or invalid, false otherwise
+   */
+  #isWinterSrcsEmpty() {
+    const src = this.getAttribute("wintersrc") ?? "";
+    return src.startsWith("[") || src.startsWith("'")
+      ? (JSON.parse(src) as string[]).length == 0
+      : src == "";
   }
 
   /**

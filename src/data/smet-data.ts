@@ -32,6 +32,12 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
 
 export async function fetchSMET(url: string): Promise<Result> {
   let response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch SMET data from ${url}: ${response.status} ${response.statusText}`,
+    );
+  }
+
   if (url.startsWith("https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min")) {
     // https://dataset.api.hub.geosphere.at/
     const metadata = await fetch(
