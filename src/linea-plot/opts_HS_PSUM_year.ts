@@ -129,16 +129,10 @@ const baseHsSeries = (key: string, color: string): uPlot.Series => ({
   value: (_u, v) => i18n.number(v, {}, "cm"),
 });
 
-export const opts_HS_year_min = {
-  ...baseHsSeries("HS_min", "#d9dcdc", 2),
-  points: { show: false },
-};
-export const opts_HS_year_max = {
-  ...baseHsSeries("HS_max", "#d9dcdc", 0),
-  points: { show: false },
-};
-export const opts_HS_year_median = baseHsSeries("HS_median", "#878787", 2);
-export const opts_HS_year_current = baseHsSeries("HS", "#08519C", 2);
+export const opts_HS_year_min = baseHsSeries("HS_min", "#d9dcdc");
+export const opts_HS_year_max = baseHsSeries("HS_max", "#d9dcdc");
+export const opts_HS_year_median = baseHsSeries("HS_median", "#878787");
+export const opts_HS_year_current = baseHsSeries("HS", "#08519C");
 
 export const opts_HS_year_PSUM: uPlot.Series = {
   label: i18n.message("linea:parameter:PSUM"),
