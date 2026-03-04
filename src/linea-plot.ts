@@ -118,10 +118,10 @@ export class LineaPlot extends HTMLElement {
     }
 
     this.lineaViews = new Map();
-    this.lineaViews.set("station", new StationView(this.backgroundColors, this));
-    if (!this.#isWinterSrcsEmpty() || this.hasAttribute("showonlywinter")) {
-      this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
+    if (!this.hasAttribute("showonlywinter")) {
+      this.lineaViews.set("station", new StationView(this.backgroundColors, this));
     }
+    this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
 
     if (this.hasAttribute("showonlywinter")) {
       this.view = this.lineaViews.get("winter")!;
@@ -158,7 +158,7 @@ export class LineaPlot extends HTMLElement {
   async #switchView(viewkey: string): Promise<void> {
     const view = this.lineaViews.get(viewkey);
     if (!view) {
-      throw new Error(viewkey + " view not available");
+      throw viewkey + " view not available";
     }
 
     this.view.onSwitchFrom();
@@ -438,23 +438,10 @@ export class LineaPlot extends HTMLElement {
    * @returns true if wintersrc is empty or invalid, false otherwise
    */
   #isWinterSrcsEmpty() {
-    const winterSrcs = this.getAttribute("wintersrc");
-    if (!winterSrcs) {
-      return true;
-    }
-    try {
-      const parsed = JSON.parse(winterSrcs);
-      if (Array.isArray(parsed)) {
-        return parsed.length === 0;
-      } else if (typeof parsed === "string") {
-        return parsed.trim() === "";
-      } else {
-        return true;
-      }
-    } catch (e) {
-      console.error("Invalid wintersrc attribute:", e);
-      return true;
-    }
+    const src = this.getAttribute("wintersrc") ?? "";
+    return src.startsWith("[") || src.startsWith("'")
+      ? (JSON.parse(src) as string[]).length == 0
+      : src == "";
   }
 
   /**
