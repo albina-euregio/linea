@@ -265,7 +265,8 @@ export class LineaPlot extends HTMLElement {
     }
     this.winterviewBtn = document.createElement("button");
     this.winterviewBtn.id = "winterviewbtn";
-    this.winterviewBtn.style.display = "none";
+    this.winterviewBtn.style.display =
+      !this.#isWinterSrcsEmpty() && !this.hasAttribute("showonlywinter") ? "block" : "none";
     this.winterviewBtn.classList.add("toggle-btn");
     this.winterviewBtn.classList.add("winterview-btn");
     this.winterviewBtn.setAttribute("aria-busy", "false");
