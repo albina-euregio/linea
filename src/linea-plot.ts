@@ -440,11 +440,9 @@ export class LineaPlot extends HTMLElement {
    */
   #isWinterSrcsEmpty() {
     const src = this.getAttribute("wintersrc") ?? "";
-    const ret =
-      src.startsWith("[") || src.startsWith("'")
+    return src.startsWith("[") || src.startsWith("'")
         ? (JSON.parse(src) as string[]).length == 0
         : src == "";
-    return ret;
   }
 
   /**
