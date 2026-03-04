@@ -444,7 +444,6 @@ export class LineaPlot extends HTMLElement {
       src.startsWith("[") || src.startsWith("'")
         ? (JSON.parse(src) as string[]).length == 0
         : src == "";
-    console.log(ret);
     return ret;
   }
 
