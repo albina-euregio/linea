@@ -39,15 +39,8 @@ export class WinterView extends LineaView {
    * Renders the winter view
    */
   show() {
-    const [startDate, endDate] = this.#getWinterDates();
     for (const chart of this.charts) {
       this.lineaplot.appendChild(chart);
-    }
-    if (this.dp) {
-      this.dp.update({
-        dateFormat: "yyyy",
-      });
-      this.updateDatepickerStartEndDate(startDate, endDate);
     }
   }
 

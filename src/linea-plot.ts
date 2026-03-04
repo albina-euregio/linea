@@ -128,6 +128,7 @@ export class LineaPlot extends HTMLElement {
     }
 
     await this.view.initialize();
+    this.view.onSwitchTo();
     this.view.show();
   }
 
