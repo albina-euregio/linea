@@ -104,6 +104,10 @@ export const opts_TEMP_year: uPlot.Options = {
       fill: "#d9dcdc",
     },
     {
+      series: [3, 1],
+      fill: "#d9dcdc",
+    },
+    {
       series: [2, 1],
       fill: "#d9dcdc",
     },
@@ -123,7 +127,7 @@ export const opts_TEMP_year_min = {
   points: { show: false },
 };
 export const opts_TEMP_year_max = {
-  ...baseTempSeries("TEMP_max", "#d9dcdc", 0),
+  ...baseTempSeries("TEMP_max", "#d9dcdc", 2),
   points: { show: false },
 };
 export const opts_TEMP_year_median = baseTempSeries("TEMP_median", "#878787", 2);
