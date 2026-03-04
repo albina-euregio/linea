@@ -54,17 +54,8 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
 - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
   If there are more SMET files than colorcodes for the other stations there is no background color set. Per default the first station is set in light grey, if there is more than one.
 - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
-- `startdate` {string} - Initial start date in ISO 8601 format (e.g., "2025-06-04T10:24[Europe/Berlin]").
-  If used with `showdatepicker` and `enddate` it will set the initial date range.
-  If used without `showdatepicker`, but with `enddate` it will set a fixed date range.
-- `enddate` {string} - Initial end date in ISO 8601 format (e.g., "2025-06-04T12:24[Europe/Berlin]").
-  If used with `showdatepicker` and `startdate` it will set the initial date range.
-  If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
 - `showexport` - toggles if the export button is shown
 - `showinteractiveblogexport`- in combination with `showexport` it shows a button to export a wordpress shortcode, which can be used together with the `linea-plot-blog.php` plugin for Wordpress. See Export options for more details.
-
-If startdate or enddate is missing it will show all data from the SMET file.
-If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
 
 If the data from `src` is not a subset from `lazysrc`, the inital view for the user is not changed after loading and replacing the data from `src` with data from `lazysrc` element. Available dates for the date picker are updated to timespan of data of `lazysrc` element. Clicking the previous/next week button for the first time lead to a zoom to the whole available timespan of the data of `lazysrc` element.
 
@@ -97,8 +88,6 @@ Maximum example, uses every available attribute:
   showsurfacehoarseries
   showtitle
   showexport
-  startdate="2025-06-01T00:00[Europe/Berlin]"
-  enddate="2025-06-30T23:59[Europe/Berlin]"
 >
 </linea-plot>
 ```
@@ -107,12 +96,7 @@ Shows a fixed date span from the given smet file:
 
 ```html
 <!-- Fixed date view without picker -->
-<linea-plot
-  src="data/station1.smet"
-  startdate="2025-06-04T10:00[Europe/Berlin]"
-  enddate="2025-06-04T18:00[Europe/Berlin]"
->
-</linea-plot>
+<linea-plot src="data/station1.smet"> </linea-plot>
 ```
 
 #### `<linea-plot>` yearly overview

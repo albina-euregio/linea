@@ -12,8 +12,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("linea:unit:temperature")} (°C)`;
-        var labely2 = `${i18n.message("linea:parameter:TD")} (°C)`;
+        var labely1 = `${i18n.message("linea:unit:temperature")} (℃)`;
+        var labely2 = `${i18n.message("linea:parameter:TD")} (℃)`;
         var labelColor1 = "#DE2D26";
         var labelColor2 = "#6aafd5";
 
@@ -27,7 +27,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
           labelColor2,
         );
 
-        // Draw reference line at 0°C
+        // Draw reference line at 0℃
         const width = 1;
         const offset = (width % 2) / 2;
         const x0 = u.bbox.left;
@@ -128,7 +128,7 @@ const createSeries = (labelKey: any, color: string): uPlot.Series => ({
   scale: "y",
   width: 1.5,
   spanGaps: false,
-  value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "°C")),
+  value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
 });
 
 export const opts_TA = createSeries("linea:unit:temperature", "#DE2D26");

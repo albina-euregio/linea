@@ -27,7 +27,7 @@ class I18n {
       maximumFractionDigits: 1,
       ...opts,
     }).format(num);
-    if (unit) s += ` ${unit}`;
+    if (unit) s += ` ${unit}`;
     return s;
   }
 

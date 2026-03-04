@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import type { Result, Values } from "../data/station-data";
+import type { Result, Values } from "./data/station-data";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
@@ -15,6 +15,15 @@ export abstract class AbstractLineaChart extends HTMLElement {
     this.backgroundColor = backgroundColor;
     this.showTitle = showTitle;
     this.result = result;
+  }
+
+  connectedCallback() {
+    this.resizeObserver.observe(this);
+    this.resizePlots(this.clientWidth, this.style);
+  }
+
+  disconnectedCallback() {
+    this.resizeObserver.unobserve(this);
   }
 
   abstract setData(timestamps: number[], values: Values): void;

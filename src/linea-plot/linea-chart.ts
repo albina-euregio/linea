@@ -6,7 +6,7 @@ import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
 import type { Result, Values } from "../data/station-data";
 import { i18n } from "../i18n";
-import { AbstractLineaChart } from "./abstract-linea-chart";
+import { AbstractLineaChart } from "../abstract-linea-chart";
 
 export class LineaChart extends AbstractLineaChart {
   readonly result: Result;
@@ -161,10 +161,6 @@ export class LineaChart extends AbstractLineaChart {
 
     this.resizePlots(this.clientWidth, this.style);
     this.resizeObserver.observe(this);
-  }
-
-  disconnectedCallback() {
-    this.resizeObserver.unobserve(this);
   }
 
   #filterDWData(values: (number | null)[]): (number | null)[] {

@@ -1,13 +1,13 @@
 import { i18n } from "./i18n";
-import { fetchSMET } from "./data/smet-data";
-import type { Result, Values } from "./data/station-data";
-import { LineaChart } from "./linea-plot/linea-chart";
-import { AbstractLineaChart } from "./linea-plot/abstract-linea-chart";
+import { AbstractLineaChart } from "./abstract-linea-chart";
 import { LineaYearChart } from "./linea-plot/linea-year-chart";
 import type { ExportModal } from "./linea-plot/export-modal";
 import type AirDatepicker from "air-datepicker";
 import css from "./linea-plot.css?inline";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
+import { WinterView } from "./linea-plot/winter-view";
+import type { LineaView } from "./linea-view";
+import { StationView } from "./linea-plot/station-view";
 /**
  * LineaPlot Web Component
  * 
@@ -28,17 +28,9 @@ import cssuPlot from "uplot/dist/uPlot.min.css?raw";
  * - `backgroundcolors` {string} - JSON-encoded array with colorcodes for the background color in the plots, same order as the SMET files.
  *    If there are more SMET files than colorcodes for the other stations there is no background color set. Per default the first station is set in light grey, if there is more than one.
  * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
- * - `startdate` {string} - Initial start date in ISO 8601 format (e.g., "2025-06-04T10:24[Europe/Berlin]"). 
- *    If used with `showdatepicker` and `enddate` it will set the initial date range.
- *    If used without `showdatepicker`, but with `enddate` it will set a fixed date range.
- * - `enddate` {string} - Initial end date in ISO 8601 format (e.g., "2025-06-04T12:24[Europe/Berlin]").
- *    If used with `showdatepicker` and `startdate` it will set the initial date range.
- *    If used without `showdatepicker`, but with `startdate` it will set a fixed date range.
  * - `showexport` - toggles if the export button is shown
  * - `showinteractiveblogexport` - toggles if the export for the interactive blog button is shown, just in combination with `showexport`
  * 
- * If startdate or enddate is missing it will show all data from the SMET file. 
- * If the startdate is out of bound of the data, it is set to the first available timestamp, simliar enddate is set to the last.
  * 
  * @example
  * ```html
@@ -49,17 +41,13 @@ import cssuPlot from "uplot/dist/uPlot.min.css?raw";
  *   showdatepicker
  *   showsurfacehoarseries
  *   showtitle
- *   showexport
- *   startdate="2025-06-01T00:00[Europe/Berlin]"
- *   enddate="2025-06-30T23:59[Europe/Berlin]">
+ *   showexport>
  * </linea-plot>
  * 
  * <!-- Fixed date view without picker -->
  * <linea-plot 
  *   src='["data/station1.smet"]'
- *   wintersrc='["data/station1_winter.smet"]'
- *   startdate="2025-06-04T10:00[Europe/Berlin]"
- *   enddate="2025-06-04T18:00[Europe/Berlin]">
+ *   wintersrc='["data/station1_winter.smet"]'>
  * </linea-plot>
  * ```
  * 
@@ -82,25 +70,13 @@ export class LineaPlot extends HTMLElement {
   private exportModal!: ExportModal;
   private daterange!: HTMLInputElement;
   private styleTag!: HTMLStyleElement;
-
-  private attributeQueue: Promise<void> = Promise.resolve();
+  view!: LineaView;
+  private lineaViews!: Map<string, LineaView>;
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
-  private dp: AirDatepicker | undefined;
-
-  srcs: string[] = [];
-  lazysrcs: string[] = [];
-  wintersrcs: string[] = [];
-  lineacharts: AbstractLineaChart[] = [] as AbstractLineaChart[];
-  results: Result[] = [] as Result[];
-  winterresults: Result[] = [] as Result[];
-  winterview: boolean = false;
+  public dp: AirDatepicker | undefined;
 
   private backgroundColors = ["rgba(0, 0, 0, 0.05)"];
-  private minTime: number = +Infinity;
-  private maxTime: number = -Infinity;
-  private minTimeWinter: number = +Infinity;
-  private maxTimeWinter: number = -Infinity;
 
   async connectedCallback() {
     this.styleTag = document.createElement("style");
@@ -110,17 +86,7 @@ export class LineaPlot extends HTMLElement {
     await this.#addControls();
     this.#addExportModal();
 
-    if (this.hasAttribute("data")) {
-      this.storeDataFromAttribute();
-      this.#initAfterDataStorage();
-    } else {
-      this.fetchAndStoreData(this.hasAttribute("showonlywinter") ? "wintersrc" : "src").then(() => {
-        this.#initAfterDataStorage();
-        if (!this.hasAttribute("showonlywinter")) {
-          this.#lazyLoad();
-        }
-      });
-    }
+    this.#loadViews();
 
     this.tabIndex = 0;
     this.focus();
@@ -128,194 +94,78 @@ export class LineaPlot extends HTMLElement {
   }
 
   attributeChangedCallback(name: string) {
-    if (this.isLoaded && name === "src") {
-      this.attributeQueue = this.attributeQueue.then(async () => {
-        for (const lc of this.lineacharts) {
-          this.removeChild(lc);
-        }
-        this.lineacharts = [];
-        this.results = [];
-        this.minTime = +Infinity;
-        this.maxTime = -Infinity;
-        this.fetchAndStoreData()
-          .then(() => {
-            this.#initAfterDataStorage();
-            this.#lazyLoad();
-            this.isLoaded = true;
-          })
-          .catch((_) => {});
-      });
+    if (!this.isLoaded) {
+      return;
+    }
+    if (name === "src") {
+      this.#loadViews();
     }
   }
 
   /**
-   * builds and update the UI after data is stored.
+   * Reload all views with the new data from updated attributes
    */
-  #initAfterDataStorage() {
-    this.#updateValidDateInputs();
+  async #loadViews(): Promise<void> {
+    if (this.view) {
+      for (const chart of this.view.getCharts()) {
+        this.removeChild(chart);
+      }
+    }
+
+    this.lineaViews = new Map();
+    this.lineaViews.set("station", new StationView(this.backgroundColors, this));
+    if (this.hasAttribute("wintersrc") || this.hasAttribute("showonlywinter")) {
+      this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
+    }
+
     if (this.hasAttribute("showonlywinter")) {
-      this.#switchToWinterView();
+      this.view = this.lineaViews.get("winter")!;
     } else {
-      this.render();
-      if (
-        this.hasAttribute("showdatepicker") &&
-        this.hasAttribute("startdate") &&
-        this.hasAttribute("enddate")
-      ) {
-        this.#setStartEndDateToAttributes();
-      } else {
-        this.#setStartEndDateToMinMax();
-      }
-      this.filterAndUpdateData();
-      if (!this.hasAttribute("showdatepicker")) {
-        this.#handleFixedDateView();
-      }
+      this.view = this.lineaViews.get("station")!;
     }
+
+    await this.view.initialize();
+    this.view.show();
   }
 
   /**
-   * fetches the data per default from the src attribute, generalizes it and update the valid date inputs.
-   * If a other attribute is given it uses this one instead of src.
-   * If the `src`attribute is `wintersrc`, the fetched data is stored in winterresults, minTimeWinter, maxTimeWinter.
-   * @param attribute {string} - attribute to fetch the data from, default is "src"
+   * Get the current view key
    */
-  async fetchAndStoreData(attribute: string = "src") {
-    if (!globalThis.Temporal) {
-      await import("temporal-polyfill/global");
-    }
-    const src = this.getAttribute(attribute) ?? "";
-    let srcs: string[] =
-      src.startsWith("[") || src.startsWith("'") ? (JSON.parse(src) as string[]) : [src];
-
-    if (srcs.length == 0) {
-      throw "Empty src array!";
-    }
-
-    if (attribute == "src") {
-      this.srcs = srcs;
-    } else if (attribute == "lazysrc") {
-      this.lazysrcs = srcs;
-    } else if (attribute == "wintersrc") {
-      this.wintersrcs = srcs;
-    }
-    if (attribute == "wintersrc") {
-      this.winterresults = [];
-      for (const src in srcs) {
-        let result = await fetchSMET(srcs[src]);
-        this.minTimeWinter = Math.min(this.minTimeWinter, result.timestamps[0]);
-        this.maxTimeWinter = Math.max(
-          this.maxTimeWinter,
-          result.timestamps[result.timestamps.length - 1],
-        );
-        this.winterresults.push(result);
+  #getCurrentViewKey(): string {
+    for (const [key, view] of this.lineaViews.entries()) {
+      if (view === this.view) {
+        return key;
       }
-    } else {
-      this.results = [];
-      for (const src in srcs) {
-        let result = await fetchSMET(srcs[src]);
-        this.minTime = Math.min(this.minTime, result.timestamps[0]);
-        this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
-        this.results.push(result);
-      }
-      this.#generalizeData();
-      this.#updateValidDateInputs();
     }
+    return "station";
   }
 
   /**
-   * Stores data from the `linea-plot` webcomponents `data`attribute.
+   * Switch to view
    */
-  storeDataFromAttribute() {
-    if (this.hasAttribute("showonlywinter")) {
-      const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
-      this.winterview = true;
-      this.winterresults = results;
-      this.minTimeWinter = +Infinity;
-      this.maxTimeWinter = -Infinity;
-      for (const result of results) {
-        if (this.minTimeWinter > result.timestamps[0]) {
-          this.minTimeWinter = result.timestamps[0];
-        }
-        if (this.maxTimeWinter < result.timestamps[result.timestamps.length - 1]) {
-          this.maxTimeWinter = result.timestamps[result.timestamps.length - 1];
-        }
-      }
-    } else {
-      const results: Result[] = JSON.parse(this.getAttribute("data") ?? "");
-      this.results = results;
-      this.minTime = +Infinity;
-      this.maxTime = -Infinity;
-      for (const result of results) {
-        if (this.minTime > result.timestamps[0]) {
-          this.minTime = result.timestamps[0];
-        }
-        if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
-          this.maxTime = result.timestamps[result.timestamps.length - 1];
-        }
-      }
-      this.#generalizeData();
-      this.#updateValidDateInputs();
+  async #switchView(viewkey: string): Promise<void> {
+    const view = this.lineaViews.get(viewkey);
+    if (!view) {
+      throw new Error(viewkey + " view not available");
     }
-  }
 
-  /**
-   * ---------------------------------------------
-   *        STATION VIEW
-   * ---------------------------------------------
-   *
-   * creates all LineaCharts and initialize them
-   */
-  render() {
-    if (this.hasAttribute("backgroundcolors")) {
-      this.backgroundColors = JSON.parse(this.getAttribute("backgroundcolors") ?? "");
-    }
-    for (const i in this.results) {
-      const result = this.results[i];
-      let lc = new LineaChart(
-        result,
-        this.hasAttribute("showtitle"),
-        this.hasAttribute("showsurfacehoarseries"),
-        this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
-      );
-      this.lineacharts.push(lc);
-      this.appendChild(lc);
-      this.#setStartEndDateTo(
-        result.timestamps[0],
-        result.timestamps[result.timestamps.length - 1],
-      );
-    }
-  }
-
-  /**
-   * Filters the Results for each LineaChart for the given timespan.
-   * Passes the filtered data to the LineaCharts
-   * @param startDate from where the data shall be shown
-   * @param endDate to when the data shall be shown
-   */
-  filterAndUpdateData(
-    startDate: Temporal.ZonedDateTime = this.#getDatePickerStartDate(),
-    endDate: Temporal.ZonedDateTime = this.#getDatePickerEndDate(),
-  ) {
-    const startTimestamp = startDate.toInstant().epochMilliseconds;
-    const endTimestamp = endDate.toInstant().epochMilliseconds;
-
-    for (let i = 0; i < this.lineacharts.length; i++) {
-      const res = this.results[i];
-      if (res === undefined) {
-        continue;
+    this.view.onSwitchFrom();
+    for (const chart of this.view.getCharts()) {
+      if (this.contains(chart)) {
+        this.removeChild(chart);
       }
-      let filteredValues = {};
-
-      for (const key in res.values) {
-        filteredValues[key] = res.values[key].filter(
-          (t, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp,
-        );
-      }
-      const filteredTimestamps = res.timestamps.filter(
-        (t) => t >= startTimestamp && t <= endTimestamp,
-      );
-      (this.lineacharts[i] as LineaChart).setData(filteredTimestamps, filteredValues as Values);
     }
+
+    const needsInitialization = view.results.length === 0;
+    this.view = view;
+
+    if (needsInitialization) {
+      await view.initialize();
+    }
+    view.show();
+    view.onSwitchTo();
+
+    this.updateValidDateInputs();
   }
 
   /**
@@ -367,36 +217,7 @@ export class LineaPlot extends HTMLElement {
         }
       });
       previous.addEventListener("click", () => {
-        const start = this.#dateToZonedDateTime(this.dp.selectedDates[0]);
-        const end = this.#dateToZonedDateTime(this.dp.selectedDates[1]);
-        if (!start || !end) return;
-        next.disabled = false;
-        if (!this.winterview) {
-          let newEnd = end.subtract({ days: 1 });
-          let newStart = start.subtract({ days: 1 });
-          if (newStart.toInstant().epochMilliseconds < this.minTime) {
-            newStart = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-              i18n.timezone(),
-            );
-            previous.disabled = true;
-            newEnd = end;
-          } else if (newStart.toInstant().epochMilliseconds > this.maxTime) {
-            this.#setStartEndDateToMinMax();
-            this.filterAndUpdateData();
-            return;
-          }
-          this.#updateDatepickerStartEndDate(newStart, newEnd);
-          this.filterAndUpdateData(newStart, newEnd);
-        } else {
-          let newEnd = end.subtract({ years: 1 });
-          let newStart = start.subtract({ years: 1 });
-          if (newStart.toInstant().epochMilliseconds < this.minTimeWinter) {
-            previous.disabled = true;
-            return;
-          }
-          this.#updateDatepickerStartEndDate(newStart, newEnd);
-          this.#updateWinterPlots();
-        }
+        this.view.previous(previous, next);
       });
       const next = document.createElement("button");
       next.classList.add("toggle-btn");
@@ -409,36 +230,7 @@ export class LineaPlot extends HTMLElement {
         }
       });
       next.addEventListener("click", () => {
-        const start = this.#dateToZonedDateTime(this.dp.selectedDates[0]);
-        const end = this.#dateToZonedDateTime(this.dp.selectedDates[1]);
-        if (!start || !end) return;
-        previous.disabled = false;
-        if (!this.winterview) {
-          let newStart = start.add({ days: 1 });
-          let newEnd = end.add({ days: 1 });
-          if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
-            newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-              i18n.timezone(),
-            );
-            next.disabled = true;
-            newStart = start;
-          } else if (newEnd.toInstant().epochMilliseconds < this.minTime) {
-            this.#setStartEndDateToMinMax();
-            this.filterAndUpdateData();
-            return;
-          }
-          this.#updateDatepickerStartEndDate(newStart, newEnd);
-          this.filterAndUpdateData(newStart, newEnd);
-        } else {
-          let newEnd = end.add({ years: 1 });
-          let newStart = start.add({ years: 1 });
-          if (newStart.toInstant().epochMilliseconds > this.maxTimeWinter) {
-            next.disabled = true;
-            return;
-          }
-          this.#updateDatepickerStartEndDate(newStart, newEnd);
-          this.#updateWinterPlots();
-        }
+        this.view.next(previous, next);
       });
       controlsdates.appendChild(previous);
       controlsdates.appendChild(this.daterange);
@@ -451,8 +243,8 @@ export class LineaPlot extends HTMLElement {
       exportbtn.innerHTML = `${i18n.message("linea:controls:value:export")}`;
       exportbtn.classList.add("toggle-btn");
       exportbtn.addEventListener("click", () => {
-        if (this.lineacharts.length == 0) {
-          alert("Nothing to export!");
+        if (this.view.charts.length == 0) {
+          alert(i18n.message("linea:message:noplotselected"));
           return;
         }
         this.exportModal.show();
@@ -486,15 +278,15 @@ export class LineaPlot extends HTMLElement {
         winterviewbtn.classList.add("loading");
         winterviewbtn.disabled = true;
 
-        if (!this.winterview) {
-          this.#switchToWinterView().then(() => {
+        const currentViewKey = this.#getCurrentViewKey();
+        if (currentViewKey === "station") {
+          this.#switchView("winter").then(() => {
             winterviewbtn.classList.remove("loading");
             winterviewbtn.disabled = false;
-
             label.textContent = i18n.message("linea:controls:value:winterview:station");
           });
         } else {
-          this.#switchToStationView();
+          this.#switchView("station");
           winterviewbtn.classList.remove("loading");
           winterviewbtn.disabled = false;
           label.textContent = i18n.message("linea:controls:value:winterview:winter");
@@ -502,277 +294,45 @@ export class LineaPlot extends HTMLElement {
       });
       menu.appendChild(winterviewbtn);
     }
-    if (this.hasAttribute("showdatepicker")) {
-      const enlargebtn = document.createElement("button");
-      enlargebtn.innerHTML = `<svg width="13px" height="13px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <polyline data-name="Right" fill="none" id="Right-2" points="3 17.3 3 21 6.7 21" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="10" x2="3.8" y1="14" y2="20.2"/>
-        <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14" x2="20.2" y1="10" y2="3.8"/>
-        <polyline data-name="Right" fill="none" id="Right-3" points="21 6.7 21 3 17.3 3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </svg><span class="linea-tooltiptext">${i18n.message("linea:controls:tooltips:wholetimespan")}</span>`;
-      enlargebtn.classList.add("toggle-btn");
-      enlargebtn.classList.add("linea-tooltip");
-      enlargebtn.addEventListener("click", () => {
-        this.#setStartEndDateToMinMax();
-        this.filterAndUpdateData();
-      });
-      // menu.appendChild(enlargebtn);
-    }
     controls.appendChild(menu);
     this.appendChild(controls);
-
-    await this.#constructDatePicker();
+    if (this.hasAttribute("showdatepicker")) {
+      await this.#constructDatePicker();
+    }
     this.focus();
-  }
-
-  /**
-   * handles the fixed date view
-   */
-  #handleFixedDateView() {
-    if (
-      !this.hasAttribute("showdatepicker") &&
-      (!this.hasAttribute("startdate") || !this.hasAttribute("enddate"))
-    ) {
-      console.debug("Start and Endate are not chosen, all data is presented!");
-    } else if (!this.hasAttribute("showdatepicker")) {
-      this.filterAndUpdateData(
-        Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "1900-00-00T00:00[UTC]"),
-        Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "2300-00-00T00:00[UTC]"),
-      );
-    }
-  }
-
-  /**
-   * Loads lazy data if the lazysrc attribute is given
-   */
-  #lazyLoad() {
-    if (this.hasAttribute("lazysrc")) {
-      this.fetchAndStoreData("lazysrc");
-    }
-  }
-
-  /**
-   * Generalizes the data stored in the results list:
-   * ensures that all Results objects have the same timestamps and fill up missing data.
-   * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
-   * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
-   * so we can show all available data
-   */
-  #generalizeData() {
-    if (this.results.length === 0) {
-      return;
-    }
-    const tsSet = new Set<number>();
-    for (const res of this.results) {
-      for (const t of res.timestamps) tsSet.add(t);
-    }
-    const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
-
-    for (const res of this.results) {
-      for (const key in res.values) {
-        const map = new Map<number, number[]>();
-        for (let i = 0; i < res.timestamps.length; i++) {
-          map.set(res.timestamps[i], res.values[key][i]);
-        }
-        const newValues = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : null));
-        res.values[key] = newValues;
-      }
-      // set the common timeline to all results
-      res.timestamps = allTimestamps.slice();
-    }
-  }
-
-  /**
-   * These variables are needed to make the switch from the station view to the winter view.
-   */
-  private oldDateFormat: string = "";
-  private oldStartDate: Temporal.ZonedDateTime;
-  private oldEndDate: Temporal.ZonedDateTime;
-
-  async #switchToWinterView() {
-    if (this.winterresults.length == 0) {
-      await this.fetchAndStoreData("wintersrc");
-    }
-    this.#renderWinter();
-  }
-
-  /**
-   * Renders the winter view
-   */
-  #renderWinter() {
-    if (!this.hasAttribute("showonlywinter") && this.dp) {
-      this.oldDateFormat = this.dp.locale.dateFormat;
-      this.oldStartDate = this.#getDatePickerStartDate();
-      this.oldEndDate = this.#getDatePickerEndDate();
-    }
-    const [startDate, endDate] = this.#getWinterDates();
-    for (const i in this.winterresults) {
-      const lcy = new LineaYearChart(
-        this.winterresults[i],
-        true,
-        this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
-        startDate.toPlainDate(),
-        endDate.toPlainDate(),
-      );
-      for (const lc of this.lineacharts) {
-        this.removeChild(lc);
-      }
-      this.lineacharts = [];
-      this.lineacharts.push(lcy);
-      this.appendChild(lcy);
-    }
-    if (this.dp) {
-      this.dp.update({
-        dateFormat: "yyyy",
-      });
-      this.#updateDatepickerStartEndDate(startDate, endDate);
-    }
-    this.winterview = true;
-  }
-
-  /**
-   *
-   */
-  #switchToStationView() {
-    for (const lc of this.lineacharts) {
-      this.removeChild(lc);
-    }
-    this.lineacharts = [];
-    this.#initAfterDataStorage();
-
-    this.dp.update({
-      dateFormat: this.oldDateFormat,
-    });
-    this.dp.disabled = false;
-    this.#updateDatepickerStartEndDate(this.oldStartDate, this.oldEndDate);
-    this.winterview = false;
-  }
-
-  /**
-   * Determines the winter season date range based on the current date.
-   *
-   * If the current date is after October 1st, returns the winter season from October 1st
-   * of the current year to July 1st of the next year. Otherwise, returns the winter season
-   * from Ocotber 1st of the previous year to July 1st of the current year.
-   *
-   * Also stores the current datepicker format and start/end dates for restoration when
-   * switching back from winter view.
-   *
-   * @returns {[Temporal.ZonedDateTime, Temporal.ZonedDateTime]} A tuple containing the start
-   * date (october 1st) and end date (July 1th) of the winter season in the configured timezone
-   *
-   * @example
-   * // If today is November 15, 2024
-   * const [start, end] = this.#getWinterDates();
-   * // Returns: [2024-11-01T00:00:00+00:00, 2025-04-30T00:00:00+00:00]
-   */
-  #getWinterDates(): [Temporal.ZonedDateTime, Temporal.ZonedDateTime] {
-    // get today and decide:
-    // if after september 30th, select next season (10-01 to 07-01 of next year)
-    // else select this season
-    const today = Temporal.Now.plainDateISO();
-    const currentYear = today.year;
-    const octoberThirtyfirst = Temporal.PlainDate.from(`${currentYear}-10-01`);
-
-    let winterStartYear = currentYear;
-    let winterEndYear = currentYear + 1;
-
-    if (Temporal.PlainDate.compare(today, octoberThirtyfirst) > 0) {
-      winterStartYear = currentYear;
-      winterEndYear = currentYear + 1;
-    } else {
-      winterStartYear = currentYear - 1;
-      winterEndYear = currentYear;
-    }
-    return [
-      Temporal.PlainDate.from(`${winterStartYear}-10-01`).toZonedDateTime(i18n.timezone()),
-      Temporal.PlainDate.from(`${winterEndYear}-07-01`).toZonedDateTime(i18n.timezone()),
-    ];
-  }
-
-  #updateWinterPlots() {
-    for (const lc of this.lineacharts) {
-      (lc as LineaYearChart).updateStartEndDate(
-        this.#getDatePickerStartDate(),
-        this.#getDatePickerEndDate(),
-      );
-    }
   }
 
   /**
    * sets the valid data range to the startDate and endDate inputs
    * @returns
    */
-  #updateValidDateInputs() {
+  updateValidDateInputs() {
     if (!this.dp) {
       return;
     }
-    const minTime = Temporal.Instant.fromEpochMilliseconds(
-      this.hasAttribute("showonlywinter") ? this.minTimeWinter : this.minTime,
-    ).toZonedDateTimeISO(i18n.timezone());
-    const maxTime = Temporal.Instant.fromEpochMilliseconds(
-      this.hasAttribute("showonlywinter") ? this.maxTimeWinter : this.maxTime,
-    ).toZonedDateTimeISO(i18n.timezone());
+    const minTime = Temporal.Instant.fromEpochMilliseconds(this.view.minTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
+    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.view.maxTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
     this.#updateDatePickerMinMax(minTime, maxTime);
-  }
-
-  /**
-   *  Set the start and end input to the values given by the attributes
-   * @returns
-   */
-  #setStartEndDateToAttributes() {
-    if (!this.daterange || !this.dp) {
-      return;
-    }
-    let startdate = Temporal.ZonedDateTime.from(this.getAttribute("startdate") ?? "");
-    let enddate = Temporal.ZonedDateTime.from(this.getAttribute("enddate") ?? "");
-    const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-      i18n.timezone(),
-    );
-    const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-      i18n.timezone(),
-    );
-
-    if (
-      Temporal.ZonedDateTime.compare(startdate, maxTime) > 0 ||
-      Temporal.ZonedDateTime.compare(startdate, minTime) < 0
-    ) {
-      const minTime = Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-        i18n.timezone(),
-      );
-      startdate = minTime;
-    }
-    if (
-      Temporal.ZonedDateTime.compare(enddate, minTime) < 0 ||
-      Temporal.ZonedDateTime.compare(enddate, maxTime) > 0
-    ) {
-      const maxTime = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-        i18n.timezone(),
-      );
-      enddate = maxTime;
-    }
-    this.#updateDatepickerStartEndDate(startdate, enddate);
-    this.filterAndUpdateData(startdate, enddate);
   }
 
   /**
    *
    * set the Input fields to the widthest available timespan
    */
-  #setStartEndDateToMinMax() {
+  setStartEndDateToMinMax() {
     if (!this.daterange || !this.dp) {
       return;
     }
-    let min, max;
-    if (this.hasAttribute("showonlywinter") || this.winterview) {
-      min = this.minTimeWinter;
-      max = this.maxTimeWinter;
-    } else {
-      min = this.minTime;
-      max = this.maxTime;
-    }
-    const minDate = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(i18n.timezone());
-    const maxDate = Temporal.Instant.fromEpochMilliseconds(max).toZonedDateTimeISO(i18n.timezone());
+    const minDate = Temporal.Instant.fromEpochMilliseconds(this.view.minTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
+    const maxDate = Temporal.Instant.fromEpochMilliseconds(this.view.maxTime).toZonedDateTimeISO(
+      i18n.timezone(),
+    );
     this.#updateDatepickerStartEndDate(minDate, maxDate);
   }
 
@@ -781,7 +341,7 @@ export class LineaPlot extends HTMLElement {
    * values are given in UTC epoch milliseconds
    *
    */
-  #setStartEndDateTo(min: number, max: number) {
+  setStartEndDateTo(min: number, max: number) {
     if (!this.dp || !this.daterange) {
       return;
     }
@@ -790,19 +350,6 @@ export class LineaPlot extends HTMLElement {
     );
     const endDate = Temporal.Instant.fromEpochMilliseconds(max).toZonedDateTimeISO(i18n.timezone());
     this.#updateDatepickerStartEndDate(startDate, endDate);
-  }
-
-  /**
-   *
-   * Converts a Date to a ZonedDateTime
-   * @param value Date to convert
-   * @returns a Temporal ZonedDateTime Object
-   */
-  #dateToZonedDateTime(value: Date): Temporal.ZonedDateTime {
-    // Convert the Date to a Temporal Instant
-    const instant = Temporal.Instant.from(value.toISOString());
-    // Return a ZonedDateTime object in the specified timezone
-    return instant.toZonedDateTimeISO(i18n.timezone());
   }
 
   /**
@@ -829,45 +376,6 @@ export class LineaPlot extends HTMLElement {
     });
   }
 
-  #getDatePickerStartDate(): Temporal.ZonedDateTime {
-    if (!this.dp) {
-      if (!this.winterview) {
-        return Temporal.Instant.fromEpochMilliseconds(this.minTime).toZonedDateTimeISO(
-          i18n.timezone(),
-        );
-      } else {
-        return Temporal.Instant.fromEpochMilliseconds(this.minTimeWinter).toZonedDateTimeISO(
-          i18n.timezone(),
-        );
-      }
-    }
-    const date: Date = this.dp.selectedDates[0];
-    date.setHours(0);
-    date.setMinutes(0);
-    return this.#dateToZonedDateTime(date);
-  }
-
-  #getDatePickerEndDate(): Temporal.ZonedDateTime {
-    if (!this.dp) {
-      if (!this.winterview) {
-        return Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
-          i18n.timezone(),
-        );
-      } else {
-        return Temporal.Instant.fromEpochMilliseconds(this.maxTimeWinter).toZonedDateTimeISO(
-          i18n.timezone(),
-        );
-      }
-    }
-    let date: Date;
-    if (this.dp.selectedDates.length == 1) {
-      date = this.dp.selectedDates[0];
-    } else {
-      date = this.dp.selectedDates[1];
-    }
-    return this.#dateToZonedDateTime(date).add({ days: 1 });
-  }
-
   /**
    * cosntructs the AirDatePicker
    */
@@ -879,16 +387,6 @@ export class LineaPlot extends HTMLElement {
     this.dp = new AirDatepicker(this.daterange, {
       range: true,
       multipleDatesSeparator: " - ",
-      onSelect: () => {
-        if (!this.winterview) {
-          this.filterAndUpdateData();
-        }
-      },
-      onShow: () => {
-        if (this.winterview) {
-          requestAnimationFrame(() => this.dp.hide());
-        }
-      },
       container: this,
       autoClose: true,
     });

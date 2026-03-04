@@ -2,8 +2,9 @@ import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
 import type { Result } from "../data/station-data";
-import { AbstractLineaChart } from "./abstract-linea-chart";
+import { AbstractLineaChart } from "../abstract-linea-chart";
 import css from "./export-modal.css?inline";
+import { WinterView } from "./winter-view";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -211,7 +212,7 @@ export class ExportModal {
     this.exportSettings.style.display = "block";
     this.exportResult.style.display = "none";
 
-    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.lineacharts
+    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.view.charts
       .map((chart, index) => {
         let options = "";
         chart.plotnames.forEach((name, i) => {
@@ -319,7 +320,6 @@ export class ExportModal {
   }
 
   #download(url: string, download: string = this.exportdata?.filename ?? "file.txt") {
-    console.log(url);
     const a = document.createElement("a");
     a.href = url;
     a.download = download;
@@ -347,23 +347,15 @@ export class ExportModal {
   }
 
   /**
-   *
+   * Downloads all available SMET files
    */
   #exportAsSMET() {
-    if (this.lineaPlot.winterview) {
-      this.#downloadSMETS(this.lineaPlot.wintersrcs);
-    } else {
-      if (this.lineaPlot.hasAttribute("lazysrc")) {
-        this.#downloadSMETS(this.lineaPlot.lazysrcs);
-      } else {
-        this.#downloadSMETS(this.lineaPlot.srcs);
-      }
-    }
+    this.#downloadSMETS(this.lineaPlot.view.srcs);
   }
 
   async #downloadSMETS(srcs: string[]) {
     for (const src of srcs) {
-      this.#download(src, src.split("/")[-1]);
+      this.#download(src, src.split("/")[src.split("/").length - 1]);
       await new Promise(requestAnimationFrame);
       await new Promise((r) => setTimeout(r, 1000));
     }
@@ -385,7 +377,7 @@ export class ExportModal {
         values: {},
         units: {},
       };
-      if (this.lineaPlot.winterview) {
+      if (this.lineaPlot.view instanceof WinterView) {
         activeplots.forEach((index) => {
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
             result.values.TA = lc.result.values.TA ?? [];
@@ -435,7 +427,7 @@ export class ExportModal {
    */
   async #exportAsIframe() {
     if (this.#getActiveLineacharts().length == 0) {
-      alert("Nothing to export!");
+      alert(i18n.message("linea:message:noplotselected"));
       return;
     }
     const exports = this.#getExportSettings();
@@ -448,7 +440,7 @@ export class ExportModal {
       .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
       .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
 
-    if (this.lineaPlot.winterview) {
+    if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
 
@@ -482,7 +474,7 @@ export class ExportModal {
 
   async #exportAsBlogElement() {
     if (this.#getActiveLineacharts().length == 0) {
-      alert("Nothing to export!");
+      alert(i18n.message("linea:message:noplotselected"));
       return;
     }
     const exports = this.#getExportSettings();
@@ -493,7 +485,7 @@ export class ExportModal {
                     <linea-plot style="position: absolute; inset: 0; z-index: 2;" data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
                   </div>`;
 
-    if (this.lineaPlot.winterview) {
+    if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot ", "<linea-plot showonlywinter");
     }
     const binary = ExportModal.#toBinary(html);
@@ -598,7 +590,7 @@ export class ExportModal {
   ) {
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
-      alert("Nothing to export!");
+      alert(i18n.message("linea:message:noplotselected"));
       return;
     }
 
@@ -607,8 +599,8 @@ export class ExportModal {
     const legendItems = {};
 
     const parentWidth =
-      (width * this.lineaPlot.lineacharts[0].clientWidth) /
-      this.lineaPlot.lineacharts[0].plots[0].root.querySelector("canvas").width;
+      (width * this.lineaPlot.view.charts[0].clientWidth) /
+      this.lineaPlot.view.charts[0].plots[0].root.querySelector("canvas").width;
 
     let oldBackgroundColor = "";
     if (activeLinecharts.length == 1) {
@@ -616,8 +608,8 @@ export class ExportModal {
       activeLinecharts[0].setBackgroundColor("#00000000");
     }
     // has to be done after background color change, because uPlot canvas is redrawn on background color change
-    const initHeightPerCanvas = this.lineaPlot.lineacharts[0].plots[0].height;
-    for (const lineachart of this.lineaPlot.lineacharts) {
+    const initHeightPerCanvas = this.lineaPlot.view.charts[0].plots[0].height;
+    for (const lineachart of this.lineaPlot.view.charts) {
       lineachart.resizeObserver.unobserve(lineachart);
       lineachart.resizePlots(parentWidth, lineachart.style, heightPerCanvas);
       await new Promise((r) => setTimeout(r, 1));
@@ -625,7 +617,10 @@ export class ExportModal {
 
     activeLinecharts.forEach((lineachart, index) => {
       const plotindices = this.#getCheckedPlotIndices(index);
-      const plots: uPlot[] = lineachart.plots.filter((v, i) => plotindices.includes(i));
+      if (plotindices.length == 0) {
+        return;
+      }
+      const plots: uPlot[] = lineachart.plots.filter((_v, i) => plotindices.includes(i));
       plots
         .map((p) => p.root.querySelector("canvas")!)
         .forEach((c) => {
@@ -647,13 +642,55 @@ export class ExportModal {
       );
     });
 
-    //build png
-    const titleHeight = title ? 40 : 0;
+    if (Object.keys(legendItems).length == 0) {
+      alert(i18n.message("linea:message:noplotselected"));
+      return;
+    }
+
+    const swatchSize = 18;
     const legendItemHeight = 22;
     const legendPadding = 20;
+    const labelFontSize = 16;
+    const legendLines: Array<{
+      items: Array<{ label: string; color: string; width: number }>;
+      startX: number;
+    }> = [];
+    //Calculate legend layout - try to fit as many items as possible into one line, then create new lines as needed.
+    if (Object.keys(legendItems).length > 0) {
+      const xStart = legendPadding * 2;
 
+      const ctx = canvases[0].getContext("2d")!;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = labelFontSize + "px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
+      let currentLine: Array<{ label: string; color: string; width: number }> = [];
+      let currentLineWidth = 0;
+
+      for (const [label, color] of Object.entries(legendItems)) {
+        const textwidth = ctx.measureText(label).width;
+        const itemWidth = swatchSize + 8 + textwidth + 10;
+
+        if (currentLineWidth + itemWidth > canvases[0].width - legendPadding * 2) {
+          if (currentLine.length > 0) {
+            legendLines.push({ items: currentLine, startX: xStart });
+            currentLine = [];
+            currentLineWidth = 0;
+          }
+        }
+        currentLine.push({ label, color, width: itemWidth });
+        currentLineWidth += itemWidth;
+      }
+
+      if (currentLine.length > 0) {
+        legendLines.push({ items: currentLine, startX: xStart });
+      }
+    }
+
+    const titleHeight = title ? 40 : 0;
     const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-    const totalHeight = titleHeight + chartsHeight + (width <= 550 ? 110 : 90);
+    const legendHeight = (legendLines.length * legendItemHeight * 3) / 2;
+    const totalHeight = titleHeight + chartsHeight + legendHeight;
 
     const outCanvas = document.createElement("canvas");
     outCanvas.width = canvases[0].width;
@@ -663,19 +700,26 @@ export class ExportModal {
     const ctx = outCanvas.getContext("2d")!;
     ctx.imageSmoothingEnabled = false;
     ctx.imageSmoothingQuality = "high";
-
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
 
+    //draw title
     if (title) {
       ctx.fillStyle = "#000";
-      ctx.font = "24px Arial";
       ctx.textAlign = "center";
-      const titlewidth = ctx.measureText(title).width;
-      if (width < titlewidth) {
-        ctx.font = "18px Arial";
+      ctx.textBaseline = "top";
+
+      let fontSize = 24;
+      ctx.font = `bold ${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`;
+      let titleWidth = ctx.measureText(title).width;
+
+      // Reduce font size until title fits
+      while (titleWidth > outCanvas.width - 40 && fontSize > 12) {
+        fontSize -= 2;
+        ctx.font = `bold ${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`;
+        titleWidth = ctx.measureText(title).width;
       }
-      ctx.fillText(title, outCanvas.width / 2, 40);
+      ctx.fillText(title, outCanvas.width / 2, 18);
     }
 
     let y = titleHeight;
@@ -684,37 +728,42 @@ export class ExportModal {
       y += c.height;
     }
 
-    if (Object.keys(legendItems).length > 0) {
-      const swatchSize = 18;
-      const xStart = legendPadding * 2;
-      let legendY = y + legendPadding + legendItemHeight / 2;
+    let lineIndex = 0;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.font = labelFontSize + "px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
 
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = "14px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+    for (const line of legendLines) {
+      const totalLineWidth = line.items.reduce((sum, item) => sum + item.width, 0);
+      const centeredStartX = (outCanvas.width - totalLineWidth) / 2;
 
-      let x = xStart;
-      for (const [label, color] of Object.entries(legendItems)) {
-        const textwidth = ctx.measureText(label).width;
-        if (x + swatchSize + 8 + textwidth > outCanvas.width) {
-          x = xStart;
-          legendY += legendItemHeight;
-        }
-
+      let x = centeredStartX;
+      for (const item of line.items) {
         // colored square
-        ctx.fillStyle = color;
-        ctx.fillRect(x, legendY - swatchSize / 2, swatchSize, swatchSize);
+        ctx.fillStyle = item.color;
+        ctx.fillRect(
+          x,
+          y + legendPadding + (lineIndex * legendItemHeight * 3) / 2 - swatchSize / 2,
+          swatchSize,
+          swatchSize,
+        );
 
         // label
         ctx.fillStyle = "#000";
-        ctx.fillText(label, x + swatchSize + 8, legendY);
-        x = x + swatchSize + 8 + textwidth + 10;
+        ctx.fillText(
+          item.label,
+          x + swatchSize + 8,
+          y + legendPadding + (lineIndex * legendItemHeight * 3) / 2,
+        );
+        x += item.width;
       }
+      lineIndex++;
     }
+
     if (activeLinecharts.length == 1) {
       activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
     }
-    for (const lineachart of this.lineaPlot.lineacharts) {
+    for (const lineachart of this.lineaPlot.view.charts) {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
       lineachart.resizeObserver.observe(lineachart);
     }
@@ -744,7 +793,7 @@ export class ExportModal {
     const activeCharts: AbstractLineaChart[] = [];
     const indices = this.#getCheckedDiagramIndices();
     let i = 0;
-    for (const lineachart of this.lineaPlot.lineacharts) {
+    for (const lineachart of this.lineaPlot.view.charts) {
       if (indices.includes(i)) {
         activeCharts.push(lineachart);
       }
