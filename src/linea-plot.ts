@@ -126,8 +126,14 @@ export class LineaPlot extends HTMLElement {
     } else {
       this.view = this.lineaViews.get("station")!;
     }
-
-    await this.view.initialize();
+    try {
+      await this.view.initialize();
+    } catch (error: any) {
+      error == "Empty src array!"
+        ? console.warn("No data to load for the " + this.#getCurrentViewKey() + " view")
+        : console.error(error);
+      return;
+    }
     this.view.onSwitchTo();
     this.view.show();
   }
@@ -346,7 +352,7 @@ export class LineaPlot extends HTMLElement {
    *
    */
   setStartEndDateTo(min: number, max: number) {
-    if (!this.dp || !this.daterange) {
+    if (!this.dp || !this.daterange || min === +Infinity || max === -Infinity) {
       return;
     }
     const startDate = Temporal.Instant.fromEpochMilliseconds(min).toZonedDateTimeISO(
