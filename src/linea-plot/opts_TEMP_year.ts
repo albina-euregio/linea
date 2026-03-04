@@ -13,8 +13,8 @@ export const opts_TEMP_year: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("linea:parameter:TA")} (°C)`;
-        var labely2 = `${i18n.message("linea:parameter:TSS")} (°C)`;
+        var labely1 = `${i18n.message("linea:parameter:TA")} (℃)`;
+        var labely2 = `${i18n.message("linea:parameter:TSS")} (℃)`;
         OptsHelper.UpdateAxisLabels(
           ctx,
           labely1,
@@ -104,6 +104,10 @@ export const opts_TEMP_year: uPlot.Options = {
       fill: "#d9dcdc",
     },
     {
+      series: [3, 1],
+      fill: "#d9dcdc",
+    },
+    {
       series: [2, 1],
       fill: "#d9dcdc",
     },
@@ -115,7 +119,7 @@ const baseTempSeries = (key: string, color: string, width = 2): uPlot.Series => 
   stroke: color,
   width,
   scale: "y",
-  value: (u, v) => i18n.number(v, {}, "°C"),
+  value: (u, v) => i18n.number(v, {}, "℃"),
 });
 
 export const opts_TEMP_year_min = {
@@ -123,7 +127,7 @@ export const opts_TEMP_year_min = {
   points: { show: false },
 };
 export const opts_TEMP_year_max = {
-  ...baseTempSeries("TEMP_max", "#d9dcdc", 0),
+  ...baseTempSeries("TEMP_max", "#d9dcdc", 2),
   points: { show: false },
 };
 export const opts_TEMP_year_median = baseTempSeries("TEMP_median", "#878787", 2);

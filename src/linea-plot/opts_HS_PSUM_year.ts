@@ -134,7 +134,7 @@ export const opts_HS_year_min = {
   points: { show: false },
 };
 export const opts_HS_year_max = {
-  ...baseHsSeries("HS_max", "#d9dcdc", 0),
+  ...baseHsSeries("HS_max", "#d9dcdc", 2),
   points: { show: false },
 };
 export const opts_HS_year_median = baseHsSeries("HS_median", "#878787", 2);
