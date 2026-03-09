@@ -10,7 +10,7 @@
   "linea:parameter:PSUM": "Precipitation",
   "linea:parameter:TA": "Air Temperature",
   "linea:parameter:TD": "Dew Point",
-  "linea:parameter:TSS": "Snow Surface Temperature",
+  "linea:parameter:TSS": "Surface Temperature",
   "linea:parameter:RH": "Relative Humidity",
   "linea:parameter:ISWR": "Global Radiation",
   "linea:parameter:VW": "Wind Speed",

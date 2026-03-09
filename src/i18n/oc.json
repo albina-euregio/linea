@@ -10,7 +10,7 @@
   "linea:parameter:PSUM": "Precipitacion",
   "linea:parameter:TA": "Temperatura der aire",
   "linea:parameter:TD": "Punt de rosada",
-  "linea:parameter:TSS": "Temperatura ena superfícia dera nhèu",
+  "linea:parameter:TSS": "Temperatura de superfície",
   "linea:parameter:RH": "Umiditat relativa",
   "linea:parameter:ISWR": "Radiacion globau",
   "linea:parameter:VW": "Velocitat vent",
@@ -34,8 +34,8 @@
   "linea:controls:value:winterview:station": "Stationview",
   "linea:controls:label:exportsettings": "Export Settings",
   "linea:controls:label:heightpercanvas": "Height per canvas",
-  "linea:controls:label:width": "Width (only PNG)",
-  "linea:controls:label:title": "Title (only PNG)",
+  "linea:controls:label:width": "Width",
+  "linea:controls:label:title": "Títol",
   "linea:controls:label:exportchart": "Export Chart",
   "linea:controls:label:exportresult": "Export Result",
   "linea:controls:button:pngimage": "PNG Image",
@@ -44,6 +44,8 @@
   "linea:controls:button:iframe:sub": "HTML code to embed the chart in a webpage",
   "linea:controls:button:interactiveblog": "Embed Code (blog)",
   "linea:controls:button:interactiveblog:sub": "HTML code to embed as interactive element into the blog",
+  "linea:controls:button:smet": "SMET",
+  "linea:controls:button:smet:sub": "Raw data in .smet format",
   "linea:controls:button:copytoclipboard": "Copiar",
   "linea:controls:button:copytoclipboard:clicked": "Copiar",
   "linea:controls:button:download": "Descargar",
@@ -55,5 +57,6 @@
   "linea:plotnames:humidity_gr": "Humidity&GR",
   "linea:plotnames:datapoints": "Datapoints",
   "linea:plotnames:newsnow": "Nhèu recenta",
-  "linea:title:since": "since"
+  "linea:title:since": "since",
+  "linea:message:noplotselected": "Please select at least one plot to export."
 }

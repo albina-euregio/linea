@@ -10,7 +10,7 @@
   "linea:parameter:PSUM": "précipitation",
   "linea:parameter:TA": "température de l'air",
   "linea:parameter:TD": "point de rosée",
-  "linea:parameter:TSS": "température de surface de la neige",
+  "linea:parameter:TSS": "Surface Temperature",
   "linea:parameter:RH": "humidité relative",
   "linea:parameter:ISWR": "rayonnement global",
   "linea:parameter:VW": "Vitesse du vent",
@@ -34,8 +34,8 @@
   "linea:controls:value:winterview:station": "vue de la gare",
   "linea:controls:label:exportsettings": "paramètres d'exportation",
   "linea:controls:label:heightpercanvas": "hauteur par toile",
-  "linea:controls:label:width": "largeur",
-  "linea:controls:label:title": "titre",
+  "linea:controls:label:width": "Width",
+  "linea:controls:label:title": "Title",
   "linea:controls:label:exportchart": "graphique des exportations",
   "linea:controls:label:exportresult": "résultat de l'exportation",
   "linea:controls:button:pngimage": "image PNG",
@@ -44,6 +44,8 @@
   "linea:controls:button:iframe:sub": "Code HTML pour intégrer le graphique dans une page Web",
   "linea:controls:button:interactiveblog": "code d'intégration (blog)",
   "linea:controls:button:interactiveblog:sub": "Shortcode WordPress à intégrer comme élément interactif dans le blog",
+  "linea:controls:button:smet": "SMET",
+  "linea:controls:button:smet:sub": "Raw data in .smet format",
   "linea:controls:button:copytoclipboard": "Copier",
   "linea:controls:button:copytoclipboard:clicked": "Copier",
   "linea:controls:button:download": "Télécharger",
@@ -55,5 +57,6 @@
   "linea:plotnames:humidity_gr": "humidité et rayonnement global",
   "linea:plotnames:datapoints": "points de données",
   "linea:plotnames:newsnow": "Neige fraîche",
-  "linea:title:since": "depuis"
+  "linea:title:since": "depuis",
+  "linea:message:noplotselected": "Please select at least one plot to export."
 }

@@ -10,7 +10,7 @@
   "linea:parameter:PSUM": "Precipitazione",
   "linea:parameter:TA": "Temperatura dell'aria",
   "linea:parameter:TD": "Punto di rugiada",
-  "linea:parameter:TSS": "Temperatura superficiale della neve",
+  "linea:parameter:TSS": "Temperatura superficiale",
   "linea:parameter:RH": "Umidità relativa",
   "linea:parameter:ISWR": "Radiazione globale",
   "linea:parameter:VW": "Velocità vento",
@@ -34,7 +34,7 @@
   "linea:controls:value:winterview:station": "Grafico di default",
   "linea:controls:label:exportsettings": "Impostazioni per export",
   "linea:controls:label:heightpercanvas": "Altezza grafico",
-  "linea:controls:label:width": "Larghezza",
+  "linea:controls:label:width": "Width",
   "linea:controls:label:title": "Titolo",
   "linea:controls:label:exportchart": "Export grafico",
   "linea:controls:label:exportresult": "Export risultato",
@@ -44,6 +44,8 @@
   "linea:controls:button:iframe:sub": "Codice HTML per incorporare il grafico in una pagina web",
   "linea:controls:button:interactiveblog": "Codice incorporato (blog)",
   "linea:controls:button:interactiveblog:sub": "Shortcode wordpress da incorporare come elemento interattivo nel blog",
+  "linea:controls:button:smet": "SMET",
+  "linea:controls:button:smet:sub": "Raw data in .smet format",
   "linea:controls:button:copytoclipboard": "Copia",
   "linea:controls:button:copytoclipboard:clicked": "Copia",
   "linea:controls:button:download": "Scarica",
@@ -55,5 +57,6 @@
   "linea:plotnames:humidity_gr": "Umidità e radiazione globale",
   "linea:plotnames:datapoints": "Ponti dati",
   "linea:plotnames:newsnow": "Neve fresca",
-  "linea:title:since": "partendo da"
+  "linea:title:since": "partendo da",
+  "linea:message:noplotselected": "Please select at least one plot to export."
 }
