@@ -103,21 +103,39 @@ export abstract class LineaView {
       const mergedTimestamps = [...new Set([...oldTimestamps, ...newTimestamps])].sort(
         (a, b) => a - b,
       );
+
+      const oldIndexMap = new Map<number, number>();
+      for (let j = 0; j < oldTimestamps.length; j++) {
+        oldIndexMap.set(oldTimestamps[j], j);
+      }
+      const newIndexMap = new Map<number, number>();
+      for (let j = 0; j < newTimestamps.length; j++) {
+        newIndexMap.set(newTimestamps[j], j);
+      }
+
       const mergedValues: Values = {};
-      for (const key of Object.keys(oldResult.values)) {
-        mergedValues[key] = [];
-        for (const t of mergedTimestamps) {
-          const oldIndex = oldTimestamps.indexOf(t);
-          const newIndex = newTimestamps.indexOf(t);
-          if (oldIndex !== -1) {
-            mergedValues[key].push(oldResult.values[key][oldIndex]);
-          } else if (newIndex !== -1) {
-            mergedValues[key].push(newResult.values[key][newIndex]);
+      const keys = Object.keys(oldResult.values);
+
+      for (const key of keys) {
+        mergedValues[key] = new Array(mergedTimestamps.length);
+      }
+
+      for (let t = 0; t < mergedTimestamps.length; t++) {
+        const timestamp = mergedTimestamps[t];
+        const oldIndex = oldIndexMap.get(timestamp);
+        const newIndex = newIndexMap.get(timestamp);
+
+        for (const key of keys) {
+          if (oldIndex !== undefined) {
+            mergedValues[key][t] = oldResult.values[key][oldIndex];
+          } else if (newIndex !== undefined) {
+            mergedValues[key][t] = newResult.values[key][newIndex];
           } else {
-            mergedValues[key].push(null);
+            mergedValues[key][t] = null;
           }
         }
       }
+
       results.push({
         ...oldResult,
         timestamps: mergedTimestamps,
