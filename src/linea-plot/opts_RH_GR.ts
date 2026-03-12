@@ -14,7 +14,7 @@ export const opts_RH_GR: uPlot.Options = {
         const ctx = u.ctx;
         var labely1 = `${i18n.message("linea:parameter:RH")} (%)`;
         var labely2 = `${i18n.message("linea:parameter:ISWR")} (W/m²)`;
-        var labelColor1 = "#6aafd5";
+        var labelColor1 = "#8a7474";
         var labelColor2 = "#DE2D26";
         OptsHelper.UpdateAxisLabels(
           ctx,
@@ -43,7 +43,7 @@ export const opts_RH_GR: uPlot.Options = {
     {
       scale: "y",
       splits: [0, 25, 50, 75, 100],
-      stroke: "#6aafd5",
+      stroke: "#8a7474",
       grid: {
         show: false,
       },
@@ -68,10 +68,10 @@ export const opts_RH_GR: uPlot.Options = {
 
 export const opts_RH: uPlot.Series = {
   label: i18n.message("linea:parameter:RH"),
-  stroke: "#6aafd5",
+  stroke: "#8a7474",
   scale: "y",
-  width: 2,
-  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
+  width: 1.5,
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
 };
 
 export const opts_ISWR: uPlot.Series = {
@@ -79,6 +79,6 @@ export const opts_ISWR: uPlot.Series = {
   stroke: "#DE2D26",
   fill: "rgba(255,0,0,0.1)",
   scale: "y2",
-  width: 1,
-  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
+  width: 1.5,
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
 };

@@ -114,22 +114,16 @@ export const opts_TEMP_year: uPlot.Options = {
   ],
 };
 
-const baseTempSeries = (key: string, color: string, width = 2): uPlot.Series => ({
+const baseTempSeries = (key: string, color: string): uPlot.Series => ({
   label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
-  width,
+  width: 1.5,
   scale: "y",
-  value: (u, v) => i18n.number(v, {}, "℃"),
+  value: (_u, v) => i18n.number(v, {}, "℃"),
 });
 
-export const opts_TEMP_year_min = {
-  ...baseTempSeries("TEMP_min", "#d9dcdc", 2),
-  points: { show: false },
-};
-export const opts_TEMP_year_max = {
-  ...baseTempSeries("TEMP_max", "#d9dcdc", 2),
-  points: { show: false },
-};
-export const opts_TEMP_year_median = baseTempSeries("TEMP_median", "#878787", 2);
-export const opts_TEMP_year_current = baseTempSeries("TEMP", "#DE2D26", 2);
-export const opts_DEW_year_current = baseTempSeries("TSS", "#FC9272", 2);
+export const opts_TEMP_year_min = baseTempSeries("TEMP_min", "#d9dcdc");
+export const opts_TEMP_year_max = baseTempSeries("TEMP_max", "#d9dcdc");
+export const opts_TEMP_year_median = baseTempSeries("TEMP_median", "#878787");
+export const opts_TEMP_year_current = baseTempSeries("TEMP", "#DE2D26");
+export const opts_DEW_year_current = baseTempSeries("TSS", "#FC9272");

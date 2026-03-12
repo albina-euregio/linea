@@ -9,7 +9,7 @@ const ms = 1,
   y = d * 365;
 
 export const timeAxis: uPlot.Axis = {
-  values(self, splits, axisIdx, foundSpace, foundIncr) {
+  values(_self, splits, _axisIdx, _foundSpace, foundIncr) {
     let opts:
       | [Intl.DateTimeFormatOptions]
       | [Intl.DateTimeFormatOptions, Intl.DateTimeFormatOptions] = [{}];

@@ -84,7 +84,7 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
 export const opts_DATAPOINTS_amount_year: uPlot.Series = {
   label: i18n.message("linea:parameter:DATAPOINTS:amount"),
   stroke: "#00ff55ff",
-  width: 2,
+  width: 1.5,
   scale: "y",
-  value: (u, v) => i18n.number(v, {}, i18n.message("linea:unit:DATAPOINTS")),
+  value: (_u, v) => i18n.number(v, {}, i18n.message("linea:unit:DATAPOINTS")),
 };

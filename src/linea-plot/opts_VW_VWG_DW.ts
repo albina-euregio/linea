@@ -54,7 +54,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   scales: {
     x: timeScale,
     y: {
-      range: (u, dataMin, dataMax) => {
+      range: (_u, _dataMin, dataMax) => {
         const closest = [100, 120, 160, 230, 300].reduce((prev, curr) =>
           dataMax > prev && dataMax <= curr ? curr : prev,
         );
@@ -112,16 +112,16 @@ export const opts_VW: uPlot.Series = {
   label: i18n.message("linea:parameter:VW"),
   stroke: "#00E2B6",
   scale: "y",
-  width: 2,
-  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
+  width: 1.5,
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
 };
 
 export const opts_VW_MAX: uPlot.Series = {
   label: i18n.message("linea:parameter:VW_MAX"),
   stroke: "#00A484",
   scale: "y",
-  width: 2,
-  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
+  width: 1.5,
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
 };
 
 export const opts_DW: uPlot.Series = {
@@ -134,5 +134,5 @@ export const opts_DW: uPlot.Series = {
     size: 4,
   },
   scale: "y2",
-  value: (u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "°"),
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "°"),
 };
