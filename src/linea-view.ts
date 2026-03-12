@@ -62,14 +62,10 @@ export abstract class LineaView {
 
     const results: Result[] = [];
     for (const src of this.srcs) {
-      try {
-        const result = await fetchSMET(src);
-        this.minTime = Math.min(this.minTime, result.timestamps[0]);
-        this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
-        results.push(result);
-      } catch (e) {
-        console.error(e);
-      }
+      const result = await fetchSMET(src);
+      this.minTime = Math.min(this.minTime, result.timestamps[0]);
+      this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
+      results.push(result);
     }
     this.results = this.#mergeResults(results);
     this.#generalizeData();

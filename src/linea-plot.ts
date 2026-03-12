@@ -161,6 +161,18 @@ export class LineaPlot extends HTMLElement {
       throw viewkey + " view not available";
     }
 
+    const needsInitialization = view.results.length === 0;
+    if (needsInitialization) {
+      try {
+        await view.initialize();
+      } catch (error: any) {
+        console.error(error);
+        this.#updateWinterViewButton();
+        this.winterviewBtn.disabled = true;
+        return;
+      }
+    }
+
     this.view.onSwitchFrom();
     for (const chart of this.view.getCharts()) {
       if (this.contains(chart)) {
@@ -168,12 +180,8 @@ export class LineaPlot extends HTMLElement {
       }
     }
 
-    const needsInitialization = view.results.length === 0;
     this.view = view;
 
-    if (needsInitialization) {
-      await view.initialize();
-    }
     view.show();
     view.onSwitchTo();
 
