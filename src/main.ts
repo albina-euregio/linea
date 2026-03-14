@@ -1,3 +1,3 @@
 import "./linea-plot";
-import "./schema/listing.ts";
-import "./schema/listing-legacy.ts";
+export * as listing from "./schema/listing";
+export * as listingLegacy from "./schema/listing-legacy";
