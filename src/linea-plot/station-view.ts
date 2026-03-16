@@ -2,6 +2,7 @@ import { i18n } from "../i18n";
 import { LineaChart } from "./linea-chart";
 import { LineaView } from "../linea-view";
 import type { LineaPlot } from "../linea-plot";
+import type { AirDatepickerOptions } from "air-datepicker";
 
 /**
  * Station View - displays non-winter station data with interactive filtering
@@ -58,19 +59,24 @@ export class StationView extends LineaView {
    * Called when switching to this view
    */
   onSwitchTo(): void {
-    if (this.dp && this.savedDateFormat && this.savedStartDate && this.savedEndDate) {
-      this.dp.update({
-        dateFormat: this.savedDateFormat,
+    if (this.dp) {
+      const options: Partial<AirDatepickerOptions> = {
         onShow: () => {},
         onSelect: () => {
           this.filterAndUpdateData();
         },
-      });
+      };
+      if (this.savedDateFormat) {
+        options.dateFormat = this.savedDateFormat;
+      }
+      this.dp.update(options);
       (this.dp as any).disabled = false;
-      this.updateDatepickerStartEndDate(
-        this.savedStartDate,
-        this.savedEndDate.subtract({ days: 1 }),
-      );
+      if (this.savedStartDate && this.savedEndDate) {
+        this.updateDatepickerStartEndDate(
+          this.savedStartDate,
+          this.savedEndDate.subtract({ days: 1 }),
+        );
+      }
     }
   }
 
