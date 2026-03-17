@@ -25,46 +25,47 @@ export class LineaChart extends AbstractLineaChart {
   }
 
   setData(timestamps: number[], values: Values) {
-    this.result.timestamps = timestamps;
-    this.result.values = values;
     let i = 0;
-    if (this.result.values.HS || this.result.values.PSUM) {
-      this.updateData(this.plots[i], [this.result.values.HS, this.result.values.PSUM]);
+    if (values.HS || values.PSUM) {
+      this.updateData(this.plots[i], [timestamps, values.HS, values.PSUM]);
       i += 1;
     }
-    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
+    if (values.VW || values.VW_MAX || values.DW) {
       this.updateData(this.plots[i], [
-        this.result.values.VW,
-        this.result.values.VW_MAX,
-        this.#filterDWData(this.result.values.DW),
+        timestamps,
+        values.VW,
+        values.VW_MAX,
+        this.#filterDWData(values.DW),
       ]);
       i += 1;
     }
-    if (this.result.values.TA || this.result.values.TD || this.result.values.TSS) {
-      if (this.showSurfaceHoarSeries && this.result.values.TD && this.result.values.TSS) {
+    if (values.TA || values.TD || values.TSS) {
+      if (this.showSurfaceHoarSeries && values.TD && values.TSS) {
         this.updateData(this.plots[i], [
-          this.result.values.TA,
-          this.result.values.TD ??
-            (this.result.values.TA && this.result.values.RH
-              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+          timestamps,
+          values.TA,
+          values.TD ??
+            (values.TA && values.RH
+              ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
               : undefined),
-          this.result.values.TSS,
+          values.TSS,
           this.#generateSurfaceHoarData(),
         ]);
       } else {
         this.updateData(this.plots[i], [
-          this.result.values.TA,
-          this.result.values.TD ??
-            (this.result.values.TA && this.result.values.RH
-              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+          timestamps,
+          values.TA,
+          values.TD ??
+            (values.TA && values.RH
+              ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
               : undefined),
-          this.result.values.TSS,
+          values.TSS,
         ]);
       }
       i += 1;
     }
-    if (this.result.values.RH || this.result.values.ISWR) {
-      this.updateData(this.plots[i], [this.result.values.RH, this.result.values.ISWR]);
+    if (values.RH || values.ISWR) {
+      this.updateData(this.plots[i], [timestamps, values.RH, values.ISWR]);
     }
     this.resizePlots(this.clientWidth, this.style);
   }
