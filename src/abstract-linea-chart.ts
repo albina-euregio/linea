@@ -48,11 +48,8 @@ export abstract class AbstractLineaChart extends HTMLElement {
     }
   }
 
-  protected updateData(plot: uPlot, values: (number | null)[][], appendTimestamps: boolean = true) {
+  protected updateData(plot: uPlot, values: (number | null)[][]) {
     let data = [];
-    if (appendTimestamps) {
-      data.push(this.result.timestamps);
-    }
     for (const element of values) {
       data.push(element ?? this.#createNullArray());
     }

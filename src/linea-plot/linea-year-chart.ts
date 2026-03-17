@@ -86,33 +86,25 @@ export class LineaYearChart extends AbstractLineaChart {
           timestamps,
           values.PSUM,
         );
-        this.updateData(
-          this.plots[i],
-          [
-            yearDataHS.timestamps,
-            yearDataHS.minValues,
-            yearDataHS.maxValues,
-            yearDataHS.medianValues,
-            yearDataHS.values,
-            yearDataPSUM.values.map((v) => (v == 0 ? null : v)),
-          ],
-          false,
-        );
+        this.updateData(this.plots[i], [
+          yearDataHS.timestamps,
+          yearDataHS.minValues,
+          yearDataHS.maxValues,
+          yearDataHS.medianValues,
+          yearDataHS.values,
+          yearDataPSUM.values.map((v) => (v == 0 ? null : v)),
+        ]);
       } else {
-        this.updateData(
-          this.plots[i],
-          [
-            yearDataHS.timestamps,
-            yearDataHS.minValues,
-            yearDataHS.maxValues,
-            yearDataHS.medianValues,
-            yearDataHS.values,
-          ],
-          false,
-        );
+        this.updateData(this.plots[i], [
+          yearDataHS.timestamps,
+          yearDataHS.minValues,
+          yearDataHS.maxValues,
+          yearDataHS.medianValues,
+          yearDataHS.values,
+        ]);
       }
       i += 1;
-      this.updateData(this.plots[i], [yearDataHS.timestamps, yearDataHS.amount], false);
+      this.updateData(this.plots[i], [yearDataHS.timestamps, yearDataHS.amount]);
       i += 1;
     }
     if (this.result.values.NS) {
@@ -124,17 +116,13 @@ export class LineaYearChart extends AbstractLineaChart {
         values.NS,
       );
       if (yearDataHS) {
-        this.updateData(
-          this.plots[i],
-          [
-            yearDataHS.timestamps,
-            yearDataHS.values.map((v) => (v && v > 0 ? 1000 : -1000)),
-            yearDataNS.values.map((v) => (v == 0 ? null : v)),
-          ],
-          false,
-        );
+        this.updateData(this.plots[i], [
+          yearDataHS.timestamps,
+          yearDataHS.values.map((v) => (v && v > 0 ? 1000 : -1000)),
+          yearDataNS.values.map((v) => (v == 0 ? null : v)),
+        ]);
       } else {
-        this.updateData(this.plots[i], [yearDataNS.timestamps, yearDataNS.values], false);
+        this.updateData(this.plots[i], [yearDataNS.timestamps, yearDataNS.values]);
       }
       i += 1;
     }
@@ -147,17 +135,13 @@ export class LineaYearChart extends AbstractLineaChart {
         values.TA,
       );
       if (!this.result.values.TSS) {
-        this.updateData(
-          this.plots[i],
-          [
-            yearDataTA.timestamps,
-            yearDataTA.minValues,
-            yearDataTA.maxValues,
-            yearDataTA.medianValues,
-            yearDataTA.values,
-          ],
-          false,
-        );
+        this.updateData(this.plots[i], [
+          yearDataTA.timestamps,
+          yearDataTA.minValues,
+          yearDataTA.maxValues,
+          yearDataTA.medianValues,
+          yearDataTA.values,
+        ]);
       } else {
         const yearDataTSS = YearData.from(
           i18n.timezone(),
@@ -166,18 +150,14 @@ export class LineaYearChart extends AbstractLineaChart {
           timestamps,
           values.TSS,
         );
-        this.updateData(
-          this.plots[i],
-          [
-            yearDataTA.timestamps,
-            yearDataTA.minValues,
-            yearDataTA.maxValues,
-            yearDataTA.medianValues,
-            yearDataTA.values,
-            yearDataTSS.values,
-          ],
-          false,
-        );
+        this.updateData(this.plots[i], [
+          yearDataTA.timestamps,
+          yearDataTA.minValues,
+          yearDataTA.maxValues,
+          yearDataTA.medianValues,
+          yearDataTA.values,
+          yearDataTSS.values,
+        ]);
       }
       i += 1;
     }
