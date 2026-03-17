@@ -1,6 +1,4 @@
 import { i18n } from "./i18n";
-import { AbstractLineaChart } from "./abstract-linea-chart";
-import { LineaYearChart } from "./linea-plot/linea-year-chart";
 import type { ExportModal } from "./linea-plot/export-modal";
 import type AirDatepicker from "air-datepicker";
 import css from "./linea-plot.css?inline";
@@ -131,9 +129,11 @@ export class LineaPlot extends HTMLElement {
     try {
       await this.view.initialize();
     } catch (error: any) {
-      error == "Empty src array!"
-        ? console.warn("No data to load for the " + this.#getCurrentViewKey() + " view")
-        : console.error(error);
+      if (error === "Empty src array!") {
+        console.warn("No data to load for the " + this.#getCurrentViewKey() + " view");
+      } else {
+        console.error(error);
+      }
       return;
     }
     this.view.onSwitchTo();
