@@ -113,7 +113,7 @@ export abstract class LineaView {
       const keys = Object.keys(oldResult.values);
 
       for (const key of keys) {
-        mergedValues[key] = new Array(mergedTimestamps.length);
+        mergedValues[key] = Array.from({ length: mergedTimestamps.length });
       }
 
       for (let t = 0; t < mergedTimestamps.length; t++) {
