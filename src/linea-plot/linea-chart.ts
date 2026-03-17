@@ -29,7 +29,7 @@ export class LineaChart extends AbstractLineaChart {
     this.result.values = values;
     let i = 0;
     if (this.result.values.HS || this.result.values.PSUM) {
-      this.updateData(this.plots[i], [this.result.values.HS, this.result.values.PSUM]);
+      this.updateData(this.plots[i], [this.result.values.HS, this.#sumupPrecipitation()]);
       i += 1;
     }
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
@@ -45,9 +45,9 @@ export class LineaChart extends AbstractLineaChart {
         this.updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
-            (this.result.values.TA && this.result.values.RH
-              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
-              : undefined),
+          (this.result.values.TA && this.result.values.RH
+            ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+            : undefined),
           this.result.values.TSS,
           this.#generateSurfaceHoarData(),
         ]);
@@ -55,9 +55,9 @@ export class LineaChart extends AbstractLineaChart {
         this.updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
-            (this.result.values.TA && this.result.values.RH
-              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
-              : undefined),
+          (this.result.values.TA && this.result.values.RH
+            ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+            : undefined),
           this.result.values.TSS,
         ]);
       }
@@ -90,7 +90,7 @@ export class LineaChart extends AbstractLineaChart {
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
       this.addSeries(p, opts_HS, this.result.values.HS);
-      this.addSeries(p, opts_PSUM, this.result.values.PSUM);
+      this.addSeries(p, opts_PSUM, this.#sumupPrecipitation());
     }
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
@@ -207,11 +207,40 @@ export class LineaChart extends AbstractLineaChart {
     return result;
   }
 
+  /**
+   * Sums the precipitation until it reaches 7 o'clock, then resets to zero and starts all over.
+   *
+   * Handles missing data inside the precipitation data by treating them as zero.
+   */
+  #sumupPrecipitation(): number[] {
+    const result: number[] = [];
+    const psum: (number | null)[] = this.result.values.PSUM ?? [];
+    const timestamps = this.result.timestamps;
+    let lastWasBefore7 = true;
+    let sum = 0;
+
+    for (let i = 0; i < psum.length; i++) {
+      const date = Temporal.Instant.fromEpochMilliseconds(timestamps[i]).toZonedDateTimeISO(
+        i18n.timezone(),
+      );
+      if (date.hour >= 7 && lastWasBefore7) {
+        lastWasBefore7 = false;
+        sum = psum[i] ?? 0;
+        result[i] = sum;
+      } else {
+        lastWasBefore7 = date.hour < 7;
+        sum += psum[i] ?? 0;
+        result[i] = sum;
+      }
+    }
+    return result;
+  }
+
   protected getStationTitle(): {} {
     return this.showTitle && !this.drawedTitle
       ? {
-          title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-        }
+        title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+      }
       : {};
   }
 }
