@@ -45,9 +45,9 @@ export class LineaChart extends AbstractLineaChart {
         this.updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
-          (this.result.values.TA && this.result.values.RH
-            ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
-            : undefined),
+            (this.result.values.TA && this.result.values.RH
+              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+              : undefined),
           this.result.values.TSS,
           this.#generateSurfaceHoarData(),
         ]);
@@ -55,9 +55,9 @@ export class LineaChart extends AbstractLineaChart {
         this.updateData(this.plots[i], [
           this.result.values.TA,
           this.result.values.TD ??
-          (this.result.values.TA && this.result.values.RH
-            ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
-            : undefined),
+            (this.result.values.TA && this.result.values.RH
+              ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+              : undefined),
           this.result.values.TSS,
         ]);
       }
@@ -239,8 +239,8 @@ export class LineaChart extends AbstractLineaChart {
   protected getStationTitle(): {} {
     return this.showTitle && !this.drawedTitle
       ? {
-        title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
-      }
+          title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
+        }
       : {};
   }
 }
