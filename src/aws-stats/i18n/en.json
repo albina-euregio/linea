@@ -3,7 +3,7 @@
   "chart:observations:series:avalanches": "Avalanches",
   "chart:observations:series:observations": "Observations",
   "chart:observations:series:precipitation": "Precipitation",
-  "chart:observations:title": "Avalanches",
+  "chart:observations:title": "Observations",
   "chart:observations:yaxis:count": "Count",
   "chart:observations:yaxis:precipitation": "Precipitation",
   "chart:dangerrating:yaxis:altitude": "Altitude (m)",
