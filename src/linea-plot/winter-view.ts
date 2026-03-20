@@ -72,7 +72,7 @@ export class WinterView extends LineaView {
         onShow: () => {
           requestAnimationFrame(() => this.dp.hide());
         },
-        onSelect: () => { },
+        onSelect: () => {},
       });
       const [startDate, endDate] = this.#getWinterDates();
       this.dp.selectDate([this.zonedDateTimeToDate(startDate), this.zonedDateTimeToDate(endDate)]);
