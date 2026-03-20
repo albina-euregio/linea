@@ -1,0 +1,113 @@
+import "./avalanches-chart";
+import "./danger-rating-altitude-chart";
+import css from "./aws-stats-wrapper.css?raw";
+import { BulletinData, Observations } from "./datastore";
+import { fetchSMET } from "./data/smet-data";
+import type { Result } from "./data/station-data";
+import type { AbstractChart } from "./abstract-chart";
+
+class AwsStats extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    if (!this.getAttribute("chart-type")) {
+      console.error("chart-type attribute is required on aws-stats.");
+      return;
+    }
+    this.render();
+  }
+
+  async render() {
+    const style = document.createElement("style");
+    style.textContent = css;
+    this.appendChild(style);
+    const charttypes = this.getAttribute("chart-type")!.split(",");
+    const charts: AbstractChart[] = [];
+    for (const charttype of charttypes) {
+      charts.push(document.createElement(charttype) as AbstractChart);
+    }
+
+    const loader = document.createElement("div");
+    loader.className = "aws-loader";
+    loader.innerHTML = `
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        `;
+    this.appendChild(loader);
+
+    const loadPromises: Promise<void>[] = [];
+
+    if (this.getAttribute("observations")) {
+      loadPromises.push(
+        (async () => {
+          const results: Observations = new Observations();
+          await results.loadObservations(this.getAttribute("observations") || "");
+          for (const chart of charts) {
+            chart.setAttribute("observations", JSON.stringify(results.observations));
+          }
+        })(),
+      );
+    }
+
+    if (this.getAttribute("stationsrc")) {
+      loadPromises.push(
+        (async () => {
+          try {
+            const result: Result = await fetchSMET(this.getAttribute("stationsrc") || "");
+            for (const chart of charts) {
+              chart.setAttribute("weather", JSON.stringify(result));
+            }
+          } catch (error) {
+            console.error("Failed to load weather station data:", error);
+          }
+        })(),
+      );
+    }
+
+    if (this.getAttribute("bulletin-region-id")) {
+      loadPromises.push(
+        (async () => {
+          try {
+            //https://static.avalanche.report/bulletins/2026-03-15/2026-03-15_AT-07_de_CAAMLv6.json
+            const bulletins = new BulletinData();
+            await bulletins.loadBulletins(
+              this.getAttribute("bulletin-region-id")!,
+              this.getAttribute("bulletin-start-date")!,
+              this.getAttribute("bulletin-end-date")!,
+            );
+            for (const chart of charts) {
+              chart.setAttribute(
+                "bulletins",
+                JSON.stringify(
+                  this.getAttribute("bulletin-filter-micro-region")
+                    ? bulletins.filterForMicroRegions(
+                        JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
+                      ).bulletins
+                    : bulletins.bulletins,
+                ),
+              );
+              chart.setAttribute(
+                "bulletin-filter-micro-region",
+                this.getAttribute("bulletin-filter-micro-region") ?? "",
+              );
+            }
+          } catch (error) {
+            console.error("Failed to load bulletin data:", error);
+          }
+        })(),
+      );
+    }
+
+    await Promise.all(loadPromises);
+
+    // Remove loader and append chart
+    loader.remove();
+    for (const chart of charts) {
+      this.appendChild(chart);
+    }
+  }
+}
+
+customElements.define("aws-stats-wrapper", AwsStats);
