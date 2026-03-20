@@ -82,8 +82,8 @@ class AwsStats extends HTMLElement {
                 JSON.stringify(
                   this.getAttribute("bulletin-filter-micro-region")
                     ? bulletins.filterForMicroRegions(
-                      JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
-                    ).bulletins
+                        JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
+                      ).bulletins
                     : bulletins.bulletins,
                 ),
               );

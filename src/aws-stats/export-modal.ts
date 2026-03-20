@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { i18n } from "./i18n";
+import { i18n } from "../i18n";
 import css from "./export-modal.css?inline";
 import type { AbstractChart } from "./abstract-chart";
 

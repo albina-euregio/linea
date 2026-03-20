@@ -1,5 +1,5 @@
 import { AbstractChart } from "./abstract-chart";
-import type { Bulletin } from "./data/bulletin-schema";
+import type { Bulletin } from "./bulletin-schema";
 import uPlot from "uplot";
 import { opts_danger_rating_altitude } from "./series-options/danger-rating-altitude-opts";
 

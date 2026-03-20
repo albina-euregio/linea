@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
 import { OptsHelper } from "./opts-helper";
-import { i18n } from "../i18n";
+import { i18n } from "../../i18n";
 
 function dangerColor(danger: string) {
   const colorByDanger: Record<string, string> = {

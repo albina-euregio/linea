@@ -1,5 +1,5 @@
 import { parseBulletinCollection, type Bulletin, type BulletinCollection } from "./bulletin-schema";
-import { i18n } from "./i18n";
+import { i18n } from "../i18n";
 
 export class Observations {
   public observations: Observation[];
@@ -172,10 +172,7 @@ export class BulletinData {
     this.bulletins = bulletins;
   }
 
-  async loadBulletins(
-    startDate: string,
-    endDate: string,
-  ): Promise<BulletinCollection> {
+  async loadBulletins(startDate: string, endDate: string): Promise<BulletinCollection> {
     const urls: string[] = [];
 
     const start = new Date(startDate);

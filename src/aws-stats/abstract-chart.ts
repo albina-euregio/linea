@@ -2,8 +2,8 @@ import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import { ExportModal } from "./export-modal";
-import { i18n } from "./i18n";
-import type { Bulletin } from "./data/bulletin-schema";
+import { i18n } from "../i18n";
+import type { Bulletin } from "./bulletin-schema";
 
 export abstract class AbstractChart extends HTMLElement {
   public container!: HTMLDivElement;
