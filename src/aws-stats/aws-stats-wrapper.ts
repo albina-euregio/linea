@@ -2,8 +2,8 @@ import "./avalanches-chart";
 import "./danger-rating-altitude-chart";
 import css from "./aws-stats-wrapper.css?raw";
 import { BulletinData, Observations } from "./datastore";
-import { fetchSMET } from "./data/smet-data";
-import type { Result } from "./data/station-data";
+import { fetchSMET } from "../data/smet-data";
+import type { Result } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
 
 class AwsStats extends HTMLElement {

@@ -1,6 +1,6 @@
 import uPlot from "uplot";
 import { cursorOpts } from "./cursor-opts";
-import { TouchZoom } from "./touch-zoom";
+import { TouchZoom } from "../../linea-plot/touch-zoom";
 
 export interface SplitOptions {
   uplot: uPlot;

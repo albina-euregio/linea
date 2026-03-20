@@ -1,8 +1,4 @@
-import {
-  parseBulletinCollection,
-  type Bulletin,
-  type BulletinCollection,
-} from "./data/bulletin-schema";
+import { parseBulletinCollection, type Bulletin, type BulletinCollection } from "./bulletin-schema";
 
 export class Observations {
   public observations: Observation[];
