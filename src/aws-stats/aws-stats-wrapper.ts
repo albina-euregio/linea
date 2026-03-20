@@ -6,6 +6,42 @@ import { fetchSMET } from "../data/smet-data";
 import type { Result } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
 
+function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
+  if (!date) return null;
+  const suffix = isEnd ? "T23:59:59.999Z" : "T00:00:00.000Z";
+  const timestamp = Date.parse(`${date}${suffix}`);
+  return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+function filterWeatherByDate(result: Result, startDate: string | null, endDate: string | null): Result {
+  const start = parseDateBoundary(startDate, false);
+  const end = parseDateBoundary(endDate, true);
+
+  if (start == null && end == null) {
+    return result;
+  }
+
+  const indices: number[] = [];
+  result.timestamps.forEach((timestamp, index) => {
+    if ((start == null || timestamp >= start) && (end == null || timestamp <= end)) {
+      indices.push(index);
+    }
+  });
+
+  const filteredValues = Object.fromEntries(
+    Object.entries(result.values).map(([key, values]) => [
+      key,
+      indices.map((index) => values[index]),
+    ]),
+  ) as Result["values"];
+
+  return {
+    ...result,
+    timestamps: indices.map((index) => result.timestamps[index]),
+    values: filteredValues,
+  };
+}
+
 class AwsStats extends HTMLElement {
   constructor() {
     super();
@@ -56,8 +92,13 @@ class AwsStats extends HTMLElement {
         (async () => {
           try {
             const result: Result = await fetchSMET(this.getAttribute("stationsrc") || "");
+            const filteredResult = filterWeatherByDate(
+              result,
+              this.getAttribute("start-date"),
+              this.getAttribute("end-date"),
+            );
             for (const chart of charts) {
-              chart.setAttribute("weather", JSON.stringify(result));
+              chart.setAttribute("weather", JSON.stringify(filteredResult));
             }
           } catch (error) {
             console.error("Failed to load weather station data:", error);
