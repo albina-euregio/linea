@@ -13,7 +13,11 @@ function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
   return Number.isNaN(timestamp) ? null : timestamp;
 }
 
-function filterWeatherByDate(result: Result, startDate: string | null, endDate: string | null): Result {
+function filterWeatherByDate(
+  result: Result,
+  startDate: string | null,
+  endDate: string | null,
+): Result {
   const start = parseDateBoundary(startDate, false);
   const end = parseDateBoundary(endDate, true);
 
@@ -123,8 +127,8 @@ class AwsStats extends HTMLElement {
                 JSON.stringify(
                   this.getAttribute("bulletin-filter-micro-region")
                     ? bulletins.filterForMicroRegions(
-                      JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
-                    ).bulletins
+                        JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
+                      ).bulletins
                     : bulletins.bulletins,
                 ),
               );
