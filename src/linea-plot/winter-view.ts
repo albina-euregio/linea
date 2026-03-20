@@ -21,6 +21,13 @@ export class WinterView extends LineaView {
       await this.fetchData("wintersrc");
     }
 
+    // dates back if the start date is somewhere in the season
+    const minDate = new Date(this.minTime);
+    if (minDate.getMonth() < 6 || minDate.getMonth() >= 9) {
+      minDate.setMonth(9, 1);
+      this.minTime = minDate.getTime();
+    }
+
     const [startDate, endDate] = this.#getWinterDates();
     for (const i in this.results) {
       const lcy = new LineaYearChart(

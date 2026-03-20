@@ -27,7 +27,7 @@ export class YearData {
       }
       const arr = map.get(monthDay) ?? [];
       const finite = arr.filter(Number.isFinite) as number[];
-      if (finite.length === 0) return NaN;
+      if (finite.length === 0) return null;
       return f(...finite);
     });
   }
@@ -61,7 +61,7 @@ export class YearData {
     const yearData = new YearData();
     yearData.timeZone = timeZone;
     for (let i = 0; i < timestamps.length; i++) {
-      const value = Number.isFinite(values[i]) ? values[i] : NaN;
+      const value = Number.isFinite(values[i]) ? values[i] : null;
       const timestamp = timestamps[i];
       const instant = Temporal.Instant.fromEpochMilliseconds(timestamp);
       const date = instant.toZonedDateTimeISO(timeZone).toPlainDate();
