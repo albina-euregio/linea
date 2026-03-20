@@ -176,15 +176,13 @@ export class BulletinData {
     startDate: string,
     endDate: string,
   ): Promise<BulletinCollection> {
-    const template =
-      "https://static.avalanche.report/bulletins/2026-03-15/2026-03-15_AT-07_de_CAAMLv6.json";
     const urls: string[] = [];
 
     const start = new Date(startDate);
     const end = new Date(endDate);
     for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split("T")[0];
-      const url = template.replaceAll("2026-03-15", dateStr).replace("AT-07", regionID);
+      const url = `https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_{i18n.lang}_CAAMLv6.json`;
       urls.push(url);
     }
 
