@@ -14,7 +14,10 @@
     "prepare": "husky",
     "test": "vitest run",
     "lint": "oxfmt --check && oxlint --max-warnings 12",
-    "build": "vite build",
+    "build": "pnpm run build:linea",
+    "build:linea": "vite build -c linea.vite.config.ts",
+    "build:awsstats": "vite build -c awsstats.vite.config.ts",
+    "build:all": "pnpm run build:linea && pnpm run build:awsstats",
     "dev": "vite"
   },
   "dependencies": {

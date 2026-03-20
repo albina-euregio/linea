@@ -1,13 +1,17 @@
 ---
-build:
+.default-node:
   image: node:24
-  stage: build
-  script:
+  before_script:
     - corepack enable
     - pnpm install --frozen-lockfile
+
+build-linea:
+  extends: .default-node
+  stage: build
+  script:
     - pnpm lint
     - pnpm test
-    - pnpm build
+    - pnpm run build:linea
     - pnpm pack
   artifacts:
     paths:
@@ -15,31 +19,74 @@ build:
       - dist/
       - package.tgz
       - README.md
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^linea-v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
 
-publish-npm:
-  stage: deploy
-  image: node:24
-  needs:
-    - build
+build-awsstats:
+  extends: .default-node
+  stage: build
   script:
-    - corepack enable
-    - pnpm install --frozen-lockfile
-    - npm config set -- "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/"
-    - npm config set -- "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=\${CI_JOB_TOKEN}"
-    - npm config set -- "${CI_API_V4_URL#https?}/groups/${CI_PROJECT_ROOT_NAMESPACE}/-/packages/npm/:_authToken=\${CI_JOB_TOKEN}"
-    - npm version --no-git-tag-version $CI_COMMIT_TAG
+    - pnpm lint
+    - pnpm test
+    - pnpm run build:awsstats
+  artifacts:
+    paths:
+      - dist/awsstats/
+      - README.md
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^awsstats-v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
+
+publish-npm-linea:
+  extends: .default-node
+  stage: deploy
+  needs:
+    - build-linea
+  script:
+    - 'npm config set -- "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/"'
+    - 'npm config set -- "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}"'
+    - 'npm config set -- "${CI_API_V4_URL#https?}/groups/${CI_PROJECT_ROOT_NAMESPACE}/-/packages/npm/:_authToken=${CI_JOB_TOKEN}"'
+    - npm version --no-git-tag-version ${CI_COMMIT_TAG#linea-v}
     - npm publish
-  only:
-    - tags
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^linea-v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
+
+publish-npm-awsstats:
+  extends: .default-node
+  stage: deploy
+  needs:
+    - build-awsstats
+  script:
+    - 'npm config set -- "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/"'
+    - 'npm config set -- "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}"'
+    - 'npm config set -- "${CI_API_V4_URL#https?}/groups/${CI_PROJECT_ROOT_NAMESPACE}/-/packages/npm/:_authToken=${CI_JOB_TOKEN}"'
+    - npm pkg set name="@${CI_PROJECT_ROOT_NAMESPACE}/awsstats"
+    - npm pkg set main="./dist/awsstats/awsstats.cjs"
+    - npm pkg set module="./dist/awsstats/awsstats.js"
+    - npm pkg delete files
+    - npm pkg set files[0]="dist/awsstats/"
+    - npm pkg set files[1]="README.md"
+    - npm version --no-git-tag-version ${CI_COMMIT_TAG#awsstats-v}
+    - npm publish
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^awsstats-v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
 
 pages:
   stage: deploy
   image: alpine:latest
   needs:
-    - build
+    - job: build-linea
+      optional: true
+    - job: build-awsstats
+      optional: true
   pages:
     publish: dist
   script:
+    - mkdir -p dist
+    - if [ ! -f dist/index.html ] && [ -f dist/awsstats/awsstats.js ]; then echo '<!doctype html><html><body><h1>awsstats build</h1><p><a href="./awsstats/awsstats.js">awsstats.js</a></p><p><a href="./awsstats/awsstats.cjs">awsstats.cjs</a></p></body></html>' > dist/index.html; fi
     - echo Deploying GitLab Pages
-  only:
-    - tags
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^linea-v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'
+    - if: '$CI_COMMIT_TAG =~ /^awsstats-v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/'

@@ -5,12 +5,14 @@ import { FeatureCollectionSchema } from "./src/schema/listing";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "./aws-stats/",
+  base: "./",
   build: {
+    outDir: "dist/awsstats",
     chunkSizeWarningLimit: 190,
     license: { fileName: "license.json" },
     lib: {
       entry: "./src/aws-stats/main.ts",
+      fileName: "awsstats",
       formats: ["es", "cjs"],
       name: "@albina-euregio/awsstats",
     },
