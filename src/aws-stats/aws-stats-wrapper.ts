@@ -73,8 +73,8 @@ class AwsStats extends HTMLElement {
             //https://static.avalanche.report/bulletins/2026-03-15/2026-03-15_AT-07_de_CAAMLv6.json
             const bulletins = new BulletinData();
             await bulletins.loadBulletins(
-              this.getAttribute("bulletin-start-date")!,
-              this.getAttribute("bulletin-end-date")!,
+              this.getAttribute("start-date")!,
+              this.getAttribute("end-date")!,
             );
             for (const chart of charts) {
               chart.setAttribute(
@@ -82,8 +82,8 @@ class AwsStats extends HTMLElement {
                 JSON.stringify(
                   this.getAttribute("bulletin-filter-micro-region")
                     ? bulletins.filterForMicroRegions(
-                        JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
-                      ).bulletins
+                      JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
+                    ).bulletins
                     : bulletins.bulletins,
                 ),
               );
