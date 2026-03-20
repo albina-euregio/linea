@@ -1,4 +1,5 @@
 import { parseBulletinCollection, type Bulletin, type BulletinCollection } from "./bulletin-schema";
+import { i18n } from "./i18n";
 
 export class Observations {
   public observations: Observation[];
@@ -182,7 +183,7 @@ export class BulletinData {
     const end = new Date(endDate);
     for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split("T")[0];
-      const url = `https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_{i18n.lang}_CAAMLv6.json`;
+      const url = `https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_${i18n.lang}_CAAMLv6.json`;
       urls.push(url);
     }
 
