@@ -66,14 +66,13 @@ class AwsStats extends HTMLElement {
       );
     }
 
-    if (this.getAttribute("bulletin-region-id")) {
+    if (this.getAttribute("bulletin-filter-micro-region")) {
       loadPromises.push(
         (async () => {
           try {
             //https://static.avalanche.report/bulletins/2026-03-15/2026-03-15_AT-07_de_CAAMLv6.json
             const bulletins = new BulletinData();
             await bulletins.loadBulletins(
-              this.getAttribute("bulletin-region-id")!,
               this.getAttribute("bulletin-start-date")!,
               this.getAttribute("bulletin-end-date")!,
             );
@@ -83,8 +82,8 @@ class AwsStats extends HTMLElement {
                 JSON.stringify(
                   this.getAttribute("bulletin-filter-micro-region")
                     ? bulletins.filterForMicroRegions(
-                        JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
-                      ).bulletins
+                      JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
+                    ).bulletins
                     : bulletins.bulletins,
                 ),
               );

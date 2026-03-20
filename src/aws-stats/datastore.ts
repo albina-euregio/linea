@@ -173,7 +173,6 @@ export class BulletinData {
   }
 
   async loadBulletins(
-    regionID: string,
     startDate: string,
     endDate: string,
   ): Promise<BulletinCollection> {
