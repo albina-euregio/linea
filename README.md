@@ -1,11 +1,17 @@
 # LINEA
 
-Visualizations of meteorological data, such as automated weather stations. The view is defined by the [LAWIS](https://https://www.lawis.at/) work group.
+This project features visualization of different data in context of avalanche warning, but can also used in other context. On the basis of [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) several graphic representations are implemented. The project divides into two submodules:
+
+1. Visualizations of meteorological data, such as automated weather stations. The visualization is defined by the [LAWIS](https://https://www.lawis.at/) work group.
 The data has to be available as smet-file, see the [specification of the smet format](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf).
 
-The package offers one [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to show:
-
+The package offers one complex web component to show:
 - `<linea-plot src="...smet">` is rendering weather station data using [uPlot](https://github.com/leeoniya/uPlot), see **Usage** for its usage.
+
+2. Visualization of different statistics in context:
+- `<aws-observations smet="...smet" observations="...geojson">` is rendering counts of observations and avalanches with precipitation data from a weather station
+- `<aws-danger-rating bulletins="[...]">` is rendering the highest danger rating for different micro regions over a timespan
+- `<aws-danger-rating-altitude bulletins="[]">` is rendering the danger rating in dependency of the altitude as heatmap
 
 ## Featuring
 
@@ -13,6 +19,7 @@ LINEA is featuring weather station visualization on:
 
 - https://avalanche.report/weather/stations
 - https://eaws-bulletin-map.legner.me/?stations=1
+
 
 ## Contributing
 
@@ -108,6 +115,61 @@ For yearly overviews, use the `<linea-plot>` component like this:
 <linea-plot wintersrc="/prototype/mock.data" showtitle showexport showdatepicker showonlywinter>
 </linea-plot>
 ```
+
+### aws-statistics
+Each visualization chart is doing it's own data aggregation, but not fetching. All charts have standardized attributes to receive data  of one of the following types:
+- `weather` attribute requires a JSON encoded Result object which is found in `/data/smet-data` and features data from one station.
+- `bulletins` requires a JSON encoded [CAAML V6 JSON](http://caaml.org/Schemas/BulletinEAWS/v6.0/json/CAAMLv6_BulletinEAWS.json) array
+- `observations` requires the content of a `observations.geojson` as it is produced by the ALBINA Admin GUI
+- `dangersources` is not implemented due to lack of json format for now
+
+#### Visualization
+
+##### `<aws-observations>`
+
+Attributes:
+- `observations`, required
+- `weather`, optional: data from a weather station containing a PSUM value
+
+Visualization:
+Observations are counted per day and shown as bar plot. They are filtered for avalanche oberservations and this is shown as a seperate series too. 
+If weather data with a PSUM value is present the precipitation is summed up for each day and shown as light background series to have a reference to precipitation events.
+
+##### `<aws-danger-rating>`
+
+Attributes:
+- `bulletins`, required
+- `bulletins-filter-micro-region`, optional: JSON encoded string array with micro region ids, e.g. `'["AT-07-14-01", "AT-07-01]'`
+
+Visualization:
+Displayed is the highest danger rating of the latest bulletin from each day per day. If the filter micro regions are set, this is done seperately for each micro region and plotted.
+
+##### `<aws-danger-rating-altitude>`
+
+Attributes:
+- `bulletins`, required: To make sense, this has to be an array of bulletins from one specific micro region
+
+Visualization:
+Displays the altitude dependency of the danger rating for each day.
+
+#### `<aws-stats-wrapper`>
+
+Helper web component which does data fetching and filtering. Supports the following attributes and converts them into the standardized attributes for the visualization.
+
+Attributes:
+`html
+<aws-stats-wrapper
+  chart-type="aws-observations,aws-danger-rating,aws-danger-rating-altitude"
+  observations="./observations.geojson"
+  stationsrc="https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
+  bulletin-start-date="2026-01-01"
+  bulletin-end-date="2026-03-18"
+  bulletin-filter-micro-region='["AT-07-14-01", "AT-07-01", "AT-07-27", "AT-07-14-02", "AT-07-15", "AT-07-17-01"]'
+></aws-stats-wrapper>
+`
+
+The charts in `chart-type` are appended after data fetching into the wrapper component. The other ones ares self-explanatory.
+
 
 # Miscellaneous
 
