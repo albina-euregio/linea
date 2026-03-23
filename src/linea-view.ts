@@ -223,7 +223,7 @@ export abstract class LineaView {
         for (let i = 0; i < res.timestamps.length; i++) {
           map.set(res.timestamps[i], res.values[key][i]);
         }
-        const newValues = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : null));
+        const newValues = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : NaN));
         res.values[key] = newValues;
       }
       // set the common timeline to all results
