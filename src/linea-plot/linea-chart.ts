@@ -27,7 +27,7 @@ export class LineaChart extends AbstractLineaChart {
   setData(timestamps: number[], values: Values) {
     let i = 0;
     if (values.HS || values.PSUM) {
-      this.updateData(this.plots[i], [timestamps, values.HS, values.PSUM]);
+      this.updateData(this.plots[i], [timestamps, values.HS, this.#sumupPrecipitation()]);
       i += 1;
     }
     if (values.VW || values.VW_MAX || values.DW) {
@@ -91,7 +91,7 @@ export class LineaChart extends AbstractLineaChart {
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
       this.addSeries(p, opts_HS, this.result.values.HS);
-      this.addSeries(p, opts_PSUM, this.result.values.PSUM);
+      this.addSeries(p, opts_PSUM, this.#sumupPrecipitation());
     }
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
@@ -203,6 +203,35 @@ export class LineaChart extends AbstractLineaChart {
       } else {
         result[i] = -100;
         i++;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Sums the precipitation until it reaches 7 o'clock, then resets to zero and starts all over.
+   *
+   * Handles missing data inside the precipitation data by treating them as zero.
+   */
+  #sumupPrecipitation(): number[] {
+    const result: number[] = [];
+    const psum: (number | null)[] = this.result.values.PSUM ?? [];
+    const timestamps = this.result.timestamps;
+    let lastWasBefore7 = true;
+    let sum = 0;
+
+    for (let i = 0; i < psum.length; i++) {
+      const date = Temporal.Instant.fromEpochMilliseconds(timestamps[i]).toZonedDateTimeISO(
+        i18n.timezone(),
+      );
+      if (date.hour >= 7 && lastWasBefore7) {
+        lastWasBefore7 = false;
+        sum = psum[i] ?? 0;
+        result[i] = sum;
+      } else {
+        lastWasBefore7 = date.hour < 7;
+        sum += psum[i] ?? 0;
+        result[i] = sum;
       }
     }
     return result;
