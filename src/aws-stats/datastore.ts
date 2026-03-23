@@ -248,6 +248,33 @@ export class BulletinData {
     return "";
   }
 
+  get dangerRatingDistribution(): { rating: number, count: number }[] {
+    const conversion: Record<string, number> = {
+      low: 1,
+      moderate: 2,
+      considerable: 3,
+      high: 4,
+      very_high: 5,
+    };
+
+    const distribution: Record<number, number> = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0
+    };
+    this.bulletins.forEach((bulletin) => {
+      if (bulletin.dangerRatings) {
+        bulletin.dangerRatings.forEach((r) => {
+          const ratingValue = conversion[r.mainValue?.toLowerCase() ?? ""] ?? 0;
+          distribution[ratingValue] = (distribution[ratingValue] ?? 0) + 1;
+        });
+      }
+    });
+    return Object.entries(distribution).map(([rating, count]) => ({ rating, count }));
+  }
+
   get highestDangerRatingPerDay(): { timestamps: number[]; rating: number[] } {
     const conversion: Record<string, number> = {
       low: 1,

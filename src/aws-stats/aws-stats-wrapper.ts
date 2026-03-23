@@ -1,5 +1,6 @@
 import "./avalanches-chart";
 import "./danger-rating-altitude-chart";
+import "./danger-rating-distribution";
 import css from "./aws-stats-wrapper.css?raw";
 import { BulletinData, Observations } from "./datastore";
 import { fetchSMET } from "../data/smet-data";
@@ -125,10 +126,10 @@ class AwsStats extends HTMLElement {
               chart.setAttribute(
                 "bulletins",
                 JSON.stringify(
-                  this.getAttribute("bulletin-filter-micro-region")
+                  this.getAttribute("bulletin-filter-micro-region") != "all"
                     ? bulletins.filterForMicroRegions(
-                        JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
-                      ).bulletins
+                      JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
+                    ).bulletins
                     : bulletins.bulletins,
                 ),
               );
