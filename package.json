@@ -19,14 +19,23 @@
     "./aws-stats": {
       "import": "./dist/aws-stats.mjs"
     },
-    "./src/schema/listing": "./src/schema/listing.ts",
-    "./src/schema/listing-legacy": "./src/schema/listing-legacy.ts"
+    "./listing": {
+      "import": "./dist/listing.mjs",
+      "types": "./dist/listing.d.ts"
+    },
+    "./listing-legacy": {
+      "import": "./dist/listing-legacy.mjs",
+      "types": "./dist/listing-legacy.d.ts"
+    }
   },
   "scripts": {
     "prepare": "husky",
     "test": "vitest run",
     "lint": "oxfmt --check && oxlint --max-warnings 12",
-    "build": "tsgo && vite build",
+    "build": "pnpm run build:tsc && pnpm run build:vite && pnpm run build:listing",
+    "build:tsc": "tsc",
+    "build:vite": "vite build",
+    "build:listing": "tsdown --dts --sourcemap --no-clean src/schema/listing.ts src/schema/listing-legacy.ts",
     "dev": "vite"
   },
   "dependencies": {
@@ -41,6 +50,8 @@
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
+    "tsdown": "^0.21.4",
+    "typescript": "^6.0.2",
     "vite": "8.0.2",
     "vitest": "^4.1.1"
   },
