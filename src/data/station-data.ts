@@ -49,6 +49,37 @@ export class StationData {
     public units: Units,
     public values: Values,
   ) {}
+
+  /**
+   * Filters the Results for each LineaChart for the given timespan.
+   * Passes the filtered data to the LineaCharts
+   * @param startDate from where the data shall be shown
+   * @param endDate to when the data shall be shown
+   */
+  filter(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime) {
+    const startTimestamp = startDate.toInstant().epochMilliseconds;
+    const endTimestamp = endDate.toInstant().epochMilliseconds;
+
+    let filteredValues: Values = {};
+
+    let key: ParameterType;
+    for (key in this.values) {
+      filteredValues[key] = this.values[key].filter(
+        (_, j) => this.timestamps[j] >= startTimestamp && this.timestamps[j] <= endTimestamp,
+      );
+    }
+    const filteredTimestamps = this.timestamps.filter(
+      (t) => t >= startTimestamp && t <= endTimestamp,
+    );
+
+    return new StationData(
+      this.station,
+      this.altitude,
+      filteredTimestamps,
+      this.units,
+      filteredValues,
+    );
+  }
 }
 
 export class StationDataArray extends Array<StationData> {

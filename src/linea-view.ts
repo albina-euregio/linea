@@ -1,9 +1,4 @@
-import {
-  type StationData,
-  type Values,
-  ParameterType,
-  StationDataArray,
-} from "./data/station-data";
+import { type StationData, StationDataArray } from "./data/station-data";
 import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
@@ -110,26 +105,13 @@ export abstract class LineaView {
     startDate: Temporal.ZonedDateTime = this.getDatePickerStartDate(),
     endDate: Temporal.ZonedDateTime = this.getDatePickerEndDate(),
   ) {
-    const startTimestamp = startDate.toInstant().epochMilliseconds;
-    const endTimestamp = endDate.toInstant().epochMilliseconds;
-
     for (let i = 0; i < this.charts.length; i++) {
       const res = this.results[i];
       if (res === undefined) {
         continue;
       }
-      let filteredValues: Values = {};
-
-      let key: ParameterType;
-      for (key in res.values) {
-        filteredValues[key] = res.values[key].filter(
-          (_, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp,
-        );
-      }
-      const filteredTimestamps = res.timestamps.filter(
-        (t) => t >= startTimestamp && t <= endTimestamp,
-      );
-      this.charts[i].setData(filteredTimestamps, filteredValues as Values);
+      const filtered = res.filter(startDate, endDate);
+      this.charts[i].setData(filtered.timestamps, filtered.values);
     }
   }
 
