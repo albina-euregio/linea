@@ -1,13 +1,13 @@
 import uPlot from "uplot";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
-import { OptsHelper } from "./opts-helper";
+import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import { i18n } from "../../i18n";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
  */
 export const opts_avalanches: uPlot.Options = {
-  ...OptsHelper.getDefaultOptions(),
+  ...AwsStatsOptsHelper.getDefaultOptions(),
   title: i18n.message("linea:observations:title"),
   hooks: {
     drawAxes: [
@@ -15,7 +15,7 @@ export const opts_avalanches: uPlot.Options = {
         var labely1 = `${i18n.message("linea:observations:yaxis:count")}`;
         var labely2 = `${i18n.message("linea:observations:yaxis:precipitation")}`;
 
-        OptsHelper.UpdateAxisLabels(
+        AwsStatsOptsHelper.UpdateAxisLabels(
           u,
           labely1,
           labely2,

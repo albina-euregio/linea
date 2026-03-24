@@ -1,24 +1,23 @@
 import uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { OptsHelper, type SplitOptions } from "./opts-helper";
+import { LineaOptsHelper, type SplitOptions } from "./linea-opts-helper";
 
 /**
  * uPlot options for snow-height/year [cm]
  */
 
 export const opts_HS_year: uPlot.Options = {
-  ...OptsHelper.getLineaOptions(),
+  ...LineaOptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
-        const ctx = u.ctx;
         var labely1 = `${i18n.message("linea:parameter:HS")} (cm)`;
         var labely2 = `${i18n.message("linea:parameter:PSUM")} (mm)`;
         var labelColor1 = "#08519C";
         var labelColor2 = "#6aafd5";
-        OptsHelper.UpdateAxisLabels(
-          ctx,
+        LineaOptsHelper.UpdateAxisLabels(
+          u,
           labely1,
           labely2,
           u.bbox.left,
@@ -30,7 +29,7 @@ export const opts_HS_year: uPlot.Options = {
     ],
     setSelect: [
       (u) => {
-        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3, 4]);
+        LineaOptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3, 4]);
       },
     ],
   },
@@ -61,7 +60,7 @@ export const opts_HS_year: uPlot.Options = {
       scale: "y",
       stroke: "#08519C",
       splits: (u) => {
-        return OptsHelper.getSplits({
+        return LineaOptsHelper.getSplits({
           uplot: u,
           mins: [0, 0, 0],
           maxs: [250, 500, 1000],
@@ -79,7 +78,7 @@ export const opts_HS_year: uPlot.Options = {
       stroke: "#6aafd5",
       side: 1,
       splits: (u) => {
-        return OptsHelper.getSplits(
+        return LineaOptsHelper.getSplits(
           {
             uplot: u,
             mins: [0, 0],

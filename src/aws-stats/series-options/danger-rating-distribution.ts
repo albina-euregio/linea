@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { OptsHelper } from "./opts-helper";
+import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import { i18n } from "../../i18n";
 
 export const dangerDistributionOrder = [
@@ -32,14 +32,14 @@ export const dangerDistributionColors: Record<
 };
 
 export const opts_danger_rating_distribution: uPlot.Options = {
-  ...OptsHelper.getDefaultOptions(),
+  ...AwsStatsOptsHelper.getDefaultOptions(),
   title: `${i18n.message("linea:yearly:dangerratingdistribution:title")}`,
   hooks: {
     drawAxes: [
       (u) => {
         const labely1 =
           i18n.message("linea:yearly:dangerratingdistribution:yaxis:percent") + " (%)";
-        OptsHelper.UpdateAxisLabels(
+        AwsStatsOptsHelper.UpdateAxisLabels(
           u,
           labely1,
           "",

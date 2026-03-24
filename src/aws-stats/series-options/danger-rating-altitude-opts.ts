@@ -1,6 +1,6 @@
 import uPlot from "uplot";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
-import { OptsHelper } from "./opts-helper";
+import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import { i18n } from "../../i18n";
 
 function dangerColor(danger: string) {
@@ -16,13 +16,13 @@ function dangerColor(danger: string) {
 }
 
 export const opts_danger_rating_altitude: uPlot.Options = {
-  ...OptsHelper.getDefaultOptions(),
+  ...AwsStatsOptsHelper.getDefaultOptions(),
   title: i18n.message("linea:dangerrating:title"),
   hooks: {
     drawAxes: [
       (u) => {
         var labely1 = `${i18n.message("linea:dangerrating:yaxis:altitude")}`;
-        OptsHelper.UpdateAxisLabels(
+        AwsStatsOptsHelper.UpdateAxisLabels(
           u,
           labely1,
           "",

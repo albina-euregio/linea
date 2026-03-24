@@ -1,23 +1,22 @@
 import type uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { OptsHelper, type SplitOptions } from "./opts-helper";
+import { LineaOptsHelper, type SplitOptions } from "./linea-opts-helper";
 
 /**
  * uPlot options for Schneehöhe [cm] & Niederschlag 24h [mm]
  */
 export const opts_HS_PSUM: uPlot.Options = {
-  ...OptsHelper.getLineaOptions(),
+  ...LineaOptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
-        const ctx = u.ctx;
         var labely1 = `${i18n.message("linea:parameter:HS")} (cm)`;
         var labely2 = `${i18n.message("linea:parameter:PSUM")} (mm)`;
         var labelColor1 = "#08519C";
         var labelColor2 = "#6aafd5";
-        OptsHelper.UpdateAxisLabels(
-          ctx,
+        LineaOptsHelper.UpdateAxisLabels(
+          u,
           labely1,
           labely2,
           u.bbox.left,
@@ -29,7 +28,7 @@ export const opts_HS_PSUM: uPlot.Options = {
     ],
     setSelect: [
       (u) => {
-        OptsHelper.calculateAxisLimitsInZoom(u, [1]);
+        LineaOptsHelper.calculateAxisLimitsInZoom(u, [1]);
       },
     ],
   },
@@ -51,7 +50,7 @@ export const opts_HS_PSUM: uPlot.Options = {
     {
       scale: "y",
       splits: (u) => {
-        return OptsHelper.getSplits({
+        return LineaOptsHelper.getSplits({
           uplot: u,
           mins: [0, 0],
           maxs: [250, 500],

@@ -14,14 +14,35 @@ export interface SplitOptions {
 
 export class OptsHelper {
   static UpdateAxisLabels(
-    ctx: CanvasRenderingContext2D,
+    u: uPlot,
     leftLabel: string,
     rightLabel: string,
     chartLeft: number,
     chartWidth: number,
     leftFillStyle: string | CanvasGradient | CanvasPattern,
     rightFillStyle: string | CanvasGradient | CanvasPattern,
+    hideAxes: boolean = false,
   ): CanvasRenderingContext2D {
+    if (hideAxes) {
+      const seriesShown: Map<String, boolean> = new Map();
+
+      for (let i = 1; i < u.series.length; i++) {
+        const label: string = u.series[i].scale as string;
+        seriesShown.set(label, seriesShown.get(label) || (u.series[i].show as boolean));
+      }
+
+      for (let i = 1; i < u.axes.length; i++) {
+        const scale: string = u.axes[i].scale as string;
+        if (seriesShown.get(scale) === false) {
+          if (u.axes[i].side === 3) {
+            leftLabel = "";
+          } else if (u.axes[i].side === 1) {
+            rightLabel = "";
+          }
+        }
+      }
+    }
+    const ctx = u.ctx;
     ctx.save();
     ctx.textBaseline = "top";
 
@@ -66,53 +87,6 @@ export class OptsHelper {
     ctx.restore();
 
     return ctx;
-  }
-
-  static getLineaOptions(): uPlot.Options {
-    return {
-      ms: 1, // timestamp multiplier that yields 1 millisecond
-      width: 1040,
-      height: 200,
-      padding: [20, 3, 0, -10],
-      cursor: {
-        lock: true,
-        focus: {
-          prox: -1,
-        },
-        sync: {
-          key: syncCursor.key,
-          setSeries: false,
-          match: [(own, ext) => own == ext, (own, ext) => own == ext],
-        },
-        points: {
-          size: 5,
-          width: 2,
-        },
-        drag: {
-          setScale: true,
-          x: true,
-          y: false,
-          dist: 0,
-          uni: null,
-          click: (_self, e) => {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-          },
-        },
-        snap: true,
-        showTime: true,
-      },
-      plugins: [TouchZoom.touchZoomPlugin()],
-      legend: {
-        show: true,
-        live: true,
-        fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
-        markers: {
-          fill: (u: any, seriesIdx: number) =>
-            u.series[seriesIdx].stroke(u, seriesIdx) ?? u.series[seriesIdx].stroke(u, seriesIdx),
-        },
-      },
-    };
   }
 
   static calculateAxisLimitsInZoom(u: uPlot, indices: number[]) {

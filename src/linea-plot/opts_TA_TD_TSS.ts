@@ -1,13 +1,13 @@
 import type uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { OptsHelper, type SplitOptions } from "./opts-helper";
+import { LineaOptsHelper, type SplitOptions } from "./linea-opts-helper";
 
 /**
  * uPlot options for Temperature, Dew Point & Snow Surface Temperature
  */
 export const opts_TA_TD_TSS: uPlot.Options = {
-  ...OptsHelper.getLineaOptions(),
+  ...LineaOptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
@@ -17,8 +17,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         var labelColor1 = "#DE2D26";
         var labelColor2 = "#6aafd5";
 
-        OptsHelper.UpdateAxisLabels(
-          ctx,
+        LineaOptsHelper.UpdateAxisLabels(
+          u,
           labely1,
           labely2,
           u.bbox.left,
@@ -48,7 +48,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     ],
     setSelect: [
       (u) => {
-        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3]);
+        LineaOptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3]);
       },
     ],
   },
@@ -73,7 +73,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
       stroke: "#DE2D26",
       grid: { show: true },
       splits: (u) => {
-        return OptsHelper.getSplits({
+        return LineaOptsHelper.getSplits({
           uplot: u,
           mins: [-30, -30],
           maxs: [10, 30],
@@ -95,7 +95,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         show: false,
       },
       splits: (u) => {
-        return OptsHelper.getSplits({
+        return LineaOptsHelper.getSplits({
           uplot: u,
           mins: [-30, -30],
           maxs: [10, 30],

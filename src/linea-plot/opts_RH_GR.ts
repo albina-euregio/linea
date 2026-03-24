@@ -1,23 +1,22 @@
 import type uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { OptsHelper } from "./opts-helper";
+import { LineaOptsHelper } from "./linea-opts-helper";
 
 /**
  * uPlot options for Relative Luftfeuchtigkeit [%] & Globalstrahlung [W/m²]
  */
 export const opts_RH_GR: uPlot.Options = {
-  ...OptsHelper.getLineaOptions(),
+  ...LineaOptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
-        const ctx = u.ctx;
         var labely1 = `${i18n.message("linea:parameter:RH")} (%)`;
         var labely2 = `${i18n.message("linea:parameter:ISWR")} (W/m²)`;
         var labelColor1 = "#8a7474";
         var labelColor2 = "#DE2D26";
-        OptsHelper.UpdateAxisLabels(
-          ctx,
+        LineaOptsHelper.UpdateAxisLabels(
+          u,
           labely1,
           labely2,
           u.bbox.left,
