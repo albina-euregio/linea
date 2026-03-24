@@ -1,4 +1,9 @@
-import { StationData, type Values, ParameterType } from "./data/station-data";
+import {
+  type StationData,
+  type Values,
+  ParameterType,
+  StationDataArray,
+} from "./data/station-data";
 import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
@@ -16,7 +21,7 @@ export abstract class LineaView {
   protected showTitle: boolean = false;
   minTime: number = +Infinity;
   maxTime: number = -Infinity;
-  results: StationData[] = [];
+  results = new StationDataArray();
   srcs: string[] = [];
   protected lineaplot: LineaPlot;
 
@@ -60,15 +65,15 @@ export abstract class LineaView {
       throw "Empty src array!";
     }
 
-    const results: StationData[] = [];
+    const results = new StationDataArray();
     for (const src of this.srcs) {
       const result = await fetchSMET(src);
       this.minTime = Math.min(this.minTime, result.timestamps[0]);
       this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
       results.push(result);
     }
-    this.results = StationData.merge(this.results, results);
-    StationData.generalize(this.results);
+    this.results.mergeWith(results);
+    this.results.generalize();
     this.lineaplot.updateValidDateInputs();
   }
 
@@ -80,7 +85,7 @@ export abstract class LineaView {
    */
   loadFromDataAttribute() {
     const results: StationData[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
-    this.results = results;
+    this.results = new StationDataArray(...results);
     this.minTime = +Infinity;
     this.maxTime = -Infinity;
     for (const result of results) {
@@ -91,7 +96,7 @@ export abstract class LineaView {
         this.maxTime = result.timestamps[result.timestamps.length - 1];
       }
     }
-    StationData.generalize(this.results);
+    this.results.generalize();
     this.lineaplot.updateValidDateInputs();
   }
 

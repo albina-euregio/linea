@@ -49,26 +49,26 @@ export class StationData {
     public units: Units,
     public values: Values,
   ) {}
+}
 
+export class StationDataArray extends Array<StationData> {
   /**
    * Merges the results from the new fetch with the existing results in the view.
    * Mainly implemented to integrate the lazy source data into the existing one.
    * The first loaded data decides about the keys to show.
-   * @param existing The existing results
    * @param newResults The results to integrate into the existing.
    * It is assumed that the order of the results in the newResults array corresponds to the order of the results in the existing array.
    *
    * The merged data is stored in the existing object.
-   * @return StationData[] - The merged results
    */
-  static merge(existing: StationData[], newResults: StationData[]): StationData[] {
-    if (existing.length === 0) {
-      return newResults;
+  mergeWith(newResults: StationDataArray): void {
+    if (this.length === 0) {
+      this.push(...newResults);
+      return;
     }
 
-    const results: StationData[] = [];
-    for (let i = 0; i < existing.length; i++) {
-      const oldResult = existing[i];
+    for (let i = 0; i < this.length; i++) {
+      const oldResult = this[i];
       const newResult = newResults[i];
       if (oldResult === undefined || newResult === undefined) {
         continue;
@@ -111,17 +111,9 @@ export class StationData {
         }
       }
 
-      results.push(
-        new StationData(
-          oldResult.station,
-          oldResult.altitude,
-          mergedTimestamps,
-          oldResult.units,
-          mergedValues,
-        ),
-      );
+      oldResult.timestamps = mergedTimestamps;
+      oldResult.values = mergedValues;
     }
-    return results;
   }
 
   /**
@@ -131,21 +123,21 @@ export class StationData {
    * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
    * so we can show all available data
    */
-  static generalize(existing: StationData[]): void {
-    if (existing.length === 0) {
-      console.log(existing);
+  generalize(): void {
+    if (this.length === 0) {
+      console.log(this);
       console.warn("No results to generalize");
       return;
     }
     const tsSet = new Set<number>();
-    for (const res of existing) {
+    for (const res of this) {
       for (const t of res.timestamps) {
         tsSet.add(t);
       }
     }
     const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
 
-    for (const res of existing) {
+    for (const res of this) {
       let key: ParameterType;
       for (key in res.values) {
         const map = new Map<number, number>();
