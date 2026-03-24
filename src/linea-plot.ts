@@ -6,6 +6,8 @@ import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import { WinterView } from "./linea-plot/winter-view";
 import type { LineaView } from "./linea-view";
 import { StationView } from "./linea-plot/station-view";
+
+type LineaViewType = "station" | "winter";
 /**
  * LineaPlot Web Component
  *
@@ -72,7 +74,7 @@ export class LineaPlot extends HTMLElement {
   private winterviewBtnLabel!: HTMLSpanElement;
 
   view!: LineaView;
-  private lineaViews!: Map<string, LineaView>;
+  private lineaViews!: Map<LineaViewType, LineaView>;
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   public dp: AirDatepicker | undefined;
@@ -155,7 +157,7 @@ export class LineaPlot extends HTMLElement {
   /**
    * Switch to view
    */
-  async #switchView(viewkey: string): Promise<void> {
+  async #switchView(viewkey: LineaViewType): Promise<void> {
     const view = this.lineaViews.get(viewkey);
     if (!view) {
       throw viewkey + " view not available";
