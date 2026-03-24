@@ -248,7 +248,7 @@ export class BulletinData {
     return "";
   }
 
-  get dangerRatingDistribution(): { rating: number, count: number }[] {
+  get dangerRatingDistribution(): { rating: number; count: number }[] {
     const conversion: Record<string, number> = {
       low: 1,
       moderate: 2,
@@ -262,7 +262,7 @@ export class BulletinData {
       2: 0,
       3: 0,
       4: 0,
-      5: 0
+      5: 0,
     };
     this.bulletins.forEach((bulletin) => {
       if (bulletin.dangerRatings) {

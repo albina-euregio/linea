@@ -88,7 +88,7 @@ export class OptsHelper {
     return {
       ms: 1, // timestamp multiplier that yields 1 millisecond
       width: 1040,
-      height: 200,
+      height: 300,
       padding: [20, 20, 0, 0],
       cursor: cursorOpts,
       plugins: [TouchZoom.touchZoomPlugin()],

@@ -21,23 +21,13 @@
     <nav></nav>
 
     <aws-stats-wrapper
-      chart-type="aws-observations,aws-danger-rating,aws-danger-rating-altitude"
+      chart-type="aws-danger-rating-distribution"
       observations="./observations.geojson"
       stationsrc="https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
-      bulletin-start-date="2026-01-01"
-      bulletin-end-date="2026-03-18"
-      bulletin-filter-micro-region='["AT-07-14-01", "AT-07-01", "AT-07-27", "AT-07-14-02", "AT-07-15", "AT-07-17-01"]'
+      start-date="2026-01-01"
+      end-date="2026-03-18"
+      bulletin-filter-micro-region="all"
     ></aws-stats-wrapper>
-    <linea-plot
-      wintersrc='["https://api.avalanche.report/lawine/grafiken/smet/all/NFRA2.smet.gz"]'
-      showtitle
-      showexport
-      showonlywinter
-      showsurfacehoarseries
-      showdatepicker
-      showinteractiveblogexport
-    >
-    </linea-plot>
     <!-- <linea-plot
       src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
       lazysrc='["https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz"]'
