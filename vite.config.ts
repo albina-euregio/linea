@@ -6,6 +6,10 @@ import { FeatureCollectionSchema } from "./src/schema/listing";
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "./",
+  legacy: {
+    // see https://github.com/t1m0n/air-datepicker/issues/704
+    inconsistentCjsInterop: true,
+  },
   build: {
     chunkSizeWarningLimit: 190,
     license: { fileName: "license.json" },

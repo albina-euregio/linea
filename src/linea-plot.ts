@@ -1,6 +1,6 @@
 import { i18n } from "./i18n";
 import type { LineaExportModal } from "./linea-plot/linea-export-modal";
-import type AirDatepicker from "air-datepicker";
+import { AirDatepicker, localizeDatePicker, cssAirDatepicker } from "./datepicker";
 import css from "./linea-plot.css?inline";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import { WinterView } from "./linea-plot/winter-view";
@@ -8,13 +8,13 @@ import type { LineaView } from "./linea-view";
 import { StationView } from "./linea-plot/station-view";
 /**
  * LineaPlot Web Component
- * 
+ *
  * A custom HTML element for displaying and filtering SMET (Standard Meteorological Exchange Format) data
  * with interactive date range selection and multi-station chart visualization. Plotting it accordingly to the EAWS workgroup.
 
- * 
+ *
  * @element linea-plot
- * 
+ *
  * @attributes
  * - `data` {string} - JSON-encoded array of @class Result objects (optional, either this or the `src` attribute)
  * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute)
@@ -28,12 +28,12 @@ import { StationView } from "./linea-plot/station-view";
  * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
  * - `showexport` - toggles if the export button is shown
  * - `showinteractiveblogexport` - toggles if the export for the interactive blog button is shown, just in combination with `showexport`
- * 
- * 
+ *
+ *
  * @example
  * ```html
  * <!-- Display all data with date picker -->
- * <linea-plot 
+ * <linea-plot
  *   src='["data/station1.smet", "data/station2.smet"]'
  *   backgroundcolors = '["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
  *   showdatepicker
@@ -41,14 +41,14 @@ import { StationView } from "./linea-plot/station-view";
  *   showtitle
  *   showexport>
  * </linea-plot>
- * 
+ *
  * <!-- Fixed date view without picker -->
- * <linea-plot 
+ * <linea-plot
  *   src='["data/station1.smet"]'
  *   wintersrc='["data/station1_winter.smet"]'>
  * </linea-plot>
  * ```
- * 
+ *
  * @features
  * - Multi-source data fetching and aggregation
  * - Automatic data generalization across multiple stations with different time ranges
@@ -195,7 +195,7 @@ export class LineaPlot extends HTMLElement {
     if (!this.hasAttribute("showexport")) {
       return;
     }
-    const { LineaExportModal: LineaExportModal } = await import("./linea-plot/linea-export-modal");
+    const { LineaExportModal } = await import("./linea-plot/linea-export-modal");
     this.exportModal = new LineaExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }
@@ -405,17 +405,16 @@ export class LineaPlot extends HTMLElement {
    * cosntructs the AirDatePicker
    */
   async #constructDatePicker() {
-    const { default: AirDatepicker } = await import("air-datepicker");
-    const css = await import("air-datepicker/air-datepicker.css?raw");
-    this.styleTag.textContent += css.default;
+    this.styleTag.textContent += cssAirDatepicker;
 
     this.dp = new AirDatepicker(this.daterange, {
+      locale: localizeDatePicker(i18n.lang),
       range: true,
       multipleDatesSeparator: " - ",
       container: this,
       autoClose: true,
     });
-    await this.#localizeDatePicker();
+
     //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener
     this.daterange.addEventListener("touchstart", (e) => {
       e.preventDefault();
@@ -451,89 +450,6 @@ export class LineaPlot extends HTMLElement {
     return src.startsWith("[") || src.startsWith("'")
       ? (JSON.parse(src) as string[]).length == 0
       : src == "";
-  }
-
-  /**
-   * Localizes the AirDatepicker
-   */
-  async #localizeDatePicker() {
-    let locale;
-    switch (i18n.lang) {
-      case "en":
-        locale = (await import("air-datepicker/locale/en")).default.default; // English
-        break;
-      case "ca":
-        locale = (await import("air-datepicker/locale/ca")).default.default; // Catalan
-        break;
-      case "de":
-        locale = (await import("air-datepicker/locale/de")).default.default; // German
-        break;
-      case "es":
-        locale = (await import("air-datepicker/locale/es")).default.default; // Spanish
-        break;
-      case "fr":
-        locale = (await import("air-datepicker/locale/fr")).default.default; // French
-        break;
-      case "it":
-        locale = (await import("air-datepicker/locale/it")).default.default; // Italian
-        break;
-      case "oc":
-        locale = {
-          days: ["Dimenge", "Diluns", "Mars", "Dimècres", "Dijòus", "Divendres", "Dissabte"],
-          daysShort: ["Dg", "Dl", "Dm", "Dc", "Dj", "Dv", "Ds"],
-          daysMin: ["Dg", "Dl", "Dm", "Dc", "Dj", "Dv", "Ds"],
-          months: [
-            "Genièr",
-            "Febrièr",
-            "Març",
-            "Abril",
-            "Mai",
-            "Junh",
-            "Julhet",
-            "Agost",
-            "Setembre",
-            "Octòbre",
-            "Novembre",
-            "Decembre",
-          ],
-          monthsShort: [
-            "Gen.",
-            "Feb.",
-            "Març",
-            "Abr.",
-            "Mai",
-            "Junh",
-            "Jul.",
-            "Ago.",
-            "Set",
-            "Oct",
-            "Nov",
-            "Dec",
-          ],
-          today: "Uèi",
-          clear: "Esfacar",
-          dateFormat: "dd/mm/yyyy",
-          timeFormat: "hh:ii",
-          firstDay: 1,
-        };
-        break;
-      case "pl":
-        locale = (await import("air-datepicker/locale/pl")).default.default; // Polish
-        break;
-      case "sk":
-        locale = (await import("air-datepicker/locale/sk")).default.default; // Slovak
-        break;
-      case "sl":
-        locale = (await import("air-datepicker/locale/sl")).default.default; // Slovenian
-        break;
-      default:
-        locale = (await import("air-datepicker/locale/en")).default.default; // Default to English if no match
-        break;
-    }
-
-    this.dp.update({
-      locale: locale,
-    });
   }
 }
 
