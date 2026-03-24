@@ -49,7 +49,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
   }
 
   protected updateData(plot: uPlot, values: (number | null)[][]) {
-    let data = [];
+    let data = [] as unknown as [xValues: number[], ...yValues: (number | null | undefined)[][]];
     for (const element of values) {
       data.push(element ?? this.#createNullArray());
     }
@@ -71,7 +71,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
       data = [] as number[];
     }
     plot.addSeries({ ...series, show: !!data?.length });
-    plot.data.push(data);
+    (plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]]).push(data);
   }
 
   modifyDrawHook(p: uPlot, backgroundColor: string) {

@@ -112,7 +112,7 @@ export class Observation {
 }
 
 export class AvalancheObservation extends Observation {
-  public properties: {
+  declare properties: {
     stability: string;
     authorName: string;
     content: string;
@@ -272,7 +272,7 @@ export class BulletinData {
         });
       }
     });
-    return Object.entries(distribution).map(([rating, count]) => ({ rating, count }));
+    return Object.entries(distribution).map(([rating, count]) => ({ rating: +rating, count }));
   }
 
   get highestDangerRatingPerDay(): { timestamps: number[]; rating: number[] } {

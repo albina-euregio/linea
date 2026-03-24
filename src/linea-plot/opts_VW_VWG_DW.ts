@@ -87,7 +87,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
           splitcount: 5,
         } as SplitOptions);
       },
-      values: (u, vals) => vals.map((v) => v.toString()),
+      values: (_, vals) => vals.map((v) => v.toString()),
     },
     {
       splits: [0, 90, 180, 270, 360],

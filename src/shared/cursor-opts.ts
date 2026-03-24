@@ -20,6 +20,4 @@ export const cursorOpts: uPlot.Cursor = {
       e.stopImmediatePropagation();
     },
   },
-  snap: true,
-  showTime: true,
 };

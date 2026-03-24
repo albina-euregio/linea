@@ -62,13 +62,13 @@ export abstract class AbstractExportModal {
       `<div class="export-modal-content">
                 <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
                 <h2>${i18n.message("linea:controls:label:exportchart")}</h2>
-    
+
                 <div class="export-options">
                     <div class="export-option" id="btnExportIframe">
                         <h4>${i18n.message("linea:controls:button:iframe")}</h4>
                         <p>${i18n.message("linea:controls:button:iframe:sub")}</p>
                     </div>
-    
+
                     <div class="export-option" id="btnExportPNG">
                         <h4>${i18n.message("linea:controls:button:pngimage")}</h4>
                         <p>${i18n.message("linea:controls:button:pngimage:sub")}</p>
@@ -84,7 +84,7 @@ export abstract class AbstractExportModal {
                         <p>${i18n.message("linea:controls:button:smet:sub")}</p>
                     </div>
                 </div>
-    
+
                 <div class="export-settings" id="exportSettings" style="display:none;">
                     <h4>${i18n.message("linea:controls:label:exportsettings")}</h4>
                     <div style="display: grid; gap: 15px;">
@@ -109,7 +109,7 @@ export abstract class AbstractExportModal {
                         </div>
                     </div>
                 </div>
-    
+
                 <div id="exportResult" style="display:none;">
                     <h3>${i18n.message("linea:controls:label:exportresult")}</h3>
                     <div class="code-container">
@@ -138,8 +138,14 @@ export abstract class AbstractExportModal {
       }
     };
 
-    this.modal.querySelector("#exportWidth")!.addEventListener("keydown", keyListener);
-    this.modal.querySelector("#exportHeight")!.addEventListener("keydown", keyListener);
+    (this.modal.querySelector("#exportWidth") as HTMLElement)!.addEventListener(
+      "keydown",
+      keyListener,
+    );
+    (this.modal.querySelector("#exportHeight") as HTMLElement)!.addEventListener(
+      "keydown",
+      keyListener,
+    );
 
     this.modal.querySelector("#btnExportSmet")!.addEventListener("click", () => {
       this.exportAsSMET();
@@ -336,10 +342,11 @@ export abstract class AbstractExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  protected async exportAllPlotsToPNG(
-    { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
-    noshow: boolean = false,
-  ): Promise<string> {
+  protected async exportAllPlotsToPNG(_: {
+    width: number;
+    heightPerCanvas: number;
+    title: string;
+  }): Promise<string> {
     return Promise.resolve("");
   }
 

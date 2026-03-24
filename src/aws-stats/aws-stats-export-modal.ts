@@ -55,8 +55,8 @@ export class AwsStatsExportModal extends AbstractExportModal {
     super(modal);
     this.chart = chart;
 
-    this.modal.querySelector("#btnExportSmet")!.style!.display = "none";
-    this.modal.querySelector("#btnExportIframe")!.style.display = "none";
+    (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
+    (this.modal.querySelector("#btnExportIframe") as HTMLElement)!.style.display = "none";
   }
 
   /**
@@ -107,7 +107,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
   ): Promise<string> {
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
-    const legendItems = {};
+    const legendItems: Record<string, string> = {};
 
     const parentWidth =
       (width * this.chart.container.clientWidth) /
@@ -126,11 +126,11 @@ export class AwsStatsExportModal extends AbstractExportModal {
       let color = "#000000";
       if (typeof s.stroke === "string") {
         color = s.stroke;
-      } else {
+      } else if (typeof s.stroke === "function") {
         const c = s.stroke(this.chart.plot, i + 1);
         if (typeof c === "string") color = c;
       }
-      legendItems[label] = color;
+      legendItems[String(label)] = color;
     });
 
     if (Object.keys(legendItems).length == 0) {
@@ -169,7 +169,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
             currentLineWidth = 0;
           }
         }
-        currentLine.push({ label, color, width: itemWidth });
+        currentLine.push({ label, color: color as string, width: itemWidth });
         currentLineWidth += itemWidth;
       }
 

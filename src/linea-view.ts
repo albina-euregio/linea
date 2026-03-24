@@ -1,4 +1,4 @@
-import type { StationData, Values } from "./data/station-data";
+import { type StationData, type Values, ParameterType } from "./data/station-data";
 import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
@@ -110,9 +110,9 @@ export abstract class LineaView {
       }
 
       const mergedValues: Values = {};
-      const keys = Object.keys(oldResult.values);
 
-      for (const key of keys) {
+      let key: ParameterType;
+      for (key in oldResult.values) {
         mergedValues[key] = Array.from({ length: mergedTimestamps.length });
       }
 
@@ -121,7 +121,7 @@ export abstract class LineaView {
         const oldIndex = oldIndexMap.get(timestamp);
         const newIndex = newIndexMap.get(timestamp);
 
-        for (const key of keys) {
+        for (key in oldResult.values) {
           if (oldIndex !== undefined) {
             mergedValues[key][t] = oldResult.values[key][oldIndex];
           } else if (newIndex !== undefined) {
@@ -182,11 +182,12 @@ export abstract class LineaView {
       if (res === undefined) {
         continue;
       }
-      let filteredValues = {};
+      let filteredValues: Values = {};
 
-      for (const key in res.values) {
+      let key: ParameterType;
+      for (key in res.values) {
         filteredValues[key] = res.values[key].filter(
-          (t, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp,
+          (_, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp,
         );
       }
       const filteredTimestamps = res.timestamps.filter(
@@ -218,13 +219,13 @@ export abstract class LineaView {
     const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
 
     for (const res of this.results) {
-      for (const key in res.values) {
-        const map = new Map<number, number[]>();
+      let key: ParameterType;
+      for (key in res.values) {
+        const map = new Map<number, number>();
         for (let i = 0; i < res.timestamps.length; i++) {
           map.set(res.timestamps[i], res.values[key][i]);
         }
-        const newValues = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : NaN));
-        res.values[key] = newValues;
+        res.values[key] = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : NaN));
       }
       // set the common timeline to all results
       res.timestamps = allTimestamps.slice();
