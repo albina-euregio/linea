@@ -10,6 +10,22 @@
   "type": "module",
   "main": "./dist/linea.cjs",
   "module": "./dist/linea.js",
+  "exports": {
+    ".": {
+      "import": "./dist/linea.es.js",
+      "require": "./dist/linea.cjs.js"
+    },
+    "./linea": {
+      "import": "./dist/linea.es.js",
+      "require": "./dist/linea.cjs.js"
+    },
+    "./aws-stats": {
+      "import": "./dist/aws-stats.es.js",
+      "require": "./dist/aws-stats.cjs.js"
+    },
+    "./src/schema/listing": "./src/schema/listing.ts",
+    "./src/schema/listing-legacy": "./src/schema/listing-legacy.ts"
+  },
   "scripts": {
     "prepare": "husky",
     "test": "vitest run",

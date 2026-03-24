@@ -1,25 +1,24 @@
 import uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { OptsHelper, type SplitOptions } from "./opts-helper";
+import { LineaOptsHelper, type SplitOptions } from "./linea-opts-helper";
 
 /**
  * uPlot options for datapoints/year [cm]
  */
 
 export const opts_DATAPOINTS_year: uPlot.Options = {
-  ...OptsHelper.getLineaOptions(),
+  ...LineaOptsHelper.getLineaOptions(),
   padding: [20, 52, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {
-        const ctx = u.ctx;
         var labely1 = `${i18n.message("linea:parameter:DATAPOINTS:amount")}`;
         var labely2 = "";
         var labelColor1 = "#00ff55ff";
         var labelColor2 = "";
-        OptsHelper.UpdateAxisLabels(
-          ctx,
+        LineaOptsHelper.UpdateAxisLabels(
+          u,
           labely1,
           labely2,
           u.bbox.left,
@@ -31,7 +30,7 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
     ],
     setSelect: [
       (u) => {
-        OptsHelper.calculateAxisLimitsInZoom(u, [1]);
+        LineaOptsHelper.calculateAxisLimitsInZoom(u, [1]);
       },
     ],
   },
@@ -57,7 +56,7 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
       scale: "y",
       stroke: "#00ff55ff",
       splits: (u) => {
-        return OptsHelper.getSplits({
+        return LineaOptsHelper.getSplits({
           uplot: u,
           mins: [0, 0, 0, 0],
           maxs: [30, 50, 70, 90],

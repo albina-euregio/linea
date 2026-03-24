@@ -1,5 +1,5 @@
 import { i18n } from "../i18n";
-import { MIN_VISIBLE_DATAPOINTS } from "./touch-zoom.ts";
+import { MIN_VISIBLE_DATAPOINTS } from "../shared/touch-zoom.ts";
 
 const ms = 1,
   s = ms * 1e3,

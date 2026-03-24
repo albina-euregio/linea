@@ -10,14 +10,17 @@ export default defineConfig({
     chunkSizeWarningLimit: 190,
     license: { fileName: "license.json" },
     lib: {
-      entry: "./src/main.ts",
+      entry: {
+        linea: "./src/main.ts",
+        "aws-stats": "./src/aws-stats/main.ts",
+      },
       formats: ["es", "cjs"],
-      name: "@albina-euregio/linea",
+      fileName: (format, entryName) => `${entryName}.${format}.js`,
     },
     sourcemap: true,
     rolldownOptions: {
       output: {
-        advancedChunks: {
+        codeSplitting: {
           groups: [
             {
               test: /node_modules\/temporal-polyfill/,

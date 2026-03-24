@@ -19,16 +19,15 @@
     </script> -->
     <!-- src="/prototype/mock.data" -->
     <nav></nav>
-    <linea-plot
-      wintersrc='["https://api.avalanche.report/lawine/grafiken/smet/all/NFRA2.smet.gz"]'
-      showtitle
-      showexport
-      showonlywinter
-      showsurfacehoarseries
-      showdatepicker
-      showinteractiveblogexport
-    >
-    </linea-plot>
+
+    <aws-stats-wrapper
+      chart-type="aws-danger-rating-distribution"
+      observations="./observations.geojson"
+      stationsrc="https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
+      start-date="2026-01-01"
+      end-date="2026-03-18"
+      bulletin-filter-micro-region="all"
+    ></aws-stats-wrapper>
     <!-- <linea-plot
       src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
       lazysrc='["https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz"]'
@@ -39,6 +38,7 @@
       showdatepicker
     >
     </linea-plot> -->
+    <script type="module" src="./src/aws-stats/main.ts"></script>
     <script type="module" src="./src/main.ts"></script>
     <!--
     <script>

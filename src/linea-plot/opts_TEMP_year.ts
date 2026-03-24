@@ -1,22 +1,21 @@
 import uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { OptsHelper, type SplitOptions } from "./opts-helper";
+import { LineaOptsHelper, type SplitOptions } from "./linea-opts-helper";
 
 /**
  * uPlot options for temperature/year [cm]
  */
 
 export const opts_TEMP_year: uPlot.Options = {
-  ...OptsHelper.getLineaOptions(),
+  ...LineaOptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
-        const ctx = u.ctx;
         var labely1 = `${i18n.message("linea:parameter:TA")} (℃)`;
         var labely2 = `${i18n.message("linea:parameter:TSS")} (℃)`;
-        OptsHelper.UpdateAxisLabels(
-          ctx,
+        LineaOptsHelper.UpdateAxisLabels(
+          u,
           labely1,
           labely2,
           u.bbox.left,
@@ -24,12 +23,11 @@ export const opts_TEMP_year: uPlot.Options = {
           "#DE2D26",
           "#FC9272",
         );
-        ctx.restore();
       },
     ],
     setSelect: [
       (u) => {
-        OptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3, 4]);
+        LineaOptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3, 4]);
       },
     ],
   },
@@ -54,7 +52,7 @@ export const opts_TEMP_year: uPlot.Options = {
       scale: "y",
       stroke: "#DE2D26",
       splits: (u) => {
-        return OptsHelper.getSplits({
+        return LineaOptsHelper.getSplits({
           uplot: u,
           mins: [-30, -30],
           maxs: [10, 30],
@@ -71,7 +69,7 @@ export const opts_TEMP_year: uPlot.Options = {
       stroke: "#FC9272",
       side: 1,
       splits: (u) => {
-        return OptsHelper.getSplits(
+        return LineaOptsHelper.getSplits(
           {
             uplot: u,
             mins: [-30, -30],
