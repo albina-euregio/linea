@@ -32,8 +32,8 @@
     "prepare": "husky",
     "test": "vitest run",
     "lint": "oxfmt --check && oxlint --max-warnings 12",
-    "build": "pnpm run build:tsc && pnpm run build:vite && pnpm run build:listing",
-    "build:tsc": "tsc",
+    "build": "pnpm run build:tsgo && pnpm run build:vite && pnpm run build:listing",
+    "build:tsgo": "tsgo",
     "build:vite": "vite build",
     "build:listing": "tsdown --dts --sourcemap --no-clean src/schema/listing.ts src/schema/listing-legacy.ts",
     "dev": "vite"
