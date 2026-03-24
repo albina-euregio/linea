@@ -41,10 +41,12 @@ export type Units = Partial<Record<ParameterType, string>>;
 
 export type Values = Partial<Record<ParameterType, (number | null)[]>>;
 
-export type StationData = {
-  station: string;
-  altitude: number;
-  timestamps: number[];
-  units: Units;
-  values: Values;
-};
+export class StationData {
+  constructor(
+    public station: string,
+    public altitude: number,
+    public timestamps: number[],
+    public units: Units,
+    public values: Values,
+  ) {}
+}

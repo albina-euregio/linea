@@ -130,11 +130,11 @@ export function parseSMET(smet: string): StationData {
   });
 
   units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
-  return {
+  return new StationData(
     station,
     altitude,
-    timestamps: timestamps.slice(0, dataIndex),
-    units: Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
-    values: Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,
-  };
+    timestamps.slice(0, dataIndex),
+    Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
+    Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,
+  );
 }
