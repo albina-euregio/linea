@@ -5,11 +5,11 @@ import { i18n } from "../../i18n";
 
 export const opts_danger_rating: uPlot.Options = {
   ...OptsHelper.getDefaultOptions(),
-  title: i18n.message("chart:dangerrating:title"),
+  title: i18n.message("linea:dangerrating:title"),
   hooks: {
     drawAxes: [
       (u) => {
-        var labely1 = `${i18n.message("chart:dangerrating:yaxis:dangerrating")}`;
+        var labely1 = `${i18n.message("linea:dangerrating:yaxis:dangerrating")}`;
         OptsHelper.UpdateAxisLabels(
           u,
           labely1,
@@ -49,5 +49,5 @@ export const opts_danger_rating_series_base: uPlot.Series = {
 
 export const opts_danger_rating_series_all: uPlot.Series = {
   ...opts_danger_rating_series_base,
-  label: i18n.message("chart:dangerrating:series:dangerrating"),
+  label: i18n.message("linea:dangerrating:series:dangerrating"),
 };

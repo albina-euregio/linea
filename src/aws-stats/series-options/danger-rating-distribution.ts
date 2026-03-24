@@ -13,11 +13,11 @@ export const dangerDistributionOrder = [
 export type DangerDistributionKey = (typeof dangerDistributionOrder)[number];
 
 const dangerDistributionLabels: Record<(typeof dangerDistributionOrder)[number], string> = {
-  low: `1 ${i18n.message("chart:yearly:dangerratingdistribution:series:low")}`,
-  moderate: `2 ${i18n.message("chart:yearly:dangerratingdistribution:series:moderate")}`,
-  considerable: `3 ${i18n.message("chart:yearly:dangerratingdistribution:series:considerable")}`,
-  high: `4 ${i18n.message("chart:yearly:dangerratingdistribution:series:high")}`,
-  very_high: `5 ${i18n.message("chart:yearly:dangerratingdistribution:series:very_high")}`,
+  low: `1 ${i18n.message("linea:yearly:dangerratingdistribution:series:low")}`,
+  moderate: `2 ${i18n.message("linea:yearly:dangerratingdistribution:series:moderate")}`,
+  considerable: `3 ${i18n.message("linea:yearly:dangerratingdistribution:series:considerable")}`,
+  high: `4 ${i18n.message("linea:yearly:dangerratingdistribution:series:high")}`,
+  very_high: `5 ${i18n.message("linea:yearly:dangerratingdistribution:series:very_high")}`,
 };
 
 export const dangerDistributionColors: Record<
@@ -33,12 +33,12 @@ export const dangerDistributionColors: Record<
 
 export const opts_danger_rating_distribution: uPlot.Options = {
   ...OptsHelper.getDefaultOptions(),
-  title: `${i18n.message("chart:yearly:dangerratingdistribution:title")}`,
+  title: `${i18n.message("linea:yearly:dangerratingdistribution:title")}`,
   hooks: {
     drawAxes: [
       (u) => {
         const labely1 =
-          i18n.message("chart:yearly:dangerratingdistribution:yaxis:percent") + " (%)";
+          i18n.message("linea:yearly:dangerratingdistribution:yaxis:percent") + " (%)";
         OptsHelper.UpdateAxisLabels(
           u,
           labely1,
@@ -102,7 +102,7 @@ export const opts_danger_rating_distribution_series: uPlot.Series = {
 
 export const opts_danger_rating_distribution_reference_series: uPlot.Series = {
   ...opts_danger_rating_distribution_series,
-  label: i18n.message("chart:yearly:dangerratingdistribution:series:reference"),
+  label: i18n.message("linea:yearly:dangerratingdistribution:series:reference"),
   stroke: "#7a7a7a",
   fill: "rgba(130, 130, 130, 0.35)",
   paths: uPlot.paths.bars!({

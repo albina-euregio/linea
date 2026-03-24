@@ -49,7 +49,7 @@ export class DangerRatingChart extends AbstractChart {
 
     if (counts.every((value) => value === 0)) {
       const empty = document.createElement("div");
-      empty.textContent = i18n.message("chart:yearly:dangerratingdistribution:no-data");
+      empty.textContent = i18n.message("linea:yearly:dangerratingdistribution:no-data");
       empty.style.padding = "16px";
       this.appendChild(empty);
       return;

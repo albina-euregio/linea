@@ -8,12 +8,12 @@ import { i18n } from "../../i18n";
  */
 export const opts_avalanches: uPlot.Options = {
   ...OptsHelper.getDefaultOptions(),
-  title: i18n.message("chart:observations:title"),
+  title: i18n.message("linea:observations:title"),
   hooks: {
     drawAxes: [
       (u) => {
-        var labely1 = `${i18n.message("chart:observations:yaxis:count")}`;
-        var labely2 = `${i18n.message("chart:observations:yaxis:precipitation")}`;
+        var labely1 = `${i18n.message("linea:observations:yaxis:count")}`;
+        var labely2 = `${i18n.message("linea:observations:yaxis:precipitation")}`;
 
         OptsHelper.UpdateAxisLabels(
           u,
@@ -62,14 +62,14 @@ export const opts_avalanches: uPlot.Options = {
 
   series: [
     {
-      label: i18n.message("chart:axis:time"),
+      label: i18n.message("linea:axis:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
   ],
 };
 
 export const opts_series_precipitation = {
-  label: i18n.message("chart:observations:series:precipitation"),
+  label: i18n.message("linea:observations:series:precipitation"),
   stroke: "#4108dd69",
   fill: "rgba(89, 146, 192, 0.2)",
   scale: "y2",
@@ -77,7 +77,7 @@ export const opts_series_precipitation = {
 };
 
 export const opts_series_observations = {
-  label: i18n.message("chart:observations:series:observations"),
+  label: i18n.message("linea:observations:series:observations"),
   stroke: "#6aafd5",
   fill: "rgba(106, 175, 213, 0.3)",
   points: { show: false },
@@ -87,7 +87,7 @@ export const opts_series_observations = {
 };
 
 export const opts_series_avalanches = {
-  label: i18n.message("chart:observations:series:avalanches"),
+  label: i18n.message("linea:observations:series:avalanches"),
   stroke: "#d56a6a",
   fill: "rgba(213, 131, 106, 0.3)",
   points: { show: false },

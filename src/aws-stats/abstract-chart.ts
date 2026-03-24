@@ -75,7 +75,7 @@ export abstract class AbstractChart extends HTMLElement {
     menubar.className = "menubar";
 
     const exportBtn = document.createElement("button");
-    exportBtn.textContent = i18n.message("chart:export");
+    exportBtn.textContent = i18n.message("linea:controls:value:export");
     exportBtn.addEventListener("click", () => this.exportModal.show());
     menubar.appendChild(exportBtn);
     this.appendChild(menubar);

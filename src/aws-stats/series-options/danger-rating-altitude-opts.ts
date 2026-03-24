@@ -17,11 +17,11 @@ function dangerColor(danger: string) {
 
 export const opts_danger_rating_altitude: uPlot.Options = {
   ...OptsHelper.getDefaultOptions(),
-  title: i18n.message("chart:dangerrating:title"),
+  title: i18n.message("linea:dangerrating:title"),
   hooks: {
     drawAxes: [
       (u) => {
-        var labely1 = `${i18n.message("chart:dangerrating:yaxis:altitude")}`;
+        var labely1 = `${i18n.message("linea:dangerrating:yaxis:altitude")}`;
         OptsHelper.UpdateAxisLabels(
           u,
           labely1,

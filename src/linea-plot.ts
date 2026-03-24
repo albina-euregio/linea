@@ -195,8 +195,8 @@ export class LineaPlot extends HTMLElement {
     if (!this.hasAttribute("showexport")) {
       return;
     }
-    const { ExportModal: LineaExportModal } = await import("./linea-plot/linea-export-modal");
-    this.exportModal = new ExportModal(document.createElement("div"), this);
+    const { LineaExportModal: LineaExportModal } = await import("./linea-plot/linea-export-modal");
+    this.exportModal = new LineaExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }
 
