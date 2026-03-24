@@ -8,20 +8,16 @@
     "src/"
   ],
   "type": "module",
-  "main": "./dist/linea.cjs",
-  "module": "./dist/linea.js",
+  "module": "./dist/linea.mjs",
   "exports": {
     ".": {
-      "import": "./dist/linea.es.js",
-      "require": "./dist/linea.cjs.js"
+      "import": "./dist/linea.mjs"
     },
     "./linea": {
-      "import": "./dist/linea.es.js",
-      "require": "./dist/linea.cjs.js"
+      "import": "./dist/linea.mjs"
     },
     "./aws-stats": {
-      "import": "./dist/aws-stats.es.js",
-      "require": "./dist/aws-stats.cjs.js"
+      "import": "./dist/aws-stats.mjs"
     },
     "./src/schema/listing": "./src/schema/listing.ts",
     "./src/schema/listing-legacy": "./src/schema/listing-legacy.ts"
