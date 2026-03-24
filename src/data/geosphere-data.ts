@@ -1,4 +1,4 @@
-import type { StationData } from "./station-data";
+import { StationData } from "./station-data";
 
 interface ParameterValues {
   name: string;
@@ -76,11 +76,21 @@ export function parseGeosphereData(metadata: Metadata, collection: FeatureCollec
   const feature = collection?.features?.[0];
   const station = metadata.stations.find((s) => s.id === feature.properties.station);
   const parameters = feature.properties.parameters;
-  return {
-    station: station.name ?? feature.properties.station,
-    altitude: station?.altitude,
-    timestamps: collection.timestamps.map((t) => Date.parse(t)),
-    values: {
+  return new StationData(
+    station.name ?? feature.properties.station,
+    station?.altitude,
+    collection.timestamps.map((t) => Date.parse(t)),
+    {
+      DW: parameters.DD?.unit,
+      HS: parameters.SCHNEE?.unit,
+      P: parameters.P?.unit,
+      RH: parameters.RF?.unit,
+      TA: parameters.TL?.unit,
+      TD: parameters.TP?.unit,
+      VW_MAX: parameters.FFX?.unit === "m/s" ? "km/h" : parameters.FFX?.unit,
+      VW: parameters.FF?.unit === "m/s" ? "km/h" : parameters.FF?.unit,
+    },
+    {
       DW: parameters.DD?.data,
       HS: parameters.SCHNEE?.data,
       P: parameters.P?.data,
@@ -96,15 +106,5 @@ export function parseGeosphereData(metadata: Metadata, collection: FeatureCollec
           ? parameters.FF?.data.map((v) => v * 3.6)
           : parameters.FF?.data,
     },
-    units: {
-      DW: parameters.DD?.unit,
-      HS: parameters.SCHNEE?.unit,
-      P: parameters.P?.unit,
-      RH: parameters.RF?.unit,
-      TA: parameters.TL?.unit,
-      TD: parameters.TP?.unit,
-      VW_MAX: parameters.FFX?.unit === "m/s" ? "km/h" : parameters.FFX?.unit,
-      VW: parameters.FF?.unit === "m/s" ? "km/h" : parameters.FF?.unit,
-    },
-  };
+  );
 }
