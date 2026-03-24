@@ -11,20 +11,20 @@
   "module": "./dist/linea.mjs",
   "exports": {
     ".": {
-      "import": "./dist/linea.mjs"
+      "default": "./dist/linea.mjs"
     },
     "./linea": {
-      "import": "./dist/linea.mjs"
+      "default": "./dist/linea.mjs"
     },
     "./aws-stats": {
-      "import": "./dist/aws-stats.mjs"
+      "default": "./dist/aws-stats.mjs"
     },
     "./listing": {
-      "import": "./dist/listing.mjs",
+      "default": "./dist/listing.mjs",
       "types": "./dist/listing.d.ts"
     },
     "./listing-legacy": {
-      "import": "./dist/listing-legacy.mjs",
+      "default": "./dist/listing-legacy.mjs",
       "types": "./dist/listing-legacy.d.ts"
     }
   },
