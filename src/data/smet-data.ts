@@ -1,5 +1,5 @@
 import { parseGeosphereData } from "./geosphere-data";
-import type { ParameterType, Result, Units, Values } from "./station-data";
+import type { ParameterType, StationData, Units, Values } from "./station-data";
 import { unitTransformer } from "./units";
 
 const DEFAULT_UNITS: Units = {
@@ -30,7 +30,7 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
   mm: { to: "mm", convert: unitTransformer("mm", "mm") },
 };
 
-export async function fetchSMET(url: string): Promise<Result> {
+export async function fetchSMET(url: string): Promise<StationData> {
   let response = await fetch(url);
   if (!response.ok) {
     throw new Error(
@@ -59,7 +59,7 @@ export async function fetchSMET(url: string): Promise<Result> {
   return parseSMET(smet);
 }
 
-export function parseSMET(smet: string): Result {
+export function parseSMET(smet: string): StationData {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
   let values: number[][] = [];

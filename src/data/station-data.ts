@@ -41,7 +41,7 @@ export type Units = Record<ParameterType, string>;
 
 export type Values = Record<ParameterType, (number | null)[]>;
 
-export type Result = {
+export type StationData = {
   station: string;
   altitude: number;
   timestamps: number[];

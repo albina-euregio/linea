@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import type { Result, Values } from "./data/station-data";
+import type { StationData, Values } from "./data/station-data";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
@@ -8,9 +8,9 @@ export abstract class AbstractLineaChart extends HTMLElement {
   protected drawedTitle: boolean = false;
   protected backgroundColor: string;
   protected showTitle: boolean;
-  public result: Result;
+  public result: StationData;
 
-  constructor(backgroundColor: string, showTitle: boolean, result: Result) {
+  constructor(backgroundColor: string, showTitle: boolean, result: StationData) {
     super();
     this.backgroundColor = backgroundColor;
     this.showTitle = showTitle;

@@ -1,4 +1,4 @@
-import type { Result, Values } from "./data/station-data";
+import type { StationData, Values } from "./data/station-data";
 import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
@@ -16,7 +16,7 @@ export abstract class LineaView {
   protected showTitle: boolean = false;
   minTime: number = +Infinity;
   maxTime: number = -Infinity;
-  results: Result[] = [];
+  results: StationData[] = [];
   srcs: string[] = [];
   protected lineaplot: LineaPlot;
 
@@ -60,7 +60,7 @@ export abstract class LineaView {
       throw "Empty src array!";
     }
 
-    const results: Result[] = [];
+    const results: StationData[] = [];
     for (const src of this.srcs) {
       const result = await fetchSMET(src);
       this.minTime = Math.min(this.minTime, result.timestamps[0]);
@@ -80,14 +80,14 @@ export abstract class LineaView {
    * It is assumed that the order of the results in the newResults array corresponds to the order of the results in the this.results array.
    *
    * The merged data is stored in the this.result object.
-   * @return Result[] - The merged results
+   * @return StationData[] - The merged results
    */
-  #mergeResults(newResults: Result[]): Result[] {
+  #mergeResults(newResults: StationData[]): StationData[] {
     if (this.results.length === 0) {
       return newResults;
     }
 
-    const results: Result[] = [];
+    const results: StationData[] = [];
     for (let i = 0; i < this.results.length; i++) {
       const oldResult = this.results[i];
       const newResult = newResults[i];
@@ -148,7 +148,7 @@ export abstract class LineaView {
    * This method is used when the data is directly provided in the HTML and no fetching from a source is needed.
    */
   loadFromDataAttribute() {
-    const results: Result[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
+    const results: StationData[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
     this.results = results;
     this.minTime = +Infinity;
     this.maxTime = -Infinity;

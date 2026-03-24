@@ -4,7 +4,7 @@ import "./danger-rating-distribution";
 import css from "./aws-stats-wrapper.css?raw";
 import { BulletinData, Observations } from "./datastore";
 import { fetchSMET } from "../data/smet-data";
-import type { Result } from "../data/station-data";
+import type { StationData } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
 
 function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
@@ -15,10 +15,10 @@ function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
 }
 
 function filterWeatherByDate(
-  result: Result,
+  result: StationData,
   startDate: string | null,
   endDate: string | null,
-): Result {
+): StationData {
   const start = parseDateBoundary(startDate, false);
   const end = parseDateBoundary(endDate, true);
 
@@ -38,7 +38,7 @@ function filterWeatherByDate(
       key,
       indices.map((index) => values[index]),
     ]),
-  ) as Result["values"];
+  ) as StationData["values"];
 
   return {
     ...result,
@@ -96,7 +96,7 @@ class AwsStats extends HTMLElement {
       loadPromises.push(
         (async () => {
           try {
-            const result: Result = await fetchSMET(this.getAttribute("stationsrc") || "");
+            const result: StationData = await fetchSMET(this.getAttribute("stationsrc") || "");
             const filteredResult = filterWeatherByDate(
               result,
               this.getAttribute("start-date"),

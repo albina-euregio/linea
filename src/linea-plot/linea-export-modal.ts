@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
-import type { Result } from "../data/station-data";
+import type { StationData } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import css from "../shared/export-modal.css?inline";
 import { WinterView } from "./winter-view";
@@ -120,12 +120,12 @@ export class LineaExportModal extends AbstractExportModal {
    * Generates the code which can be included into an iframe.
    * @returns Promise<string> - html code to insert into an iframe
    */
-  async #generateInteractiveExportData(): Promise<{ resultsFiltered: Result[]; dataUrl: string }> {
-    const resultsFiltered: Result[] = [];
+  async #generateInteractiveExportData(): Promise<{ resultsFiltered: StationData[]; dataUrl: string }> {
+    const resultsFiltered: StationData[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
       const activeplots = this.#getCheckedPlotIndices(index);
-      let result: Result = {
+      let result: StationData = {
         station: lc.result.station,
         altitude: lc.result.altitude,
         timestamps: lc.result.timestamps,
@@ -208,7 +208,7 @@ export class LineaExportModal extends AbstractExportModal {
 
     const iframecode = `<iframe
           src="data:text/html;base64,${btoa(binary)}"
-          frameborder="0" 
+          frameborder="0"
           scrolling="no"
           style="width: 100%; height: ${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px;border:none;overflow:hidden;"
           title="${exports.title}">
