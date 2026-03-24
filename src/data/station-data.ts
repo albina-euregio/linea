@@ -11,7 +11,7 @@ export enum ParameterType {
   /** TSS Temperature Snow Surface, in Kelvin */
   "TSS" = "TSS",
   /** TSG Temperature Surface Ground, in Kelvin */
-  "TSG" = "TSG",
+  // "TSG" = "TSG",
   /** RH Relative Humidity, between 0 and 1 */
   "RH" = "RH",
   /** VW_MAX Maximum wind velocity, in m/s */
@@ -23,13 +23,13 @@ export enum ParameterType {
   /** ISWR Incoming Short Wave Radiation, in W/m2 */
   "ISWR" = "ISWR",
   /** RSWR Reflected Short Wave Radiation, in W/m2 (previously OSWR) */
-  "RSWR" = "RSWR",
+  // "RSWR" = "RSWR",
   /** ILWR Incoming Long Wave Radiation, in W/m2 */
-  "ILWR" = "ILWR",
+  // "ILWR" = "ILWR",
   /** OLWR Outgoing Long Wave Radiation, in W/m2 */
-  "OLWR" = "OLWR",
+  // "OLWR" = "OLWR",
   /** PINT Precipitation Intensity, in mm/h, as an average over the timestep */
-  "PINT" = "PINT",
+  // "PINT" = "PINT",
   /** PSUM Precipitation accumulation, in mm, summed over the last timestep */
   "PSUM" = "PSUM",
   /** HS Height Snow, in m */
