@@ -5,6 +5,7 @@ import type { Result } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import css from "../shared/export-modal.css?inline";
 import { WinterView } from "./winter-view";
+import { AbstractExportModal } from "../shared/abstract-export-modal";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -38,11 +39,7 @@ import { WinterView } from "./winter-view";
  * const exportModal = new ExportModal(modalElement, lineaPlot);
  * exportModal.show();
  */
-export class ExportModal {
-  private exportSettings: HTMLDivElement;
-  private exportResult: HTMLDivElement;
-  private exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;
-  readonly modal: HTMLDivElement;
+export class ExportModal extends AbstractExportModal {
   private lineaPlot: LineaPlot;
 
   /**
@@ -58,144 +55,8 @@ export class ExportModal {
    * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
    */
   constructor(modal: HTMLDivElement, lineaPlot: LineaPlot) {
-    this.modal = modal;
+    super(modal);
     this.lineaPlot = lineaPlot;
-
-    const styleTag = document.createElement("style");
-    styleTag.textContent = css;
-    this.modal.appendChild(styleTag);
-    this.modal.classList.add("export-modal");
-    this.modal.id = "exportModal";
-    this.modal.insertAdjacentHTML(
-      "beforeend",
-      `<div class="export-modal-content">
-                <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
-                <h2>${i18n.message("linea:controls:label:exportchart")}</h2>
-    
-                <div class="export-options">
-                    <div class="export-option" id="btnExportIframe">
-                        <h4>${i18n.message("linea:controls:button:iframe")}</h4>
-                        <p>${i18n.message("linea:controls:button:iframe:sub")}</p>
-                    </div>
-    
-                    <div class="export-option" id="btnExportPNG">
-                        <h4>${i18n.message("linea:controls:button:pngimage")}</h4>
-                        <p>${i18n.message("linea:controls:button:pngimage:sub")}</p>
-                    </div>
-
-                    <div class="export-option" id="btnExportInteractiveBlog" style="display: none;">
-                        <h4>${i18n.message("linea:controls:button:interactiveblog")}</h4>
-                        <p>${i18n.message("linea:controls:button:interactiveblog:sub")}</p>
-                    </div>
-
-                    <div class="export-option" id="btnExportSmet">
-                        <h4>${i18n.message("linea:controls:button:smet")}</h4>
-                        <p>${i18n.message("linea:controls:button:smet:sub")}</p>
-                    </div>
-                </div>
-    
-                <div class="export-settings" id="exportSettings" style="display:none;">
-                    <h4>${i18n.message("linea:controls:label:exportsettings")}</h4>
-                    <div style="display: grid; gap: 15px;">
-                        <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                          <div>
-                              <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
-                              <input type="number" id="exportWidth" value="1000" min="400" max="2600" step="100">
-                          </div>
-                          <div>
-                              <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
-                              <input type="number" id="exportHeight" value="200" min="150" max="600" step="50">
-                          </div>
-                          <div>
-                              <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
-                              <input type="text" id="exportTitle" value="">
-                          </div>
-                        </div>
-                        <div>
-                            <label for="exportDiagrams">${i18n.message("linea:controls:label:selectdiagrams")}</label>
-                            <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-    
-                <div id="exportResult" style="display:none;">
-                    <h3>${i18n.message("linea:controls:label:exportresult")}</h3>
-                    <div class="code-container">
-                        <div class="code-container-buttons">
-                            <button class="copy-btn" id="copyExportBtn">${i18n.message("linea:controls:button:copytoclipboard")}</button>
-                            <button class="dwn-btn" id="downloadBtn">${i18n.message("linea:controls:button:download")}</button>
-                            <button class="open-btn" id="openBtn">${i18n.message("linea:controls:button:open")}</button>
-                        </div>
-                        <pre id="exportCode"></pre>
-                    </div>
-                </div>
-            </div>`,
-    );
-
-    this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
-    this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
-
-    const keyListener = (e: KeyboardEvent) => {
-      if (!this.exportdata || e.key !== "Enter") {
-        return;
-      }
-      if (this.exportdata.type == "image/png") {
-        (this.modal.querySelector("#btnExportPNG") as HTMLButtonElement).click();
-      } else if (this.exportdata.type == "text/html") {
-        (this.modal.querySelector("#btnExportIframe") as HTMLButtonElement).click();
-      }
-    };
-
-    this.modal.querySelector("#exportWidth")?.addEventListener("keydown", keyListener);
-    this.modal.querySelector("#exportHeight")?.addEventListener("keydown", keyListener);
-
-    if (this.lineaPlot.hasAttribute("showinteractiveblogexport")) {
-      (this.modal.querySelector("#btnExportInteractiveBlog") as HTMLElement).style.display = "grid";
-      (this.modal.querySelector("#btnExportInteractiveBlog") as HTMLElement).addEventListener(
-        "click",
-        () => {
-          this.#resetCopyToClipboardButton();
-          this.#exportAsBlogElement();
-        },
-      );
-    }
-
-    this.modal.querySelector("#btnExportSmet")?.addEventListener("click", () => {
-      this.#exportAsSMET();
-    });
-
-    this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
-      document.getElementById("exportSizes").style.display = "none";
-      this.#resetCopyToClipboardButton();
-      this.#exportAsIframe();
-    });
-
-    this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
-      document.getElementById("exportSizes").style.display = "grid";
-      this.#resetCopyToClipboardButton();
-      this.#exportAllPlotsToPNG(this.#getExportSettings());
-    });
-
-    this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
-      this.#copyToClipboard();
-    });
-
-    this.modal.querySelector("#downloadBtn")?.addEventListener("click", () => {
-      this.#downloadExport();
-    });
-
-    this.modal.querySelector("#openBtn")?.addEventListener("click", () => {
-      this.#openExport();
-    });
-
-    // Close modal when clicking outside
-    window.onclick = function (event) {
-      const modal = document.getElementById("exportModal");
-      if (event.target === modal && modal) {
-        modal.style.display = "none";
-      }
-    };
   }
 
   /**
@@ -241,121 +102,15 @@ export class ExportModal {
   }
 
   /**
-   * Resets the copyToClipboard Button
-   */
-  #resetCopyToClipboardButton() {
-    const btn = document.querySelector(".copy-btn") as HTMLButtonElement;
-    btn.style.background = "#3498db";
-    btn.innerText = i18n.message("linea:controls:button:copytoclipboard");
-  }
-
-  /**
-   * Copies the exported content to the system clipboard.
-   *
-   * Supports copying both PNG images and HTML content formats.
-   * Provides visual feedback by temporarily changing the button text and color.
-   * Provides for content type of text/html a text/plain fallback, generated from the exportdata.data
-   *
-   * @private
-   * @returns {void}
-   * @throws {Error} Logs error if clipboard write operation fails
-   */
-  #copyToClipboard() {
-    let code: ClipboardItem[] = [];
-    if (this.exportdata) {
-      if (this.exportdata.type === "image/png") {
-        code = [
-          new ClipboardItem({
-            ["image/png"]: this.exportdata.blob,
-          }),
-        ];
-      } else if (this.exportdata.type === "text/html") {
-        code = [
-          new ClipboardItem({
-            ["text/html"]: this.exportdata.blob,
-            ["text/plain"]: new Blob([this.exportdata.data], { type: "text/plain" }),
-          }),
-        ];
-      } else if (this.exportdata.type === "text/plain") {
-        code = [
-          new ClipboardItem({
-            ["text/plain"]: this.exportdata.blob,
-          }),
-        ];
-      }
-    } else {
-      console.error(
-        "Couldn't save clipboard item, no matching content type " + this.exportdata.type + "!",
-      );
-      return;
-    }
-    navigator.clipboard
-      .write(code)
-      .then(() => {
-        const btn = document.querySelector(".copy-btn") as HTMLButtonElement;
-        const originalText = btn.textContent;
-        btn.textContent = `${i18n.message("linea:controls:button:copytoclipboard:clicked")}`;
-        btn.style.background = "#27ae60";
-        setTimeout(() => {
-          btn.textContent = originalText;
-          btn.style.background = "#667eea";
-        }, 2000);
-      })
-      .catch((err) => {
-        console.error("Failed to copy: ", err);
-      });
-  }
-
-  /**
-   * Downloads the exported file to the user's local system.
-   *
-   * @private
-   * @returns {void}
-   */
-  #downloadExport() {
-    if (!this.exportdata) {
-      return;
-    }
-    this.#download(URL.createObjectURL(this.exportdata.blob));
-  }
-
-  #download(url: string, download: string = this.exportdata?.filename ?? "file.txt") {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = download;
-    a.target = "_tab";
-    a.click();
-  }
-
-  /**
-   * Opens the exported content in a new browser tab.
-   *
-   * Creates a temporary anchor element and opens the exported data
-   * in a new tab using the data URL or blob reference.
-   *
-   * @private
-   * @returns {void}
-   */
-  #openExport() {
-    if (!this.exportdata) {
-      return;
-    }
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(this.exportdata.blob);
-    a.target = "_blank";
-    a.click();
-  }
-
-  /**
    * Downloads all available SMET files
    */
-  #exportAsSMET() {
+  protected exportAsSMET() {
     this.#downloadSMETS(this.lineaPlot.view.srcs);
   }
 
   async #downloadSMETS(srcs: string[]) {
     for (const src of srcs) {
-      this.#download(src, src.split("/")[src.split("/").length - 1]);
+      this.download(src, src.split("/")[src.split("/").length - 1]);
       await new Promise(requestAnimationFrame);
       await new Promise((r) => setTimeout(r, 1000));
     }
@@ -411,7 +166,7 @@ export class ExportModal {
       resultsFiltered.push(result);
     });
 
-    const dataUrl: string = await this.#exportAllPlotsToPNG(
+    const dataUrl: string = await this.exportAllPlotsToPNG(
       { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
       true,
     );
@@ -425,12 +180,12 @@ export class ExportModal {
    * @returns {void}
    * @todo Implement iframe export logic
    */
-  async #exportAsIframe() {
+  protected async exportAsIframe() {
     if (this.#getActiveLineacharts().length == 0) {
       alert(i18n.message("linea:message:noplotselected"));
       return;
     }
-    const exports = this.#getExportSettings();
+    const exports = this.getExportSettings();
 
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
 
@@ -444,7 +199,7 @@ export class ExportModal {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
 
-    const binary = ExportModal.#toBinary(html);
+    const binary = ExportModal.toBinary(html);
 
     let totalCanvases = 0;
     this.#getCheckedDiagramIndices().forEach((index) => {
@@ -472,12 +227,12 @@ export class ExportModal {
     };
   }
 
-  async #exportAsBlogElement() {
+  protected async exportAsBlogElement() {
     if (this.#getActiveLineacharts().length == 0) {
       alert(i18n.message("linea:message:noplotselected"));
       return;
     }
-    const exports = this.#getExportSettings();
+    const exports = this.getExportSettings();
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
 
     let html = `<div data-lineaplot-wrapper>
@@ -488,7 +243,7 @@ export class ExportModal {
     if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot ", "<linea-plot showonlywinter");
     }
-    const binary = ExportModal.#toBinary(html);
+    const binary = ExportModal.toBinary(html);
 
     let totalCanvases = 0;
     this.#getCheckedDiagramIndices().forEach((index) => {
@@ -498,7 +253,7 @@ export class ExportModal {
     const iframeshortcode = `[lineaplotblog height="${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
-    document.getElementById("exportCode").innerHTML = `<p>${iframeshortcode}</p>`;
+    document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;
     this.exportdata = {
       blob: new Blob([iframeshortcode], {
         type: "text/plain",
@@ -584,14 +339,14 @@ export class ExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  async #exportAllPlotsToPNG(
+  protected async exportAllPlotsToPNG(
     { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
     noshow: boolean = false,
-  ) {
+  ): Promise<string> {
     const activeLinecharts = this.#getActiveLineacharts();
     if (activeLinecharts.length == 0) {
       alert(i18n.message("linea:message:noplotselected"));
-      return;
+      return Promise.resolve("");
     }
 
     const canvases: HTMLCanvasElement[] = [];
@@ -644,7 +399,7 @@ export class ExportModal {
 
     if (Object.keys(legendItems).length == 0) {
       alert(i18n.message("linea:message:noplotselected"));
-      return;
+      return Promise.resolve("");
     }
 
     const swatchSize = 18;
@@ -825,40 +580,5 @@ export class ExportModal {
       }
     });
     return indices;
-  }
-
-  /**
-   * Retrieves the current export settings from the modal input fields.
-   *
-   * @private
-   * @returns {Object} Export settings object
-   * @returns {number} return.width - Export width in pixels
-   * @returns {number} return.height - Export height per canvas in pixels
-   * @returns {string} return.title - Export title text
-   */
-  #getExportSettings() {
-    const widthInput = document.getElementById("exportWidth") as HTMLInputElement;
-    const heightInput = document.getElementById("exportHeight") as HTMLInputElement;
-    const titleInput = document.getElementById("exportTitle") as HTMLInputElement;
-    return {
-      width: parseInt(widthInput.value),
-      heightPerCanvas: parseInt(heightInput.value),
-      title: titleInput.value,
-    };
-  }
-
-  /**
-   * Converts a string to binary
-   *
-   * @param s string to convert
-   * @returns converted string to binary
-   */
-  static #toBinary(s: string): string {
-    const uint8Array = new TextEncoder().encode(s);
-    let binary = "";
-    for (let i = 0; i < uint8Array.byteLength; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
-    }
-    return binary;
   }
 }
