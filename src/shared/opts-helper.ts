@@ -9,7 +9,6 @@ export interface SplitOptions {
 }
 
 export class OptsHelper {
-
   static UpdateAxisLabels(
     u: uPlot,
     leftLabel: string,

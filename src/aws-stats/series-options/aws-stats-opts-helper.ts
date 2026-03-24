@@ -21,7 +21,7 @@ export class AwsStatsOptsHelper extends OptsHelper {
     leftFillStyle: string | CanvasGradient | CanvasPattern,
     rightFillStyle: string | CanvasGradient | CanvasPattern,
   ): CanvasRenderingContext2D {
-    super.UpdateAxisLabels(
+    return super.UpdateAxisLabels(
       u,
       leftLabel,
       rightLabel,
