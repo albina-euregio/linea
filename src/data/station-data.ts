@@ -181,4 +181,11 @@ export class StationDataArray extends Array<StationData> {
       res.timestamps = allTimestamps.slice();
     }
   }
+
+  get minMaxTime(): [number, number] {
+    return [
+      Math.min(...this.map((v) => v.timestamps.at(0))),
+      Math.max(...this.map((v) => v.timestamps.at(-1))),
+    ];
+  }
 }

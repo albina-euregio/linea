@@ -63,12 +63,11 @@ export abstract class LineaView {
     const results = new StationDataArray();
     for (const src of this.srcs) {
       const result = await fetchSMET(src);
-      this.minTime = Math.min(this.minTime, result.timestamps[0]);
-      this.maxTime = Math.max(this.maxTime, result.timestamps.at(-1));
       results.push(result);
     }
     this.results.mergeWith(results);
     this.results.generalize();
+    [this.minTime, this.maxTime] = this.results.minMaxTime;
     this.lineaplot.updateValidDateInputs();
   }
 
@@ -81,17 +80,8 @@ export abstract class LineaView {
   loadFromDataAttribute() {
     const results: StationData[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
     this.results = new StationDataArray(...results);
-    this.minTime = +Infinity;
-    this.maxTime = -Infinity;
-    for (const result of results) {
-      if (this.minTime > result.timestamps[0]) {
-        this.minTime = result.timestamps[0];
-      }
-      if (this.maxTime < result.timestamps.at(-1)) {
-        this.maxTime = result.timestamps.at(-1);
-      }
-    }
     this.results.generalize();
+    [this.minTime, this.maxTime] = this.results.minMaxTime;
     this.lineaplot.updateValidDateInputs();
   }
 
