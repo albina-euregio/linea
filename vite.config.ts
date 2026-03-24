@@ -20,7 +20,7 @@ export default defineConfig({
     sourcemap: true,
     rolldownOptions: {
       output: {
-        advancedChunks: {
+        codeSplitting: {
           groups: [
             {
               test: /node_modules\/temporal-polyfill/,
