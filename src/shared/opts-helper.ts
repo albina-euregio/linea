@@ -1,8 +1,4 @@
 import uPlot from "uplot";
-import { TouchZoom } from "./touch-zoom";
-
-// Create a single sync instance for all charts
-const syncCursor = uPlot.sync("weather-charts");
 
 export interface SplitOptions {
   uplot: uPlot;
@@ -13,6 +9,7 @@ export interface SplitOptions {
 }
 
 export class OptsHelper {
+
   static UpdateAxisLabels(
     u: uPlot,
     leftLabel: string,

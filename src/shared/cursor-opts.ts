@@ -1,6 +1,5 @@
 import uPlot from "uplot";
 
-// Define shared cursor options for all charts
 export const cursorOpts: uPlot.Cursor = {
   lock: true,
   focus: {

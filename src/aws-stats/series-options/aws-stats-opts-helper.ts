@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { cursorOpts } from "./cursor-opts";
+import { cursorOpts } from "../../shared/cursor-opts";
 import { TouchZoom } from "../../shared/touch-zoom";
 import { OptsHelper } from "../../shared/opts-helper";
 
