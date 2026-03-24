@@ -123,4 +123,39 @@ export class StationData {
     }
     return results;
   }
+
+  /**
+   * Generalizes the data stored in the results list:
+   * ensures that all Results objects have the same timestamps and fill up missing data.
+   * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
+   * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
+   * so we can show all available data
+   */
+  static generalize(existing: StationData[]): void {
+    if (existing.length === 0) {
+      console.log(existing);
+      console.warn("No results to generalize");
+      return;
+    }
+    const tsSet = new Set<number>();
+    for (const res of existing) {
+      for (const t of res.timestamps) {
+        tsSet.add(t);
+      }
+    }
+    const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
+
+    for (const res of existing) {
+      let key: ParameterType;
+      for (key in res.values) {
+        const map = new Map<number, number>();
+        for (let i = 0; i < res.timestamps.length; i++) {
+          map.set(res.timestamps[i], res.values[key][i]);
+        }
+        res.values[key] = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : NaN));
+      }
+      // set the common timeline to all results
+      res.timestamps = allTimestamps.slice();
+    }
+  }
 }
