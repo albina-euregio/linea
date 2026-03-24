@@ -49,4 +49,78 @@ export class StationData {
     public units: Units,
     public values: Values,
   ) {}
+
+  /**
+   * Merges the results from the new fetch with the existing results in the view.
+   * Mainly implemented to integrate the lazy source data into the existing one.
+   * The first loaded data decides about the keys to show.
+   * @param existing The existing results
+   * @param newResults The results to integrate into the existing.
+   * It is assumed that the order of the results in the newResults array corresponds to the order of the results in the existing array.
+   *
+   * The merged data is stored in the existing object.
+   * @return StationData[] - The merged results
+   */
+  static merge(existing: StationData[], newResults: StationData[]): StationData[] {
+    if (existing.length === 0) {
+      return newResults;
+    }
+
+    const results: StationData[] = [];
+    for (let i = 0; i < existing.length; i++) {
+      const oldResult = existing[i];
+      const newResult = newResults[i];
+      if (oldResult === undefined || newResult === undefined) {
+        continue;
+      }
+      const oldTimestamps = oldResult.timestamps;
+      const newTimestamps = newResult.timestamps;
+      const mergedTimestamps = [...new Set([...oldTimestamps, ...newTimestamps])].sort(
+        (a, b) => a - b,
+      );
+
+      const oldIndexMap = new Map<number, number>();
+      for (let j = 0; j < oldTimestamps.length; j++) {
+        oldIndexMap.set(oldTimestamps[j], j);
+      }
+      const newIndexMap = new Map<number, number>();
+      for (let j = 0; j < newTimestamps.length; j++) {
+        newIndexMap.set(newTimestamps[j], j);
+      }
+
+      const mergedValues: Values = {};
+
+      let key: ParameterType;
+      for (key in oldResult.values) {
+        mergedValues[key] = Array.from({ length: mergedTimestamps.length });
+      }
+
+      for (let t = 0; t < mergedTimestamps.length; t++) {
+        const timestamp = mergedTimestamps[t];
+        const oldIndex = oldIndexMap.get(timestamp);
+        const newIndex = newIndexMap.get(timestamp);
+
+        for (key in oldResult.values) {
+          if (oldIndex !== undefined) {
+            mergedValues[key][t] = oldResult.values[key][oldIndex];
+          } else if (newIndex !== undefined) {
+            mergedValues[key][t] = newResult.values[key][newIndex];
+          } else {
+            mergedValues[key][t] = null;
+          }
+        }
+      }
+
+      results.push(
+        new StationData(
+          oldResult.station,
+          oldResult.altitude,
+          mergedTimestamps,
+          oldResult.units,
+          mergedValues,
+        ),
+      );
+    }
+    return results;
+  }
 }
