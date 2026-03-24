@@ -8,36 +8,40 @@
     "src/"
   ],
   "type": "module",
-  "main": "./dist/linea.cjs",
-  "module": "./dist/linea.js",
+  "module": "./dist/linea.mjs",
   "exports": {
     ".": {
-      "import": "./dist/linea.es.js",
-      "require": "./dist/linea.cjs.js"
+      "default": "./dist/linea.mjs"
     },
     "./linea": {
-      "import": "./dist/linea.es.js",
-      "require": "./dist/linea.cjs.js"
+      "default": "./dist/linea.mjs"
     },
     "./aws-stats": {
-      "import": "./dist/aws-stats.es.js",
-      "require": "./dist/aws-stats.cjs.js"
+      "default": "./dist/aws-stats.mjs"
     },
-    "./src/schema/listing": "./src/schema/listing.ts",
-    "./src/schema/listing-legacy": "./src/schema/listing-legacy.ts"
+    "./listing": {
+      "default": "./dist/listing.mjs",
+      "types": "./dist/listing.d.ts"
+    },
+    "./listing-legacy": {
+      "default": "./dist/listing-legacy.mjs",
+      "types": "./dist/listing-legacy.d.ts"
+    }
   },
   "scripts": {
     "prepare": "husky",
     "test": "vitest run",
     "lint": "oxfmt --check && oxlint --max-warnings 12",
-    "build": "tsgo && vite build",
+    "build": "pnpm run build:tsc && pnpm run build:vite && pnpm run build:listing",
+    "build:tsc": "tsc",
+    "build:vite": "vite build",
+    "build:listing": "tsdown --dts --sourcemap --no-clean src/schema/listing.ts src/schema/listing-legacy.ts",
     "dev": "vite"
   },
   "dependencies": {
     "air-datepicker": "^3.6.0",
     "temporal-polyfill": "^0.3.0",
-    "uplot": "^1.6.32",
-    "zod": "^4.3.5"
+    "uplot": "^1.6.32"
   },
   "devDependencies": {
     "@typescript/native-preview": "7.0.0-dev.20260324.1",
@@ -45,8 +49,13 @@
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
+    "tsdown": "^0.21.4",
+    "typescript": "^6.0.2",
     "vite": "8.0.2",
     "vitest": "^4.1.1"
+  },
+  "peerDependencies": {
+    "zod": "^4.3.0"
   },
   "lint-staged": {
     "**/*.{js,ts}": "oxlint --fix --max-warnings 0",

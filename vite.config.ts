@@ -18,8 +18,8 @@ export default defineConfig({
         linea: "./src/main.ts",
         "aws-stats": "./src/aws-stats/main.ts",
       },
-      formats: ["es", "cjs"],
-      fileName: (format, entryName) => `${entryName}.${format}.js`,
+      formats: ["es"],
+      fileName: (format, entryName) => `${entryName}.mjs`,
     },
     sourcemap: true,
     rolldownOptions: {
