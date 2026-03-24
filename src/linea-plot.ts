@@ -1,5 +1,5 @@
 import { i18n } from "./i18n";
-import type { ExportModal } from "./linea-plot/export-modal";
+import type { LineaExportModal } from "./linea-plot/linea-export-modal";
 import type AirDatepicker from "air-datepicker";
 import css from "./linea-plot.css?inline";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
@@ -65,7 +65,7 @@ export class LineaPlot extends HTMLElement {
   static observedAttributes = ["src"];
   private isLoaded: boolean = false;
 
-  private exportModal!: ExportModal;
+  private exportModal!: LineaExportModal;
   private daterange!: HTMLInputElement;
   private styleTag!: HTMLStyleElement;
   private winterviewBtn!: HTMLButtonElement;
@@ -195,7 +195,7 @@ export class LineaPlot extends HTMLElement {
     if (!this.hasAttribute("showexport")) {
       return;
     }
-    const { ExportModal } = await import("./linea-plot/export-modal");
+    const { ExportModal: LineaExportModal } = await import("./linea-plot/linea-export-modal");
     this.exportModal = new ExportModal(document.createElement("div"), this);
     this.appendChild(this.exportModal.modal);
   }

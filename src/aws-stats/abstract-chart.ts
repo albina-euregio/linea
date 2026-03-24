@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
-import { ExportModal } from "./export-modal";
+import { AwsStatsExportModal } from "./aws-stats-export-modal";
 import { i18n } from "../i18n";
 import type { Bulletin } from "./bulletin-schema";
 
@@ -9,7 +9,7 @@ export abstract class AbstractChart extends HTMLElement {
   public container!: HTMLDivElement;
   public plot: uPlot | null = null;
   readonly resizeObserver: ResizeObserver;
-  readonly exportModal!: ExportModal;
+  readonly exportModal!: AwsStatsExportModal;
   protected bulletins!: Bulletin[];
 
   constructor() {
@@ -19,7 +19,7 @@ export abstract class AbstractChart extends HTMLElement {
         this.resizePlot(this.container.clientWidth, this.container.style);
       }
     });
-    this.exportModal = new ExportModal(document.createElement("div"), this);
+    this.exportModal = new AwsStatsExportModal(document.createElement("div"), this);
   }
 
   connectedCallback() {

@@ -39,7 +39,7 @@ import { AbstractExportModal } from "../shared/abstract-export-modal";
  * const exportModal = new ExportModal(modalElement, lineaPlot);
  * exportModal.show();
  */
-export class ExportModal extends AbstractExportModal {
+export class LineaExportModal extends AbstractExportModal {
   private lineaPlot: LineaPlot;
 
   /**
@@ -199,7 +199,7 @@ export class ExportModal extends AbstractExportModal {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
 
-    const binary = ExportModal.toBinary(html);
+    const binary = LineaExportModal.toBinary(html);
 
     let totalCanvases = 0;
     this.#getCheckedDiagramIndices().forEach((index) => {
@@ -243,7 +243,7 @@ export class ExportModal extends AbstractExportModal {
     if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot ", "<linea-plot showonlywinter");
     }
-    const binary = ExportModal.toBinary(html);
+    const binary = LineaExportModal.toBinary(html);
 
     let totalCanvases = 0;
     this.#getCheckedDiagramIndices().forEach((index) => {

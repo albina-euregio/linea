@@ -35,7 +35,7 @@ import { AbstractExportModal } from "../shared/abstract-export-modal";
  * const exportModal = new ExportModal(modalElement, lineaPlot);
  * exportModal.show();
  */
-export class ExportModal extends AbstractExportModal {
+export class AwsStatsExportModal extends AbstractExportModal {
   private chart: AbstractChart;
   public legend: boolean = true;
 
