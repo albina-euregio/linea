@@ -20,7 +20,7 @@ export class OptsHelper {
     hideAxes: boolean = false,
   ): CanvasRenderingContext2D {
     if (hideAxes) {
-      const seriesShown: Map<String, boolean> = new Map();
+      const seriesShown: Map<string, boolean> = new Map();
 
       for (let i = 1; i < u.series.length; i++) {
         const label: string = u.series[i].scale as string;

@@ -69,7 +69,7 @@ export abstract class LineaView {
     for (const src of this.srcs) {
       const result = await fetchSMET(src);
       this.minTime = Math.min(this.minTime, result.timestamps[0]);
-      this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
+      this.maxTime = Math.max(this.maxTime, result.timestamps.at(-1));
       results.push(result);
     }
     this.results.mergeWith(results);
@@ -92,8 +92,8 @@ export abstract class LineaView {
       if (this.minTime > result.timestamps[0]) {
         this.minTime = result.timestamps[0];
       }
-      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
-        this.maxTime = result.timestamps[result.timestamps.length - 1];
+      if (this.maxTime < result.timestamps.at(-1)) {
+        this.maxTime = result.timestamps.at(-1);
       }
     }
     this.results.generalize();

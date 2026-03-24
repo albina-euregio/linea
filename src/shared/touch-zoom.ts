@@ -84,7 +84,7 @@ export class TouchZoom {
 
             const plots: uPlot[] = uPlot.sync(u.cursor.sync.key).plots;
             const dataMin = u.data[0][0];
-            const dataMax = u.data[0][u.data[0].length - 1];
+            const dataMax = u.data[0].at(-1);
             const windowWidth = u.scales.x.max - u.scales.x.min;
 
             if (e.touches.length === 1) {

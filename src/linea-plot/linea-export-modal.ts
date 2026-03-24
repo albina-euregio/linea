@@ -308,7 +308,7 @@ export class LineaExportModal extends AbstractExportModal {
     }
 
     const firstTs = timestamps[0];
-    const lastTs = timestamps[timestamps.length - 1];
+    const lastTs = timestamps.at(-1);
 
     const date = Temporal.Instant.fromEpochMilliseconds(lastTs).toZonedDateTimeISO(i18n.timezone());
 
