@@ -41,7 +41,6 @@ import type { StationData, Values } from "../data/station-data";
  *
  */
 export class LineaYearChart extends AbstractLineaChart {
-  readonly result: StationData;
   public startDate: Temporal.PlainDate;
   public endDate: Temporal.PlainDate;
 

@@ -33,7 +33,7 @@ export class AwsStatsOptsHelper extends OptsHelper {
     );
   }
 
-  static getDefaultOptions(): uPlot.Options {
+  static getDefaultOptions(): Omit<uPlot.Options, "series"> {
     return {
       ms: 1, // timestamp multiplier that yields 1 millisecond
       width: 1040,
@@ -44,7 +44,6 @@ export class AwsStatsOptsHelper extends OptsHelper {
       legend: {
         show: true,
         live: true,
-        fill: (u: any, seriesIdx: number) => u.series[seriesIdx].stroke(u, seriesIdx),
         markers: {
           fill: (u: any, seriesIdx: number) =>
             u.series[seriesIdx].stroke(u, seriesIdx) ?? u.series[seriesIdx].stroke(u, seriesIdx),

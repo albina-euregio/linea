@@ -1,5 +1,5 @@
 import { parseGeosphereData } from "./geosphere-data";
-import type { ParameterType, StationData, Units, Values } from "./station-data";
+import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 
 const DEFAULT_UNITS: Units = {
@@ -7,16 +7,16 @@ const DEFAULT_UNITS: Units = {
   TA: "K",
   TD: "K",
   TSS: "K",
-  TSG: "K",
+  // TSG: "K",
   RH: "1",
   VW_MAX: "m/s",
   VW: "m/s",
   DW: "degree",
   ISWR: "W/m²",
-  RSWR: "W/m²",
-  ILWR: "W/m²",
-  OLWR: "W/m²",
-  PINT: "mm/h",
+  // RSWR: "W/m²",
+  // ILWR: "W/m²",
+  // OLWR: "W/m²",
+  // PINT: "mm/h",
   PSUM: "mm",
   HS: "m",
   NS: "m",

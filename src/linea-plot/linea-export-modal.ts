@@ -3,7 +3,6 @@ import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
 import type { StationData } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
-import css from "../shared/export-modal.css?inline";
 import { WinterView } from "./winter-view";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
 
@@ -120,7 +119,10 @@ export class LineaExportModal extends AbstractExportModal {
    * Generates the code which can be included into an iframe.
    * @returns Promise<string> - html code to insert into an iframe
    */
-  async #generateInteractiveExportData(): Promise<{ resultsFiltered: StationData[]; dataUrl: string }> {
+  async #generateInteractiveExportData(): Promise<{
+    resultsFiltered: StationData[];
+    dataUrl: string;
+  }> {
     const resultsFiltered: StationData[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
@@ -351,7 +353,7 @@ export class LineaExportModal extends AbstractExportModal {
 
     const canvases: HTMLCanvasElement[] = [];
     const series: uPlot.Series[] = [];
-    const legendItems = {};
+    const legendItems: Record<string, string> = {};
 
     const parentWidth =
       (width * this.lineaPlot.view.charts[0].clientWidth) /
@@ -388,11 +390,11 @@ export class LineaExportModal extends AbstractExportModal {
           let color = "#000000";
           if (typeof s.stroke === "string") {
             color = s.stroke;
-          } else {
+          } else if (typeof s.stroke === "function") {
             const c = s.stroke(p, i + 1);
             if (typeof c === "string") color = c;
           }
-          legendItems[label] = color;
+          legendItems[String(label)] = color;
         }),
       );
     });
@@ -433,7 +435,7 @@ export class LineaExportModal extends AbstractExportModal {
             currentLineWidth = 0;
           }
         }
-        currentLine.push({ label, color, width: itemWidth });
+        currentLine.push({ label, color: color as string, width: itemWidth });
         currentLineWidth += itemWidth;
       }
 

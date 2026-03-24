@@ -9,7 +9,6 @@ import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 
 export class LineaChart extends AbstractLineaChart {
-  readonly result: StationData;
   private showSurfaceHoarSeries: boolean;
 
   constructor(

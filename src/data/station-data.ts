@@ -37,9 +37,9 @@ export enum ParameterType {
   "NS" = "NS",
 }
 
-export type Units = Record<ParameterType, string>;
+export type Units = Partial<Record<ParameterType, string>>;
 
-export type Values = Record<ParameterType, (number | null)[]>;
+export type Values = Partial<Record<ParameterType, (number | null)[]>>;
 
 export type StationData = {
   station: string;
