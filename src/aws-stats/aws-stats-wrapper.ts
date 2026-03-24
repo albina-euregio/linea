@@ -112,6 +112,16 @@ class AwsStats extends HTMLElement {
       );
     }
 
+    if (this.getAttribute("region-code")) {
+      loadPromises.push(
+        (async () => {
+          for (const chart of charts) {
+            chart.setAttribute("region-code", this.getAttribute("region-code")!);
+          }
+        })(),
+      );
+    }
+
     if (this.getAttribute("bulletin-filter-micro-region")) {
       loadPromises.push(
         (async () => {

@@ -389,6 +389,94 @@ export class BulletinData {
       .filter((value) => !Number.isNaN(value));
   }
 
+  filterRegionCode(regionCode: string): BulletinData {
+    if (regionCode === "all") {
+      return new BulletinData(this.bulletins);
+    }
+    return new BulletinData(
+      this.bulletins.filter((bulletin) =>
+        (bulletin.regions ?? []).some((region) =>
+          region.regionID.toLowerCase().includes(regionCode.toLowerCase()),
+        ),
+      ),
+    );
+  }
+
+  private static dayTimestamp(value: string | undefined): number | null {
+    if (!value) {
+      return null;
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    return new Date(date.toISOString().split("T")[0]).getTime();
+  }
+
+  private static conversion: Record<string, number> = {
+    low: 1,
+    moderate: 2,
+    considerable: 3,
+    high: 4,
+    very_high: 5,
+  };
+
+  private static dangerRatingLevel(value: string | undefined): number {
+    const normalized = value?.toLowerCase() ?? "";
+    return BulletinData.conversion[normalized] ?? 0;
+  }
+
+  affectedMicroRegionsPerDangerRatingPerDay(regionCode: string = "all"): {
+    timestamps: number[];
+    ratings: { 1: number[]; 2: number[]; 3: number[]; 4: number[]; 5: number[] };
+  } {
+    const perDay: Record<number, { 1: number; 2: number; 3: number; 4: number; 5: number }> = {};
+
+    this.bulletins.forEach((bulletin) => {
+      const day = BulletinData.dayTimestamp(
+        bulletin.validTime?.endTime ?? bulletin.publicationTime,
+      );
+      const highestDangerRating = Math.max(
+        ...(bulletin.dangerRatings?.map((r) => BulletinData.dangerRatingLevel(r.mainValue)) ?? [0]),
+      );
+      const matchedMicroRegionCount = (bulletin.regions ?? []).filter((region) =>
+        regionCode === "all"
+          ? true
+          : region.regionID.toLowerCase().includes(regionCode.toLowerCase()),
+      ).length;
+
+      if (day === null || highestDangerRating === 0 || matchedMicroRegionCount === 0) {
+        console.debug(`Skipping bulletin with no danger rating: ${bulletin.validTime?.endTime}`);
+        return;
+      }
+      if (!perDay[day]) {
+        perDay[day] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      }
+      perDay[day][highestDangerRating as 1 | 2 | 3 | 4 | 5] += matchedMicroRegionCount;
+    });
+
+    const timestamps: number[] = Object.keys(perDay)
+      .map((date) => Number(date))
+      .sort((a, b) => a - b);
+    const distribution: { 1: number[]; 2: number[]; 3: number[]; 4: number[]; 5: number[] } = {
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+    };
+
+    for (let i = 0; i < timestamps.length; i++) {
+      const ratings = perDay[timestamps[i]];
+      const sum = Object.values(ratings).reduce((a, b) => a + b, 0);
+      for (let rating = 1; rating <= 5; rating++) {
+        const key = rating as 1 | 2 | 3 | 4 | 5;
+        distribution[key].push(sum > 0 ? (ratings[key] / sum) * 100 : 0);
+      }
+    }
+    return { timestamps, ratings: distribution };
+  }
+
   filterForMicroRegions(microRegionCodes: string[]): BulletinData {
     return new BulletinData(
       this.bulletins.filter((bulletin) => {

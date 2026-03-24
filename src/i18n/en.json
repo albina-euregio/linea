@@ -84,5 +84,7 @@
   "linea:avalancheactivityindex:yaxis:avalanchecount": "Avalanche Count",
   "linea:avalancheactivityindex:series:aai": "Avalanche Activity Index",
   "linea:avalancheactivityindex:series:avalanchestotal": "Avalanches Total",
+  "linea:dangerratingmicroregions:title": "Danger Rating by Micro-Regions",
+  "linea:dangerratingmicroregions:yaxis:dangerrating": "Affected Micro-Regions",
   "linea:wrapper:loading": "Loading data..."
 }
