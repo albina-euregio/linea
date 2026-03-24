@@ -3,14 +3,6 @@ import { cursorOpts } from "../../shared/cursor-opts";
 import { TouchZoom } from "../../shared/touch-zoom";
 import { OptsHelper } from "../../shared/opts-helper";
 
-export interface SplitOptions {
-  uplot: uPlot;
-  mins: number[];
-  maxs: number[];
-  splits: number[][];
-  splitcount: number;
-}
-
 export class AwsStatsOptsHelper extends OptsHelper {
   static UpdateAxisLabels(
     u: uPlot,

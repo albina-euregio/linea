@@ -79,5 +79,10 @@
   "linea:yearly:dangerratingdistribution:series:high": "High",
   "linea:yearly:dangerratingdistribution:series:very_high": "Very High",
   "linea:yearly:dangerratingdistribution:no-data": "No danger rating data available",
+  "linea:avalancheactivityindex:title": "Avalanche Activity Index",
+  "linea:avalancheactivityindex:yaxis:aai": "Avalanche Activity Index",
+  "linea:avalancheactivityindex:yaxis:avalanchecount": "Avalanche Count",
+  "linea:avalancheactivityindex:series:aai": "Avalanche Activity Index",
+  "linea:avalancheactivityindex:series:avalanchestotal": "Avalanches Total",
   "linea:wrapper:loading": "Loading data..."
 }

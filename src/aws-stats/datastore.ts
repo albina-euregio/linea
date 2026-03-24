@@ -53,7 +53,15 @@ export class Observations {
   }
 
   get avalanches() {
-    return new Observations(
+    return new AvalancheObservations(
+      this.observations.filter(
+        (obs) => obs.properties.$type === "Avalanche",
+      ) as AvalancheObservation[],
+    );
+  }
+
+  get sizedAvalanches() {
+    return new SizedAvalancheObservations(
       this.observations.filter(
         (obs) => obs.properties.$type === "Avalanche",
       ) as AvalancheObservation[],
@@ -126,6 +134,162 @@ export class AvalancheObservation extends Observation {
     reportDate: string;
     [key: string]: any;
   };
+}
+
+export class SizedAvalancheObservation extends AvalancheObservation {
+  declare public properties: AvalancheObservation["properties"] & {
+    avalancheSize: number | null;
+  };
+
+  static fromObservation(observation: AvalancheObservation): SizedAvalancheObservation {
+    return SizedAvalancheObservations.normalizeObservation(observation);
+  }
+}
+
+export class AvalancheObservations extends Observations {
+  constructor(observations: AvalancheObservation[] = []) {
+    super(observations);
+  }
+
+  get items(): AvalancheObservation[] {
+    return this.observations as AvalancheObservation[];
+  }
+}
+
+export class SizedAvalancheObservations extends AvalancheObservations {
+  constructor(observations: AvalancheObservation[] = []) {
+    super(SizedAvalancheObservations.normalizeAll(observations));
+  }
+
+  static normalizeAll(observations: AvalancheObservation[]): SizedAvalancheObservation[] {
+    return observations
+      .map((obs) => SizedAvalancheObservations.normalizeObservation(obs))
+      .filter((v) => !!v.properties.avalancheSize);
+  }
+
+  static normalizeObservation(observation: AvalancheObservation): SizedAvalancheObservation {
+    const props = (observation.properties ?? {}) as Record<string, any>;
+    const aspect = props.aspect ?? (Array.isArray(props.aspects) ? props.aspects[0] : undefined);
+    const avalancheSize = extractAvalancheSize(props);
+
+    const normalizedProperties: {} = {
+      ...props,
+      aspect: aspect ?? "",
+      avalancheSize,
+    };
+
+    return {
+      ...observation,
+      properties: normalizedProperties,
+    } as SizedAvalancheObservation;
+  }
+
+  get items(): SizedAvalancheObservation[] {
+    return this.observations as SizedAvalancheObservation[];
+  }
+
+  get avalanchesPerDay(): { timestamps: number[]; avalanches: SizedAvalancheObservation[][] } {
+    const countMap: Record<number, SizedAvalancheObservation[]> = {};
+
+    this.items.forEach((obs) => {
+      const eventDate = new Date(obs.properties?.eventDate);
+      if (Number.isNaN(eventDate.getTime())) {
+        return;
+      }
+      const day = new Date(eventDate.toISOString().split("T")[0]).getTime();
+      countMap[day] = [...(countMap[day] ?? []), obs];
+    });
+
+    const sorted = Object.entries(countMap)
+      .map(([date, avalanches]) => ({ timestamp: parseInt(date), avalanches: avalanches }))
+      .sort((a, b) => a.timestamp - b.timestamp);
+
+    return {
+      timestamps: sorted.map((entry) => entry.timestamp),
+      avalanches: sorted.map((entry) => entry.avalanches),
+    };
+  }
+
+  calculateAvalancheIndexPerDay(
+    timestamps: number[],
+    avalanches: SizedAvalancheObservation[][],
+  ): { timestamps: number[]; avalancheIndices: number[] } {
+    const avalancheIndices: number[] = [];
+
+    const converter: Record<number, number> = {
+      1: 0.01,
+      2: 0.1,
+      3: 1,
+      4: 10,
+      5: 100,
+    };
+
+    for (let i = 0; i < timestamps.length; i++) {
+      const dayAvalanches = avalanches[i] ?? [];
+
+      const aai = dayAvalanches
+        .map((v) => {
+          return converter[v.properties.avalancheSize!];
+        })
+        .reduce((acc, val) => (acc ?? 0) + (val ?? 0), 0);
+      avalancheIndices.push(aai!);
+    }
+
+    return {
+      timestamps,
+      avalancheIndices,
+    };
+  }
+}
+
+function toNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return undefined;
+}
+
+function extractAvalancheSize(properties: Record<string, any>): number | null {
+  const byNested = toNumber(properties.avalanche?.size?.id);
+  if (byNested !== undefined) {
+    return byNested;
+  }
+
+  const byExtraRows = Array.isArray(properties.$extraDialogRows)
+    ? properties.$extraDialogRows.find((row: any) => row?.label === "observations.avalancheSize")
+    : undefined;
+  const byExtraValue = toNumber(byExtraRows?.value);
+  if (byExtraValue !== undefined) {
+    return byExtraValue;
+  }
+
+  const byLawisField = toNumber(properties.avalancheSize);
+  if (byLawisField !== undefined) {
+    return byLawisField;
+  }
+
+  const sizeText = String(
+    properties.avalancheSize ?? properties.LAWINENGROESSE ?? "",
+  ).toLowerCase();
+  if (sizeText.includes("small") || sizeText.includes("klein")) {
+    return 1;
+  }
+  if (sizeText.includes("medium") || sizeText.includes("mittel")) {
+    return 2;
+  }
+  if (sizeText.includes("very") || sizeText.includes("sehr")) {
+    return 4;
+  }
+  if (sizeText.includes("large") || sizeText == "gross") {
+    return 3;
+  }
+  return null;
 }
 
 export class WeatherStationData {
