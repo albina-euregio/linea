@@ -4,7 +4,7 @@ import "./danger-rating-distribution";
 import css from "./aws-stats-wrapper.css?raw";
 import { BulletinData, Observations } from "./datastore";
 import { fetchSMET } from "../data/smet-data";
-import type { StationData } from "../data/station-data";
+import { StationData } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
 
 function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
@@ -19,6 +19,8 @@ function filterWeatherByDate(
   startDate: string | null,
   endDate: string | null,
 ): StationData {
+  // FIXME use StationData.filter
+
   const start = parseDateBoundary(startDate, false);
   const end = parseDateBoundary(endDate, true);
 
@@ -40,11 +42,13 @@ function filterWeatherByDate(
     ]),
   ) as StationData["values"];
 
-  return {
-    ...result,
-    timestamps: indices.map((index) => result.timestamps[index]),
-    values: filteredValues,
-  };
+  return new StationData(
+    result.station,
+    result.altitude,
+    indices.map((index) => result.timestamps[index]),
+    result.units,
+    filteredValues,
+  );
 }
 
 class AwsStats extends HTMLElement {

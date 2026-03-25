@@ -1,4 +1,4 @@
-import { type StationData, type Values, ParameterType } from "./data/station-data";
+import { type StationData, StationDataArray } from "./data/station-data";
 import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
@@ -16,7 +16,7 @@ export abstract class LineaView {
   protected showTitle: boolean = false;
   minTime: number = +Infinity;
   maxTime: number = -Infinity;
-  results: StationData[] = [];
+  results = new StationDataArray();
   srcs: string[] = [];
   protected lineaplot: LineaPlot;
 
@@ -60,85 +60,15 @@ export abstract class LineaView {
       throw "Empty src array!";
     }
 
-    const results: StationData[] = [];
+    const results = new StationDataArray();
     for (const src of this.srcs) {
       const result = await fetchSMET(src);
-      this.minTime = Math.min(this.minTime, result.timestamps[0]);
-      this.maxTime = Math.max(this.maxTime, result.timestamps[result.timestamps.length - 1]);
       results.push(result);
     }
-    this.results = this.#mergeResults(results);
-    this.#generalizeData();
+    this.results.mergeWith(results);
+    this.results.generalize();
+    [this.minTime, this.maxTime] = this.results.minMaxTime;
     this.lineaplot.updateValidDateInputs();
-  }
-
-  /**
-   * Merges the results from the new fetch with the existing results in the view.
-   * Mainly implemented to integrate the lazy source data into the existing one.
-   * The first loaded data decides about the keys to show.
-   * @param newResults The results to integrate into the this.results.
-   * It is assumed that the order of the results in the newResults array corresponds to the order of the results in the this.results array.
-   *
-   * The merged data is stored in the this.result object.
-   * @return StationData[] - The merged results
-   */
-  #mergeResults(newResults: StationData[]): StationData[] {
-    if (this.results.length === 0) {
-      return newResults;
-    }
-
-    const results: StationData[] = [];
-    for (let i = 0; i < this.results.length; i++) {
-      const oldResult = this.results[i];
-      const newResult = newResults[i];
-      if (oldResult === undefined || newResult === undefined) {
-        continue;
-      }
-      const oldTimestamps = oldResult.timestamps;
-      const newTimestamps = newResult.timestamps;
-      const mergedTimestamps = [...new Set([...oldTimestamps, ...newTimestamps])].sort(
-        (a, b) => a - b,
-      );
-
-      const oldIndexMap = new Map<number, number>();
-      for (let j = 0; j < oldTimestamps.length; j++) {
-        oldIndexMap.set(oldTimestamps[j], j);
-      }
-      const newIndexMap = new Map<number, number>();
-      for (let j = 0; j < newTimestamps.length; j++) {
-        newIndexMap.set(newTimestamps[j], j);
-      }
-
-      const mergedValues: Values = {};
-
-      let key: ParameterType;
-      for (key in oldResult.values) {
-        mergedValues[key] = Array.from({ length: mergedTimestamps.length });
-      }
-
-      for (let t = 0; t < mergedTimestamps.length; t++) {
-        const timestamp = mergedTimestamps[t];
-        const oldIndex = oldIndexMap.get(timestamp);
-        const newIndex = newIndexMap.get(timestamp);
-
-        for (key in oldResult.values) {
-          if (oldIndex !== undefined) {
-            mergedValues[key][t] = oldResult.values[key][oldIndex];
-          } else if (newIndex !== undefined) {
-            mergedValues[key][t] = newResult.values[key][newIndex];
-          } else {
-            mergedValues[key][t] = null;
-          }
-        }
-      }
-
-      results.push({
-        ...oldResult,
-        timestamps: mergedTimestamps,
-        values: mergedValues,
-      });
-    }
-    return results;
   }
 
   /**
@@ -149,18 +79,9 @@ export abstract class LineaView {
    */
   loadFromDataAttribute() {
     const results: StationData[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
-    this.results = results;
-    this.minTime = +Infinity;
-    this.maxTime = -Infinity;
-    for (const result of results) {
-      if (this.minTime > result.timestamps[0]) {
-        this.minTime = result.timestamps[0];
-      }
-      if (this.maxTime < result.timestamps[result.timestamps.length - 1]) {
-        this.maxTime = result.timestamps[result.timestamps.length - 1];
-      }
-    }
-    this.#generalizeData();
+    this.results = new StationDataArray(...results);
+    this.results.generalize();
+    [this.minTime, this.maxTime] = this.results.minMaxTime;
     this.lineaplot.updateValidDateInputs();
   }
 
@@ -174,61 +95,13 @@ export abstract class LineaView {
     startDate: Temporal.ZonedDateTime = this.getDatePickerStartDate(),
     endDate: Temporal.ZonedDateTime = this.getDatePickerEndDate(),
   ) {
-    const startTimestamp = startDate.toInstant().epochMilliseconds;
-    const endTimestamp = endDate.toInstant().epochMilliseconds;
-
     for (let i = 0; i < this.charts.length; i++) {
       const res = this.results[i];
       if (res === undefined) {
         continue;
       }
-      let filteredValues: Values = {};
-
-      let key: ParameterType;
-      for (key in res.values) {
-        filteredValues[key] = res.values[key].filter(
-          (_, j) => res.timestamps[j] >= startTimestamp && res.timestamps[j] <= endTimestamp,
-        );
-      }
-      const filteredTimestamps = res.timestamps.filter(
-        (t) => t >= startTimestamp && t <= endTimestamp,
-      );
-      this.charts[i].setData(filteredTimestamps, filteredValues as Values);
-    }
-  }
-
-  /**
-   * Generalizes the data stored in the results list:
-   * ensures that all Results objects have the same timestamps and fill up missing data.
-   * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
-   * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
-   * so we can show all available data
-   */
-  #generalizeData() {
-    if (this.results.length === 0) {
-      console.log(this.results);
-      console.warn("No results to generalize");
-      return;
-    }
-    const tsSet = new Set<number>();
-    for (const res of this.results) {
-      for (const t of res.timestamps) {
-        tsSet.add(t);
-      }
-    }
-    const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
-
-    for (const res of this.results) {
-      let key: ParameterType;
-      for (key in res.values) {
-        const map = new Map<number, number>();
-        for (let i = 0; i < res.timestamps.length; i++) {
-          map.set(res.timestamps[i], res.values[key][i]);
-        }
-        res.values[key] = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : NaN));
-      }
-      // set the common timeline to all results
-      res.timestamps = allTimestamps.slice();
+      const filtered = res.filter(startDate, endDate);
+      this.charts[i].setData(filtered.timestamps, filtered.values);
     }
   }
 

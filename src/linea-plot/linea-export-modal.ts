@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
-import type { StationData } from "../data/station-data";
+import { StationData } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { WinterView } from "./winter-view";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
@@ -127,13 +127,13 @@ export class LineaExportModal extends AbstractExportModal {
 
     this.#getActiveLineacharts().forEach((lc, index) => {
       const activeplots = this.#getCheckedPlotIndices(index);
-      let result: StationData = {
-        station: lc.result.station,
-        altitude: lc.result.altitude,
-        timestamps: lc.result.timestamps,
-        values: {},
-        units: {},
-      };
+      let result = new StationData(
+        lc.result.station,
+        lc.result.altitude,
+        lc.result.timestamps,
+        {},
+        {},
+      );
       if (this.lineaPlot.view instanceof WinterView) {
         activeplots.forEach((index) => {
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
@@ -308,7 +308,7 @@ export class LineaExportModal extends AbstractExportModal {
     }
 
     const firstTs = timestamps[0];
-    const lastTs = timestamps[timestamps.length - 1];
+    const lastTs = timestamps.at(-1);
 
     const date = Temporal.Instant.fromEpochMilliseconds(lastTs).toZonedDateTimeISO(i18n.timezone());
 
