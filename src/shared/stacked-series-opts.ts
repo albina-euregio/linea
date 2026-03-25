@@ -43,7 +43,6 @@ export function stack(
 
 export function getStackedOpts(
   opts: uPlot.Options,
-  _series: uPlot.Series[],
   data: StackedData,
   interp?: (input: StackedData) => StackedData,
   formatValue?: (value: number | null) => string | number,

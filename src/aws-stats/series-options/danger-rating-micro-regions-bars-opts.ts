@@ -106,11 +106,10 @@ export const opts_danger_rating_micro_regions_bars: uPlot.Options = {
 
 export function getStackedOpts(
   opts: uPlot.Options,
-  series: uPlot.Series[],
   data: StackedData,
   interp?: (input: StackedData) => StackedData,
 ): { opts: uPlot.Options; data: StackedData } {
-  return getReusableStackedOpts(opts, series, data, interp, (value: number | null) =>
+  return getReusableStackedOpts(opts, data, interp, (value: number | null) =>
     value === null || Number.isNaN(value) ? "-" : i18n.number(value, {}, "%"),
   );
 }

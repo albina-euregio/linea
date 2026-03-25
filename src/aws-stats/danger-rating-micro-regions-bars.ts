@@ -24,18 +24,12 @@ export class DangerRatingMicroRegionsBarsChart extends AbstractChart {
       this.getAttribute("region-code") ?? "all",
     );
 
-    const series: uPlot.Series[] = [];
     const dataSeries: number[][] = [distribution.timestamps];
     for (let i = 1; i <= 5; i++) {
       dataSeries.push(distribution.ratings[i] || []);
     }
 
-    let { opts, data } = getStackedOpts(
-      opts_danger_rating_micro_regions_bars,
-      series,
-      dataSeries,
-      null,
-    );
+    let { opts, data } = getStackedOpts(opts_danger_rating_micro_regions_bars, dataSeries, null);
     this.createPlot(opts, data);
   }
 }
