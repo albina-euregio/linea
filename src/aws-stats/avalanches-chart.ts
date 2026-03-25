@@ -34,7 +34,7 @@ export class AvalanchesChart extends AbstractChart {
     }
   }
 
-  render() {
+  async render(): Promise<void> {
     const countPerDayObservations = this.observations.countperday;
     const countPerDay = this.observations.avalanches.countperday;
     const precipitationPerDay = this.weather

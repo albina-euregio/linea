@@ -24,7 +24,7 @@ export class AvalancheActivityIndexChart extends AbstractChart {
     }
   }
 
-  render() {
+  async render(): Promise<void> {
     const avalanches = this.observations.sizedAvalanches;
     const { timestamps: indexTimestamps, avalanches: perDay } = avalanches.avalanchesPerDay;
     const { avalancheIndices } = avalanches.calculateAvalancheIndexPerDay(indexTimestamps, perDay);

@@ -12,7 +12,7 @@ export class DangerRatingMicroRegionsChart extends AbstractChart {
     this.exportModal.legend = false;
   }
 
-  render(): void {
+  async render(): Promise<void> {
     if (this.plot) {
       this.plot.destroy();
       this.plot = null;

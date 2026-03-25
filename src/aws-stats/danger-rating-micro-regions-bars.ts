@@ -10,7 +10,7 @@ export class DangerRatingMicroRegionsBarsChart extends AbstractChart {
     this.parseBulletins(this.getAttribute("bulletins"));
   }
 
-  render(): void {
+  async render(): Promise<void> {
     if (this.plot) {
       this.plot.destroy();
       this.plot = null;
