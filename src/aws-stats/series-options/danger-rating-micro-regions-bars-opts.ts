@@ -8,7 +8,7 @@ import {
   stack2 as reusableStack2,
   type Stack2Series,
   type StackedData,
-} from "./stacked-series-opts";
+} from "../../shared/stacked-series-opts";
 
 export const opts_series_danger_rating_micro_regions = {
   scale: "y",
