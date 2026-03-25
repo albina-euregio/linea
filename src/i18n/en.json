@@ -86,5 +86,15 @@
   "linea:avalancheactivityindex:series:avalanchestotal": "Avalanches Total",
   "linea:dangerratingmicroregions:title": "Danger Rating by Micro-Regions",
   "linea:dangerratingmicroregions:yaxis:dangerrating": "Affected Micro-Regions",
+  "linea:yearly:products:title": "Products",
+  "linea:yearly:products:yaxis:products": "Warning service activities",
+  "linea:yearly:products:series:bulletins:tyrol": "Bulletins Ty",
+  "linea:yearly:products:series:bulletins:south_tirol": "Bulletins Bz",
+  "linea:yearly:products:series:bulletins:trentino": "Bulletins Tn",
+  "linea:yearly:products:series:fieldtrainings": "Field Trainings",
+  "linea:yearly:products:series:virtualtrainings": "Virtual Trainings",
+  "linea:yearly:products:series:blogs:tyrol": "Blogs Ty",
+  "linea:yearly:products:series:blogs:south_tirol": "Blogs Bz",
+  "linea:yearly:products:series:blogs:trentino": "Blogs Tn",
   "linea:wrapper:loading": "Loading data..."
 }

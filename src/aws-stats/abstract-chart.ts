@@ -26,11 +26,12 @@ export abstract class AbstractChart extends HTMLElement {
     this.onConnected()
       .then(() => {
         this.buildLayout();
-        this.render();
-        if (this.container && this.plot) {
-          this.resizePlot(this.container.clientWidth, this.container.style);
-          this.resizeObserver.observe(this.container);
-        }
+        this.render().then(() => {
+          if (this.container && this.plot) {
+            this.resizePlot(this.container.clientWidth, this.container.style);
+            this.resizeObserver.observe(this.container);
+          }
+        });
       })
       .catch((error) => {
         console.error("Failed to initialize chart:", error);
@@ -82,7 +83,7 @@ export abstract class AbstractChart extends HTMLElement {
     this.appendChild(this.exportModal.modal);
   }
 
-  abstract render(): void;
+  async render(): Promise<void> {}
 
   async onConnected(): Promise<void> {
     // Default implementation - can be overridden by subclasses

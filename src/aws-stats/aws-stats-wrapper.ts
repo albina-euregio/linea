@@ -7,7 +7,7 @@ import { fetchSMET } from "../data/smet-data";
 import type { Result } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
 
-function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
+export function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
   if (!date) return null;
   const suffix = isEnd ? "T23:59:59.999Z" : "T00:00:00.000Z";
   const timestamp = Date.parse(`${date}${suffix}`);
@@ -126,7 +126,6 @@ class AwsStats extends HTMLElement {
       loadPromises.push(
         (async () => {
           try {
-            //https://static.avalanche.report/bulletins/2026-03-15/2026-03-15_AT-07_de_CAAMLv6.json
             const bulletins = new BulletinData();
             await bulletins.loadBulletins(
               this.getAttribute("start-date")!,
@@ -155,6 +154,30 @@ class AwsStats extends HTMLElement {
       );
     }
 
+    loadPromises.push(
+      (async () => {
+        if (this.hasAttribute("virtual-trainings")) {
+          for (const chart of charts) {
+            chart.setAttribute("virtual-trainings", this.getAttribute("virtual-trainings")!);
+          }
+        }
+        if (this.hasAttribute("field-trainings")) {
+          for (const chart of charts) {
+            chart.setAttribute("field-trainings", this.getAttribute("field-trainings")!);
+          }
+        }
+        if (this.hasAttribute("start-date")) {
+          for (const chart of charts) {
+            chart.setAttribute("start-date", this.getAttribute("start-date")!);
+          }
+        }
+        if (this.hasAttribute("end-date")) {
+          for (const chart of charts) {
+            chart.setAttribute("end-date", this.getAttribute("end-date")!);
+          }
+        }
+      })(),
+    );
     await Promise.all(loadPromises);
 
     // Remove loader and append chart

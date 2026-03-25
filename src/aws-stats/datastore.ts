@@ -389,6 +389,29 @@ export class BulletinData {
       .filter((value) => !Number.isNaN(value));
   }
 
+  get bulletinsPerDay(): { timestamps: number[]; data: number[] } {
+    const countMap: Record<number, Bulletin[]> = {};
+
+    this.bulletins.forEach((bulletin) => {
+      const day = BulletinData.dayTimestamp(
+        bulletin.validTime?.endTime ?? bulletin.publicationTime,
+      );
+      if (day === null) {
+        return;
+      }
+      countMap[day] = [...(countMap[day] ?? []), bulletin];
+    });
+
+    const sorted = Object.entries(countMap)
+      .map(([date, bulletins]) => ({ timestamp: parseInt(date), bulletins }))
+      .sort((a, b) => a.timestamp - b.timestamp);
+
+    return {
+      timestamps: sorted.map((entry) => entry.timestamp),
+      data: sorted.map((entry) => entry.bulletins.length),
+    };
+  }
+
   filterRegionCode(regionCode: string): BulletinData {
     if (regionCode === "all") {
       return new BulletinData(this.bulletins);
@@ -549,6 +572,45 @@ export class BulletinData {
     return {
       timestamps: Object.keys(ratingMap).map((date) => new Date(date).getTime()),
       rating: Object.values(ratingMap),
+    };
+  }
+}
+
+export class BlogService {
+  static readonly urlsMap: Record<string, string> = {
+    "AT-07":
+      "https://blog.avalanche.report/at-07/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
+    "IT-32-BZ":
+      "https://blog.avalanche.report/it-32-bz/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
+    "IT-32-TN":
+      "https://blog.avalanche.report/it-32-tn/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
+  };
+
+  static async loadBlogData(
+    regionCode: "AT-07" | "IT-32-BZ" | "IT-32-TN",
+    startDate: string,
+    endDate: string,
+  ): Promise<{ timestamps: number[]; data: number[] }> {
+    const map: Map<string, number> = new Map();
+    const url = this.urlsMap[regionCode].replace("{before}", endDate).replace("{after}", startDate);
+    let page = 1;
+    while (true) {
+      const res = await fetch(url.replace("{page}", page.toString()));
+      if (res.status !== 200) {
+        break;
+      }
+      let response = await res.json();
+
+      for (const v of response) {
+        const dateKey = new Date(v.date).toISOString().split("T")[0];
+        map.set(dateKey, (map.get(dateKey) ?? 0) + 1);
+      }
+      page = page + 1;
+    }
+
+    return {
+      timestamps: Array.from(map.keys()).map((date) => new Date(date).getTime()),
+      data: Array.from(map.values()),
     };
   }
 }
