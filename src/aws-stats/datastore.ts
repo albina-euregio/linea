@@ -980,6 +980,10 @@ export class BlogService {
         const dateKey = new Date(v.date).toISOString().split("T")[0];
         map.set(dateKey, (map.get(dateKey) ?? 0) + 1);
       }
+      //max. 100 blog posts per request due to wordpress restrictions
+      if (response.length < 100) {
+        break;
+      }
       page = page + 1;
     }
 
