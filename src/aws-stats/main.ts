@@ -1,5 +1,5 @@
 import "./aws-stats-wrapper";
-import "./avalanches-chart";
+import "./observations-chart";
 import "./danger-rating-altitude-chart";
 import "./danger-rating-chart";
 import "./danger-rating-distribution";

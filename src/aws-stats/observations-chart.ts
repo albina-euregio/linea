@@ -3,11 +3,11 @@ import {
   opts_series_avalanches,
   opts_series_observations,
   opts_series_precipitation,
-} from "./series-options/avalanches-opts";
+} from "./series-options/observations-opts";
 import { AbstractChart } from "./abstract-chart";
 import { Observations, WeatherStationData } from "./datastore";
 
-export class AvalanchesChart extends AbstractChart {
+export class ObservationsChart extends AbstractChart {
   private observations!: Observations;
   private weather: WeatherStationData | null = null;
 
@@ -59,4 +59,4 @@ export class AvalanchesChart extends AbstractChart {
   }
 }
 
-customElements.define("aws-observations", AvalanchesChart);
+customElements.define("aws-observations", ObservationsChart);

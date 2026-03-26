@@ -1,4 +1,4 @@
-import "./avalanches-chart";
+import "./observations-chart";
 import "./danger-rating-altitude-chart";
 import "./danger-rating-distribution";
 import css from "./aws-stats-wrapper.css?raw";
