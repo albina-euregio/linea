@@ -952,22 +952,13 @@ export class BulletinData {
 }
 
 export class BlogService {
-  static readonly urlsMap: Record<string, string> = {
-    "AT-07":
-      "https://blog.avalanche.report/at-07/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
-    "IT-32-BZ":
-      "https://blog.avalanche.report/it-32-bz/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
-    "IT-32-TN":
-      "https://blog.avalanche.report/it-32-tn/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
-  };
-
-  static async loadBlogData(
-    regionCode: "AT-07" | "IT-32-BZ" | "IT-32-TN",
-    startDate: string,
-    endDate: string,
-  ): Promise<{ timestamps: number[]; data: number[] }> {
+  /**
+   *
+   * @param url a url to a wordpress pages API endpoint with field {page} e.g. "https://blog.avalanche.report/at-07/wp-json/wp/v2/posts?_fields=date&before=2025-03-11&after=2025-03-28&per_page=100&page={page}"
+   * @returns
+   */
+  static async loadBlogData(url: string): Promise<{ timestamps: number[]; data: number[] }> {
     const map: Map<string, number> = new Map();
-    const url = this.urlsMap[regionCode].replace("{before}", endDate).replace("{after}", startDate);
     let page = 1;
     while (true) {
       const res = await fetch(url.replace("{page}", page.toString()));

@@ -180,6 +180,11 @@ class AwsStats extends HTMLElement {
             chart.setAttribute("end-date", this.getAttribute("end-date")!);
           }
         }
+        if (this.hasAttribute("blog-urls")) {
+          for (const chart of charts) {
+            chart.setAttribute("blog-urls", this.getAttribute("blog-urls")!);
+          }
+        }
       })(),
     );
     await Promise.all(loadPromises);
