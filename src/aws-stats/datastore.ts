@@ -766,12 +766,12 @@ export class BulletinData {
       }
       if (
         !bulletin.customData ||
-        !bulletin.customData.LWD_Tyrol ||
-        !bulletin.customData.LWD_Tyrol.dangerPatterns
+        !bulletin.customData["LWD_Tyrol"] ||
+        !bulletin.customData["LWD_Tyrol"].dangerPatterns
       ) {
         return;
       }
-      const dangerProblems = bulletin.customData.LWD_Tyrol.dangerPatterns.map((dp: string) =>
+      const dangerProblems = bulletin.customData["LWD_Tyrol"].dangerPatterns.map((dp: string) =>
         parseInt(dp.slice(2)),
       ) as (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)[];
 

@@ -6,6 +6,8 @@ const messages = import.meta.glob("./i18n/*.json", {
   eager: true,
 });
 
+export type messagesEN_t = keyof typeof messagesEN;
+
 class I18n {
   get lang(): string {
     return document.documentElement.lang.slice(0, 2) || "en";
@@ -15,7 +17,7 @@ class I18n {
     return messages[`./i18n/${this.lang}.json`] as typeof messagesEN;
   }
 
-  message(id: keyof typeof messagesEN): string {
+  message(id: messagesEN_t): string {
     return this.messages?.[id] ?? messagesEN[id] ?? id;
   }
 

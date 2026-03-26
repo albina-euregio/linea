@@ -1,4 +1,4 @@
-import { i18n } from "../i18n";
+import { i18n, type messagesEN_t } from "../i18n";
 import { AbstractChart } from "./abstract-chart";
 import { BulletinData } from "./datastore";
 import {
@@ -28,14 +28,16 @@ export class DangerRatingMicroRegionsChart extends AbstractChart {
 
     this.createPlot(opts_danger_rating_micro_regions, [distribution.timestamps]);
 
-    const convert: Map<number, string> = {
+    type dangerRating = 1 | 2 | 3 | 4 | 5;
+
+    const convert: Record<dangerRating, string> = {
       1: "low",
       2: "moderate",
       3: "considerable",
       4: "high",
       5: "very_high",
     };
-    const colors: Map<number, { fill: string; stroke: string }> = {
+    const colors: Record<dangerRating, { fill: string; stroke: string }> = {
       1: { stroke: "#7fbf00", fill: "rgba(204, 255, 102, 0.1)" },
       2: { stroke: "#b89b00", fill: "rgba(255, 255, 0, 0.1)" },
       3: { stroke: "#cc6f00", fill: "rgba(255, 153, 0, 0.1)" },
@@ -43,11 +45,12 @@ export class DangerRatingMicroRegionsChart extends AbstractChart {
       5: { stroke: "#111111", fill: "rgba(0, 0, 0, 0.1)" },
     };
 
-    for (let i = 1; i <= 5; i++) {
+    const ratings: dangerRating[] = [1, 2, 3, 4, 5];
+    for (const i of ratings) {
       this.addSeries(
         {
           ...opts_series_danger_rating_micro_regions,
-          label: `${i} ${i18n.message(`linea:yearly:dangerratingdistribution:series:${convert[i]}`)}`,
+          label: `${i} ${i18n.message(`linea:yearly:dangerratingdistribution:series:${convert[i]}` as messagesEN_t)}`,
           ...colors[i],
         },
         distribution.ratings[i],

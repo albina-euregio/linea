@@ -1,3 +1,4 @@
+import type uPlot from "uplot";
 import { AbstractChart } from "./abstract-chart";
 import { BlogService, BulletinData, Observations } from "./datastore";
 import { getStackedOpts, opts_products_bars } from "./series-options/products-opts";
@@ -60,7 +61,7 @@ export class ProductsChart extends AbstractChart {
     ]);
 
     let { opts, data } = getStackedOpts(opts_products_bars, [timestamps, ...seriesData], null);
-    this.createPlot(opts, data);
+    this.createPlot(opts, data as uPlot.AlignedData);
   }
 
   private convertTrainingsToDataset(trainingDates: string[]): {

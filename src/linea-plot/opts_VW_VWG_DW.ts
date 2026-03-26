@@ -1,7 +1,8 @@
 import type uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
-import { LineaOptsHelper, type SplitOptions } from "./linea-opts-helper";
+import { LineaOptsHelper } from "./linea-opts-helper";
+import type { SplitOptions } from "../shared/opts-helper.ts";
 
 /**
  * uPlot options for Windgeschwindigkeit [km/h] & Windrichtung [˚]

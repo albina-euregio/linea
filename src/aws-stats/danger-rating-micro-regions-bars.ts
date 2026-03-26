@@ -26,11 +26,11 @@ export class DangerRatingMicroRegionsBarsChart extends AbstractChart {
 
     const dataSeries: number[][] = [distribution.timestamps];
     for (let i = 1; i <= 5; i++) {
-      dataSeries.push(distribution.ratings[i] || []);
+      dataSeries.push(distribution.ratings[i as 1 | 2 | 3 | 4 | 5] || []);
     }
 
     let { opts, data } = getStackedOpts(opts_danger_rating_micro_regions_bars, dataSeries, null);
-    this.createPlot(opts, data);
+    this.createPlot(opts, data as uPlot.AlignedData);
   }
 }
 

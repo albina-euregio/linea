@@ -2,7 +2,7 @@ import uPlot, { type Plugin } from "uplot";
 import { AbstractChart } from "./abstract-chart";
 import { BulletinData } from "./datastore";
 import { opts_avalanche_problem_micro_regions } from "./series-options/avalanche-problem-micro-regions-opts";
-import { i18n } from "../i18n";
+import { i18n, type messagesEN_t } from "../i18n";
 
 export class AvalancheProblemMicroRegionsChart extends AbstractChart {
   async onConnected(): Promise<void> {
@@ -107,7 +107,9 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
         "cornices",
         "no_distinct_avalanche_problem",
         "favourable_situation",
-      ].map((v) => i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}`));
+      ].map((v) =>
+        i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
+      );
     } else if (avalancheProblems.ratings[7].filter((v) => !!v || v !== 0).length > 0) {
       opts.scales!.y.range = [0.5, 7.5];
       opts.axes[1].splits = [1, 2, 3, 4, 5, 6, 7];
@@ -119,7 +121,9 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
         "gliding_snow",
         "cornices",
         "no_distinct_avalanche_problem",
-      ].map((v) => i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}`));
+      ].map((v) =>
+        i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
+      );
     } else if (avalancheProblems.ratings[6].filter((v) => !!v || v !== 0).length > 0) {
       opts.scales!.y.range = [0.5, 6.5];
       opts.axes[1].splits = [1, 2, 3, 4, 5, 6];
@@ -130,7 +134,9 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
         "wet_snow",
         "gliding_snow",
         "cornices",
-      ].map((v) => i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}`));
+      ].map((v) =>
+        i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
+      );
     }
 
     const data: uPlot.AlignedData = [

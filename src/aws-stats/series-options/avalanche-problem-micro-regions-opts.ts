@@ -1,6 +1,6 @@
 import uPlot from "uplot";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
-import { i18n } from "../../i18n";
+import { i18n, type messagesEN_t } from "../../i18n";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
 
 export const opts_avalanche_problem_micro_regions: uPlot.Options = {
@@ -39,7 +39,8 @@ export const opts_avalanche_problem_micro_regions: uPlot.Options = {
       ticks: { stroke: "#333" },
       splits: [1, 2, 3, 4, 5],
       values: ["persistent_weak_layer", "new_snow", "wind_slab", "wet_snow", "gliding_snow"].map(
-        (v) => i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}`),
+        (v) =>
+          i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
       ),
     },
   ],
