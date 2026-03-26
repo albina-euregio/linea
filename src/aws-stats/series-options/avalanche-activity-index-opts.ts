@@ -110,37 +110,49 @@ export const opts_avalanche_activity_index: uPlot.Options = {
       },
     },
   ],
-
   series: [
     {
       label: i18n.message("linea:axis:time"),
       value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
     },
+    {
+      label: i18n.message("linea:avalancheactivityindex:series:aai"),
+      stroke: "#799418",
+      fill: "#b4d4414f",
+      scale: "y",
+      width: 1.5,
+    },
+    {
+      scale: "y2",
+      points: { show: false },
+      paths: uPlot.paths.bars!({ size: [0.4, 100], align: -1, radius: 0 }),
+      label: i18n.message("linea:avalancheactivityindex:series:avalanchestotal"),
+      stroke: "#c408dd",
+      fill: "#c408dd62",
+    },
+    {
+      scale: "y2",
+      points: { show: false },
+      paths: uPlot.paths.bars!({ size: [0.4, 100], align: 1, radius: 0 }),
+      label: i18n.message("linea:avalancheactivityindex:series:avalanches:spontaneous"),
+      stroke: "#8727b3",
+      fill: "#8727b462",
+    },
+    {
+      scale: "y2",
+      points: { show: false },
+      paths: uPlot.paths.bars!({ size: [0.4, 100], align: 1, radius: 0 }),
+      label: i18n.message("linea:avalancheactivityindex:series:avalanches:artificial"),
+      stroke: "#081ddd",
+      fill: "#081ddd62",
+    },
+    {
+      scale: "y2",
+      points: { show: false },
+      paths: uPlot.paths.bars!({ size: [0.4, 100], align: 1, radius: 0 }),
+      label: i18n.message("linea:avalancheactivityindex:series:avalanches:unknown"),
+      stroke: "#08bddd",
+      fill: "#08bddd62",
+    },
   ],
-};
-
-export const opts_series_avalancheactivityindex = {
-  label: i18n.message("linea:avalancheactivityindex:series:aai"),
-  stroke: "#799418",
-  fill: "#b4d4414f",
-  scale: "y",
-  width: 1.5,
-};
-
-export const opts_series_avalanche_count = {
-  label: i18n.message("linea:observations:series:avalanches"),
-  stroke: "#4108dd69",
-  fill: "rgba(89, 146, 192, 0.2)",
-  scale: "y2",
-  width: 1.5,
-  points: { show: false },
-};
-
-export const opts_series_avalanche_count_total = {
-  label: i18n.message("linea:avalancheactivityindex:series:avalanchestotal"),
-  stroke: "#c408dd",
-  fill: "rgba(196, 8, 221, 0.2)",
-  scale: "y2",
-  width: 1.5,
-  points: { show: false },
 };

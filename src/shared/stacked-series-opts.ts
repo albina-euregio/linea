@@ -111,7 +111,7 @@ export function getStackedOpts(
         const restacked = stack(data, (seriesIdx: number) => !u.series[seriesIdx].show);
         u.delBand(null);
         restacked.bands.forEach((b: uPlot.Band) => u.addBand(b));
-        u.setData(restacked.data as unknown as uPlot.AlignedData);
+        u.setData(restacked.data as unknown as uPlot.AlignedData, false);
       },
     ],
   };
@@ -119,17 +119,20 @@ export function getStackedOpts(
   return { opts, data: stacked.data };
 }
 
-export function stack2(series: Stack2Series[]): {
-  data: Array<Array<number | null> | undefined>;
-  bands: Array<{ series: [number, number]; dir: number }>;
+export function stack2(
+  series: Stack2Series[],
+  omit: (seriesIdx: number) => boolean = (_seriesIdx: number) => false,
+): {
+  data: Array<Array<number | null>>;
+  bands: Array<{ series: [number, number]; dir: 1 | -1 }>;
 } {
-  const data: Array<Array<number | null> | undefined> = Array(series.length);
-  const bands: Array<{ series: [number, number]; dir: number }> = [];
+  const data: Array<Array<number | null>> = Array(series.length);
+  const bands: Array<{ series: [number, number]; dir: 1 | -1 }> = [];
 
-  const dataLen = series[0].values.length;
+  const dataLen = series[0]?.values.length ?? 0;
   const zeroArr = Array(dataLen).fill(0);
 
-  const stackGroups = new Map<string, { series: number[]; acc: number[]; dir: number }>();
+  const stackGroups = new Map<string, { series: number[]; acc: number[]; dir: 1 | -1 }>();
   const seriesStackKeys: string[] = Array(series.length);
 
   series.forEach((s, si) => {
@@ -143,57 +146,58 @@ export function stack2(series: Stack2Series[]): {
       }
     }
 
-    if (s.stacking.mode !== "none") {
-      const hasPos = vals.some((v) => (v ?? 0) > 0);
-      const stackKey = (seriesStackKeys[si] =
-        s.stacking.mode + s.scaleKey + s.stacking.group + (hasPos ? "+" : "-"));
-      let group = stackGroups.get(stackKey);
-
-      if (group == null) {
-        group = {
-          series: [],
-          acc: zeroArr.slice(),
-          dir: hasPos ? -1 : 1,
-        };
-        stackGroups.set(stackKey, group);
-      }
-
-      group.series.unshift(si);
-
-      const stacked = (data[si] = Array(dataLen));
-      const { acc } = group;
-
-      for (let i = 0; i < dataLen; i++) {
-        const v = vals[i];
-        if (v != null) {
-          stacked[i] = acc[i] += v;
-        } else {
-          stacked[i] = v;
-        }
-      }
-    } else {
+    if (omit(si) || s.stacking.mode === "none") {
       data[si] = vals;
+      return;
+    }
+
+    const hasPos = vals.some((v) => (v ?? 0) > 0);
+    const stackKey = (seriesStackKeys[si] =
+      s.stacking.mode + s.scaleKey + s.stacking.group + (hasPos ? "+" : "-"));
+
+    let group = stackGroups.get(stackKey);
+    if (group == null) {
+      group = {
+        series: [],
+        acc: zeroArr.slice(),
+        dir: hasPos ? -1 : 1,
+      };
+      stackGroups.set(stackKey, group);
+    }
+
+    group.series.unshift(si);
+
+    const stacked = (data[si] = Array(dataLen));
+    const { acc } = group;
+
+    for (let i = 0; i < dataLen; i++) {
+      const v = vals[i];
+      if (v != null) {
+        stacked[i] = acc[i] += v;
+      } else {
+        stacked[i] = v;
+      }
     }
   });
 
   series.forEach((s, si) => {
-    if (s.stacking.mode === "percent") {
-      const group = stackGroups.get(seriesStackKeys[si]);
-      if (!group) {
-        return;
-      }
-      const { acc } = group;
-      const sign = group.dir * -1;
-      const stacked = data[si];
-      if (!stacked) {
-        return;
-      }
+    if (omit(si) || s.stacking.mode !== "percent") {
+      return;
+    }
 
-      for (let i = 0; i < dataLen; i++) {
-        const v = stacked[i];
-        if (v != null) {
-          stacked[i] = sign * (v / acc[i]);
-        }
+    const group = stackGroups.get(seriesStackKeys[si]);
+    if (!group) {
+      return;
+    }
+
+    const stacked = data[si];
+    const { acc } = group;
+    const sign = group.dir * -1;
+
+    for (let i = 0; i < dataLen; i++) {
+      const v = stacked[i];
+      if (v != null) {
+        stacked[i] = sign * (v / acc[i]);
       }
     }
   });
@@ -214,7 +218,7 @@ export function stack2(series: Stack2Series[]): {
   });
 
   return {
-    data,
+    data: data.map((seriesValues) => seriesValues ?? []),
     bands,
   };
 }

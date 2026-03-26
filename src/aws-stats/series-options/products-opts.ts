@@ -133,9 +133,12 @@ export function getStackedOpts(
   );
 }
 
-export function stack2(series: Stack2Series[]): {
-  data: Array<Array<number | null> | undefined>;
-  bands: Array<{ series: [number, number]; dir: number }>;
+export function stack2(
+  series: Stack2Series[],
+  omit: (seriesIdx: number) => boolean = (_seriesIdx: number) => false,
+): {
+  data: Array<Array<number | null>>;
+  bands: Array<{ series: [number, number]; dir: 1 | -1 }>;
 } {
-  return reusableStack2(series);
+  return reusableStack2(series, omit);
 }

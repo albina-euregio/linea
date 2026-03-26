@@ -34,8 +34,12 @@ export class Observations {
   }
 
   get countperday(): { timestamps: number[]; countPerDay: number[] } {
+    return this.countPerDay(this.observations);
+  }
+
+  countPerDay(observations: Observation[]): { timestamps: number[]; countPerDay: number[] } {
     const countMap: { [date: string]: number } = {};
-    this.observations.forEach((obs) => {
+    observations.forEach((obs) => {
       const date = obs.properties.eventDate.split("T")[0];
       countMap[date] = (countMap[date] || 0) + 1;
     });
@@ -62,6 +66,14 @@ export class Observations {
 
   get sizedAvalanches() {
     return new SizedAvalancheObservations(
+      this.observations.filter(
+        (obs) => obs.properties.$type === "Avalanche",
+      ) as AvalancheObservation[],
+    );
+  }
+
+  get triggeredAvalanches() {
+    return new TriggeredAvalancheObservations(
       this.observations.filter(
         (obs) => obs.properties.$type === "Avalanche",
       ) as AvalancheObservation[],
@@ -242,6 +254,67 @@ export class SizedAvalancheObservations extends AvalancheObservations {
   }
 }
 
+export class TriggeredAvalancheObservation extends AvalancheObservation {
+  declare public properties: AvalancheObservation["properties"] & {
+    avalancheType: string | null;
+    triggerType: string | null;
+  };
+
+  static fromObservation(observation: AvalancheObservation): TriggeredAvalancheObservation {
+    return TriggeredAvalancheObservations.normalizeObservation(observation);
+  }
+}
+
+export class TriggeredAvalancheObservations extends AvalancheObservations {
+  constructor(observations: AvalancheObservation[] = []) {
+    super(TriggeredAvalancheObservations.normalizeAll(observations));
+  }
+
+  static normalizeAll(observations: AvalancheObservation[]): TriggeredAvalancheObservation[] {
+    return observations.map((obs) => TriggeredAvalancheObservations.normalizeObservation(obs));
+  }
+
+  static normalizeObservation(observation: AvalancheObservation): TriggeredAvalancheObservation {
+    const props = (observation.properties ?? {}) as Record<string, any>;
+    const avalancheType = extractAvalancheType(props);
+    const triggerType = extractTriggerType(props);
+
+    const normalizedProperties: {} = {
+      ...props,
+      avalancheType,
+      triggerType,
+    };
+
+    return {
+      ...observation,
+      properties: normalizedProperties,
+    } as TriggeredAvalancheObservation;
+  }
+
+  get items(): TriggeredAvalancheObservation[] {
+    return this.observations as TriggeredAvalancheObservation[];
+  }
+
+  get spontanousCount(): { timestamps: number[]; countPerDay: number[] } {
+    return this.countPerDay(
+      this.items.filter((obs) => obs.properties.triggerType === "spontaneous"),
+    );
+  }
+
+  get triggeredCount(): { timestamps: number[]; countPerDay: number[] } {
+    return this.countPerDay(
+      this.items.filter(
+        (obs) =>
+          obs.properties.triggerType === "triggered" || obs.properties.triggerType === "artificial",
+      ),
+    );
+  }
+
+  get unknownCount(): { timestamps: number[]; countPerDay: number[] } {
+    return this.countPerDay(this.items.filter((obs) => obs.properties.triggerType === "unknown"));
+  }
+}
+
 function toNumber(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
@@ -290,6 +363,94 @@ function extractAvalancheSize(properties: Record<string, any>): number | null {
     return 3;
   }
   return null;
+}
+
+function extractAvalancheType(properties: Record<string, any>): string | null {
+  // Try nested avalanche.type (Lawis)
+  const byNested = properties.avalanche?.type?.text ?? properties.avalanche?.type?.id;
+  if (byNested) {
+    return String(byNested);
+  }
+
+  // Try direct field (LoLaKronos, Snobs)
+  const byDirect = properties.avalancheType;
+  if (byDirect) {
+    return String(byDirect);
+  }
+
+  // Try German field (LwdKip)
+  const byGerman = properties.LAWINENART;
+  if (byGerman) {
+    return String(byGerman);
+  }
+
+  // Try extraDialogRows
+  const byExtra = Array.isArray(properties.$extraDialogRows)
+    ? properties.$extraDialogRows.find(
+        (row: any) => row?.label?.includes("avalancheType") || row?.label?.includes("Lawinenart"),
+      )
+    : undefined;
+  if (byExtra?.value) {
+    return String(byExtra.value);
+  }
+
+  return null;
+}
+
+function convertTriggerType(text: string): "artificial" | "spontaneous" | "unknown" {
+  switch (text.toLowerCase()) {
+    case "artificial":
+    case "remote":
+    case "lowAdditionalLoad":
+    case "highAdditionalLoad":
+    case "blast":
+      return "artificial";
+    case "spontaneous":
+      return "spontaneous";
+    default:
+      return "unknown";
+  }
+}
+
+function extractTriggerType(
+  properties: Record<string, any>,
+): "artificial" | "spontaneous" | "unknown" {
+  // Try nested avalanche.release (Lawis)
+  const byNested = properties.avalanche?.release?.text as "artificial" | "spontaneous" | "unknown";
+  if (byNested) {
+    return convertTriggerType(byNested);
+  }
+
+  // Try direct field (LoLaKronos, Snobs)
+  const byDirect = properties.avalancheRelease;
+  if (byDirect) {
+    return convertTriggerType(byDirect);
+  }
+
+  // Try German explosion field (LwdKip) - SPRENGUNG: 0 = spontaneous, 1 = explosive/artificial
+  const byGerman = properties.SPRENGUNG;
+  if (byGerman !== undefined) {
+    return byGerman ? "artificial" : "spontaneous";
+  }
+
+  // Try extraDialogRows
+  const byExtra = Array.isArray(properties.$extraDialogRows)
+    ? properties.$extraDialogRows.find(
+        (row: any) =>
+          (row?.label?.includes("release") ||
+            row?.label?.includes("Sprengung") ||
+            row?.label?.includes("trigger")) &&
+          (row?.value !== undefined || row?.boolean !== undefined),
+      )
+    : undefined;
+  if (byExtra?.value !== undefined) {
+    return convertTriggerType(String(byExtra.value));
+  }
+  if (byExtra?.boolean !== undefined) {
+    return byExtra.boolean ? "artificial" : "spontaneous";
+  }
+
+  return "unknown";
 }
 
 export class WeatherStationData {
@@ -547,7 +708,10 @@ export class BulletinData {
         });
       }
     });
-    return Object.entries(distribution).map(([rating, count]) => ({ rating, count }));
+    return Object.entries(distribution).map(([rating, count]) => ({
+      rating: Number(rating),
+      count,
+    }));
   }
 
   get highestDangerRatingPerDay(): { timestamps: number[]; rating: number[] } {
@@ -561,7 +725,7 @@ export class BulletinData {
 
     const ratingMap: Record<string, number> = {};
     this.bulletins.forEach((bulletin) => {
-      if (bulletin.dangerRatings) {
+      if (bulletin.dangerRatings && bulletin.validTime?.endTime) {
         const dateKey = new Date(bulletin.validTime.endTime).toISOString().split("T")[0];
         const maxRating = Math.max(
           ...bulletin.dangerRatings.map((r) => conversion[r.mainValue?.toLowerCase()] ?? null),

@@ -1,12 +1,8 @@
 import uPlot from "uplot";
 import { AbstractChart } from "./abstract-chart";
-import { Observations } from "./datastore";
-import {
-  opts_avalanche_activity_index,
-  opts_series_avalanche_count,
-  opts_series_avalanche_count_total,
-  opts_series_avalancheactivityindex,
-} from "./series-options/avalanche-activity-index-opts";
+import { Observations, TriggeredAvalancheObservations } from "./datastore";
+import { opts_avalanche_activity_index } from "./series-options/avalanche-activity-index-opts";
+import { stack2 } from "./series-options/products-opts";
 
 export class AvalancheActivityIndexChart extends AbstractChart {
   private observations!: Observations;
@@ -29,39 +25,96 @@ export class AvalancheActivityIndexChart extends AbstractChart {
     const { timestamps: indexTimestamps, avalanches: perDay } = avalanches.avalanchesPerDay;
     const { avalancheIndices } = avalanches.calculateAvalancheIndexPerDay(indexTimestamps, perDay);
 
-    const countPerDayData = avalanches.countperday;
+    const triggered = new TriggeredAvalancheObservations(avalanches.items);
+
+    const uniqe = new Set(triggered.items.map((v) => v.properties.triggerType));
+    console.log(uniqe);
+
+    const spontaneous = triggered.spontanousCount;
+    const artificial = triggered.triggeredCount;
+    const unknown = triggered.unknownCount;
 
     const countPerDayAll = this.observations.avalanches.countperday;
 
     const { timestamps, seriesData } = Observations.mergeAndFillData([
       { timestamps: indexTimestamps, data: avalancheIndices },
-      { timestamps: countPerDayData.timestamps, data: countPerDayData.countPerDay },
       { timestamps: countPerDayAll.timestamps, data: countPerDayAll.countPerDay },
+      { timestamps: spontaneous.timestamps, data: spontaneous.countPerDay },
+      { timestamps: artificial.timestamps, data: artificial.countPerDay },
+      { timestamps: unknown.timestamps, data: unknown.countPerDay },
     ]);
 
-    this.createPlot({ ...opts_avalanche_activity_index }, [timestamps]);
+    const series2 = [
+      {
+        scaleKey: "y",
+        values: seriesData[0],
+        negY: false,
+        stacking: {
+          mode: "none",
+          group: "B",
+        },
+      },
+      {
+        scaleKey: "y2",
+        values: seriesData[1],
+        negY: false,
+        stacking: {
+          mode: "none",
+          group: "C",
+        },
+      },
+      {
+        scaleKey: "y2",
+        values: seriesData[2],
+        negY: false,
+        stacking: {
+          mode: "normal",
+          group: "A",
+        },
+      },
+      {
+        scaleKey: "y2",
+        values: seriesData[3],
+        negY: false,
+        stacking: {
+          mode: "normal",
+          group: "A",
+        },
+      },
+      {
+        scaleKey: "y2",
+        values: seriesData[4],
+        negY: false,
+        stacking: {
+          mode: "normal",
+          group: "A",
+        },
+      },
+    ];
 
-    if (timestamps.length > 0 && seriesData.length > 2) {
-      this.addSeries(
-        {
-          ...opts_series_avalanche_count_total,
-          paths: uPlot.paths.bars!({ size: [0.4, 100], align: -1 }),
+    const { data: stackedData, bands } = stack2(series2, (_: number) => false);
+
+    const opts: uPlot.Options = {
+      ...opts_avalanche_activity_index,
+      bands,
+    };
+
+    const existingHooks = opts.hooks || {};
+    const existingSetSeries = existingHooks.setSeries || [];
+    opts.hooks = {
+      ...existingHooks,
+      setSeries: [
+        ...existingSetSeries,
+        (u: uPlot, _seriesIdx: number | null, _opts: uPlot.Series) => {
+          const restacked = stack2(series2, (seriesIdx: number) => !u.series[seriesIdx + 1].show);
+          u.delBand(null);
+          restacked.bands.forEach((b: uPlot.Band) => u.addBand(b));
+          u.setData([timestamps, ...restacked.data] as unknown as uPlot.AlignedData, false);
         },
-        seriesData[2],
-      );
-    }
-    if (timestamps.length > 0 && seriesData.length > 1) {
-      this.addSeries(
-        {
-          ...opts_series_avalanche_count,
-          paths: uPlot.paths.bars!({ size: [0.4, 100], align: seriesData.length > 2 ? 1 : 0 }),
-        },
-        seriesData[1],
-      );
-    }
-    if (timestamps.length > 0 && seriesData.length > 0) {
-      this.addSeries(opts_series_avalancheactivityindex, seriesData[0]);
-    }
+      ],
+    };
+
+    this.createPlot(opts, [timestamps, ...stackedData]);
   }
 }
 
