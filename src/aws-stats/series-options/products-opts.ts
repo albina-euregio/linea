@@ -1,6 +1,6 @@
 import uPlot from "uplot";
 const { bars } = uPlot.paths;
-import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
+import { dailyBarChartTimeScale, timeAxis } from "../../linea-plot/opts_time_axis";
 import { i18n } from "../../i18n";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import {
@@ -54,7 +54,7 @@ export const opts_products_bars: uPlot.Options = {
     },
   } as any,
   scales: {
-    x: timeScale,
+    x: dailyBarChartTimeScale,
     y: {
       auto: true,
       range: [0, null],
