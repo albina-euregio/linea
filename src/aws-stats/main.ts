@@ -7,3 +7,4 @@ import "./avalanche-activity-index";
 import "./danger-rating-micro-regions";
 import "./danger-rating-micro-regions-bars";
 import "./products";
+import "./danger-pattern-micro-regions-chart";

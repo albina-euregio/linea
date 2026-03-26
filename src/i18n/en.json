@@ -99,5 +99,7 @@
   "linea:yearly:products:series:blogs:tyrol": "Blogs Ty",
   "linea:yearly:products:series:blogs:south_tirol": "Blogs Bz",
   "linea:yearly:products:series:blogs:trentino": "Blogs Tn",
+  "linea:yearly:dangerpatternmicroregions:title": "Danger Patterns by Micro-Regions",
+  "linea:yearly:dangerpatternmicroregions:yaxis:dangerpatterns": "Danger Patterns",
   "linea:wrapper:loading": "Loading data..."
 }

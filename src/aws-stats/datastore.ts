@@ -610,6 +610,108 @@ export class BulletinData {
     return BulletinData.conversion[normalized] ?? 0;
   }
 
+  affectedMicroRegionsPerDangerPatternPerDay(regionCode: string = "all"): {
+    timestamps: number[];
+    ratings: {
+      1: number[];
+      2: number[];
+      3: number[];
+      4: number[];
+      5: number[];
+      6: number[];
+      7: number[];
+      8: number[];
+      9: number[];
+      10: number[];
+    };
+  } {
+    const perDay: Record<
+      number,
+      {
+        1: number;
+        2: number;
+        3: number;
+        4: number;
+        5: number;
+        6: number;
+        7: number;
+        8: number;
+        9: number;
+        10: number;
+      }
+    > = {};
+
+    this.bulletins.forEach((bulletin) => {
+      const day = BulletinData.dayTimestamp(
+        bulletin.validTime?.endTime ?? bulletin.publicationTime,
+      );
+      const matchedMicroRegionCount = (bulletin.regions ?? []).filter((region) =>
+        regionCode === "all"
+          ? true
+          : region.regionID.toLowerCase().includes(regionCode.toLowerCase()),
+      ).length;
+
+      if (day === null || matchedMicroRegionCount === 0) {
+        console.debug(`Skipping bulletin with no danger rating: ${bulletin.validTime?.endTime}`);
+        return;
+      }
+      if (
+        !bulletin.customData ||
+        !bulletin.customData.LWD_Tyrol ||
+        !bulletin.customData.LWD_Tyrol.dangerPatterns
+      ) {
+        return;
+      }
+      const dangerProblems = bulletin.customData.LWD_Tyrol.dangerPatterns.map((dp: string) =>
+        parseInt(dp.slice(2)),
+      ) as (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10)[];
+
+      if (!perDay[day]) {
+        perDay[day] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 };
+      }
+      for (const dangerProblem of dangerProblems) {
+        perDay[day][dangerProblem] += matchedMicroRegionCount;
+      }
+    });
+
+    const timestamps: number[] = Object.keys(perDay)
+      .map((date) => Number(date))
+      .sort((a, b) => a - b);
+    const distribution: {
+      1: number[];
+      2: number[];
+      3: number[];
+      4: number[];
+      5: number[];
+      6: number[];
+      7: number[];
+      8: number[];
+      9: number[];
+      10: number[];
+    } = {
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+      6: [],
+      7: [],
+      8: [],
+      9: [],
+      10: [],
+    };
+
+    for (let i = 0; i < timestamps.length; i++) {
+      const ratings = perDay[timestamps[i]];
+      const sum = Object.values(ratings).reduce((a, b) => a + b, 0);
+      for (let rating = 1; rating <= 10; rating++) {
+        const key = rating as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+        distribution[key].push(sum > 0 ? (ratings[key] / sum) * 100 : 0);
+      }
+    }
+    return { timestamps, ratings: distribution };
+  }
+
   affectedMicroRegionsPerDangerRatingPerDay(regionCode: string = "all"): {
     timestamps: number[];
     ratings: { 1: number[]; 2: number[]; 3: number[]; 4: number[]; 5: number[] };
