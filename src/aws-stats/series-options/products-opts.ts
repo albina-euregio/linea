@@ -74,21 +74,9 @@ export const opts_products_bars: uPlot.Options = {
     },
     {
       ...opts_series_products,
-      label: `${i18n.message(`linea:yearly:products:series:bulletins:tyrol`)}`,
+      label: `${i18n.message(`linea:yearly:products:series:bulletins`)}`,
       stroke: "#0400ff",
       fill: "#4240ca52",
-    },
-    {
-      ...opts_series_products,
-      label: `${i18n.message(`linea:yearly:products:series:bulletins:south_tirol`)}`,
-      stroke: "#0059ff",
-      fill: "#4070ca52",
-    },
-    {
-      ...opts_series_products,
-      label: `${i18n.message(`linea:yearly:products:series:bulletins:trentino`)}`,
-      stroke: "#00a2ff",
-      fill: "#409eca52",
     },
     {
       ...opts_series_products,

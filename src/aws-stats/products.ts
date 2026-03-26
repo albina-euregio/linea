@@ -26,9 +26,7 @@ export class ProductsChart extends AbstractChart {
     }
 
     const bulletinData = new BulletinData(this.bulletins);
-    const bulletinsTyrol = bulletinData.filterRegionCode("AT-07").bulletinsPerDay;
-    const bulletinsSouthTirol = bulletinData.filterRegionCode("IT-32-BZ").bulletinsPerDay;
-    const bulletinsTrentino = bulletinData.filterRegionCode("IT-32-TN").bulletinsPerDay;
+    const bulletins = bulletinData.filterRegionCode("all").bulletinsPerDay;
 
     const fieldTrainings = this.getAttribute("field-trainings")
       ? JSON.parse(this.getAttribute("field-trainings")!)
@@ -53,9 +51,7 @@ export class ProductsChart extends AbstractChart {
     );
 
     const { timestamps, seriesData } = Observations.mergeAndFillData([
-      bulletinsTyrol,
-      bulletinsSouthTirol,
-      bulletinsTrentino,
+      bulletins,
       this.convertTrainingsToDataset(fieldTrainings),
       this.convertTrainingsToDataset(virtualTrainings),
       blogsTyrol,
