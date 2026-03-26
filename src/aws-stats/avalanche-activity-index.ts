@@ -6,7 +6,7 @@ import {
   opts_series_avalanche_count,
   opts_series_avalanche_count_total,
   opts_series_avalancheactivityindex,
-} from "./series-options/avalanche-activity-index";
+} from "./series-options/avalanche-activity-index-opts";
 
 export class AvalancheActivityIndexChart extends AbstractChart {
   private observations!: Observations;

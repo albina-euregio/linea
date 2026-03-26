@@ -3,7 +3,7 @@ import {
   opts_series_avalanches,
   opts_series_observations,
   opts_series_precipitation,
-} from "./series-options/opts_avalanches";
+} from "./series-options/avalanches-opts";
 import { AbstractChart } from "./abstract-chart";
 import { Observations, WeatherStationData } from "./datastore";
 
