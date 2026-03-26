@@ -6,6 +6,7 @@ import { BulletinData, Observations } from "./datastore";
 import { fetchSMET } from "../data/smet-data";
 import { StationData } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
+import type { Bulletin } from "../schema/caaml";
 
 export function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
   if (!date) return null;
@@ -126,15 +127,25 @@ class AwsStats extends HTMLElement {
       );
     }
 
-    if (this.getAttribute("bulletin-filter-micro-region")) {
+    if (this.getAttribute("bulletin-urls")) {
       loadPromises.push(
         (async () => {
           try {
-            const bulletins = new BulletinData();
-            await bulletins.loadBulletins(
-              this.getAttribute("start-date")!,
-              this.getAttribute("end-date")!,
-            );
+            const bulletinUrls = this.getAttribute("bulletin-urls")
+              ? JSON.parse(this.getAttribute("bulletin-urls")!)
+              : [];
+            const bulletinData: Bulletin[] = [];
+
+            for (const url of bulletinUrls) {
+              const bulletins = await BulletinData.loadBulletins(
+                url,
+                this.getAttribute("start-date")!,
+                this.getAttribute("end-date")!,
+              );
+              bulletinData.push(...bulletins);
+            }
+
+            const bulletins = new BulletinData(bulletinData);
             for (const chart of charts) {
               chart.setAttribute(
                 "bulletins",
@@ -143,7 +154,7 @@ class AwsStats extends HTMLElement {
                     ? bulletins.filterForMicroRegions(
                         JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
                       ).bulletins
-                    : bulletins.bulletins,
+                    : bulletinData,
                 ),
               );
               chart.setAttribute(

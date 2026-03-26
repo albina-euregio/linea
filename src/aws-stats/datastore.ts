@@ -497,15 +497,21 @@ export class BulletinData {
     this.bulletins = bulletins;
   }
 
-  async loadBulletins(startDate: string, endDate: string): Promise<BulletinCollection> {
+  /**
+   * Loads bulletins from a remote source within a date range.
+   * @param url a url to a CAAMLv6 JSON in with {date} and {lang} for the according variables, e.g. https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_${i18n.lang}_CAAMLv6.json
+   * @param startDate
+   * @param endDate
+   * @returns
+   */
+  static async loadBulletins(url: string, startDate: string, endDate: string): Promise<Bulletin[]> {
     const urls: string[] = [];
 
     const start = new Date(startDate);
     const end = new Date(endDate);
     for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split("T")[0];
-      const url = `https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_${i18n.lang}_CAAMLv6.json`;
-      urls.push(url);
+      urls.push(url.replaceAll("{date}", dateStr).replaceAll("{lang}", i18n.lang));
     }
 
     const allBulletins: Bulletin[] = [];
@@ -523,8 +529,7 @@ export class BulletinData {
         console.error(`Error loading bulletin from ${u}:`, error);
       }
     }
-    this.bulletins = allBulletins;
-    return { bulletins: allBulletins };
+    return allBulletins;
   }
 
   async loadBulletinsSingleSource(url: string): Promise<BulletinCollection> {
