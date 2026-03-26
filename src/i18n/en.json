@@ -101,5 +101,15 @@
   "linea:yearly:products:series:blogs:trentino": "Blogs Tn",
   "linea:yearly:dangerpatternmicroregions:title": "Danger Patterns by Micro-Regions",
   "linea:yearly:dangerpatternmicroregions:yaxis:dangerpatterns": "Danger Patterns",
+  "linea:yearly:avalancheproblemmicroregions:title": "Avalanche Problems by Micro-Regions",
+  "linea:yearly:avalancheproblemmicroregions:yaxis:avalancheproblems": "Avalanche Problems",
+  "linea:yearly:avalancheproblemmicroregions:series:persistent_weak_layer": "Persistent Weak Layer",
+  "linea:yearly:avalancheproblemmicroregions:series:new_snow": "New Snow",
+  "linea:yearly:avalancheproblemmicroregions:series:wind_slab": "Wind Slab",
+  "linea:yearly:avalancheproblemmicroregions:series:wet_snow": "Wet Snow",
+  "linea:yearly:avalancheproblemmicroregions:series:gliding_snow": "Gliding Snow",
+  "linea:yearly:avalancheproblemmicroregions:series:cornices": "Cornices",
+  "linea:yearly:avalancheproblemmicroregions:series:no_distinct_avalanche_problem": "No Distinct Avalanche Problem",
+  "linea:yearly:avalancheproblemmicroregions:series:favourable_situation": "Favourable Situation",
   "linea:wrapper:loading": "Loading data..."
 }
