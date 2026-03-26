@@ -25,7 +25,7 @@ export class DangerRatingChart extends AbstractChart {
     return normalized;
   }
 
-  render() {
+  async render(): Promise<void> {
     if (this.plot) {
       this.plot.destroy();
       this.plot = null;

@@ -21,7 +21,7 @@ export class DangerRatingChart extends AbstractChart {
     "#6108dde6",
   ];
 
-  render(): void {
+  async render(): Promise<void> {
     const bulletinData = new BulletinData(this.bulletins);
 
     if (

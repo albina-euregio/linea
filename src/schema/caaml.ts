@@ -70,7 +70,13 @@ const metaDataSchema = z
   })
   .strict();
 
-const customDataSchema = z.unknown();
+const customDataSchema = z.looseObject({
+  LWD_Tyrol: z
+    .object({
+      dangerPatterns: z.array(z.string()).optional(),
+    })
+    .optional(),
+});
 
 const personSchema = z
   .object({

@@ -3,7 +3,7 @@ import {
   opts_series_avalanches,
   opts_series_observations,
   opts_series_precipitation,
-} from "./series-options/opts_avalanches";
+} from "./series-options/avalanches-opts";
 import { AbstractChart } from "./abstract-chart";
 import { Observations, WeatherStationData } from "./datastore";
 
@@ -34,7 +34,7 @@ export class AvalanchesChart extends AbstractChart {
     }
   }
 
-  render() {
+  async render(): Promise<void> {
     const countPerDayObservations = this.observations.countperday;
     const countPerDay = this.observations.avalanches.countperday;
     const precipitationPerDay = this.weather

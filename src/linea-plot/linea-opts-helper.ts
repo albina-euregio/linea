@@ -6,14 +6,6 @@ import { cursorOpts } from "../shared/cursor-opts";
 // Create a single sync instance for all charts
 const syncCursor = uPlot.sync("weather-charts");
 
-export interface SplitOptions {
-  uplot: uPlot;
-  mins: number[];
-  maxs: number[];
-  splits: number[][];
-  splitcount: number;
-}
-
 export class LineaOptsHelper extends OptsHelper {
   static UpdateAxisLabels(
     u: uPlot,

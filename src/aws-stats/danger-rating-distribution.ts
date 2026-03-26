@@ -6,7 +6,7 @@ import {
   getDangerDistributionSeries,
   opts_danger_rating_distribution,
   opts_danger_rating_distribution_reference_series,
-} from "./series-options/danger-rating-distribution";
+} from "./series-options/danger-rating-distribution-opts";
 
 export class DangerRatingChart extends AbstractChart {
   async onConnected(): Promise<void> {
@@ -14,7 +14,7 @@ export class DangerRatingChart extends AbstractChart {
     this.exportModal.legend = false;
   }
 
-  render(): void {
+  async render(): Promise<void> {
     if (this.plot) {
       this.plot.destroy();
       this.plot = null;
