@@ -202,7 +202,3 @@ export const bulletinCollectionSchema = z
 
 export type Bulletin = z.infer<typeof bulletinSchema>;
 export type BulletinCollection = z.infer<typeof bulletinCollectionSchema>;
-
-export function parseBulletinCollection(payload: unknown): BulletinCollection {
-  return bulletinCollectionSchema.parse(payload);
-}

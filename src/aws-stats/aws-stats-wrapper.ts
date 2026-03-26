@@ -4,7 +4,7 @@ import "./danger-rating-distribution";
 import css from "./aws-stats-wrapper.css?raw";
 import { BulletinData, Observations } from "./datastore";
 import { fetchSMET } from "../data/smet-data";
-import type { Result } from "../data/station-data";
+import { StationData } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
 
 export function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
@@ -15,10 +15,12 @@ export function parseDateBoundary(date: string | null, isEnd: boolean): number |
 }
 
 function filterWeatherByDate(
-  result: Result,
+  result: StationData,
   startDate: string | null,
   endDate: string | null,
-): Result {
+): StationData {
+  // FIXME use StationData.filter
+
   const start = parseDateBoundary(startDate, false);
   const end = parseDateBoundary(endDate, true);
 
@@ -38,13 +40,15 @@ function filterWeatherByDate(
       key,
       indices.map((index) => values[index]),
     ]),
-  ) as Result["values"];
+  ) as StationData["values"];
 
-  return {
-    ...result,
-    timestamps: indices.map((index) => result.timestamps[index]),
-    values: filteredValues,
-  };
+  return new StationData(
+    result.station,
+    result.altitude,
+    indices.map((index) => result.timestamps[index]),
+    result.units,
+    filteredValues,
+  );
 }
 
 class AwsStats extends HTMLElement {
@@ -96,7 +100,7 @@ class AwsStats extends HTMLElement {
       loadPromises.push(
         (async () => {
           try {
-            const result: Result = await fetchSMET(this.getAttribute("stationsrc") || "");
+            const result: StationData = await fetchSMET(this.getAttribute("stationsrc") || "");
             const filteredResult = filterWeatherByDate(
               result,
               this.getAttribute("start-date"),

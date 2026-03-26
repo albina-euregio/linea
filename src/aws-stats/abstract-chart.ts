@@ -3,7 +3,7 @@ import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import { AwsStatsExportModal } from "./aws-stats-export-modal";
 import { i18n } from "../i18n";
-import type { Bulletin } from "./bulletin-schema";
+import type { Bulletin } from "../schema/caaml";
 
 export abstract class AbstractChart extends HTMLElement {
   public container!: HTMLDivElement;

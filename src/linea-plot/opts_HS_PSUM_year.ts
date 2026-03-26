@@ -2,6 +2,7 @@ import uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper, type SplitOptions } from "./linea-opts-helper";
+import type { ParameterType } from "../data/station-data.ts";
 
 /**
  * uPlot options for snow-height/year [cm]
@@ -121,7 +122,7 @@ export const opts_HS_year: uPlot.Options = {
   ],
 };
 const baseHsSeries = (key: string, color: string): uPlot.Series => ({
-  label: i18n.message(`linea:parameter:${key}`),
+  label: i18n.message(`linea:parameter:${key as ParameterType}`),
   stroke: color,
   width: 1.5,
   scale: "y",

@@ -1,5 +1,5 @@
 import { parseGeosphereData } from "./geosphere-data";
-import type { ParameterType, Result, Units, Values } from "./station-data";
+import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 
 const DEFAULT_UNITS: Units = {
@@ -7,16 +7,16 @@ const DEFAULT_UNITS: Units = {
   TA: "K",
   TD: "K",
   TSS: "K",
-  TSG: "K",
+  // TSG: "K",
   RH: "1",
   VW_MAX: "m/s",
   VW: "m/s",
   DW: "degree",
   ISWR: "W/m²",
-  RSWR: "W/m²",
-  ILWR: "W/m²",
-  OLWR: "W/m²",
-  PINT: "mm/h",
+  // RSWR: "W/m²",
+  // ILWR: "W/m²",
+  // OLWR: "W/m²",
+  // PINT: "mm/h",
   PSUM: "mm",
   HS: "m",
   NS: "m",
@@ -30,7 +30,7 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
   mm: { to: "mm", convert: unitTransformer("mm", "mm") },
 };
 
-export async function fetchSMET(url: string): Promise<Result> {
+export async function fetchSMET(url: string): Promise<StationData> {
   let response = await fetch(url);
   if (!response.ok) {
     throw new Error(
@@ -59,7 +59,7 @@ export async function fetchSMET(url: string): Promise<Result> {
   return parseSMET(smet);
 }
 
-export function parseSMET(smet: string): Result {
+export function parseSMET(smet: string): StationData {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
   let values: number[][] = [];
@@ -130,11 +130,11 @@ export function parseSMET(smet: string): Result {
   });
 
   units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
-  return {
+  return new StationData(
     station,
     altitude,
-    timestamps: timestamps.slice(0, dataIndex),
-    units: Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
-    values: Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,
-  };
+    timestamps.slice(0, dataIndex),
+    Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
+    Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,
+  );
 }

@@ -80,7 +80,7 @@ export class YearData {
         yearData.values.push(value);
       }
     }
-    const lastDate = yearData.dates[yearData.dates.length - 1];
+    const lastDate = yearData.dates.at(-1);
     if (Temporal.PlainDate.compare(lastDate, endDate) < 0) {
       for (
         let d = lastDate.add({ days: 1 });

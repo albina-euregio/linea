@@ -1,4 +1,4 @@
-import { parseBulletinCollection, type Bulletin, type BulletinCollection } from "./bulletin-schema";
+import { type Bulletin, type BulletinCollection, bulletinCollectionSchema } from "../schema/caaml";
 import { i18n } from "../i18n";
 
 export class Observations {
@@ -132,7 +132,7 @@ export class Observation {
 }
 
 export class AvalancheObservation extends Observation {
-  public properties: {
+  declare properties: {
     stability: string;
     authorName: string;
     content: string;
@@ -517,7 +517,7 @@ export class BulletinData {
           continue;
         }
         const payload: unknown = await response.json();
-        const parsed = parseBulletinCollection(payload);
+        const parsed = bulletinCollectionSchema.parse(payload);
         allBulletins.push(...parsed.bulletins);
       } catch (error) {
         console.error(`Error loading bulletin from ${u}:`, error);
@@ -533,7 +533,7 @@ export class BulletinData {
       throw new Error(`Failed to load bulletins: ${response.statusText}`);
     }
     const payload: unknown = await response.json();
-    const parsed = parseBulletinCollection(payload);
+    const parsed = bulletinCollectionSchema.parse(payload);
     this.bulletins = parsed.bulletins;
     return parsed;
   }
