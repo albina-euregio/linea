@@ -18,11 +18,14 @@ export const timeAxis: uPlot.Axis = {
     } else if (foundIncr >= 28 * d) {
       opts = [{ month: "short" }, { year: "numeric" }];
     } else if (foundIncr >= d) {
-      opts = [{ month: "short", day: "numeric" }, { year: "numeric" }];
+      opts = [
+        { weekday: "short", day: "numeric" },
+        { month: "short", year: "2-digit" },
+      ];
     } else {
       opts = [
         { hour: "2-digit", minute: "2-digit" },
-        { month: "short", day: "2-digit" },
+        { weekday: "short", month: "2-digit", day: "2-digit" },
       ];
     }
     return splits.map((s) =>
