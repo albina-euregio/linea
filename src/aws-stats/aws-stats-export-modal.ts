@@ -62,7 +62,8 @@ export class AwsStatsExportModal extends AbstractExportModal {
     this.wrapper = wrapper;
 
     (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
-    (this.modal.querySelector("#btnExportIframe") as HTMLElement)!.style.display = "none";
+    const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
+    titleInput.style.display = "none";
   }
 
   /**
@@ -79,98 +80,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     this.exportSettings.style.display = "block";
     this.exportResult.style.display = "none";
 
-    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.wrapper.charts
-      .map((chart, index) => {
-        const plot = chart.plot;
-        const titleFromDom = plot?.root.querySelector(".u-title")?.textContent?.trim();
-        const titleFromOpts = (plot as unknown as { opts?: { title?: string } } | null)?.opts
-          ?.title;
-        const chartTitle = titleFromDom || titleFromOpts || `Chart ${index + 1}`;
-
-        const seriesOptions = (plot?.series ?? [])
-          .slice(1)
-          .map((series, i) => {
-            const seriesIndex = i + 1;
-            return `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
-            <input type="checkbox" class="diagram-series-checkbox-${index}" value="${seriesIndex}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-            ${series.label ?? `Series ${seriesIndex}`}
-            </label>`;
-          })
-          .join("");
-
-        return `
-          <div style="display: flex; flex-direction: row; gap:20px; align-items: flex-start;">
-            <label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
-              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-              ${chartTitle}
-            </label>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px;">${seriesOptions}</div>
-          </div>
-        `;
-      })
-      .join("");
-
-    const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
-    if (titleInput) {
-      titleInput.value = this.generateTitleString();
-    }
-
-    this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
-      cb.addEventListener("change", (e) => {
-        const checkbox = e.currentTarget as HTMLInputElement;
-        const chartIndex = Number(checkbox.value);
-        this.modal
-          .querySelectorAll(`.diagram-series-checkbox-${chartIndex}`)
-          .forEach((seriesCheckbox) => {
-            (seriesCheckbox as HTMLInputElement).disabled = !checkbox.checked;
-          });
-        const input = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
-        if (input) {
-          input.value = this.generateTitleString();
-        }
-      });
-    });
-
-    this.modal.querySelectorAll('[class^="diagram-series-checkbox-"]').forEach((cb) => {
-      cb.addEventListener("change", () => {
-        const input = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
-        if (input) {
-          input.value = this.generateTitleString();
-        }
-      });
-    });
-  }
-
-  private getCheckedDiagramIndices(): number[] {
-    return Array.from(this.modal.querySelectorAll(".diagram-checkbox:checked"))
-      .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
-      .filter((n) => Number.isFinite(n));
-  }
-
-  private getCheckedSeriesIndices(chartIndex: number): number[] {
-    return Array.from(this.modal.querySelectorAll(`.diagram-series-checkbox-${chartIndex}:checked`))
-      .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
-      .filter((n) => Number.isFinite(n));
-  }
-
-  private generateTitleString(): string {
-    const titles: string[] = [];
-    for (const chartIndex of this.getCheckedDiagramIndices()) {
-      const chart = this.wrapper.charts[chartIndex];
-      const plot = chart?.plot;
-      if (!plot) {
-        continue;
-      }
-      const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
-      if (selectedSeries.length === 0) {
-        continue;
-      }
-      const titleFromDom = plot.root.querySelector(".u-title")?.textContent?.trim() ?? "";
-      const titleFromOpts = (plot as unknown as { opts?: { title?: string } }).opts?.title ?? "";
-      titles.push(titleFromDom || titleFromOpts || `Chart ${chartIndex + 1}`);
-    }
-
-    return titles.join(" – ");
+    this.addDiagramsToExportSettings(this.wrapper.charts.map((c) => c.plot));
   }
 
   private exportPlotToPNG(

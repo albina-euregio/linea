@@ -54,7 +54,7 @@ export class LineaExportModal extends AbstractExportModal {
    * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
    */
   constructor(modal: HTMLDivElement, lineaPlot: LineaPlot) {
-    super(modal);
+    super(modal, lineaPlot.hasAttribute("showinteractiveblogexport"));
     this.lineaPlot = lineaPlot;
   }
 
@@ -72,24 +72,8 @@ export class LineaExportModal extends AbstractExportModal {
     this.exportSettings.style.display = "block";
     this.exportResult.style.display = "none";
 
-    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.view.charts
-      .map((chart, index) => {
-        let options = "";
-        chart.plotnames.forEach((name, i) => {
-          options += `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
-            <input type="checkbox" class="diagram-plot-checkbox-${index}" value="${i}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-            ${name}
-            </label>`;
-        });
+    this.addDiagramsToExportSettings(this.lineaPlot.view.charts);
 
-        return `
-          <div style="display: flex; flex-direction: row; gap:20px;"><label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
-              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-              ${chart.result.station} (${chart.result.altitude}m)
-          </label>${options}</div>
-          `;
-      })
-      .join("");
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
@@ -126,7 +110,7 @@ export class LineaExportModal extends AbstractExportModal {
     const resultsFiltered: StationData[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
-      const activeplots = this.#getCheckedPlotIndices(index);
+      const activeplots = this.getCheckedSeriesIndices(index);
       let result = new StationData(
         lc.result.station,
         lc.result.altitude,
@@ -204,8 +188,8 @@ export class LineaExportModal extends AbstractExportModal {
     const binary = LineaExportModal.toBinary(html);
 
     let totalCanvases = 0;
-    this.#getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.#getCheckedPlotIndices(index).length;
+    this.getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
     const iframecode = `<iframe
@@ -248,8 +232,8 @@ export class LineaExportModal extends AbstractExportModal {
     const binary = LineaExportModal.toBinary(html);
 
     let totalCanvases = 0;
-    this.#getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.#getCheckedPlotIndices(index).length;
+    this.getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
     const iframeshortcode = `[lineaplotblog height="${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
@@ -373,7 +357,7 @@ export class LineaExportModal extends AbstractExportModal {
     }
 
     activeLinecharts.forEach((lineachart, index) => {
-      const plotindices = this.#getCheckedPlotIndices(index);
+      const plotindices = this.getCheckedSeriesIndices(index);
       if (plotindices.length == 0) {
         return;
       }
@@ -548,7 +532,7 @@ export class LineaExportModal extends AbstractExportModal {
    */
   #getActiveLineacharts(): AbstractLineaChart[] {
     const activeCharts: AbstractLineaChart[] = [];
-    const indices = this.#getCheckedDiagramIndices();
+    const indices = this.getCheckedDiagramIndices();
     let i = 0;
     for (const lineachart of this.lineaPlot.view.charts) {
       if (indices.includes(i)) {
@@ -557,30 +541,5 @@ export class LineaExportModal extends AbstractExportModal {
       i += 1;
     }
     return activeCharts;
-  }
-
-  #getCheckedPlotIndices(index: number): number[] {
-    return this.#evaluateCheckboxes(`.diagram-plot-checkbox-${index}`);
-  }
-
-  /**
-   * Gets the indices of checked diagram checkboxes.
-   *
-   * @private
-   * @returns {number[]} Array of checked checkbox indices
-   */
-  #getCheckedDiagramIndices(): number[] {
-    return this.#evaluateCheckboxes(".diagram-checkbox");
-  }
-
-  #evaluateCheckboxes(classname: string): number[] {
-    const indices: number[] = [];
-    const checkboxes = this.modal.querySelectorAll(classname) as NodeListOf<HTMLInputElement>;
-    checkboxes.forEach((cb) => {
-      if (cb.checked) {
-        indices.push(parseInt(cb.value));
-      }
-    });
-    return indices;
   }
 }
