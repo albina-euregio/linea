@@ -22,6 +22,13 @@ LINEA is featuring weather station visualization on:
 - https://avalanche.report/weather/stations
 - https://eaws-bulletin-map.legner.me/?stations=1
 
+## Usage: integrating weather stations in albina-website
+
+1. Provide a weather station listing in the GeoJSON format specified in https://albina-euregio.gitlab.io/linea/listing.schema.json (`src/schema/listing.ts`)
+2. For each weather station, provide two SMET files containing the data of the last ≈7 days, ≈6 months, respectively.
+
+Examples: https://static.avalanche.report/weather_stations/linea.geojson, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz
+
 ## Contributing
 
 1. Install [NodeJS](https://nodejs.org/en/) and [pnpm](https://pnpm.io/)
@@ -177,9 +184,7 @@ bulletin-filter-micro-region='["AT-07-14-01", "AT-07-01", "AT-07-27", "AT-07-14-
 
 The charts in `chart-type` are appended after data fetching into the wrapper component. The other ones are self-explanatory.
 
-# Miscellaneous
-
-## Installing the wordpress plugin
+## Installing the Wordpress plugin
 
 To install the wordpress `linea-plot-blog.php` plugin simply go to your wordpress installations `wp-content` folder and copy the plugin file into `mu-plugins` (create folder, if no exists). Then reload your webserver.
 For Apache `systemctl reload apache2` is enough to load it.
