@@ -122,7 +122,7 @@ export class LineaExportModal extends AbstractExportModal {
       let result = new StationData(
         lc.result.station,
         lc.result.altitude,
-        lc.result.timestamps,
+        lc.plots[0].data[0] as number[],
         {},
         {},
       );
@@ -132,7 +132,7 @@ export class LineaExportModal extends AbstractExportModal {
             result.values.TA = lc.result.values.TA ?? [];
             result.values.TD = lc.result.values.TD ?? [];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:newsnow")) {
-            result.values.NS = lc.result.values.NS;
+            result.values.NS = lc.result.values.NS ?? [];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
             result.values.HS = lc.result.values.HS ?? [];
             result.values.PSUM = lc.result.values.PSUM ?? [];
@@ -141,19 +141,51 @@ export class LineaExportModal extends AbstractExportModal {
       } else {
         activeplots.forEach((index) => {
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
-            result.values.TA = lc.result.values.TA ?? [];
-            result.values.TD = lc.result.values.TD ?? [];
-            result.values.TSS = lc.result.values.TSS ?? [];
+            const airTempIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:TA"),
+            );
+            result.values.TA = lc.plots[index].data[airTempIndex] as (number | null)[];
+            const dewPointIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:TD"),
+            );
+            result.values.TD = lc.plots[index].data[dewPointIndex] as (number | null)[];
+            const surfaceIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:TSS"),
+            );
+            result.values.TSS = lc.plots[index].data[surfaceIndex] as (number | null)[];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:wind")) {
-            result.values.VW = lc.result.values.VW ?? [];
-            result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
-            result.values.DW = lc.result.values.DW ?? [];
+            const windIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:VW_MAX"),
+            );
+            result.values.VW = lc.plots[index].data[windIndex] as (number | null)[];
+            const windMaxIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:VW_MAX"),
+            );
+            result.values.VW_MAX = lc.plots[index].data[windMaxIndex] as (number | null)[];
+            const windDirectionIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:DW"),
+            );
+            result.values.DW = lc.plots[index].data[windDirectionIndex] as (number | null)[];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:humidity_gr")) {
-            result.values.RH = lc.result.values.RH ?? [];
-            result.values.ISWR = lc.result.values.ISWR ?? [];
+            const humidityIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:RH"),
+            );
+            result.values.RH = lc.plots[index].data[humidityIndex] as (number | null)[];
+            const globalRadiationIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:ISWR"),
+            );
+            result.values.ISWR = lc.result.values.ISWR
+              ? (lc.plots[index].data[globalRadiationIndex] as (number | null)[])
+              : [];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
-            result.values.HS = lc.result.values.HS ?? [];
-            result.values.PSUM = lc.result.values.PSUM ?? [];
+            const snowHeightIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:HS"),
+            );
+            result.values.HS = lc.plots[index].data[snowHeightIndex] as (number | null)[];
+            const precipitationIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:PSUM"),
+            );
+            result.values.PSUM = lc.plots[index].data[precipitationIndex] as (number | null)[];
           }
         });
       }
