@@ -1,7 +1,7 @@
-import uPlot from "uplot";
 import { i18n } from "../i18n";
 import type { AbstractChart } from "./abstract-chart";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
+import type { AwsStats } from "./aws-stats-wrapper";
 
 /**
  * ExportModal class handles the export functionality for AwsStats charts.
@@ -36,8 +36,14 @@ import { AbstractExportModal } from "../shared/abstract-export-modal";
  * exportModal.show();
  */
 export class AwsStatsExportModal extends AbstractExportModal {
-  private chart: AbstractChart;
-  public legend: boolean = true;
+  private wrapper: AwsStats;
+  private readonly swatchSize = 18;
+  private readonly legendItemHeight = 22;
+  private readonly legendPadding = 20;
+  private readonly labelFontSize = 16;
+
+  private readonly titleFontFamily =
+    'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
 
   /**
    * Creates an instance of ExportModal and initializes the modal UI.
@@ -51,9 +57,9 @@ export class AwsStatsExportModal extends AbstractExportModal {
    * @param {HTMLDivElement} modal - The modal container element
    * @param {AbstractChart} chart - The AbstractChart instance to export
    */
-  constructor(modal: HTMLDivElement, chart: AbstractChart) {
+  constructor(modal: HTMLDivElement, wrapper: AwsStats) {
     super(modal);
-    this.chart = chart;
+    this.wrapper = wrapper;
 
     (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
     (this.modal.querySelector("#btnExportIframe") as HTMLElement)!.style.display = "none";
@@ -72,14 +78,176 @@ export class AwsStatsExportModal extends AbstractExportModal {
     this.modal.style.display = "block";
     this.exportSettings.style.display = "block";
     this.exportResult.style.display = "none";
+
+    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.wrapper.charts
+      .map((chart, index) => {
+        const plot = chart.plot;
+        const titleFromDom = plot?.root.querySelector(".u-title")?.textContent?.trim();
+        const titleFromOpts = (plot as unknown as { opts?: { title?: string } } | null)?.opts
+          ?.title;
+        const chartTitle = titleFromDom || titleFromOpts || `Chart ${index + 1}`;
+
+        const seriesOptions = (plot?.series ?? [])
+          .slice(1)
+          .map((series, i) => {
+            const seriesIndex = i + 1;
+            return `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
+            <input type="checkbox" class="diagram-series-checkbox-${index}" value="${seriesIndex}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
+            ${series.label ?? `Series ${seriesIndex}`}
+            </label>`;
+          })
+          .join("");
+
+        return `
+          <div style="display: flex; flex-direction: row; gap:20px; align-items: flex-start;">
+            <label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
+              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
+              ${chartTitle}
+            </label>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px;">${seriesOptions}</div>
+          </div>
+        `;
+      })
+      .join("");
+
     const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
     if (titleInput) {
-      const titleFromDom = this.chart.plot?.root.querySelector(".u-title")?.textContent?.trim();
-      const titleFromOpts = (this.chart.plot as unknown as { opts?: { title?: string } } | null)
-        ?.opts?.title;
-      const chartTitle = titleFromDom || titleFromOpts || "";
-      titleInput.value = chartTitle;
+      titleInput.value = this.generateTitleString();
     }
+
+    this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
+      cb.addEventListener("change", (e) => {
+        const checkbox = e.currentTarget as HTMLInputElement;
+        const chartIndex = Number(checkbox.value);
+        this.modal
+          .querySelectorAll(`.diagram-series-checkbox-${chartIndex}`)
+          .forEach((seriesCheckbox) => {
+            (seriesCheckbox as HTMLInputElement).disabled = !checkbox.checked;
+          });
+        const input = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
+        if (input) {
+          input.value = this.generateTitleString();
+        }
+      });
+    });
+
+    this.modal.querySelectorAll('[class^="diagram-series-checkbox-"]').forEach((cb) => {
+      cb.addEventListener("change", () => {
+        const input = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
+        if (input) {
+          input.value = this.generateTitleString();
+        }
+      });
+    });
+  }
+
+  private getCheckedDiagramIndices(): number[] {
+    return Array.from(this.modal.querySelectorAll(".diagram-checkbox:checked"))
+      .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
+      .filter((n) => Number.isFinite(n));
+  }
+
+  private getCheckedSeriesIndices(chartIndex: number): number[] {
+    return Array.from(this.modal.querySelectorAll(`.diagram-series-checkbox-${chartIndex}:checked`))
+      .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
+      .filter((n) => Number.isFinite(n));
+  }
+
+  private generateTitleString(): string {
+    const titles: string[] = [];
+    for (const chartIndex of this.getCheckedDiagramIndices()) {
+      const chart = this.wrapper.charts[chartIndex];
+      const plot = chart?.plot;
+      if (!plot) {
+        continue;
+      }
+      const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
+      if (selectedSeries.length === 0) {
+        continue;
+      }
+      const titleFromDom = plot.root.querySelector(".u-title")?.textContent?.trim() ?? "";
+      const titleFromOpts = (plot as unknown as { opts?: { title?: string } }).opts?.title ?? "";
+      titles.push(titleFromDom || titleFromOpts || `Chart ${chartIndex + 1}`);
+    }
+
+    return titles.join(" – ");
+  }
+
+  private exportPlotToPNG(
+    outCanvas: HTMLCanvasElement,
+    chart: AbstractChart,
+    yOffset: number,
+    chartTitle: string,
+    legendLines: Array<{ items: Array<{ label: string; color: string; width: number }> }>,
+    drawLegend: boolean,
+  ): number {
+    const plot = chart.plot;
+    const sourceCanvas = plot?.root.querySelector("canvas");
+    if (!plot || !sourceCanvas) {
+      return yOffset;
+    }
+
+    const ctx = outCanvas.getContext("2d")!;
+    const titleHeight = chartTitle ? 40 : 0;
+    const xOffset = (outCanvas.width - sourceCanvas.width) / 2;
+
+    if (chartTitle) {
+      ctx.fillStyle = "#000";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+
+      let fontSize = 24;
+      ctx.font = `bold ${fontSize}px ${this.titleFontFamily}`;
+      let titleWidth = ctx.measureText(chartTitle).width;
+
+      while (titleWidth > outCanvas.width - 40 && fontSize > 12) {
+        fontSize -= 2;
+        ctx.font = `bold ${fontSize}px ${this.titleFontFamily}`;
+        titleWidth = ctx.measureText(chartTitle).width;
+      }
+      ctx.fillText(chartTitle, outCanvas.width / 2, yOffset + 18);
+    }
+
+    let y = yOffset + titleHeight;
+    ctx.drawImage(sourceCanvas, xOffset, y);
+    y += sourceCanvas.height;
+
+    if (drawLegend) {
+      let lineIndex = 0;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = `${this.labelFontSize}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+      for (const line of legendLines) {
+        const totalLineWidth = line.items.reduce((sum, item) => sum + item.width, 0);
+        const centeredStartX = (outCanvas.width - totalLineWidth) / 2;
+
+        let x = centeredStartX;
+        for (const item of line.items) {
+          ctx.fillStyle = item.color;
+          ctx.fillRect(
+            x,
+            y +
+              this.legendPadding +
+              (lineIndex * this.legendItemHeight * 3) / 2 -
+              this.swatchSize / 2,
+            this.swatchSize,
+            this.swatchSize,
+          );
+
+          ctx.fillStyle = "#000";
+          ctx.fillText(
+            item.label,
+            x + this.swatchSize + 8,
+            y + this.legendPadding + (lineIndex * this.legendItemHeight * 3) / 2,
+          );
+          x += item.width;
+        }
+        lineIndex++;
+      }
+      y += (legendLines.length * this.legendItemHeight * 3) / 2;
+    }
+
+    return y;
   }
 
   /**
@@ -105,172 +273,195 @@ export class AwsStatsExportModal extends AbstractExportModal {
     { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
     noshow: boolean = false,
   ): Promise<string> {
-    const canvases: HTMLCanvasElement[] = [];
-    const series: uPlot.Series[] = [];
-    const legendItems: Record<string, string> = {};
+    const sections: Array<{
+      chart: AbstractChart;
+      chartTitle: string;
+      legendLines: Array<{ items: Array<{ label: string; color: string; width: number }> }>;
+      sectionHeight: number;
+      canvasWidth: number;
+    }> = [];
+    const resizedCharts: Array<{ chart: AbstractChart; initialHeight: number }> = [];
+    const seriesVisibilityState: Array<{
+      chart: AbstractChart;
+      visibility: Array<{ index: number; show: boolean }>;
+    }> = [];
 
-    const parentWidth =
-      (width * this.chart.container.clientWidth) /
-      this.chart.plot!.root.querySelector("canvas")!.width;
-
-    const initHeightPerCanvas = this.chart.plot!.height;
-
-    this.chart.resizeObserver.unobserve(this.chart.container);
-    this.chart.resizePlot(parentWidth, this.chart.container.style, heightPerCanvas);
-    await new Promise((r) => setTimeout(r, 1));
-
-    canvases.push(this.chart.plot!.root.querySelector("canvas")!);
-    series.push(...this.chart.plot!.series.slice(1));
-    this.chart.plot!.series.slice(1).map((s, i) => {
-      const label = s.label ?? `Series ${i + 1}`;
-      let color = "#000000";
-      if (typeof s.stroke === "string") {
-        color = s.stroke;
-      } else if (typeof s.stroke === "function") {
-        const c = s.stroke(this.chart.plot, i + 1);
-        if (typeof c === "string") color = c;
-      }
-      legendItems[String(label)] = color;
-    });
-
-    if (Object.keys(legendItems).length == 0) {
+    const selectedChartIndices = this.getCheckedDiagramIndices();
+    if (selectedChartIndices.length === 0) {
       alert(i18n.message("linea:message:noplotselected"));
       return "";
     }
 
-    const swatchSize = 18;
-    const legendItemHeight = 22;
-    const legendPadding = 20;
-    const labelFontSize = 16;
-    const legendLines: Array<{
-      items: Array<{ label: string; color: string; width: number }>;
-      startX: number;
-    }> = [];
-    //Calculate legend layout – try to fit as many items as possible into one line, then create new lines as needed.
-    if (Object.keys(legendItems).length > 0) {
-      const xStart = legendPadding * 2;
+    try {
+      for (const chartIndex of selectedChartIndices) {
+        const chart = this.wrapper.charts[chartIndex];
+        const plot = chart.plot;
+        const canvas = plot?.root.querySelector("canvas");
+        if (!plot || !canvas) {
+          continue;
+        }
 
-      const ctx = canvases[0].getContext("2d")!;
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = labelFontSize + "px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+        const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
+        const visibility: Array<{ index: number; show: boolean }> = [];
+        plot.series.slice(1).forEach((series, i) => {
+          const seriesIndex = i + 1;
+          visibility.push({ index: seriesIndex, show: !!series.show });
+          plot.setSeries(seriesIndex, { show: selectedSeries.includes(seriesIndex) });
+        });
+        seriesVisibilityState.push({ chart, visibility });
 
-      let currentLine: Array<{ label: string; color: string; width: number }> = [];
-      let currentLineWidth = 0;
+        const parentWidth = (width * chart.container.clientWidth) / canvas.width;
+        resizedCharts.push({ chart, initialHeight: plot.height });
+        chart.resizeObserver.unobserve(chart.container);
+        chart.resizePlot(parentWidth, chart.container.style, heightPerCanvas);
+      }
 
-      for (const [label, color] of Object.entries(legendItems)) {
-        const textwidth = ctx.measureText(label).width;
-        const itemWidth = swatchSize + 8 + textwidth + 10;
+      await new Promise((r) => setTimeout(r, 1));
 
-        if (currentLineWidth + itemWidth > canvases[0].width - legendPadding * 2) {
+      const drawLegend = !!this.wrapper.charts[0]?.exportConfiguration.pngLegend;
+
+      for (const chartIndex of selectedChartIndices) {
+        const chart = this.wrapper.charts[chartIndex];
+        const plot = chart.plot;
+        const canvas = plot?.root.querySelector("canvas");
+        if (!plot || !canvas) {
+          continue;
+        }
+
+        const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
+        if (selectedSeries.length === 0) {
+          continue;
+        }
+
+        const titleFromDom = plot.root.querySelector(".u-title")?.textContent?.trim() ?? "";
+        const titleFromOpts = (plot as unknown as { opts?: { title?: string } }).opts?.title ?? "";
+        const chartTitle = titleFromDom || titleFromOpts || title || "";
+
+        const legendItems: Record<string, string> = {};
+        selectedSeries.forEach((seriesIndex) => {
+          const s = plot.series[seriesIndex];
+          if (!s) {
+            return;
+          }
+          const label = s.label ?? `Series ${seriesIndex}`;
+          let color = "#000000";
+          if (typeof s.stroke === "string") {
+            color = s.stroke;
+          } else if (typeof s.stroke === "function") {
+            const c = s.stroke(plot, seriesIndex);
+            if (typeof c === "string") color = c;
+          }
+          legendItems[String(label)] = color;
+        });
+
+        const legendLines: Array<{
+          items: Array<{ label: string; color: string; width: number }>;
+        }> = [];
+        if (drawLegend && Object.keys(legendItems).length > 0) {
+          const legendCtx = canvas.getContext("2d")!;
+          legendCtx.textAlign = "left";
+          legendCtx.textBaseline = "middle";
+          legendCtx.font = `${this.labelFontSize}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+
+          let currentLine: Array<{ label: string; color: string; width: number }> = [];
+          let currentLineWidth = 0;
+
+          for (const [label, color] of Object.entries(legendItems)) {
+            const textwidth = legendCtx.measureText(label).width;
+            const itemWidth = this.swatchSize + 8 + textwidth + 10;
+
+            if (currentLineWidth + itemWidth > canvas.width - this.legendPadding * 2) {
+              if (currentLine.length > 0) {
+                legendLines.push({ items: currentLine });
+                currentLine = [];
+                currentLineWidth = 0;
+              }
+            }
+
+            currentLine.push({ label, color: color as string, width: itemWidth });
+            currentLineWidth += itemWidth;
+          }
+
           if (currentLine.length > 0) {
-            legendLines.push({ items: currentLine, startX: xStart });
-            currentLine = [];
-            currentLineWidth = 0;
+            legendLines.push({ items: currentLine });
           }
         }
-        currentLine.push({ label, color: color as string, width: itemWidth });
-        currentLineWidth += itemWidth;
+
+        const sectionTitleHeight = chartTitle ? 40 : 0;
+        const sectionLegendHeight = drawLegend
+          ? (legendLines.length * this.legendItemHeight * 3) / 2
+          : 0;
+        sections.push({
+          chart,
+          chartTitle,
+          legendLines,
+          sectionHeight: sectionTitleHeight + canvas.height + sectionLegendHeight,
+          canvasWidth: canvas.width,
+        });
       }
 
-      if (currentLine.length > 0) {
-        legendLines.push({ items: currentLine, startX: xStart });
+      if (sections.length === 0) {
+        alert(i18n.message("linea:message:noplotselected"));
+        return "";
       }
-    }
 
-    const titleHeight = title ? 40 : 0;
-    const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
-    const legendHeight = this.legend ? (legendLines.length * legendItemHeight * 3) / 2 : 0;
-    const totalHeight = titleHeight + chartsHeight + legendHeight;
+      const outCanvas = document.createElement("canvas");
+      outCanvas.width = Math.max(...sections.map((s) => s.canvasWidth));
+      outCanvas.height = sections.reduce((sum, s) => sum + s.sectionHeight, 0);
 
-    const outCanvas = document.createElement("canvas");
-    outCanvas.width = canvases[0].width;
-    outCanvas.height = totalHeight;
+      const ctx = outCanvas.getContext("2d")!;
+      ctx.imageSmoothingEnabled = false;
+      ctx.imageSmoothingQuality = "high";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
 
-    //fill background
-    const ctx = outCanvas.getContext("2d")!;
-    ctx.imageSmoothingEnabled = false;
-    ctx.imageSmoothingQuality = "high";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-    //draw title
-    if (title) {
-      ctx.fillStyle = "#000";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-
-      let fontSize = 24;
-      ctx.font = `bold ${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`;
-      let titleWidth = ctx.measureText(title).width;
-
-      // Reduce font size until title fits
-      while (titleWidth > outCanvas.width - 40 && fontSize > 12) {
-        fontSize -= 2;
-        ctx.font = `bold ${fontSize}px system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"`;
-        titleWidth = ctx.measureText(title).width;
+      let y = 0;
+      for (const section of sections) {
+        y = this.exportPlotToPNG(
+          outCanvas,
+          section.chart,
+          y,
+          section.chartTitle,
+          section.legendLines,
+          section.chart.exportConfiguration.pngLegend,
+        );
       }
-      ctx.fillText(title, outCanvas.width / 2, 18);
-    }
 
-    let y = titleHeight;
-    for (const c of canvases) {
-      ctx.drawImage(c, 0, y);
-      y += c.height;
-    }
+      if (!noshow) {
+        outCanvas.toBlob((blobdata) => {
+          this.exportdata = {
+            blob: blobdata,
+            data: outCanvas.toDataURL(),
+            filename: "export.png",
+            type: "image/png",
+          };
+        });
+        document.getElementById("exportCode")!.innerHTML =
+          `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+        document.getElementById("exportResult")!.style.display = "block";
+      }
 
-    if (this.legend) {
-      let lineIndex = 0;
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = labelFontSize + "px system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
-      for (const line of legendLines) {
-        const totalLineWidth = line.items.reduce((sum, item) => sum + item.width, 0);
-        const centeredStartX = (outCanvas.width - totalLineWidth) / 2;
-
-        let x = centeredStartX;
-        for (const item of line.items) {
-          // colored square
-          ctx.fillStyle = item.color;
-          ctx.fillRect(
-            x,
-            y + legendPadding + (lineIndex * legendItemHeight * 3) / 2 - swatchSize / 2,
-            swatchSize,
-            swatchSize,
-          );
-
-          // label
-          ctx.fillStyle = "#000";
-          ctx.fillText(
-            item.label,
-            x + swatchSize + 8,
-            y + legendPadding + (lineIndex * legendItemHeight * 3) / 2,
-          );
-          x += item.width;
+      return outCanvas.toDataURL();
+    } finally {
+      for (const state of seriesVisibilityState) {
+        const plot = state.chart.plot;
+        if (!plot) {
+          continue;
         }
-        lineIndex++;
+        for (const seriesState of state.visibility) {
+          plot.setSeries(seriesState.index, { show: seriesState.show });
+        }
+      }
+      for (const { chart, initialHeight } of resizedCharts) {
+        chart.resizePlot(chart.container.clientWidth, chart.container.style, initialHeight);
+        chart.resizeObserver.observe(chart.container);
       }
     }
-    this.chart.resizePlot(
-      this.chart.container.clientWidth,
-      this.chart.container.style,
-      initHeightPerCanvas,
-    );
-    this.chart.resizeObserver.observe(this.chart.container);
-
-    if (!noshow) {
-      outCanvas.toBlob((blobdata) => {
-        this.exportdata = {
-          blob: blobdata,
-          data: outCanvas.toDataURL(),
-          filename: "export.png",
-          type: "image/png",
-        };
-      });
-      document.getElementById("exportCode")!.innerHTML =
-        `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
-      document.getElementById("exportResult")!.style.display = "block";
-    }
-    return outCanvas.toDataURL();
   }
+}
+
+export interface AwsExportChartConfiguration {
+  title: string;
+  pngLegend: boolean;
+  interactiveLegend: boolean;
 }

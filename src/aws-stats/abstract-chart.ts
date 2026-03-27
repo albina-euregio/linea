@@ -1,15 +1,13 @@
 import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
-import { AwsStatsExportModal } from "./aws-stats-export-modal";
-import { i18n } from "../i18n";
 import type { Bulletin } from "../schema/caaml";
+import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 
 export abstract class AbstractChart extends HTMLElement {
   public container!: HTMLDivElement;
   public plot: uPlot | null = null;
   readonly resizeObserver: ResizeObserver;
-  readonly exportModal!: AwsStatsExportModal;
   protected bulletins!: Bulletin[];
 
   constructor() {
@@ -19,7 +17,6 @@ export abstract class AbstractChart extends HTMLElement {
         this.resizePlot(this.container.clientWidth, this.container.style);
       }
     });
-    this.exportModal = new AwsStatsExportModal(document.createElement("div"), this);
   }
 
   connectedCallback() {
@@ -71,16 +68,6 @@ export abstract class AbstractChart extends HTMLElement {
     const style = document.createElement("style");
     style.textContent = [cssComponent, cssuPlot].join("\n");
     this.appendChild(style);
-
-    const menubar = document.createElement("div");
-    menubar.className = "menubar";
-
-    const exportBtn = document.createElement("button");
-    exportBtn.textContent = i18n.message("linea:controls:value:export");
-    exportBtn.addEventListener("click", () => this.exportModal.show());
-    menubar.appendChild(exportBtn);
-    this.appendChild(menubar);
-    this.appendChild(this.exportModal.modal);
   }
 
   async render(): Promise<void> {}
@@ -99,6 +86,14 @@ export abstract class AbstractChart extends HTMLElement {
 
   get uplot(): uPlot | null {
     return this.plot;
+  }
+
+  get exportConfiguration(): AwsExportChartConfiguration {
+    return {
+      title: this.plot?.root.querySelector(".u-title")?.textContent?.trim() || "",
+      pngLegend: true,
+      interactiveLegend: true,
+    };
   }
 
   addSeries(series: uPlot.Series, data: (number | null)[]) {

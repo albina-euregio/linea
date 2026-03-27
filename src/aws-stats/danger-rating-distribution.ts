@@ -1,5 +1,6 @@
 import { i18n } from "../i18n";
 import { AbstractChart } from "./abstract-chart";
+import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import { BulletinData } from "./datastore";
 import {
   dangerDistributionOrder,
@@ -11,7 +12,6 @@ import {
 export class DangerRatingChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.exportModal.legend = false;
   }
 
   async render(): Promise<void> {
@@ -39,7 +39,7 @@ export class DangerRatingChart extends AbstractChart {
       5: 4,
     };
 
-    const counts = new Array<number>(dangerDistributionOrder.length).fill(0);
+    const counts = Array.from<number>({ length: dangerDistributionOrder.length }).fill(0);
     for (const entry of distribution) {
       const idx = indexByRating[String(entry.rating).toLowerCase()];
       if (idx !== undefined) {
@@ -73,6 +73,13 @@ export class DangerRatingChart extends AbstractChart {
       );
       this.addSeries(getDangerDistributionSeries(dangerDistributionOrder[i]), sparseSeries);
     }
+  }
+
+  get exportConfiguration(): AwsExportChartConfiguration {
+    return {
+      ...super.exportConfiguration,
+      pngLegend: false,
+    };
   }
 }
 

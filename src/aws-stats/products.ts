@@ -6,7 +6,6 @@ import { getStackedOpts, opts_products_bars } from "./series-options/products-op
 export class ProductsChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.exportModal.legend = false;
   }
 
   async render() {

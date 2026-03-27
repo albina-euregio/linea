@@ -1,5 +1,6 @@
 import { i18n, type messagesEN_t } from "../i18n";
 import { AbstractChart } from "./abstract-chart";
+import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import { BulletinData } from "./datastore";
 import {
   opts_danger_rating_micro_regions,
@@ -9,7 +10,6 @@ import {
 export class DangerRatingMicroRegionsChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.exportModal.legend = false;
   }
 
   async render(): Promise<void> {
@@ -56,6 +56,13 @@ export class DangerRatingMicroRegionsChart extends AbstractChart {
         distribution.ratings[i],
       );
     }
+  }
+
+  get exportConfiguration(): AwsExportChartConfiguration {
+    return {
+      ...super.exportConfiguration,
+      pngLegend: false,
+    };
   }
 }
 

@@ -2,11 +2,11 @@ import { AbstractChart } from "./abstract-chart";
 import type { Bulletin } from "../schema/caaml";
 import uPlot from "uplot";
 import { opts_danger_rating_altitude } from "./series-options/danger-rating-altitude-opts";
+import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 
 export class DangerRatingChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.exportModal.legend = false;
   }
 
   private parseElevationBound(bound: string | undefined, fallback: number) {
@@ -150,6 +150,13 @@ export class DangerRatingChart extends AbstractChart {
 
     this.plot.setScale("x", { min: minX, max: maxX });
     this.plot.setScale("y", { min: lowerBound, max: upperBound });
+  }
+
+  get exportConfiguration(): AwsExportChartConfiguration {
+    return {
+      ...super.exportConfiguration,
+      pngLegend: false,
+    };
   }
 }
 
