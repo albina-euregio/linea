@@ -132,7 +132,7 @@ const createSeries = (labelKey: any, color: string): uPlot.Series => ({
   value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
 });
 
-export const opts_TA = createSeries("linea:unit:temperature", "#DE2D26");
+export const opts_TA = createSeries("linea:parameter:TA", "#DE2D26");
 export const opts_TD = createSeries("linea:parameter:TD", "#6aafd5");
 export const opts_TSS = createSeries("linea:parameter:TSS", "#FC9272");
 
