@@ -42,14 +42,6 @@ export class LineaExportModal extends AbstractExportModal {
   private lineaPlot: LineaPlot;
   private readonly maxCanvasPixels = 50_000_000;
 
-  private static escapeHtmlAttribute(value: string): string {
-    return value
-      .replaceAll("&", "&amp;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
-  }
-
   /**
    * Creates an instance of ExportModal and initializes the modal UI.
    *
@@ -209,12 +201,13 @@ export class LineaExportModal extends AbstractExportModal {
     }
     const exports = this.getExportSettings();
 
-    const { resultsFiltered } = await this.#generateInteractiveExportData();
+    const resultsFiltered = await this.#generateInteractiveExportData();
+    const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
 
     const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
     let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
-      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
+      .replace('data=""', `data="${serializedData}"`)
       .replace('<img id="fallback" src="" />', "");
 
     if (this.lineaPlot.view instanceof WinterView) {
@@ -255,7 +248,7 @@ export class LineaExportModal extends AbstractExportModal {
       return;
     }
     const exports = this.getExportSettings();
-    const { resultsFiltered } = await this.#generateInteractiveExportData();
+    const resultsFiltered = await this.#generateInteractiveExportData();
     const dataUrl = await this.exportAllPlotsToPNG(
       { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
       true,
@@ -264,9 +257,10 @@ export class LineaExportModal extends AbstractExportModal {
       return;
     }
 
+    const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
     let html = `<div data-lineaplot-wrapper>
                     <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
-                    <linea-plot style="position: absolute; inset: 0; z-index: 2;" data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
+                    <linea-plot style="position: absolute; inset: 0; z-index: 2;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
                   </div>`;
 
     if (this.lineaPlot.view instanceof WinterView) {

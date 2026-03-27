@@ -35,6 +35,14 @@ import { AbstractLineaChart } from "../abstract-linea-chart";
  * exportModal.show();
  */
 export abstract class AbstractExportModal {
+  static escapeHtmlAttribute(value: string): string {
+    return value
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
   protected exportSettings: HTMLDivElement;
   protected exportResult: HTMLDivElement;
   protected exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;
