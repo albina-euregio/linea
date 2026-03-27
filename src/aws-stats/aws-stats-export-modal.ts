@@ -84,6 +84,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
   }
 
   protected async exportAsIframe() {
+    this.hideAllSeriesSelectionCheckboxes();
     const selectedChartIndices = this.getCheckedDiagramIndices();
     if (selectedChartIndices.length === 0) {
       alert(i18n.message("linea:message:noplotselected"));
@@ -244,6 +245,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
     noshow: boolean = false,
   ): Promise<string> {
+    this.showAllSeriesSelectionCheckboxes();
     const sections: Array<{
       chart: AbstractChart;
       chartTitle: string;

@@ -288,6 +288,24 @@ export abstract class AbstractExportModal {
       .filter((n) => Number.isFinite(n));
   }
 
+  protected hideAllSeriesSelectionCheckboxes() {
+    this.modal.querySelectorAll('[class^="diagram-series-checkbox-"]').forEach((checkbox) => {
+      const label = checkbox.closest("label") as HTMLLabelElement | null;
+      if (label) {
+        label.style.display = "none";
+      }
+    });
+  }
+
+  protected showAllSeriesSelectionCheckboxes() {
+    this.modal.querySelectorAll('[class^="diagram-series-checkbox-"]').forEach((checkbox) => {
+      const label = checkbox.closest("label") as HTMLLabelElement | null;
+      if (label) {
+        label.style.display = "block";
+      }
+    });
+  }
+
   /**
    * Resets the copyToClipboard Button
    */
