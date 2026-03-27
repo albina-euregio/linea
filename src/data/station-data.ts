@@ -83,6 +83,20 @@ export class StationData {
 }
 
 export class StationDataArray extends Array<StationData> {
+  static from(
+    data: {
+      station: string;
+      altitude: number;
+      timestamps: number[];
+      units: Units;
+      values: Values;
+    }[],
+  ) {
+    return new StationDataArray(
+      ...data.map((d) => new StationData(d.station, d.altitude, d.timestamps, d.units, d.values)),
+    );
+  }
+
   /**
    * Merges the results from the new fetch with the existing results in the view.
    * Mainly implemented to integrate the lazy source data into the existing one.
