@@ -155,7 +155,9 @@ export abstract class LineaView {
    * @param endDate  to when the data shall be shown
    */
   updateDatepickerStartEndDate(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime) {
-    this.dp?.selectDate([this.zonedDateTimeToDate(startDate), this.zonedDateTimeToDate(endDate)]);
+    this.dp?.selectDate([this.zonedDateTimeToDate(startDate), this.zonedDateTimeToDate(endDate)], {
+      silent: true,
+    });
   }
 
   /**
