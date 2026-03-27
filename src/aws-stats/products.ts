@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BlogService, BulletinData, Observations } from "./datastore";
 import { getStackedOpts, opts_products_bars } from "./series-options/products-opts";
 import type { StackedData } from "../shared/stacked-series-opts";
@@ -52,14 +52,14 @@ export class ProductsChart extends AbstractChart {
       blogsTrentino,
     ]);
 
-    this.rawData = [timestamps, ...seriesData];
-    this.plotData(this.rawData as uPlot.AlignedData);
+    this.plotInformation = { data: [timestamps, ...seriesData] };
+    this.plotData(this.plotInformation);
   }
 
-  plotData(data: uPlot.AlignedData): void {
+  plotData(plotInformation: PlotInformation): void {
     let { opts: stackedOpts, data: stackedData } = getStackedOpts(
       opts_products_bars,
-      data as StackedData,
+      plotInformation.data as StackedData,
       null,
     );
     this.createPlot(stackedOpts, stackedData as uPlot.AlignedData);
