@@ -191,7 +191,7 @@ export class LineaExportModal extends AbstractExportModal {
 
     const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
 
-    const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
+    const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
     let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
       .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
