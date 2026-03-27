@@ -83,6 +83,67 @@ export class AwsStatsExportModal extends AbstractExportModal {
     this.addDiagramsToExportSettings(this.wrapper.charts.map((c) => c.plot));
   }
 
+  protected async exportAsIframe() {
+    const selectedChartIndices = this.getCheckedDiagramIndices();
+    if (selectedChartIndices.length === 0) {
+      alert(i18n.message("linea:message:noplotselected"));
+      return;
+    }
+
+    const chartTypes = (this.wrapper.getAttribute("chart-type") ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    if (selectedChartIndices.length === 0) {
+      alert(i18n.message("linea:message:noplotselected"));
+      return;
+    }
+
+    const elements: string[] = [];
+
+    for (const i of selectedChartIndices) {
+      const chart: AbstractChart = this.wrapper.charts[i];
+      elements.push(
+        `<${chartTypes[i]} data='${JSON.stringify(chart.plotInformation)}'></${chartTypes[i]}>`,
+      );
+    }
+
+    const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
+    const body = `<body>
+        ${elements.join("\n")}
+        <script type="module" src="https://albina-euregio.gitlab.io/linea/aws-stats.mjs"></script>
+      </body>`;
+    let html = iframeTemplate.replace("BODY", body).replace('lang="en"', `lang="${i18n.lang}"`);
+
+    const exports = this.getExportSettings();
+    const estimatedHeight = Math.max(
+      250,
+      (exports.heightPerCanvas + 90) * selectedChartIndices.length,
+    );
+    const iframeTitle = AbstractExportModal.escapeHtmlAttribute(exports.title || "AWS Stats");
+
+    const iframecode = `<iframe
+          srcdoc="${AbstractExportModal.escapeHtmlAttribute(html)}"
+          frameborder="0"
+          scrolling="no"
+          style="width: 100%; height: ${estimatedHeight}px;border:none;overflow:hidden;"
+          title="${iframeTitle}">
+      </iframe>`;
+
+    this.exportResult.style.display = "block";
+    document.getElementById("exportCode")!.innerHTML = iframecode;
+
+    this.exportdata = {
+      blob: new Blob([iframecode], {
+        type: "text/html",
+      }),
+      data: iframecode,
+      filename: "export.html",
+      type: "text/html",
+    };
+  }
+
   private exportPlotToPNG(
     outCanvas: HTMLCanvasElement,
     chart: AbstractChart,

@@ -205,10 +205,26 @@ export class LineaExportModal extends AbstractExportModal {
     const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
 
     const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
-    let html = iframeTemplate
-      .replace('lang="en"', `lang="${i18n.lang}"`)
+    const body = `
+      <body>
+        <div id="chart-container">
+          <img id="fallback" src="" />
+          <linea-plot data="" showsurfacehoarseries showtitle id="linea"></linea-plot>
+        </div>
+
+        <script type="module" src="https://albina-euregio.gitlab.io/linea/linea.mjs"></script>
+        <script>
+          const linea = document.getElementById("linea");
+          const fallback = document.getElementById("fallback");
+
+          customElements.whenDefined("linea-plot").then(() => {
+            fallback.style.display = "none";
+          });
+        </script>
+      </body>`
       .replace('data=""', `data="${serializedData}"`)
       .replace('<img id="fallback" src="" />', "");
+    let html = iframeTemplate.replace("BODY", body).replace('lang="en"', `lang="${i18n.lang}"`);
 
     if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
