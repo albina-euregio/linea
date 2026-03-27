@@ -4,8 +4,14 @@ import {
   opts_series_observations,
   opts_series_precipitation,
 } from "./series-options/avalanches-opts";
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { Observations, WeatherStationData } from "./datastore";
+
+interface AvalanchesPlotInformation extends PlotInformation {
+  weather: boolean;
+  countPerDayObservations: boolean;
+  countPerDay: boolean;
+}
 
 export class AvalanchesChart extends AbstractChart {
   private observations!: Observations;
@@ -46,15 +52,25 @@ export class AvalanchesChart extends AbstractChart {
       { timestamps: countPerDayObservations.timestamps, data: countPerDayObservations.countPerDay },
       { timestamps: countPerDay.timestamps, data: countPerDay.countPerDay },
     ]);
-    this.createPlot({ ...opts_avalanches }, [timestamps]);
-    if (this.weather && this.weather.timestamps.length > 0) {
-      this.addSeries(opts_series_precipitation, seriesData[0]);
+    this.plotInformation = {
+      data: [timestamps, ...seriesData],
+      weather: !!this.weather && this.weather.timestamps.length > 0,
+      countPerDayObservations: countPerDayObservations.timestamps.length > 0,
+      countPerDay: countPerDay.timestamps.length > 0,
+    } as AvalanchesPlotInformation;
+    this.plotData(this.plotInformation as AvalanchesPlotInformation);
+  }
+
+  plotData(plotInformation: AvalanchesPlotInformation): void {
+    this.createPlot(opts_avalanches, [plotInformation.data[0]]);
+    if (plotInformation.weather) {
+      this.addSeries(opts_series_precipitation, plotInformation.data[1] as number[]);
     }
-    if (countPerDayObservations.timestamps.length > 0) {
-      this.addSeries(opts_series_observations, seriesData[1]);
+    if (plotInformation.countPerDayObservations) {
+      this.addSeries(opts_series_observations, plotInformation.data[2] as number[]);
     }
-    if (countPerDay.timestamps.length > 0) {
-      this.addSeries(opts_series_avalanches, seriesData[2]);
+    if (plotInformation.countPerDay) {
+      this.addSeries(opts_series_avalanches, plotInformation.data[3] as number[]);
     }
   }
 }

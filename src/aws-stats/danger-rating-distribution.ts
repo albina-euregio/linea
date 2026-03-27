@@ -1,5 +1,5 @@
 import { i18n } from "../i18n";
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import { BulletinData } from "./datastore";
 import {
@@ -15,14 +15,6 @@ export class DangerRatingChart extends AbstractChart {
   }
 
   async render(): Promise<void> {
-    if (this.plot) {
-      this.plot.destroy();
-      this.plot = null;
-    }
-    if (this.container) {
-      this.container.remove();
-    }
-
     const bulletinData = new BulletinData(this.bulletins);
     const distribution = bulletinData.dangerRatingDistribution;
 
@@ -56,21 +48,32 @@ export class DangerRatingChart extends AbstractChart {
     }
 
     const xValues = dangerDistributionOrder.map((_, index) => index + 1);
-    const sum = counts.reduce((a, b) => a + b, 0);
+    this.plotInformation = {
+      data: [xValues, counts],
+    } as PlotInformation;
+    this.plotData(this.plotInformation);
+  }
 
+  plotData(dataInformation: PlotInformation): void {
+    let sum = 0;
+    dataInformation.data[1].forEach((value) => {
+      if (typeof value === "number") {
+        sum += value;
+      }
+    });
     this.createPlot(
       {
         ...opts_danger_rating_distribution,
         title: `${opts_danger_rating_distribution.title} (N = ${sum})`,
       },
-      [xValues],
+      [dataInformation.data[0]],
     );
     this.addSeries(opts_danger_rating_distribution_reference_series, [19, 42, 37, 2.2, 0.1]);
 
     for (let i = 0; i < dangerDistributionOrder.length; i++) {
-      const sparseSeries = xValues.map((_x, index) =>
-        index === i ? (counts[i] / sum) * 100 : null,
-      );
+      const sparseSeries = dataInformation.data[0].map((_x, index) =>
+        index === i ? (dataInformation.data[1][i] / sum) * 100 : null,
+      ) as (number | null)[];
       this.addSeries(getDangerDistributionSeries(dangerDistributionOrder[i]), sparseSeries);
     }
   }

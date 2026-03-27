@@ -4,11 +4,17 @@ import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import type { Bulletin } from "../schema/caaml";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 
+export interface PlotInformation {
+  data: uPlot.AlignedData;
+  [key: string]: any;
+}
+
 export abstract class AbstractChart extends HTMLElement {
   public container!: HTMLDivElement;
   public plot: uPlot | null = null;
   readonly resizeObserver: ResizeObserver;
   protected bulletins!: Bulletin[];
+  public plotInformation: PlotInformation;
 
   constructor() {
     super();
@@ -23,12 +29,29 @@ export abstract class AbstractChart extends HTMLElement {
     this.onConnected()
       .then(() => {
         this.buildLayout();
-        this.render().then(() => {
+        if (this.plot) {
+          this.plot.destroy();
+          this.plot = null;
+        }
+        if (this.container) {
+          this.container.remove();
+        }
+        if (this.hasAttribute("data")) {
+          const data = JSON.parse(this.getAttribute("data")!);
+          this.plotData(data as PlotInformation);
           if (this.container && this.plot) {
             this.resizePlot(this.container.clientWidth, this.container.style);
             this.resizeObserver.observe(this.container);
           }
-        });
+          return;
+        } else {
+          this.render().then(() => {
+            if (this.container && this.plot) {
+              this.resizePlot(this.container.clientWidth, this.container.style);
+              this.resizeObserver.observe(this.container);
+            }
+          });
+        }
       })
       .catch((error) => {
         console.error("Failed to initialize chart:", error);
@@ -71,6 +94,8 @@ export abstract class AbstractChart extends HTMLElement {
   }
 
   async render(): Promise<void> {}
+
+  abstract plotData(plotInformation: PlotInformation): void;
 
   async onConnected(): Promise<void> {
     // Default implementation - can be overridden by subclasses

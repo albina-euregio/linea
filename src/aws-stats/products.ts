@@ -2,6 +2,7 @@ import type uPlot from "uplot";
 import { AbstractChart } from "./abstract-chart";
 import { BlogService, BulletinData, Observations } from "./datastore";
 import { getStackedOpts, opts_products_bars } from "./series-options/products-opts";
+import type { StackedData } from "../shared/stacked-series-opts";
 
 export class ProductsChart extends AbstractChart {
   async onConnected(): Promise<void> {
@@ -9,14 +10,6 @@ export class ProductsChart extends AbstractChart {
   }
 
   async render() {
-    if (this.plot) {
-      this.plot.destroy();
-      this.plot = null;
-    }
-    if (this.container) {
-      this.container.remove();
-    }
-
     if (this.bulletins.length === 0) {
       const empty = document.createElement("div");
       empty.textContent = "No bulletin data available";
@@ -59,8 +52,17 @@ export class ProductsChart extends AbstractChart {
       blogsTrentino,
     ]);
 
-    let { opts, data } = getStackedOpts(opts_products_bars, [timestamps, ...seriesData], null);
-    this.createPlot(opts, data as uPlot.AlignedData);
+    this.rawData = [timestamps, ...seriesData];
+    this.plotData(this.rawData as uPlot.AlignedData);
+  }
+
+  plotData(data: uPlot.AlignedData): void {
+    let { opts: stackedOpts, data: stackedData } = getStackedOpts(
+      opts_products_bars,
+      data as StackedData,
+      null,
+    );
+    this.createPlot(stackedOpts, stackedData as uPlot.AlignedData);
   }
 
   private convertTrainingsToDataset(trainingDates: string[]): {
