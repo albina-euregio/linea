@@ -61,6 +61,7 @@
   "linea:plotnames:newsnow": "New Snow",
   "linea:title:since": "since",
   "linea:message:noplotselected": "Please select at least one plot to export.",
+  "linea:message:exporttobig": "The selected plots are too large for export. Please reduce the number of selected plots or their dimensions.",
   "linea:axis:time": "Time",
   "linea:observations:series:avalanches": "Avalanches",
   "linea:observations:series:observations": "Observations",

@@ -40,6 +40,15 @@ import { AbstractExportModal } from "../shared/abstract-export-modal";
  */
 export class LineaExportModal extends AbstractExportModal {
   private lineaPlot: LineaPlot;
+  private readonly maxCanvasPixels = 50_000_000;
+
+  private static escapeHtmlAttribute(value: string): string {
+    return value
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
 
   /**
    * Creates an instance of ExportModal and initializes the modal UI.
@@ -105,7 +114,6 @@ export class LineaExportModal extends AbstractExportModal {
    */
   async #generateInteractiveExportData(): Promise<{
     resultsFiltered: StationData[];
-    dataUrl: string;
   }> {
     const resultsFiltered: StationData[] = [];
 
@@ -152,11 +160,7 @@ export class LineaExportModal extends AbstractExportModal {
       resultsFiltered.push(result);
     });
 
-    const dataUrl: string = await this.exportAllPlotsToPNG(
-      { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
-      true,
-    );
-    return { resultsFiltered, dataUrl };
+    return { resultsFiltered };
   }
 
   /**
@@ -173,31 +177,31 @@ export class LineaExportModal extends AbstractExportModal {
     }
     const exports = this.getExportSettings();
 
-    const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
+    const { resultsFiltered } = await this.#generateInteractiveExportData();
 
     const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
     let html = iframeTemplate
       .replace('lang="en"', `lang="${i18n.lang}"`)
       .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
-      .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
+      .replace('<img id="fallback" src="" />', "");
 
     if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
-
-    const binary = LineaExportModal.toBinary(html);
 
     let totalCanvases = 0;
     this.getCheckedDiagramIndices().forEach((index) => {
       totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
+    const iframeTitle = LineaExportModal.escapeHtmlAttribute(exports.title);
+
     const iframecode = `<iframe
-          src="data:text/html;base64,${btoa(binary)}"
+          srcdoc="${LineaExportModal.escapeHtmlAttribute(html)}"
           frameborder="0"
           scrolling="no"
           style="width: 100%; height: ${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px;border:none;overflow:hidden;"
-          title="${exports.title}">
+          title="${iframeTitle}">
       </iframe>`;
 
     this.exportResult.style.display = "block";
@@ -219,7 +223,14 @@ export class LineaExportModal extends AbstractExportModal {
       return;
     }
     const exports = this.getExportSettings();
-    const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
+    const { resultsFiltered } = await this.#generateInteractiveExportData();
+    const dataUrl = await this.exportAllPlotsToPNG(
+      { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
+      true,
+    );
+    if (!dataUrl) {
+      return;
+    }
 
     let html = `<div data-lineaplot-wrapper>
                     <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
@@ -432,9 +443,14 @@ export class LineaExportModal extends AbstractExportModal {
     const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
     const legendHeight = (legendLines.length * legendItemHeight * 3) / 2;
     const totalHeight = titleHeight + chartsHeight + legendHeight;
+    const outputWidth = canvases[0].width;
+    if (outputWidth * totalHeight > this.maxCanvasPixels) {
+      alert(i18n.message("linea:message:exporttobig"));
+      return Promise.resolve("");
+    }
 
     const outCanvas = document.createElement("canvas");
-    outCanvas.width = canvases[0].width;
+    outCanvas.width = outputWidth;
     outCanvas.height = totalHeight;
 
     //fill background
@@ -509,19 +525,21 @@ export class LineaExportModal extends AbstractExportModal {
       lineachart.resizeObserver.observe(lineachart);
     }
     if (!noshow) {
+      const dataUrl = outCanvas.toDataURL();
       outCanvas.toBlob((blobdata) => {
         this.exportdata = {
           blob: blobdata,
-          data: outCanvas.toDataURL(),
+          data: dataUrl,
           filename: this.#generateFilename() + ".png",
           type: "image/png",
         };
       });
       document.getElementById("exportCode").innerHTML =
-        `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+        `<img src="${dataUrl}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
       document.getElementById("exportResult").style.display = "block";
+      return dataUrl;
     }
-    return outCanvas.toDataURL();
+    return "";
   }
 
   /**
