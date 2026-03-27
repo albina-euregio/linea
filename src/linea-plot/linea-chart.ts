@@ -243,10 +243,11 @@ export class LineaChart extends AbstractLineaChart {
     const result: number[] = [];
     let lastWasBefore7 = true;
     let sum = 0;
+    const timezone = i18n.timezone();
 
     for (let i = 0; i < psum.length; i++) {
       const date = Temporal.Instant.fromEpochMilliseconds(timestamps[i]).toZonedDateTimeISO(
-        i18n.timezone(),
+        timezone,
       );
       if (date.hour >= 7 && lastWasBefore7) {
         lastWasBefore7 = false;
