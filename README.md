@@ -3,7 +3,7 @@
 This project features visualization of different data in context of avalanche warning, but can also used in other context. On the basis of [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) several graphic representations are implemented. The project divides into two submodules:
 
 1. Visualizations of meteorological data, such as automated weather stations. The visualization is defined by the [LAWIS](https://https://www.lawis.at/) work group.
-   The data has to be available as smet-file, see the [specification of the smet format](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf).
+   The data has to be available as SMET file, see the [specification of the SMET format](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf).
 
 The package offers one complex web component to show:
 
@@ -21,6 +21,13 @@ LINEA is featuring weather station visualization on:
 
 - https://avalanche.report/weather/stations
 - https://eaws-bulletin-map.legner.me/?stations=1
+
+## Usage: integrating weather stations in albina-website
+
+1. Provide a weather station listing in the GeoJSON format specified in https://albina-euregio.gitlab.io/linea/listing.schema.json (`src/schema/listing.ts`)
+2. For each weather station, provide two SMET files containing the data of the last ≈7 days, ≈6 months, respectively.
+
+Examples: https://static.avalanche.report/weather_stations/linea.geojson, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz
 
 ## Contributing
 
@@ -46,7 +53,7 @@ To interact with Transifex, install the official [transifex-client](https://gith
 
 Install the @albina-euregio/linea package via https://gitlab.com/albina-euregio/linea/-/packages, or include the latest version via https://albina-euregio.gitlab.io/linea/linea.mjs
 `<script type="module" src="https://albina-euregio.gitlab.io/linea/linea.mjs"></script>`
-or for awsstats https://albina-euregio.gitlab.io/linea/aws-stats.mjs
+or for awsstats: https://albina-euregio.gitlab.io/linea/aws-stats.mjs
 `<script type="module" src="https://albina-euregio.gitlab.io/linea/aws-stats.mjs"></script>`
 
 ### `<linea-plot>`
@@ -82,7 +89,7 @@ The export option `Embed Code (blog)` is useable in a wordpress blog, where the 
 #### Examples
 
 Minimal working example:
-Shows the whole dataset which is in the smet source file. Does not show surface hoar potential, datepickers, export functions.
+Shows the whole dataset which is in the SMET source file. Does not show surface hoar potential, datepickers, export functions.
 
 ```html
 <linea-plot src="data/station1.smet"> </linea-plot>
@@ -139,7 +146,7 @@ Attributes:
 - `weather`, optional: data from a weather station containing a PSUM value
 
 Visualization:
-Observations are counted per day and shown as bar plot. They are filtered for avalanche oberservations and this is shown as a seperate series too.
+Observations are counted per day and shown as bar plot. They are filtered for avalanche observations and this is shown as a separate series too.
 If weather data with a PSUM value is present the precipitation is summed up for each day and shown as light background series to have a reference to precipitation events.
 
 ##### `<aws-danger-rating>`
@@ -150,7 +157,7 @@ Attributes:
 - `bulletins-filter-micro-region`, optional: JSON encoded string array with micro region ids, e.g. `'["AT-07-14-01", "AT-07-01]'`
 
 Visualization:
-Displayed is the highest danger rating of the latest bulletin from each day per day. If the filter micro regions are set, this is done seperately for each micro region and plotted.
+Displayed is the highest danger rating of the latest bulletin from each day per day. If the filter micro regions are set, this is done separately for each micro region and plotted.
 
 ##### `<aws-danger-rating-altitude>`
 
@@ -178,13 +185,11 @@ bulletin-filter-micro-region='["AT-07-14-01", "AT-07-01", "AT-07-27", "AT-07-14-
 > </aws-stats-wrapper>
 > `
 
-The charts in `chart-type` are appended after data fetching into the wrapper component. The other ones ares self-explanatory.
+The charts in `chart-type` are appended after data fetching into the wrapper component. The other ones are self-explanatory.
 
-# Miscellaneous
-
-## Installing the wordpress plugin
+## Installing the Wordpress plugin
 
 To install the wordpress `linea-plot-blog.php` plugin simply go to your wordpress installations `wp-content` folder and copy the plugin file into `mu-plugins` (create folder, if no exists). Then reload your webserver.
-For apache `systemctl reload apache2` is enough to load it.
+For Apache `systemctl reload apache2` is enough to load it.
 
-The plugin is neccessary, because wordpress disabled custom javascript for almost all users. For more details visit [the wordpress wp_kses documentation](https://developer.wordpress.org/reference/functions/wp_kses/).
+The plugin is necessary, because wordpress disabled custom javascript for almost all users. For more details visit [the wordpress wp_kses documentation](https://developer.wordpress.org/reference/functions/wp_kses/).
