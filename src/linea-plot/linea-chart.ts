@@ -26,7 +26,20 @@ export class LineaChart extends AbstractLineaChart {
   setData(timestamps: number[], values: Values) {
     let i = 0;
     if (values.HS || values.PSUM) {
-      this.updateData(this.plots[i], [timestamps, values.HS, this.#sumupPrecipitation()]);
+      if (values.HS && values.PSUM) {
+        this.updateData(this.plots[i], [
+          timestamps,
+          values.HS,
+          this.#sumupPrecipitation(timestamps, values.PSUM),
+        ]);
+      } else if (values.HS) {
+        this.updateData(this.plots[i], [timestamps, values.HS]);
+      } else if (values.PSUM) {
+        this.updateData(this.plots[i], [
+          timestamps,
+          this.#sumupPrecipitation(timestamps, values.PSUM),
+        ]);
+      }
       i += 1;
     }
     if (values.VW || values.VW_MAX || values.DW) {
@@ -48,7 +61,7 @@ export class LineaChart extends AbstractLineaChart {
               ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
               : undefined),
           values.TSS,
-          this.#generateSurfaceHoarData(),
+          this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
         ]);
       } else {
         this.updateData(this.plots[i], [
@@ -89,8 +102,16 @@ export class LineaChart extends AbstractLineaChart {
       this.drawedTitle = true;
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
-      this.addSeries(p, opts_HS, this.result.values.HS);
-      this.addSeries(p, opts_PSUM, this.#sumupPrecipitation());
+      if (this.result.values.HS) {
+        this.addSeries(p, opts_HS, this.result.values.HS);
+      }
+      if (this.result.values.PSUM) {
+        this.addSeries(
+          p,
+          opts_PSUM,
+          this.#sumupPrecipitation(this.result.timestamps, this.result.values.PSUM),
+        );
+      }
     }
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
@@ -135,7 +156,11 @@ export class LineaChart extends AbstractLineaChart {
       if (this.result.values.TSS) {
         this.addSeries(p, opts_TSS, this.result.values.TSS);
         if (this.showSurfaceHoarSeries) {
-          const surfacehoar = this.#generateSurfaceHoarData();
+          const surfacehoar = this.#generateSurfaceHoarData(
+            this.result.timestamps,
+            this.result.values.TD,
+            this.result.values.TSS,
+          );
           this.addSeries(p, opts_SurfaceHoar, surfacehoar);
         }
       } else {
@@ -175,10 +200,12 @@ export class LineaChart extends AbstractLineaChart {
    *
    * @returns The surface hoar data for the charts data
    */
-  #generateSurfaceHoarData(): number[] {
+  #generateSurfaceHoarData(
+    timestamps: number[],
+    TD: (number | null)[],
+    TSS: (number | null)[],
+  ): number[] {
     const result: number[] = [];
-    const { TD, TSS } = this.result.values;
-    const timestamps = this.result.timestamps;
     const len = TD.length;
 
     let i = 0;
@@ -212,16 +239,15 @@ export class LineaChart extends AbstractLineaChart {
    *
    * Handles missing data inside the precipitation data by treating them as zero.
    */
-  #sumupPrecipitation(): number[] {
+  #sumupPrecipitation(timestamps: number[], psum: (number | null)[]): number[] {
     const result: number[] = [];
-    const psum: (number | null)[] = this.result.values.PSUM ?? [];
-    const timestamps = this.result.timestamps;
     let lastWasBefore7 = true;
     let sum = 0;
+    const timezone = i18n.timezone();
 
     for (let i = 0; i < psum.length; i++) {
       const date = Temporal.Instant.fromEpochMilliseconds(timestamps[i]).toZonedDateTimeISO(
-        i18n.timezone(),
+        timezone,
       );
       if (date.hour >= 7 && lastWasBefore7) {
         lastWasBefore7 = false;
