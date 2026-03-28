@@ -21,12 +21,14 @@
     <nav></nav>
 
     <aws-stats-wrapper
-      chart-type="aws-danger-rating-distribution"
+      chart-type="aws-products"
       observations="./observations.geojson"
       stationsrc="https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
       start-date="2026-01-01"
       end-date="2026-03-18"
       bulletin-filter-micro-region="all"
+      blog-urls='[{"regionCode":"AT-07", "label": "Ty", "url": "https://blog.avalanche.report/at-07/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}"},{ "regionCode":"IT-32-BZ", "label": "Bz", "url": "https://blog.avalanche.report/it-32-bz/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}" },{ "regionCode":"IT-32-TN", "label": "Tn", "url": "https://blog.avalanche.report/it-32-tn/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}" }]'
+      bulletin-urls='["https://static.avalanche.report/bulletins/{date}/{date}_AT-07_{lang}_CAAMLv6.json", "https://static.avalanche.report/bulletins/{date}/{date}_IT-32-TN_{lang}_CAAMLv6.json", "https://static.avalanche.report/bulletins/{date}/{date}_IT-32-BZ_{lang}_CAAMLv6.json"]'
     ></aws-stats-wrapper>
     <!-- <linea-plot
       src='["https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz"]'
