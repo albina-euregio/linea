@@ -41,7 +41,8 @@ export const opts_avalanche_activity_index: uPlot.Options = {
     x: timeScale,
     y: {
       range: (_u, _dataMin, dataMax) => {
-        if (!dataMax || dataMax <= 30) return [0, 30];
+        if (!dataMax || dataMax <= 15) return [0, 15];
+        if (dataMax <= 60) return [0, 30];
         if (dataMax <= 60) return [0, 60];
         if (dataMax <= 90) return [0, 90];
         if (dataMax <= 120) return [0, 120];
@@ -52,7 +53,8 @@ export const opts_avalanche_activity_index: uPlot.Options = {
     },
     y2: {
       range: (_u, _dataMin, dataMax) => {
-        if (!dataMax || dataMax <= 30) return [0, 30];
+        if (!dataMax || dataMax <= 15) return [0, 15];
+        if (dataMax <= 60) return [0, 30];
         if (dataMax <= 60) return [0, 60];
         if (dataMax <= 90) return [0, 90];
         if (dataMax <= 120) return [0, 120];
@@ -70,9 +72,10 @@ export const opts_avalanche_activity_index: uPlot.Options = {
       splits: (u) => {
         return AwsStatsOptsHelper.getSplits({
           uplot: u,
-          mins: [0, 0, 0, 0, 0, 0, 0],
-          maxs: [30, 60, 90, 120, 150, 180, 210],
+          mins: [0, 0, 0, 0, 0, 0, 0, 0],
+          maxs: [15, 30, 60, 90, 120, 150, 180, 210],
           splits: [
+            [0, 5, 10, 15],
             [0, 10, 20, 30],
             [0, 20, 40, 60],
             [0, 30, 60, 90],
@@ -92,9 +95,10 @@ export const opts_avalanche_activity_index: uPlot.Options = {
         return AwsStatsOptsHelper.getSplits(
           {
             uplot: u,
-            mins: [0, 0, 0, 0, 0, 0, 0],
-            maxs: [30, 60, 90, 120, 150, 180, 210],
+            mins: [0, 0, 0, 0, 0, 0, 0, 0],
+            maxs: [15, 30, 60, 90, 120, 150, 180, 210],
             splits: [
+              [0, 5, 10, 15],
               [0, 10, 20, 30],
               [0, 20, 40, 60],
               [0, 30, 60, 90],
