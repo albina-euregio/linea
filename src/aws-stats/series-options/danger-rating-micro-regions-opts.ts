@@ -52,6 +52,7 @@ export const opts_danger_rating_micro_regions: uPlot.Options = {
     timeAxis,
     {
       scale: "y",
+      splits: [0, 20, 40, 60, 80, 100],
     },
   ],
 

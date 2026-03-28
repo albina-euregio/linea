@@ -67,3 +67,10 @@ export const timeScale: uPlot.Scale = {
     return [xData[newStartIdx], xData[newEndIdx]];
   },
 };
+
+export const dailyBarChartTimeScale: uPlot.Scale = {
+  time: true,
+  range: (_self, newMin, newMax) => {
+    return [newMin - 12 * 60 * 60 * 1000, newMax + 12 * 60 * 60 * 1000];
+  },
+};

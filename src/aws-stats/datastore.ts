@@ -497,15 +497,21 @@ export class BulletinData {
     this.bulletins = bulletins;
   }
 
-  async loadBulletins(startDate: string, endDate: string): Promise<BulletinCollection> {
+  /**
+   * Loads bulletins from a remote source within a date range.
+   * @param url a url to a CAAMLv6 JSON in with {date} and {lang} for the according variables, e.g. https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_${i18n.lang}_CAAMLv6.json
+   * @param startDate
+   * @param endDate
+   * @returns
+   */
+  static async loadBulletins(url: string, startDate: string, endDate: string): Promise<Bulletin[]> {
     const urls: string[] = [];
 
     const start = new Date(startDate);
     const end = new Date(endDate);
     for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split("T")[0];
-      const url = `https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_${i18n.lang}_CAAMLv6.json`;
-      urls.push(url);
+      urls.push(url.replaceAll("{date}", dateStr).replaceAll("{lang}", i18n.lang));
     }
 
     const allBulletins: Bulletin[] = [];
@@ -523,8 +529,7 @@ export class BulletinData {
         console.error(`Error loading bulletin from ${u}:`, error);
       }
     }
-    this.bulletins = allBulletins;
-    return { bulletins: allBulletins };
+    return allBulletins;
   }
 
   async loadBulletinsSingleSource(url: string): Promise<BulletinCollection> {
@@ -952,22 +957,13 @@ export class BulletinData {
 }
 
 export class BlogService {
-  static readonly urlsMap: Record<string, string> = {
-    "AT-07":
-      "https://blog.avalanche.report/at-07/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
-    "IT-32-BZ":
-      "https://blog.avalanche.report/it-32-bz/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
-    "IT-32-TN":
-      "https://blog.avalanche.report/it-32-tn/wp-json/wp/v2/posts?_fields=date&before={before}&after={after}&per_page=100&page={page}",
-  };
-
-  static async loadBlogData(
-    regionCode: "AT-07" | "IT-32-BZ" | "IT-32-TN",
-    startDate: string,
-    endDate: string,
-  ): Promise<{ timestamps: number[]; data: number[] }> {
+  /**
+   *
+   * @param url a url to a wordpress pages API endpoint with field {page} e.g. "https://blog.avalanche.report/at-07/wp-json/wp/v2/posts?_fields=date&before=2025-03-11&after=2025-03-28&per_page=100&page={page}"
+   * @returns
+   */
+  static async loadBlogData(url: string): Promise<{ timestamps: number[]; data: number[] }> {
     const map: Map<string, number> = new Map();
-    const url = this.urlsMap[regionCode].replace("{before}", endDate).replace("{after}", startDate);
     let page = 1;
     while (true) {
       const res = await fetch(url.replace("{page}", page.toString()));

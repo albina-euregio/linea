@@ -1,8 +1,12 @@
 import type uPlot from "uplot";
-import { AbstractChart, type PlotInformation } from "./abstract-chart";
+import { AbstractChart } from "./abstract-chart";
 import { BlogService, BulletinData, Observations } from "./datastore";
-import { getStackedOpts, opts_products_bars } from "./series-options/products-opts";
-import type { StackedData } from "../shared/stacked-series-opts";
+import {
+  getStackedOpts,
+  opts_products_bars,
+  opts_series_products,
+} from "./series-options/products-opts";
+import { i18n } from "../i18n";
 
 export class ProductsChart extends AbstractChart {
   async onConnected(): Promise<void> {
@@ -27,42 +31,51 @@ export class ProductsChart extends AbstractChart {
     const virtualTrainings = this.getAttribute("virtual-trainings")
       ? JSON.parse(this.getAttribute("virtual-trainings")!)
       : [];
-    const blogsTyrol = await BlogService.loadBlogData(
-      "AT-07",
-      this.getAttribute("start-date")! + "T00:00:00.000Z",
-      this.getAttribute("end-date") + "T23:59:59.999Z",
-    );
-    const blogsSouthTirol = await BlogService.loadBlogData(
-      "IT-32-BZ",
-      this.getAttribute("start-date")! + "T00:00:00.000Z",
-      this.getAttribute("end-date") + "T23:59:59.999Z",
-    );
-    const blogsTrentino = await BlogService.loadBlogData(
-      "IT-32-TN",
-      this.getAttribute("start-date")! + "T00:00:00.000Z",
-      this.getAttribute("end-date") + "T23:59:59.999Z",
-    );
+
+    const blogUrls = this.getAttribute("blog-urls")
+      ? (JSON.parse(this.getAttribute("blog-urls")!) as {
+          regionCode: string;
+          label: string;
+          url: string;
+        }[])
+      : ([] as { regionCode: string; label: string; url: string }[]);
+    console.log(blogUrls);
+    const blogData: { timestamps: number[]; data: number[] }[] = [];
+
+    for (const regionBlog of blogUrls) {
+      const url2 = regionBlog.url
+        .replace("{before}", this.getAttribute("end-date") + "T23:59:59.999Z")
+        .replace("{after}", this.getAttribute("start-date")! + "T00:00:00.000Z");
+      const data = await BlogService.loadBlogData(url2);
+      blogData.push(data);
+    }
 
     const { timestamps, seriesData } = Observations.mergeAndFillData([
       bulletins,
       this.convertTrainingsToDataset(fieldTrainings),
       this.convertTrainingsToDataset(virtualTrainings),
-      blogsTyrol,
-      blogsSouthTirol,
-      blogsTrentino,
+      ...blogData,
     ]);
+    const pre_opts = opts_products_bars;
 
-    this.plotInformation = { data: [timestamps, ...seriesData] };
-    this.plotData(this.plotInformation);
-  }
+    const strokes = ["#bd2d23", "#bd5423", "#bda123"];
+    const fills = [
+      "rgba(196, 81, 81, 0.62)",
+      "rgba(196, 114, 81, 0.62)",
+      "rgba(196, 160, 81, 0.62)",
+    ];
 
-  plotData(plotInformation: PlotInformation): void {
-    let { opts: stackedOpts, data: stackedData } = getStackedOpts(
-      opts_products_bars,
-      plotInformation.data as StackedData,
-      null,
-    );
-    this.createPlot(stackedOpts, stackedData as uPlot.AlignedData);
+    blogUrls.forEach((region, index) => {
+      pre_opts.series.push({
+        ...opts_series_products,
+        label: `${i18n.message(`linea:yearly:products:series:blogs`)} ${region.label}`,
+        stroke: strokes[index % strokes.length],
+        fill: fills[index % fills.length],
+      });
+    });
+
+    let { opts, data } = getStackedOpts(opts_products_bars, [timestamps, ...seriesData], null);
+    this.createPlot(opts, data as uPlot.AlignedData);
   }
 
   private convertTrainingsToDataset(trainingDates: string[]): {

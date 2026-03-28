@@ -1,6 +1,6 @@
 import uPlot from "uplot";
 const { bars } = uPlot.paths;
-import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
+import { dailyBarChartTimeScale, timeAxis } from "../../linea-plot/opts_time_axis";
 import { i18n } from "../../i18n";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import {
@@ -54,7 +54,7 @@ export const opts_products_bars: uPlot.Options = {
     },
   } as any,
   scales: {
-    x: timeScale,
+    x: dailyBarChartTimeScale,
     y: {
       auto: true,
       range: [0, null],
@@ -89,24 +89,6 @@ export const opts_products_bars: uPlot.Options = {
       label: `${i18n.message(`linea:yearly:products:series:virtualtrainings`)}`,
       stroke: "#23bd23",
       fill: "rgba(100, 196, 81, 0.62)",
-    },
-    {
-      ...opts_series_products,
-      label: `${i18n.message(`linea:yearly:products:series:blogs:tyrol`)}`,
-      stroke: "#bd2d23",
-      fill: "rgba(196, 81, 81, 0.62)",
-    },
-    {
-      ...opts_series_products,
-      label: `${i18n.message(`linea:yearly:products:series:blogs:south_tirol`)}`,
-      stroke: "#bd5423",
-      fill: "rgba(196, 114, 81, 0.62)",
-    },
-    {
-      ...opts_series_products,
-      label: `${i18n.message(`linea:yearly:products:series:blogs:trentino`)}`,
-      stroke: "#bda123",
-      fill: "rgba(196, 160, 81, 0.62)",
     },
   ],
 };

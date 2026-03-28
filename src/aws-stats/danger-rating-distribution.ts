@@ -16,7 +16,9 @@ export class DangerRatingChart extends AbstractChart {
 
   async render(): Promise<void> {
     const bulletinData = new BulletinData(this.bulletins);
-    const distribution = bulletinData.dangerRatingDistribution;
+    const distribution = bulletinData.filterRegionCode(
+      this.getAttribute("regionCode") ?? "all",
+    ).dangerRatingDistribution;
 
     const indexByRating: Record<string, number> = {
       low: 0,
@@ -68,7 +70,10 @@ export class DangerRatingChart extends AbstractChart {
       },
       [dataInformation.data[0]],
     );
-    this.addSeries(opts_danger_rating_distribution_reference_series, [19, 42, 37, 2.2, 0.1]);
+    const reference = this.getAttribute("danger-rating-reference")
+      ? JSON.parse(this.getAttribute("danger-rating-reference")!)
+      : [19, 42, 37, 2.2, 0.1];
+    this.addSeries(opts_danger_rating_distribution_reference_series, reference);
 
     for (let i = 0; i < dangerDistributionOrder.length; i++) {
       const sparseSeries = dataInformation.data[0].map((_x, index) =>
