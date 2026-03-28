@@ -155,7 +155,7 @@ export const GeometrySchema = z.object({
 
 export const FeatureSchema = z
   .object({
-    type: z.enum(["Feature"]).nullish(),
+    type: z.enum(["Feature"]),
     geometry: GeometrySchema,
     properties: FeaturePropertiesSchema,
     id: z.union([z.uuid(), z.string()]).describe("The ID/UUID of the station"),
@@ -164,7 +164,7 @@ export const FeatureSchema = z
 
 export const FeatureCollectionSchema = z
   .object({
-    type: z.enum(["FeatureCollection"]).optional(),
+    type: z.enum(["FeatureCollection"]),
     features: z.array(FeatureSchema),
     properties: z.any(),
   })
