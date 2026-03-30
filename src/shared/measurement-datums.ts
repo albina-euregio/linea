@@ -12,6 +12,16 @@ enum Mode {
  *  enhanced:
  * - supports two datums to measure delta between them
  * - Integration of parameters over time
+ * - Different modes of measurement (delta, integral, mean, series mean)
+ *
+ * Keybindings:
+ * - Click on the chart to move the cursor to set datum '1' (blue) and datum '2' (orange)
+ * - Press 'd' to switch to delta mode
+ * - Press 'i' to switch to integral mode
+ * - Press 'm' to switch to mean mode
+ * - Press 's' to switch to series mean mode
+ * - Press 'x' to clear datums
+ * - Press 'Escape' to clear datums
  */
 export class MeasurementDatumPlugin {
   static ModeFunctions: Record<
@@ -131,13 +141,13 @@ export class MeasurementDatumPlugin {
             (e) => {
               if (e.key == "Escape") {
                 clearDatums(u);
-              } else if (e.key == "d") {
+              } else if (e.key == "x") {
                 clearDatums(u);
               } else if (e.key == "m") {
                 mode = Mode.Mean;
               } else if (e.key == "i") {
                 mode = Mode.Integral;
-              } else if (e.key == "x") {
+              } else if (e.key == "d") {
                 mode = Mode.Delta;
               } else if (e.key == "s") {
                 mode = Mode.SeriesMean;
