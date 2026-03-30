@@ -111,7 +111,7 @@ export class MeasurementDatumPlugin {
       const rectHeight = labels.length * lineHeight + padding * 2;
       const rectWidth = maxWidth + padding * 2;
       u.ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-      u.ctx.fillRect(xPos - rectWidth / 2, yPos - padding, rectWidth, rectHeight);
+      u.ctx.fillRect(xPos - rectWidth / 2, yPos - padding * 2.5, rectWidth, rectHeight);
       u.ctx.textAlign = "center";
       u.ctx.textBaseline = "middle";
       u.ctx.fillStyle = "black";
