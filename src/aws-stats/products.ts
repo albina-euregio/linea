@@ -49,7 +49,7 @@ export class ProductsChart extends AbstractChart {
       const url2 = regionBlog.url
         .replace("{before}", this.getAttribute("end-date") + "T23:59:59.999Z")
         .replace("{after}", this.getAttribute("start-date")! + "T00:00:00.000Z");
-      const data = await BlogService.loadBlogData(url2);
+      const data = await BlogService.loadBlogData(url2, regionBlog.regionCode.slice(0, 2));
       blogData.push(data);
     }
 
