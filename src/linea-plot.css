@@ -115,6 +115,7 @@ linea-plot {
     }
 
     .controls-menu {
+      position: relative;
       display: flex;
       gap: 6px;
 
@@ -126,6 +127,28 @@ linea-plot {
         justify-content: center;
         padding: 0 0.5rem;
       }
+    }
+
+    .linea-help-hint {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 20;
+      max-width: 22rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid #19aaff;
+      border-radius: 0.5rem;
+      background: #ffffff;
+      color: #2f2f2f;
+      font-size: 0.85rem;
+      line-height: 1.35;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      white-space: pre-line;
+    }
+
+    .linea-help-hint.visible {
+      display: block;
     }
   }
 

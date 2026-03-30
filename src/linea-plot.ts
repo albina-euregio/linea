@@ -72,6 +72,8 @@ export class LineaPlot extends HTMLElement {
   private styleTag!: HTMLStyleElement;
   private winterviewBtn!: HTMLButtonElement;
   private winterviewBtnLabel!: HTMLSpanElement;
+  private helpBtn!: HTMLButtonElement;
+  private helpHint!: HTMLDivElement;
 
   view!: LineaView;
   private lineaViews!: Map<LineaViewType, LineaView>;
@@ -321,7 +323,55 @@ export class LineaPlot extends HTMLElement {
         );
       }
     });
+
+    this.helpBtn = document.createElement("button");
+    this.helpBtn.classList.add("toggle-btn");
+    this.helpBtn.classList.add("linea-help-btn");
+    this.helpBtn.setAttribute("type", "button");
+    this.helpBtn.setAttribute("aria-expanded", "false");
+    this.helpBtn.setAttribute("aria-controls", "linea-measurement-hint");
+    this.helpBtn.textContent = i18n.message("linea:controls:value:help");
+
+    this.helpHint = document.createElement("div");
+    this.helpHint.id = "linea-measurement-hint";
+    this.helpHint.classList.add("linea-help-hint");
+    this.helpHint.setAttribute("role", "dialog");
+    this.helpHint.setAttribute("aria-hidden", "true");
+    this.helpHint.textContent = i18n.message("linea:measurement-datums:usage");
+
+    const hideHelpHint = () => {
+      this.helpHint.classList.remove("visible");
+      this.helpHint.setAttribute("aria-hidden", "true");
+      this.helpBtn.setAttribute("aria-expanded", "false");
+    };
+
+    this.helpBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isVisible = this.helpHint.classList.toggle("visible");
+      this.helpHint.setAttribute("aria-hidden", String(!isVisible));
+      this.helpBtn.setAttribute("aria-expanded", String(isVisible));
+    });
+
+    this.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        hideHelpHint();
+      }
+    });
+
+    this.addEventListener("click", (e) => {
+      if (
+        this.helpHint.classList.contains("visible") &&
+        e.target instanceof Node &&
+        !this.helpHint.contains(e.target) &&
+        e.target !== this.helpBtn
+      ) {
+        hideHelpHint();
+      }
+    });
+
     menu.appendChild(this.winterviewBtn);
+    menu.appendChild(this.helpBtn);
+    menu.appendChild(this.helpHint);
 
     controls.appendChild(menu);
     this.appendChild(controls);
