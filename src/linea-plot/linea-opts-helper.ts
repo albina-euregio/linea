@@ -43,7 +43,7 @@ export class LineaOptsHelper extends OptsHelper {
           match: [(own, ext) => own == ext, (own, ext) => own == ext],
         },
       },
-      plugins: [TouchZoom.touchZoomPlugin(), MeasurementDatumPlugin.datumsPlugin()],
+      plugins: [TouchZoom.touchZoomPlugin(), new MeasurementDatumPlugin().datumsPlugin()],
       legend: {
         show: true,
         live: true,

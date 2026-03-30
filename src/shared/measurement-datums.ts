@@ -24,35 +24,28 @@ enum Mode {
  * - Press 'Escape' to clear datums
  */
 export class MeasurementDatumPlugin {
-  static ModeFunctions: Record<
+  ModeFunctions: Record<
     Mode,
-    (
-      u: uPlot,
-      x1: number,
-      x2: number,
-      y1: number,
-      y2: number,
-      dataIdx1: number | null,
-      dataIdx2: number | null,
-      seriesIdx: number | null,
-    ) => string
+    (dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null) => string
   > = {
-    [Mode.Delta]: (_u, _x1, _x2, y1, y2) => `𝚫y: ${(y2 - y1).toPrecision(3)}`,
-    [Mode.Integral]: (u, x1, x2, y1, y2) =>
-      `∫: ${(((y2 - y1) * (x2 - x1)) / 3600_000).toPrecision(3)}`,
-    [Mode.Mean]: (_u, _x1, _x2, y1, y2) => `Mean: ${((y2 + y1) / 2).toPrecision(3)}`,
-    [Mode.SeriesMean]: MeasurementDatumPlugin.seriesMean,
+    [Mode.Delta]: () => `𝚫y: ${(this.y2 - this.y1).toPrecision(3)}`,
+    [Mode.Integral]: (dataIdx1, dataIdx2, seriesIdx) =>
+      this.integrateSeries(dataIdx1, dataIdx2, seriesIdx),
+    [Mode.Mean]: () => `Mean: ${((this.y2 + this.y1) / 2).toPrecision(3)}`,
+    [Mode.SeriesMean]: (dataIdx1, dataIdx2, seriesIdx) =>
+      this.seriesMean(dataIdx1, dataIdx2, seriesIdx),
   };
 
-  public static datumsPlugin() {
-    let x1: number | null = null;
-    let x2: number | null = null;
-    let y1: number | null = null;
-    let y2: number | null = null;
-    let dataIdxs1: (number | null)[] = null;
-    let dataIdxs2: (number | null)[] = null;
-    let mode: Mode = Mode.Delta;
+  public u: uPlot | null = null;
+  public x1: number | null = null;
+  public x2: number | null = null;
+  public y1: number | null = null;
+  public y2: number | null = null;
+  public dataIdxs1: (number | null)[] = null;
+  public dataIdxs2: (number | null)[] = null;
+  public mode: Mode = Mode.Delta;
 
+  public datumsPlugin(): uPlot.Plugin {
     const drawDatum = (u: uPlot, x: number, y: number, color: string) => {
       let cx = u.valToPos(x, "x", true);
       let cy = u.valToPos(y, "y", true);
@@ -72,22 +65,20 @@ export class MeasurementDatumPlugin {
     };
 
     const clearDatums = (u: uPlot) => {
-      x1 = x2 = y1 = y2 = null;
-      dataIdxs1 = dataIdxs2 = null;
+      this.x1 = this.x2 = this.y1 = this.y2 = null;
+      this.dataIdxs1 = this.dataIdxs2 = null;
       u.redraw();
     };
 
     const drawDelta = (u: uPlot) => {
-      let labels = [
-        MeasurementDatumPlugin.ModeFunctions[mode](u, x1, x2, y1, y2, null, null, null),
-      ];
+      let labels = [this.ModeFunctions[this.mode](null, null, null)];
 
       u.series.forEach((s, i) => {
         if (i == 0) {
           return;
         }
-        const idx1 = dataIdxs1[i];
-        const idx2 = dataIdxs2[i];
+        const idx1 = this.dataIdxs1[i];
+        const idx2 = this.dataIdxs2[i];
 
         if (idx1 == null || idx2 == null) {
           return;
@@ -100,22 +91,13 @@ export class MeasurementDatumPlugin {
           return;
         }
 
-        const labelValue = MeasurementDatumPlugin.ModeFunctions[mode](
-          u,
-          x1,
-          x2,
-          seriesY1,
-          seriesY2,
-          idx1,
-          idx2,
-          i,
-        );
+        const labelValue = this.ModeFunctions[this.mode](idx1, idx2, i);
         labels.push(`${s.label}: ${labelValue}`);
       });
 
       const lineHeight = 14;
-      let xPos = u.valToPos((x1 + x2) / 2, "x", true);
-      let yPos = u.valToPos((y1 + y2) / 2, "y", true) - (labels.length / 2) * lineHeight;
+      let xPos = u.valToPos((this.x1 + this.x2) / 2, "x", true);
+      let yPos = u.valToPos((this.y1 + this.y2) / 2, "y", true) - (labels.length / 2) * lineHeight;
       const maxWidth = Math.max(...labels.map((l) => u.ctx.measureText(l).width));
       const padding = 4;
       const rectHeight = labels.length * lineHeight + padding * 2;
@@ -133,6 +115,7 @@ export class MeasurementDatumPlugin {
     return {
       hooks: {
         init: (u: uPlot) => {
+          this.u = u;
           u.over.tabIndex = -1; // required for key handlers
           u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
 
@@ -144,25 +127,25 @@ export class MeasurementDatumPlugin {
               } else if (e.key == "x") {
                 clearDatums(u);
               } else if (e.key == "m") {
-                mode = Mode.Mean;
+                this.mode = Mode.Mean;
               } else if (e.key == "i") {
-                mode = Mode.Integral;
+                this.mode = Mode.Integral;
               } else if (e.key == "d") {
-                mode = Mode.Delta;
+                this.mode = Mode.Delta;
               } else if (e.key == "s") {
-                mode = Mode.SeriesMean;
+                this.mode = Mode.SeriesMean;
               } else {
                 const { left, top } = u.cursor;
 
                 if (left >= 0 && top >= 0) {
                   if (e.key == "1") {
-                    x1 = u.posToVal(left, "x");
-                    y1 = u.posToVal(top, "y");
-                    dataIdxs1 = [...u.cursor.idxs];
+                    this.x1 = u.posToVal(left, "x");
+                    this.y1 = u.posToVal(top, "y");
+                    this.dataIdxs1 = [...u.cursor.idxs];
                   } else if (e.key == "2") {
-                    x2 = u.posToVal(left, "x");
-                    y2 = u.posToVal(top, "y");
-                    dataIdxs2 = [...u.cursor.idxs];
+                    this.x2 = u.posToVal(left, "x");
+                    this.y2 = u.posToVal(top, "y");
+                    this.dataIdxs2 = [...u.cursor.idxs];
                   }
                 }
               }
@@ -172,20 +155,25 @@ export class MeasurementDatumPlugin {
           );
         },
         draw: (u: uPlot) => {
-          if (x1 != null || x2 != null) {
+          if (this.x1 != null || this.x2 != null) {
             u.ctx.save();
 
             u.ctx.lineWidth = 2;
 
-            if (x1 != null) {
-              drawDatum(u, x1, y1, "blue");
+            if (this.x1 != null) {
+              drawDatum(u, this.x1, this.y1, "blue");
             }
 
-            if (x2 != null) {
-              drawDatum(u, x2, y2, "orange");
+            if (this.x2 != null) {
+              drawDatum(u, this.x2, this.y2, "orange");
             }
 
-            if (x1 != null && x2 != null && dataIdxs1 != null && dataIdxs2 != null) {
+            if (
+              this.x1 != null &&
+              this.x2 != null &&
+              this.dataIdxs1 != null &&
+              this.dataIdxs2 != null
+            ) {
               drawDelta(u);
             }
 
@@ -196,22 +184,17 @@ export class MeasurementDatumPlugin {
     };
   }
 
-  static seriesMean(
-    u: uPlot,
-    x1: number,
-    x2: number,
-    y1: number,
-    y2: number,
-    dataIdx1: number | null,
-    dataIdx2: number | null,
-    seriesIdx: number | null,
-  ): string {
+  seriesMean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
+    if (this.u == null) {
+      return "SeriesMean: n/a";
+    }
+
     if (dataIdx1 == null || dataIdx2 == null || seriesIdx == null) {
-      return `Timerange: ${((x2 - x1) / 3_600_000).toFixed(1)} h`;
+      return `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`;
     }
     const dataMinIdx = Math.min(dataIdx1, dataIdx2);
     const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
-    const dataSlice = u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
 
     const sum = dataSlice.reduce((acc, val) => acc + val, 0);
     const mean = sum / dataSlice.length;
