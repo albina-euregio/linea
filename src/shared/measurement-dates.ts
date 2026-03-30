@@ -17,7 +17,7 @@ enum Mode {
  * - Different modes of measurement (delta, integral, mean, series mean)
  *
  * Keybindings:
- * - Click on the chart to move the cursor to set datum '1' (blue) and datum '2' (orange)
+ * - Click on the chart to move the cursor to set border '1' (blue) and border '2' (orange)
  * - Press 'd' to switch to delta mode
  * - Press 'i' to switch to integral mode
  * - Press 'm' to switch to mean mode
@@ -25,7 +25,7 @@ enum Mode {
  * - Press 'x' to clear datums
  * - Press 'Escape' to clear datums
  */
-export class MeasurementDatumPlugin {
+export class MeasurementDatesPlugin {
   ModeFunctions: Record<
     Mode,
     (dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null) => string
@@ -47,7 +47,7 @@ export class MeasurementDatumPlugin {
   public dataIdxs2: (number | null)[] = null;
   public mode: Mode = Mode.Delta;
 
-  public datumsPlugin(): uPlot.Plugin {
+  public plugin(): uPlot.Plugin {
     const drawDatumLine = (u: uPlot, x: number, color: string) => {
       let cx = u.valToPos(x, "x", true);
 
@@ -84,16 +84,16 @@ export class MeasurementDatumPlugin {
       let title = "";
       switch (this.mode) {
         case Mode.Delta:
-          title = i18n.message("linea:measurement-datums:delta");
+          title = i18n.message("linea:measurement-dates:delta");
           break;
         case Mode.Mean:
-          title = i18n.message("linea:measurement-datums:mean");
+          title = i18n.message("linea:measurement-dates:mean");
           break;
         case Mode.SeriesMean:
-          title = i18n.message("linea:measurement-datums:seriesmean");
+          title = i18n.message("linea:measurement-dates:seriesmean");
           break;
         case Mode.Integral:
-          title = i18n.message("linea:measurement-datums:integral");
+          title = i18n.message("linea:measurement-dates:integral");
           break;
       }
       let labels = [title, `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`];
@@ -217,7 +217,7 @@ export class MeasurementDatumPlugin {
     if (this.u == null) {
       return "Δy: n/a";
     }
-    const unit = MeasurementDatumPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     const value = this.u.data[seriesIdx][dataIdx2] - this.u.data[seriesIdx][dataIdx1];
     return `𝚫y: ${i18n.number(value, {}, unit)}`;
   }
@@ -226,7 +226,7 @@ export class MeasurementDatumPlugin {
     if (this.u == null) {
       return "n/a";
     }
-    const unit = MeasurementDatumPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     const value = (this.u.data[seriesIdx][dataIdx1] + this.u.data[seriesIdx][dataIdx2]) / 2;
     return `${i18n.number(value, {}, unit)}`;
   }
@@ -241,7 +241,7 @@ export class MeasurementDatumPlugin {
 
     const sum = dataSlice.reduce((acc, val) => acc + val, 0);
     const mean = sum / dataSlice.length;
-    const unit = MeasurementDatumPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     return `${i18n.number(mean, {}, unit)}`;
   }
 
@@ -285,8 +285,8 @@ export class MeasurementDatumPlugin {
     }
 
     const integralValue = isPSUM ? integral : integral / 3_600_000;
-    const unit = MeasurementDatumPlugin.resolveUnit(seriesLabel);
-    const [number, integratedUnit] = MeasurementDatumPlugin.integrateUnit(integralValue, unit);
+    const unit = MeasurementDatesPlugin.resolveUnit(seriesLabel);
+    const [number, integratedUnit] = MeasurementDatesPlugin.integrateUnit(integralValue, unit);
     return `∫: ${i18n.number(number, {}, integratedUnit)}`;
   }
 

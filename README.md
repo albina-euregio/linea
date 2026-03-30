@@ -86,9 +86,9 @@ An exported `Embed Code (iframe)` is useable in a website. To use in wordpress, 
 
 The export option `Embed Code (blog)` is useable in a wordpress blog, where the `linea-plot-blog.php` plugin is installed. Therefore, per default it should not be shown.
 
-#### Measurement datums
+#### Measurements
 
-To do quick analyzes of the displayed weather data there is a small measurement tool implemented. To use the tool, simply click into a chart and set the measurement datumns by hitting key '1' and '2'. As soon both are set a label shows in between, per default with the difference between both points in the y-coordinate.
+To do quick analyzes of the displayed weather data there is a small measurement tool implemented. To use the tool, simply click into a chart and set the two borders by pressing key '1' and '2'. As soon both are set, a label shows up, per default with the difference between both points for the different series.
 Following actions can be performed further:
 
 - Press 'd' to switch to delta mode -> total difference between the two datums: `y2-y1`
@@ -98,7 +98,7 @@ Following actions can be performed further:
 - Press 'x' to clear datums
 - Press 'Escape' to clear datums
 
-In the `png` export the datumn stays!
+In the `png` export the markers stay!
 
 #### Examples
 

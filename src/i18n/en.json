@@ -112,10 +112,10 @@
   "linea:yearly:avalancheproblemmicroregions:series:no_distinct_avalanche_problem": "No Distinct Avalanche Problem",
   "linea:yearly:avalancheproblemmicroregions:series:favourable_situation": "Favourable Situation",
   "linea:wrapper:loading": "Loading data...",
-  "linea:measurement-datums:timerange": "Time Range",
-  "linea:measurement-datums:mean": "Mean",
-  "linea:measurement-datums:seriesmean": "Series Mean",
-  "linea:measurement-datums:delta": "Total Difference",
-  "linea:measurement-datums:integral": "Integral",
-  "linea:measurement-datums:usage": "Data Analyzing:\n1) Focus a plot and press 1 to set border 1 (red).\n2) Move the mouse to another point and press 2 to set border 2 (blue).\n3) Use d/i/m/s to switch mode (Difference/Integral/Mean/Series Mean).\n4) Press x or Escape to clear borders."
+  "linea:measurement-dates:timerange": "Time Range",
+  "linea:measurement-dates:mean": "Mean",
+  "linea:measurement-dates:seriesmean": "Series Mean",
+  "linea:measurement-dates:delta": "Total Difference",
+  "linea:measurement-dates:integral": "Integral",
+  "linea:measurement-dates:usage": "Data Analyzing:\n1) Focus a plot and press 1 to set border 1 (red).\n2) Move the mouse to another point and press 2 to set border 2 (blue).\n3) Use d/i/m/s to switch mode (Difference/Integral/Mean/Series Mean).\n4) Press x or Escape to clear borders."
 }
