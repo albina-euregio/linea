@@ -1,4 +1,4 @@
-import { type StationData, StationDataArray } from "./data/station-data";
+import { type StationData, StationDataArray, type Units, type Values } from "./data/station-data";
 import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
@@ -78,8 +78,14 @@ export abstract class LineaView {
    * This method is used when the data is directly provided in the HTML and no fetching from a source is needed.
    */
   loadFromDataAttribute() {
-    const results: StationData[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
-    this.results = new StationDataArray(...results);
+    let results: {
+      station: string;
+      altitude: number;
+      timestamps: number[];
+      units: Units;
+      values: Values;
+    }[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
+    this.results = StationDataArray.from(results);
     this.results.generalize();
     [this.minTime, this.maxTime] = this.results.minMaxTime;
     this.lineaplot.updateValidDateInputs();
@@ -96,12 +102,17 @@ export abstract class LineaView {
     endDate: Temporal.ZonedDateTime = this.getDatePickerEndDate(),
   ) {
     for (let i = 0; i < this.charts.length; i++) {
-      const res = this.results[i];
-      if (res === undefined) {
+      const res: StationData | undefined = this.results[i];
+      if (!res) {
         continue;
       }
-      const filtered = res.filter(startDate, endDate);
-      this.charts[i].setData(filtered.timestamps, filtered.values);
+      try {
+        const filtered = res.filter(startDate, endDate);
+        this.charts[i].setData(filtered.timestamps, filtered.values);
+      } catch (e) {
+        console.error("Error filtering data for chart", i, e);
+        this.charts[i].setData(res.timestamps, res.values);
+      }
     }
   }
 

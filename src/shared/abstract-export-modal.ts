@@ -1,5 +1,7 @@
+import type uPlot from "uplot";
 import { i18n } from "../i18n";
 import css from "./export-modal.css?inline";
+import { AbstractLineaChart } from "../abstract-linea-chart";
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
  *
@@ -33,6 +35,14 @@ import css from "./export-modal.css?inline";
  * exportModal.show();
  */
 export abstract class AbstractExportModal {
+  static escapeHtmlAttribute(value: string): string {
+    return value
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
   protected exportSettings: HTMLDivElement;
   protected exportResult: HTMLDivElement;
   protected exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;
@@ -48,8 +58,9 @@ export abstract class AbstractExportModal {
    *
    * @constructor
    * @param {HTMLDivElement} modal - The modal container element
+   * @param {boolean} showInteractibeBlogExportOption - Whether to show the interactive blog export option
    */
-  constructor(modal: HTMLDivElement) {
+  constructor(modal: HTMLDivElement, showInteractibeBlogExportOption: boolean = false) {
     this.modal = modal;
 
     const styleTag = document.createElement("style");
@@ -126,6 +137,10 @@ export abstract class AbstractExportModal {
 
     this.exportSettings = this.modal.querySelector("#exportSettings") as HTMLDivElement;
     this.exportResult = this.modal.querySelector("#exportResult") as HTMLDivElement;
+    const interactiveBlogExportOption = this.modal.querySelector(
+      "#btnExportInteractiveBlog",
+    ) as HTMLDivElement;
+    interactiveBlogExportOption.style.display = showInteractibeBlogExportOption ? "block" : "none";
 
     const keyListener = (e: KeyboardEvent) => {
       if (!this.exportdata || e.key !== "Enter") {
@@ -163,6 +178,12 @@ export abstract class AbstractExportModal {
       this.exportAllPlotsToPNG(this.getExportSettings());
     });
 
+    this.modal.querySelector("#btnExportInteractiveBlog")?.addEventListener("click", () => {
+      document.getElementById("exportSizes")!.style.display = "none";
+      this.resetCopyToClipboardButton();
+      this.exportAsBlogElement();
+    });
+
     this.modal.querySelector("#copyExportBtn")?.addEventListener("click", () => {
       this.copyToClipboard();
     });
@@ -195,6 +216,95 @@ export abstract class AbstractExportModal {
    * @returns {void}
    */
   abstract show(): void;
+
+  protected addDiagramsToExportSettings(plots: (uPlot | AbstractLineaChart)[]) {
+    this.modal.querySelector("#exportDiagrams")!.innerHTML = plots
+      .map((plot, index) => {
+        let title = "";
+        if (plot instanceof AbstractLineaChart) {
+          title = `${plot.result.station} (${plot.result.altitude}m)`;
+        } else {
+          const titleFromDom = plot?.root.querySelector(".u-title")?.textContent?.trim();
+          const titleFromOpts = (plot as unknown as { opts?: { title?: string } } | null)?.opts
+            ?.title;
+          title = titleFromDom || titleFromOpts || `Chart ${index + 1}`;
+        }
+
+        const labels: string[] = [];
+        if (plot instanceof AbstractLineaChart) {
+          plot.plotnames.forEach((name) => {
+            labels.push(name);
+          });
+        } else {
+          const series = plot?.series ?? [];
+          series.slice(1).forEach((s, i) => {
+            labels.push((s.label as string) ?? `Series ${i + 1}`);
+          });
+        }
+        const seriesCheckboxes = labels
+          .map((label, i) => {
+            const seriesIndex = plot instanceof AbstractLineaChart ? i : i + 1;
+            return `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
+          <input type="checkbox" class="diagram-series-checkbox-${index}" value="${seriesIndex}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
+          ${label ?? `Series ${seriesIndex}`}
+          </label>`;
+          })
+          .join("");
+
+        return `
+          <div style="display: flex; flex-direction: row; gap:20px; align-items: flex-start;">
+            <label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
+              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
+              ${title}
+            </label>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px;">${seriesCheckboxes}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
+      cb.addEventListener("change", (e) => {
+        const checkbox = e.currentTarget as HTMLInputElement;
+        const chartIndex = Number(checkbox.value);
+        this.modal
+          .querySelectorAll(`.diagram-series-checkbox-${chartIndex}`)
+          .forEach((seriesCheckbox) => {
+            (seriesCheckbox as HTMLInputElement).disabled = !checkbox.checked;
+          });
+      });
+    });
+  }
+
+  protected getCheckedDiagramIndices(): number[] {
+    return Array.from(this.modal.querySelectorAll(".diagram-checkbox:checked"))
+      .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
+      .filter((n) => Number.isFinite(n));
+  }
+
+  protected getCheckedSeriesIndices(chartIndex: number): number[] {
+    return Array.from(this.modal.querySelectorAll(`.diagram-series-checkbox-${chartIndex}:checked`))
+      .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
+      .filter((n) => Number.isFinite(n));
+  }
+
+  protected hideAllSeriesSelectionCheckboxes() {
+    this.modal.querySelectorAll('[class^="diagram-series-checkbox-"]').forEach((checkbox) => {
+      const label = checkbox.closest("label") as HTMLLabelElement | null;
+      if (label) {
+        label.style.display = "none";
+      }
+    });
+  }
+
+  protected showAllSeriesSelectionCheckboxes() {
+    this.modal.querySelectorAll('[class^="diagram-series-checkbox-"]').forEach((checkbox) => {
+      const label = checkbox.closest("label") as HTMLLabelElement | null;
+      if (label) {
+        label.style.display = "block";
+      }
+    });
+  }
 
   /**
    * Resets the copyToClipboard Button

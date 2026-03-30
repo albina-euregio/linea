@@ -40,6 +40,7 @@ import { AbstractExportModal } from "../shared/abstract-export-modal";
  */
 export class LineaExportModal extends AbstractExportModal {
   private lineaPlot: LineaPlot;
+  private readonly maxCanvasPixels = 50_000_000;
 
   /**
    * Creates an instance of ExportModal and initializes the modal UI.
@@ -54,7 +55,7 @@ export class LineaExportModal extends AbstractExportModal {
    * @param {LineaPlot} lineaPlot - The LineaPlot instance to export
    */
   constructor(modal: HTMLDivElement, lineaPlot: LineaPlot) {
-    super(modal);
+    super(modal, lineaPlot.hasAttribute("showinteractiveblogexport"));
     this.lineaPlot = lineaPlot;
   }
 
@@ -72,24 +73,8 @@ export class LineaExportModal extends AbstractExportModal {
     this.exportSettings.style.display = "block";
     this.exportResult.style.display = "none";
 
-    this.modal.querySelector("#exportDiagrams")!.innerHTML = this.lineaPlot.view.charts
-      .map((chart, index) => {
-        let options = "";
-        chart.plotnames.forEach((name, i) => {
-          options += `<label style="display: flex; align-items: center; margin-bottom: 0; font-weight: normal; white-space: nowrap;">
-            <input type="checkbox" class="diagram-plot-checkbox-${index}" value="${i}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-            ${name}
-            </label>`;
-        });
+    this.addDiagramsToExportSettings(this.lineaPlot.view.charts);
 
-        return `
-          <div style="display: flex; flex-direction: row; gap:20px;"><label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
-              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-              ${chart.result.station} (${chart.result.altitude}m)
-          </label>${options}</div>
-          `;
-      })
-      .join("");
     (document.getElementById("exportTitle") as HTMLInputElement)!.value =
       this.#generateTitleString();
     this.modal.querySelectorAll(".diagram-checkbox").forEach((cb) => {
@@ -121,16 +106,15 @@ export class LineaExportModal extends AbstractExportModal {
    */
   async #generateInteractiveExportData(): Promise<{
     resultsFiltered: StationData[];
-    dataUrl: string;
   }> {
     const resultsFiltered: StationData[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
-      const activeplots = this.#getCheckedPlotIndices(index);
+      const activeplots = this.getCheckedSeriesIndices(index);
       let result = new StationData(
         lc.result.station,
         lc.result.altitude,
-        lc.result.timestamps,
+        lc.plots[0].data[0] as number[],
         {},
         {},
       );
@@ -140,7 +124,7 @@ export class LineaExportModal extends AbstractExportModal {
             result.values.TA = lc.result.values.TA ?? [];
             result.values.TD = lc.result.values.TD ?? [];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:newsnow")) {
-            result.values.NS = lc.result.values.NS;
+            result.values.NS = lc.result.values.NS ?? [];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
             result.values.HS = lc.result.values.HS ?? [];
             result.values.PSUM = lc.result.values.PSUM ?? [];
@@ -149,30 +133,58 @@ export class LineaExportModal extends AbstractExportModal {
       } else {
         activeplots.forEach((index) => {
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
-            result.values.TA = lc.result.values.TA ?? [];
-            result.values.TD = lc.result.values.TD ?? [];
-            result.values.TSS = lc.result.values.TSS ?? [];
+            const airTempIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:TA"),
+            );
+            result.values.TA = lc.plots[index].data[airTempIndex] as (number | null)[];
+            const dewPointIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:TD"),
+            );
+            result.values.TD = lc.plots[index].data[dewPointIndex] as (number | null)[];
+            const surfaceIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:TSS"),
+            );
+            result.values.TSS = lc.plots[index].data[surfaceIndex] as (number | null)[];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:wind")) {
-            result.values.VW = lc.result.values.VW ?? [];
-            result.values.VW_MAX = lc.result.values.VW_MAX ?? [];
-            result.values.DW = lc.result.values.DW ?? [];
+            const windIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:VW_MAX"),
+            );
+            result.values.VW = lc.plots[index].data[windIndex] as (number | null)[];
+            const windMaxIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:VW_MAX"),
+            );
+            result.values.VW_MAX = lc.plots[index].data[windMaxIndex] as (number | null)[];
+            const windDirectionIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:DW"),
+            );
+            result.values.DW = lc.plots[index].data[windDirectionIndex] as (number | null)[];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:humidity_gr")) {
-            result.values.RH = lc.result.values.RH ?? [];
-            result.values.ISWR = lc.result.values.ISWR ?? [];
+            const humidityIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:RH"),
+            );
+            result.values.RH = lc.plots[index].data[humidityIndex] as (number | null)[];
+            const globalRadiationIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:ISWR"),
+            );
+            result.values.ISWR = lc.result.values.ISWR
+              ? (lc.plots[index].data[globalRadiationIndex] as (number | null)[])
+              : [];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
-            result.values.HS = lc.result.values.HS ?? [];
-            result.values.PSUM = lc.result.values.PSUM ?? [];
+            const snowHeightIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:HS"),
+            );
+            result.values.HS = lc.plots[index].data[snowHeightIndex] as (number | null)[];
+            const precipitationIndex = lc.plots[index].series.findIndex(
+              (s) => s.label === i18n.message("linea:parameter:PSUM"),
+            );
+            result.values.PSUM = lc.plots[index].data[precipitationIndex] as (number | null)[];
           }
         });
       }
       resultsFiltered.push(result);
     });
 
-    const dataUrl: string = await this.exportAllPlotsToPNG(
-      { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
-      true,
-    );
-    return { resultsFiltered, dataUrl };
+    return { resultsFiltered };
   }
 
   /**
@@ -189,31 +201,48 @@ export class LineaExportModal extends AbstractExportModal {
     }
     const exports = this.getExportSettings();
 
-    const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
+    const resultsFiltered = await this.#generateInteractiveExportData();
+    const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
 
-    const iframeTemplate = await import("./iframetemplate.html?raw").then((m) => m.default);
-    let html = iframeTemplate
-      .replace('lang="en"', `lang="${i18n.lang}"`)
-      .replace('data=""', `data='${JSON.stringify(resultsFiltered)}'`)
-      .replace('id="fallback" src=""', `id="fallback" src='${dataUrl}'`);
+    const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
+    const body = `
+      <body>
+        <div id="chart-container">
+          <img id="fallback" src="" />
+          <linea-plot data="" showsurfacehoarseries showtitle id="linea"></linea-plot>
+        </div>
+
+        <script type="module" src="https://albina-euregio.gitlab.io/linea/linea.mjs"></script>
+        <script>
+          const linea = document.getElementById("linea");
+          const fallback = document.getElementById("fallback");
+
+          customElements.whenDefined("linea-plot").then(() => {
+            fallback.style.display = "none";
+          });
+        </script>
+      </body>`
+      .replace('data=""', `data="${serializedData}"`)
+      .replace('<img id="fallback" src="" />', "");
+    let html = iframeTemplate.replace("BODY", body).replace('lang="en"', `lang="${i18n.lang}"`);
 
     if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot", "<linea-plot showonlywinter");
     }
 
-    const binary = LineaExportModal.toBinary(html);
-
     let totalCanvases = 0;
-    this.#getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.#getCheckedPlotIndices(index).length;
+    this.getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
+    const iframeTitle = LineaExportModal.escapeHtmlAttribute(exports.title);
+
     const iframecode = `<iframe
-          src="data:text/html;base64,${btoa(binary)}"
+          srcdoc="${LineaExportModal.escapeHtmlAttribute(html)}"
           frameborder="0"
           scrolling="no"
           style="width: 100%; height: ${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px;border:none;overflow:hidden;"
-          title="${exports.title}">
+          title="${iframeTitle}">
       </iframe>`;
 
     this.exportResult.style.display = "block";
@@ -235,11 +264,19 @@ export class LineaExportModal extends AbstractExportModal {
       return;
     }
     const exports = this.getExportSettings();
-    const { resultsFiltered, dataUrl } = await this.#generateInteractiveExportData();
+    const resultsFiltered = await this.#generateInteractiveExportData();
+    const dataUrl = await this.exportAllPlotsToPNG(
+      { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
+      true,
+    );
+    if (!dataUrl) {
+      return;
+    }
 
+    const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
     let html = `<div data-lineaplot-wrapper>
                     <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
-                    <linea-plot style="position: absolute; inset: 0; z-index: 2;" data='${JSON.stringify(resultsFiltered)}' showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
+                    <linea-plot style="position: absolute; inset: 0; z-index: 2;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
                   </div>`;
 
     if (this.lineaPlot.view instanceof WinterView) {
@@ -248,8 +285,8 @@ export class LineaExportModal extends AbstractExportModal {
     const binary = LineaExportModal.toBinary(html);
 
     let totalCanvases = 0;
-    this.#getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.#getCheckedPlotIndices(index).length;
+    this.getCheckedDiagramIndices().forEach((index) => {
+      totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
     const iframeshortcode = `[lineaplotblog height="${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
@@ -373,7 +410,7 @@ export class LineaExportModal extends AbstractExportModal {
     }
 
     activeLinecharts.forEach((lineachart, index) => {
-      const plotindices = this.#getCheckedPlotIndices(index);
+      const plotindices = this.getCheckedSeriesIndices(index);
       if (plotindices.length == 0) {
         return;
       }
@@ -448,9 +485,14 @@ export class LineaExportModal extends AbstractExportModal {
     const chartsHeight = canvases.reduce((sum, c) => sum + c.height, 0);
     const legendHeight = (legendLines.length * legendItemHeight * 3) / 2;
     const totalHeight = titleHeight + chartsHeight + legendHeight;
+    const outputWidth = canvases[0].width;
+    if (outputWidth * totalHeight > this.maxCanvasPixels) {
+      alert(i18n.message("linea:message:exporttobig"));
+      return Promise.resolve("");
+    }
 
     const outCanvas = document.createElement("canvas");
-    outCanvas.width = canvases[0].width;
+    outCanvas.width = outputWidth;
     outCanvas.height = totalHeight;
 
     //fill background
@@ -525,19 +567,21 @@ export class LineaExportModal extends AbstractExportModal {
       lineachart.resizeObserver.observe(lineachart);
     }
     if (!noshow) {
+      const dataUrl = outCanvas.toDataURL();
       outCanvas.toBlob((blobdata) => {
         this.exportdata = {
           blob: blobdata,
-          data: outCanvas.toDataURL(),
+          data: dataUrl,
           filename: this.#generateFilename() + ".png",
           type: "image/png",
         };
       });
       document.getElementById("exportCode").innerHTML =
-        `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+        `<img src="${dataUrl}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
       document.getElementById("exportResult").style.display = "block";
+      return dataUrl;
     }
-    return outCanvas.toDataURL();
+    return "";
   }
 
   /**
@@ -548,7 +592,7 @@ export class LineaExportModal extends AbstractExportModal {
    */
   #getActiveLineacharts(): AbstractLineaChart[] {
     const activeCharts: AbstractLineaChart[] = [];
-    const indices = this.#getCheckedDiagramIndices();
+    const indices = this.getCheckedDiagramIndices();
     let i = 0;
     for (const lineachart of this.lineaPlot.view.charts) {
       if (indices.includes(i)) {
@@ -557,30 +601,5 @@ export class LineaExportModal extends AbstractExportModal {
       i += 1;
     }
     return activeCharts;
-  }
-
-  #getCheckedPlotIndices(index: number): number[] {
-    return this.#evaluateCheckboxes(`.diagram-plot-checkbox-${index}`);
-  }
-
-  /**
-   * Gets the indices of checked diagram checkboxes.
-   *
-   * @private
-   * @returns {number[]} Array of checked checkbox indices
-   */
-  #getCheckedDiagramIndices(): number[] {
-    return this.#evaluateCheckboxes(".diagram-checkbox");
-  }
-
-  #evaluateCheckboxes(classname: string): number[] {
-    const indices: number[] = [];
-    const checkboxes = this.modal.querySelectorAll(classname) as NodeListOf<HTMLInputElement>;
-    checkboxes.forEach((cb) => {
-      if (cb.checked) {
-        indices.push(parseInt(cb.value));
-      }
-    });
-    return indices;
   }
 }

@@ -1,12 +1,18 @@
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import type { Bulletin } from "../schema/caaml";
 import uPlot from "uplot";
 import { opts_danger_rating_altitude } from "./series-options/danger-rating-altitude-opts";
+import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
+
+interface DangerRatingAltitudePlotInformation extends PlotInformation {
+  minX: number;
+  maxX: number;
+  maxY: number;
+}
 
 export class DangerRatingChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.exportModal.legend = false;
   }
 
   private parseElevationBound(bound: string | undefined, fallback: number) {
@@ -103,18 +109,6 @@ export class DangerRatingChart extends AbstractChart {
       return;
     }
 
-    const minX = Math.min(...xValues);
-    const maxX = Math.max(...xValues) + 12 * 60 * 60 * 1000;
-    const maxY = Math.max(...layers.map((l) => l.upperBound));
-
-    const optsWithRange: uPlot.Options = {
-      ...opts_danger_rating_altitude,
-      scales: {
-        x: { time: true, auto: false, range: [minX, maxX] },
-        y: { auto: false, range: [0, maxY] },
-      },
-    };
-
     const data = [
       xValues,
       timeSeries,
@@ -122,7 +116,24 @@ export class DangerRatingChart extends AbstractChart {
       layers as unknown as number[],
     ] as uPlot.AlignedData;
 
-    const plot = this.createPlot(optsWithRange, data);
+    this.plotInformation = {
+      data,
+      minX: Math.min(...xValues),
+      maxX: Math.max(...xValues) + 12 * 60 * 60 * 1000,
+      maxY: Math.max(...layers.map((l) => l.upperBound)),
+    } as DangerRatingAltitudePlotInformation;
+    this.plotData(this.plotInformation as DangerRatingAltitudePlotInformation);
+  }
+
+  plotData(plotInformation: DangerRatingAltitudePlotInformation): void {
+    const optsWithRange: uPlot.Options = {
+      ...opts_danger_rating_altitude,
+      scales: {
+        x: { time: true, auto: false, range: [plotInformation.minX, plotInformation.maxX] },
+        y: { auto: false, range: [0, plotInformation.maxY] },
+      },
+    };
+    const plot = this.createPlot(optsWithRange, plotInformation.data);
     plot.root.addEventListener("dblclick", () => this.resetZoom());
   }
 
@@ -150,6 +161,13 @@ export class DangerRatingChart extends AbstractChart {
 
     this.plot.setScale("x", { min: minX, max: maxX });
     this.plot.setScale("y", { min: lowerBound, max: upperBound });
+  }
+
+  get exportConfiguration(): AwsExportChartConfiguration {
+    return {
+      ...super.exportConfiguration,
+      pngLegend: false,
+    };
   }
 }
 

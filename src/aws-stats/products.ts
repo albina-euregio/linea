@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BlogService, BulletinData, Observations } from "./datastore";
 import {
   getStackedOpts,
@@ -8,21 +8,16 @@ import {
 } from "./series-options/products-opts";
 import { i18n } from "../i18n";
 
+interface ProductsPlotInformation extends PlotInformation {
+  blogLabels: string[];
+}
+
 export class ProductsChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.exportModal.legend = false;
   }
 
   async render() {
-    if (this.plot) {
-      this.plot.destroy();
-      this.plot = null;
-    }
-    if (this.container) {
-      this.container.remove();
-    }
-
     if (this.bulletins.length === 0) {
       const empty = document.createElement("div");
       empty.textContent = "No bulletin data available";
@@ -48,7 +43,6 @@ export class ProductsChart extends AbstractChart {
           url: string;
         }[])
       : ([] as { regionCode: string; label: string; url: string }[]);
-    console.log(blogUrls);
     const blogData: { timestamps: number[]; data: number[] }[] = [];
 
     for (const regionBlog of blogUrls) {
@@ -65,25 +59,35 @@ export class ProductsChart extends AbstractChart {
       this.convertTrainingsToDataset(virtualTrainings),
       ...blogData,
     ]);
-    const pre_opts = opts_products_bars;
 
+    this.plotInformation = {
+      data: [timestamps, ...seriesData] as uPlot.AlignedData,
+      blogLabels: blogUrls.map((url) => url.label),
+    } as ProductsPlotInformation;
+    this.plotData(this.plotInformation as ProductsPlotInformation);
+  }
+
+  plotData(plotInformation: ProductsPlotInformation): void {
     const strokes = ["#bd2d23", "#bd5423", "#bda123"];
     const fills = [
       "rgba(196, 81, 81, 0.62)",
       "rgba(196, 114, 81, 0.62)",
       "rgba(196, 160, 81, 0.62)",
     ];
-
-    blogUrls.forEach((region, index) => {
+    const pre_opts = opts_products_bars;
+    plotInformation.blogLabels.forEach((label, index) => {
       pre_opts.series.push({
         ...opts_series_products,
-        label: `${i18n.message(`linea:yearly:products:series:blogs`)} ${region.label}`,
+        label: `${i18n.message(`linea:yearly:products:series:blogs`)} ${label}`,
         stroke: strokes[index % strokes.length],
         fill: fills[index % fills.length],
       });
     });
-
-    let { opts, data } = getStackedOpts(pre_opts, [timestamps, ...seriesData], null);
+    let { opts, data } = getStackedOpts(
+      opts_products_bars,
+      plotInformation.data as number[][],
+      null,
+    );
     this.createPlot(opts, data as uPlot.AlignedData);
   }
 

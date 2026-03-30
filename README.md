@@ -51,7 +51,10 @@ To interact with Transifex, install the official [transifex-client](https://gith
 
 ## Usage
 
-Install the `@albina-euregio/linea` package via https://gitlab.com/albina-euregio/linea/-/packages, or include the latest version via https://albina-euregio.gitlab.io/linea/linea.js
+Install the @albina-euregio/linea package via https://gitlab.com/albina-euregio/linea/-/packages, or include the latest version via https://albina-euregio.gitlab.io/linea/linea.mjs
+`<script type="module" src="https://albina-euregio.gitlab.io/linea/linea.mjs"></script>`
+or for awsstats: https://albina-euregio.gitlab.io/linea/aws-stats.mjs
+`<script type="module" src="https://albina-euregio.gitlab.io/linea/aws-stats.mjs"></script>`
 
 ### `<linea-plot>`
 

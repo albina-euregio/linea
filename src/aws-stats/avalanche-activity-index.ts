@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { Observations, TriggeredAvalancheObservations } from "./datastore";
 import { opts_avalanche_activity_index } from "./series-options/avalanche-activity-index-opts";
 import { stack2 } from "./series-options/products-opts";
@@ -27,9 +27,6 @@ export class AvalancheActivityIndexChart extends AbstractChart {
 
     const triggered = new TriggeredAvalancheObservations(avalanches.items);
 
-    const uniqe = new Set(triggered.items.map((v) => v.properties.triggerType));
-    console.log(uniqe);
-
     const spontaneous = triggered.spontanousCount;
     const artificial = triggered.triggeredCount;
     const unknown = triggered.unknownCount;
@@ -43,11 +40,17 @@ export class AvalancheActivityIndexChart extends AbstractChart {
       { timestamps: artificial.timestamps, data: artificial.countPerDay },
       { timestamps: unknown.timestamps, data: unknown.countPerDay },
     ]);
+    this.plotInformation = {
+      data: [timestamps, ...seriesData],
+    } as PlotInformation;
+    this.plotData(this.plotInformation);
+  }
 
+  plotData(plotInformation: PlotInformation): void {
     const series2 = [
       {
         scaleKey: "y",
-        values: seriesData[0],
+        values: plotInformation.data[1] as number[],
         negY: false,
         stacking: {
           mode: "none",
@@ -56,7 +59,7 @@ export class AvalancheActivityIndexChart extends AbstractChart {
       },
       {
         scaleKey: "y2",
-        values: seriesData[1],
+        values: plotInformation.data[2] as number[],
         negY: false,
         stacking: {
           mode: "none",
@@ -65,7 +68,7 @@ export class AvalancheActivityIndexChart extends AbstractChart {
       },
       {
         scaleKey: "y2",
-        values: seriesData[2],
+        values: plotInformation.data[3] as number[],
         negY: false,
         stacking: {
           mode: "normal",
@@ -74,7 +77,7 @@ export class AvalancheActivityIndexChart extends AbstractChart {
       },
       {
         scaleKey: "y2",
-        values: seriesData[3],
+        values: plotInformation.data[4] as number[],
         negY: false,
         stacking: {
           mode: "normal",
@@ -83,7 +86,7 @@ export class AvalancheActivityIndexChart extends AbstractChart {
       },
       {
         scaleKey: "y2",
-        values: seriesData[4],
+        values: plotInformation.data[5] as number[],
         negY: false,
         stacking: {
           mode: "normal",
@@ -109,12 +112,15 @@ export class AvalancheActivityIndexChart extends AbstractChart {
           const restacked = stack2(series2, (seriesIdx: number) => !u.series[seriesIdx + 1].show);
           u.delBand(null);
           restacked.bands.forEach((b: uPlot.Band) => u.addBand(b));
-          u.setData([timestamps, ...restacked.data] as unknown as uPlot.AlignedData, false);
+          u.setData(
+            [plotInformation.data[0], ...restacked.data] as unknown as uPlot.AlignedData,
+            false,
+          );
         },
       ],
     };
 
-    this.createPlot(opts, [timestamps, ...stackedData]);
+    this.createPlot(opts, [plotInformation.data[0], ...stackedData]);
   }
 }
 

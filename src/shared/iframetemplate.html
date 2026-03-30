@@ -37,21 +37,5 @@
       }
     </style>
   </head>
-
-  <body>
-    <div id="chart-container">
-      <img id="fallback" src="" />
-      <linea-plot data="" showsurfacehoarseries showtitle id="linea"></linea-plot>
-    </div>
-
-    <script type="module" src="https://albina-euregio.gitlab.io/linea/linea.js"></script>
-    <script>
-      const linea = document.getElementById("linea");
-      const fallback = document.getElementById("fallback");
-
-      customElements.whenDefined("linea-plot").then(() => {
-        fallback.style.display = "none";
-      });
-    </script>
-  </body>
+  BODY
 </html>

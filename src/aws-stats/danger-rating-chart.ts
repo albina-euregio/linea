@@ -1,10 +1,14 @@
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData, Observations } from "./datastore";
 import {
   opts_danger_rating,
   opts_danger_rating_series_all,
   opts_danger_rating_series_base,
 } from "./series-options/danger-rating-opts";
+
+interface DangerRatingPlotInformation extends PlotInformation {
+  microRegionNames: string[];
+}
 
 export class DangerRatingChart extends AbstractChart {
   async onConnected(): Promise<void> {
@@ -23,7 +27,6 @@ export class DangerRatingChart extends AbstractChart {
 
   async render(): Promise<void> {
     const bulletinData = new BulletinData(this.bulletins);
-
     if (
       !this.getAttribute("bulletin-filter-micro-region") ||
       this.getAttribute("bulletin-filter-micro-region") == ""
@@ -45,19 +48,27 @@ export class DangerRatingChart extends AbstractChart {
         microRegionNames.push(bulletinData.regionIdToName(microRegionID));
       }
       const { timestamps, seriesData } = Observations.mergeAndFillData(dataPairs);
-      this.createPlot(opts_danger_rating, [timestamps]);
-      for (let i = 0; i < seriesData.length; i++) {
-        this.addSeries(
-          {
-            ...opts_danger_rating_series_base,
-            stroke: DangerRatingChart.COLORS[i % DangerRatingChart.COLORS.length],
-            label: microRegionNames[i],
-          },
-          seriesData[i],
-        );
-      }
+      this.plotInformation = {
+        data: [timestamps, ...seriesData],
+        microRegionNames: microRegionNames,
+      } as DangerRatingPlotInformation;
+
+      this.plotData(this.plotInformation as DangerRatingPlotInformation);
+    }
+  }
+
+  plotData(plotInformation: DangerRatingPlotInformation): void {
+    this.createPlot(opts_danger_rating, [plotInformation.data[0]]);
+    for (let i = 1; i < plotInformation.data.length; i++) {
+      this.addSeries(
+        {
+          ...opts_danger_rating_series_base,
+          stroke: DangerRatingChart.COLORS[i % DangerRatingChart.COLORS.length],
+          label: plotInformation.microRegionNames[i - 1],
+        },
+        plotInformation.data[i] as number[],
+      );
     }
   }
 }
-
 customElements.define("aws-danger-rating", DangerRatingChart);

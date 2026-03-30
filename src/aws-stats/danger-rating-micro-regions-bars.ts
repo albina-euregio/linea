@@ -1,4 +1,4 @@
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData } from "./datastore";
 import {
   getStackedOpts,
@@ -28,8 +28,15 @@ export class DangerRatingMicroRegionsBarsChart extends AbstractChart {
     for (let i = 1; i <= 5; i++) {
       dataSeries.push(distribution.ratings[i as 1 | 2 | 3 | 4 | 5] || []);
     }
+    this.plotData((this.plotInformation = { data: dataSeries as uPlot.AlignedData }));
+  }
 
-    let { opts, data } = getStackedOpts(opts_danger_rating_micro_regions_bars, dataSeries, null);
+  plotData(plotInformation: PlotInformation): void {
+    let { opts, data } = getStackedOpts(
+      opts_danger_rating_micro_regions_bars,
+      plotInformation.data as number[][],
+      null,
+    );
     this.createPlot(opts, data as uPlot.AlignedData);
   }
 }

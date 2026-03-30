@@ -6,6 +6,8 @@ import { BulletinData, Observations } from "./datastore";
 import { fetchSMET } from "../data/smet-data";
 import { StationData } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
+import { AwsStatsExportModal } from "./aws-stats-export-modal";
+import { i18n } from "../i18n";
 import type { Bulletin } from "../schema/caaml";
 
 export function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
@@ -52,9 +54,13 @@ function filterWeatherByDate(
   );
 }
 
-class AwsStats extends HTMLElement {
+export class AwsStats extends HTMLElement {
+  readonly exportModal!: AwsStatsExportModal;
+  charts: AbstractChart[] = [];
+
   constructor() {
     super();
+    this.exportModal = new AwsStatsExportModal(document.createElement("div"), this);
   }
 
   connectedCallback() {
@@ -202,8 +208,19 @@ class AwsStats extends HTMLElement {
 
     // Remove loader and append chart
     loader.remove();
+
+    const menubar = document.createElement("div");
+    menubar.className = "menubar";
+
+    const exportBtn = document.createElement("button");
+    exportBtn.textContent = i18n.message("linea:controls:value:export");
+    exportBtn.addEventListener("click", () => this.exportModal.show());
+    menubar.appendChild(exportBtn);
+    this.appendChild(menubar);
+    this.appendChild(this.exportModal.modal);
     for (const chart of charts) {
       this.appendChild(chart);
+      this.charts.push(chart);
     }
   }
 }

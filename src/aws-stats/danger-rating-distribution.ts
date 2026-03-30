@@ -1,5 +1,6 @@
 import { i18n } from "../i18n";
-import { AbstractChart } from "./abstract-chart";
+import { AbstractChart, type PlotInformation } from "./abstract-chart";
+import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import { BulletinData } from "./datastore";
 import {
   dangerDistributionOrder,
@@ -11,18 +12,9 @@ import {
 export class DangerRatingChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.exportModal.legend = false;
   }
 
   async render(): Promise<void> {
-    if (this.plot) {
-      this.plot.destroy();
-      this.plot = null;
-    }
-    if (this.container) {
-      this.container.remove();
-    }
-
     const bulletinData = new BulletinData(this.bulletins);
     const distribution = bulletinData.filterRegionCode(
       this.getAttribute("regionCode") ?? "all",
@@ -58,14 +50,25 @@ export class DangerRatingChart extends AbstractChart {
     }
 
     const xValues = dangerDistributionOrder.map((_, index) => index + 1);
-    const sum = counts.reduce((a, b) => a + b, 0);
+    this.plotInformation = {
+      data: [xValues, counts],
+    } as PlotInformation;
+    this.plotData(this.plotInformation);
+  }
 
+  plotData(dataInformation: PlotInformation): void {
+    let sum = 0;
+    dataInformation.data[1].forEach((value) => {
+      if (typeof value === "number") {
+        sum += value;
+      }
+    });
     this.createPlot(
       {
         ...opts_danger_rating_distribution,
         title: `${opts_danger_rating_distribution.title} (N = ${sum})`,
       },
-      [xValues],
+      [dataInformation.data[0]],
     );
     const reference = this.getAttribute("danger-rating-reference")
       ? JSON.parse(this.getAttribute("danger-rating-reference")!)
@@ -73,11 +76,18 @@ export class DangerRatingChart extends AbstractChart {
     this.addSeries(opts_danger_rating_distribution_reference_series, reference);
 
     for (let i = 0; i < dangerDistributionOrder.length; i++) {
-      const sparseSeries = xValues.map((_x, index) =>
-        index === i ? (counts[i] / sum) * 100 : null,
-      );
+      const sparseSeries = dataInformation.data[0].map((_x, index) =>
+        index === i ? (dataInformation.data[1][i] / sum) * 100 : null,
+      ) as (number | null)[];
       this.addSeries(getDangerDistributionSeries(dangerDistributionOrder[i]), sparseSeries);
     }
+  }
+
+  get exportConfiguration(): AwsExportChartConfiguration {
+    return {
+      ...super.exportConfiguration,
+      pngLegend: false,
+    };
   }
 }
 

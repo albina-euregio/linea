@@ -1,16 +1,20 @@
 import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
-import { AwsStatsExportModal } from "./aws-stats-export-modal";
-import { i18n } from "../i18n";
 import type { Bulletin } from "../schema/caaml";
+import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
+
+export interface PlotInformation {
+  data: uPlot.AlignedData;
+  [key: string]: any;
+}
 
 export abstract class AbstractChart extends HTMLElement {
   public container!: HTMLDivElement;
   public plot: uPlot | null = null;
   readonly resizeObserver: ResizeObserver;
-  readonly exportModal!: AwsStatsExportModal;
   protected bulletins!: Bulletin[];
+  public plotInformation: PlotInformation;
 
   constructor() {
     super();
@@ -19,19 +23,35 @@ export abstract class AbstractChart extends HTMLElement {
         this.resizePlot(this.container.clientWidth, this.container.style);
       }
     });
-    this.exportModal = new AwsStatsExportModal(document.createElement("div"), this);
   }
 
   connectedCallback() {
     this.onConnected()
       .then(() => {
         this.buildLayout();
-        this.render().then(() => {
+        if (this.plot) {
+          this.plot.destroy();
+          this.plot = null;
+        }
+        if (this.container) {
+          this.container.remove();
+        }
+        if (this.hasAttribute("data")) {
+          const data = JSON.parse(this.getAttribute("data")!);
+          this.plotData(data as PlotInformation);
           if (this.container && this.plot) {
             this.resizePlot(this.container.clientWidth, this.container.style);
             this.resizeObserver.observe(this.container);
           }
-        });
+          return;
+        } else {
+          this.render().then(() => {
+            if (this.container && this.plot) {
+              this.resizePlot(this.container.clientWidth, this.container.style);
+              this.resizeObserver.observe(this.container);
+            }
+          });
+        }
       })
       .catch((error) => {
         console.error("Failed to initialize chart:", error);
@@ -71,19 +91,11 @@ export abstract class AbstractChart extends HTMLElement {
     const style = document.createElement("style");
     style.textContent = [cssComponent, cssuPlot].join("\n");
     this.appendChild(style);
-
-    const menubar = document.createElement("div");
-    menubar.className = "menubar";
-
-    const exportBtn = document.createElement("button");
-    exportBtn.textContent = i18n.message("linea:controls:value:export");
-    exportBtn.addEventListener("click", () => this.exportModal.show());
-    menubar.appendChild(exportBtn);
-    this.appendChild(menubar);
-    this.appendChild(this.exportModal.modal);
   }
 
   async render(): Promise<void> {}
+
+  abstract plotData(plotInformation: PlotInformation): void;
 
   async onConnected(): Promise<void> {
     // Default implementation - can be overridden by subclasses
@@ -99,6 +111,14 @@ export abstract class AbstractChart extends HTMLElement {
 
   get uplot(): uPlot | null {
     return this.plot;
+  }
+
+  get exportConfiguration(): AwsExportChartConfiguration {
+    return {
+      title: this.plot?.root.querySelector(".u-title")?.textContent?.trim() || "",
+      pngLegend: true,
+      interactiveLegend: true,
+    };
   }
 
   addSeries(series: uPlot.Series, data: (number | null)[]) {
