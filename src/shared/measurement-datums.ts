@@ -1,4 +1,12 @@
 import uPlot from "uplot";
+
+enum Mode {
+  Delta = "Delta",
+  Integral = "Integral",
+  Mean = "Mean",
+  SeriesMean = "SeriesMean",
+}
+
 /**
  *  inspired by https://leeoniya.github.io/uPlot/demos/measure-datums.html
  *  enhanced:
@@ -6,6 +14,26 @@ import uPlot from "uplot";
  * - Integration of parameters over time
  */
 export class MeasurementDatumPlugin {
+  static ModeFunctions: Record<
+    Mode,
+    (
+      u: uPlot,
+      x1: number,
+      x2: number,
+      y1: number,
+      y2: number,
+      dataIdx1: number | null,
+      dataIdx2: number | null,
+      seriesIdx: number | null,
+    ) => string
+  > = {
+    [Mode.Delta]: (_u, _x1, _x2, y1, y2) => `𝚫y: ${(y2 - y1).toPrecision(3)}`,
+    [Mode.Integral]: (u, x1, x2, y1, y2) =>
+      `∫: ${(((y2 - y1) * (x2 - x1)) / 3600_000).toPrecision(3)}`,
+    [Mode.Mean]: (_u, _x1, _x2, y1, y2) => `Mean: ${((y2 + y1) / 2).toPrecision(3)}`,
+    [Mode.SeriesMean]: MeasurementDatumPlugin.seriesMean,
+  };
+
   public static datumsPlugin() {
     let x1: number | null = null;
     let x2: number | null = null;
@@ -13,6 +41,7 @@ export class MeasurementDatumPlugin {
     let y2: number | null = null;
     let dataIdxs1: (number | null)[] = null;
     let dataIdxs2: (number | null)[] = null;
+    let mode: Mode = Mode.Delta;
 
     const drawDatum = (u: uPlot, x: number, y: number, color: string) => {
       let cx = u.valToPos(x, "x", true);
@@ -39,7 +68,9 @@ export class MeasurementDatumPlugin {
     };
 
     const drawDelta = (u: uPlot) => {
-      let labels = [`𝚫y: ${(y2 - y1).toPrecision(3)}`];
+      let labels = [
+        MeasurementDatumPlugin.ModeFunctions[mode](u, x1, x2, y1, y2, null, null, null),
+      ];
 
       u.series.forEach((s, i) => {
         if (i == 0) {
@@ -59,8 +90,17 @@ export class MeasurementDatumPlugin {
           return;
         }
 
-        const integral = ((seriesY2 - seriesY1) * (x2 - x1)) / 3600_000;
-        labels.push(`${s.label}: ${integral.toPrecision(3)}`);
+        const labelValue = MeasurementDatumPlugin.ModeFunctions[mode](
+          u,
+          x1,
+          x2,
+          seriesY1,
+          seriesY2,
+          idx1,
+          idx2,
+          i,
+        );
+        labels.push(`${s.label}: ${labelValue}`);
       });
 
       const lineHeight = 14;
@@ -91,6 +131,16 @@ export class MeasurementDatumPlugin {
             (e) => {
               if (e.key == "Escape") {
                 clearDatums(u);
+              } else if (e.key == "d") {
+                clearDatums(u);
+              } else if (e.key == "m") {
+                mode = Mode.Mean;
+              } else if (e.key == "i") {
+                mode = Mode.Integral;
+              } else if (e.key == "x") {
+                mode = Mode.Delta;
+              } else if (e.key == "s") {
+                mode = Mode.SeriesMean;
               } else {
                 const { left, top } = u.cursor;
 
@@ -99,18 +149,14 @@ export class MeasurementDatumPlugin {
                     x1 = u.posToVal(left, "x");
                     y1 = u.posToVal(top, "y");
                     dataIdxs1 = [...u.cursor.idxs];
-                    u.redraw();
                   } else if (e.key == "2") {
                     x2 = u.posToVal(left, "x");
                     y2 = u.posToVal(top, "y");
                     dataIdxs2 = [...u.cursor.idxs];
-                    u.redraw();
                   }
                 }
               }
-              if (e.key == "d") {
-                clearDatums(u);
-              }
+              u.redraw();
             },
             true,
           );
@@ -138,5 +184,27 @@ export class MeasurementDatumPlugin {
         },
       },
     };
+  }
+
+  static seriesMean(
+    u: uPlot,
+    x1: number,
+    x2: number,
+    y1: number,
+    y2: number,
+    dataIdx1: number | null,
+    dataIdx2: number | null,
+    seriesIdx: number | null,
+  ): string {
+    if (dataIdx1 == null || dataIdx2 == null || seriesIdx == null) {
+      return `Timerange: ${((x2 - x1) / 3_600_000).toFixed(1)} h`;
+    }
+    const dataMinIdx = Math.min(dataIdx1, dataIdx2);
+    const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
+    const dataSlice = u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+
+    const sum = dataSlice.reduce((acc, val) => acc + val, 0);
+    const mean = sum / dataSlice.length;
+    return `SeriesMean: ${mean.toFixed(2)}`;
   }
 }
