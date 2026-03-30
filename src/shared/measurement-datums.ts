@@ -200,4 +200,36 @@ export class MeasurementDatumPlugin {
     const mean = sum / dataSlice.length;
     return `SeriesMean: ${mean.toFixed(2)}`;
   }
+
+  /**
+   * Performs a simple integration with Riemann
+   */
+  integrateSeries(
+    dataIdx1: number | null,
+    dataIdx2: number | null,
+    seriesIdx: number | null,
+  ): string {
+    if (this.u == null) {
+      return "∫: n/a";
+    }
+
+    if (dataIdx1 == null || dataIdx2 == null || seriesIdx == null) {
+      return `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`;
+    }
+    const dataMinIdx = Math.min(dataIdx1, dataIdx2);
+    const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
+    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+
+    // Simple numerical integration using the Riemann sum
+    let integral = 0;
+    for (let i = 1; i < dataSlice.length; i++) {
+      const x0 = this.u.data[0][dataMinIdx + i - 1] as number;
+      const x1 = this.u.data[0][dataMinIdx + i] as number;
+      const y0 = dataSlice[i - 1];
+      const y1 = dataSlice[i];
+      integral += ((y0 + y1) / 2) * (x1 - x0);
+    }
+    const integralInHours = integral / 3_600_000;
+    return `∫: ${integralInHours.toFixed(3)} unit*h`;
+  }
 }
