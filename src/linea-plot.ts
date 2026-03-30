@@ -337,7 +337,7 @@ export class LineaPlot extends HTMLElement {
     this.helpHint.classList.add("linea-help-hint");
     this.helpHint.setAttribute("role", "dialog");
     this.helpHint.setAttribute("aria-hidden", "true");
-    this.helpHint.textContent = i18n.message("linea:measurement-datums:usage");
+    this.helpHint.textContent = i18n.message("linea:measurement-dates:usage");
 
     const hideHelpHint = () => {
       this.helpHint.classList.remove("visible");
