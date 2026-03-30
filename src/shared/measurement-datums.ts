@@ -91,9 +91,14 @@ export class MeasurementDatumPlugin {
       let labels = [title, `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`];
 
       u.series.forEach((s, i) => {
-        if (i == 0) {
+        if (
+          i == 0 ||
+          s.label == i18n.message("linea:parameter:SH:potential") ||
+          s.label == i18n.message("linea:parameter:snowcover")
+        ) {
           return;
         }
+
         const idx1 = this.dataIdxs1[i];
         const idx2 = this.dataIdxs2[i];
 
