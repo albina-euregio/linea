@@ -29,10 +29,10 @@ export class MeasurementDatumPlugin {
     Mode,
     (dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null) => string
   > = {
-    [Mode.Delta]: () => `𝚫y: ${(this.y2 - this.y1).toPrecision(3)}`,
+    [Mode.Delta]: (dataIdx1, dataIdx2, seriesIdx) => this.delta(dataIdx1, dataIdx2, seriesIdx),
     [Mode.Integral]: (dataIdx1, dataIdx2, seriesIdx) =>
       this.integrateSeries(dataIdx1, dataIdx2, seriesIdx),
-    [Mode.Mean]: () => `Mean: ${((this.y2 + this.y1) / 2).toPrecision(3)}`,
+    [Mode.Mean]: (dataIdx1, dataIdx2, seriesIdx) => this.mean(dataIdx1, dataIdx2, seriesIdx),
     [Mode.SeriesMean]: (dataIdx1, dataIdx2, seriesIdx) =>
       this.seriesMean(dataIdx1, dataIdx2, seriesIdx),
   };
@@ -72,7 +72,22 @@ export class MeasurementDatumPlugin {
     };
 
     const drawDelta = (u: uPlot) => {
-      let labels = [this.ModeFunctions[this.mode](null, null, null)];
+      let title = "";
+      switch (this.mode) {
+        case Mode.Delta:
+          title = i18n.message("linea:measurement-datums:delta");
+          break;
+        case Mode.Mean:
+          title = i18n.message("linea:measurement-datums:mean");
+          break;
+        case Mode.SeriesMean:
+          title = i18n.message("linea:measurement-datums:seriesmean");
+          break;
+        case Mode.Integral:
+          title = i18n.message("linea:measurement-datums:integral");
+          break;
+      }
+      let labels = [title, `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`];
 
       u.series.forEach((s, i) => {
         if (i == 0) {
@@ -184,13 +199,23 @@ export class MeasurementDatumPlugin {
     };
   }
 
+  delta(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
+    if (this.u == null) {
+      return "Δy: n/a";
+    }
+    return `𝚫y: ${(this.u.data[seriesIdx][dataIdx2] - this.u.data[seriesIdx][dataIdx1]).toPrecision(3)}`;
+  }
+
+  mean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
+    if (this.u == null) {
+      return "n/a";
+    }
+    return `${((this.u.data[seriesIdx][dataIdx1] + this.u.data[seriesIdx][dataIdx2]) / 2).toPrecision(3)}`;
+  }
+
   seriesMean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
     if (this.u == null) {
-      return "SeriesMean: n/a";
-    }
-
-    if (dataIdx1 == null || dataIdx2 == null || seriesIdx == null) {
-      return `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`;
+      return "n/a";
     }
     const dataMinIdx = Math.min(dataIdx1, dataIdx2);
     const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
@@ -198,7 +223,7 @@ export class MeasurementDatumPlugin {
 
     const sum = dataSlice.reduce((acc, val) => acc + val, 0);
     const mean = sum / dataSlice.length;
-    return `SeriesMean: ${mean.toFixed(2)}`;
+    return `${mean.toFixed(2)}`;
   }
 
   /**
@@ -211,10 +236,6 @@ export class MeasurementDatumPlugin {
   ): string {
     if (this.u == null) {
       return "∫: n/a";
-    }
-
-    if (dataIdx1 == null || dataIdx2 == null || seriesIdx == null) {
-      return `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`;
     }
     const dataMinIdx = Math.min(dataIdx1, dataIdx2);
     const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
