@@ -48,20 +48,16 @@ export class MeasurementDatumPlugin {
   public mode: Mode = Mode.Delta;
 
   public datumsPlugin(): uPlot.Plugin {
-    const drawDatum = (u: uPlot, x: number, y: number, color: string) => {
+    const drawDatumLine = (u: uPlot, x: number, color: string) => {
       let cx = u.valToPos(x, "x", true);
-      let cy = u.valToPos(y, "y", true);
-      let rad = 10;
 
       u.ctx.strokeStyle = color;
       u.ctx.beginPath();
 
-      u.ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
-
-      u.ctx.moveTo(cx - rad - 5, cy);
-      u.ctx.lineTo(cx + rad + 5, cy);
-      u.ctx.moveTo(cx, cy - rad - 5);
-      u.ctx.lineTo(cx, cy + rad + 5);
+      const top = u.bbox.top;
+      const bottom = u.bbox.top + u.bbox.height;
+      u.ctx.moveTo(cx, bottom);
+      u.ctx.lineTo(cx, top);
 
       u.ctx.stroke();
     };
@@ -73,6 +69,18 @@ export class MeasurementDatumPlugin {
     };
 
     const drawDelta = (u: uPlot) => {
+      let cxleft = u.valToPos(Math.min(this.x1, this.x2), "x", true);
+      let cxright = u.valToPos(Math.max(this.x1, this.x2), "x", true);
+
+      u.ctx.fillStyle = "#c0c0c038";
+      u.ctx.beginPath();
+
+      const top = u.bbox.top;
+      const bottom = u.bbox.top + u.bbox.height;
+      u.ctx.moveTo(cxleft, bottom);
+      u.ctx.lineTo(cxright, top);
+      u.ctx.fillRect(cxleft, top, cxright - cxleft, bottom - top);
+
       let title = "";
       switch (this.mode) {
         case Mode.Delta:
@@ -182,11 +190,11 @@ export class MeasurementDatumPlugin {
             u.ctx.lineWidth = 2;
 
             if (this.x1 != null) {
-              drawDatum(u, this.x1, this.y1, "blue");
+              drawDatumLine(u, this.x1, "#fd0000");
             }
 
             if (this.x2 != null) {
-              drawDatum(u, this.x2, this.y2, "orange");
+              drawDatumLine(u, this.x2, "#0026ff");
             }
 
             if (
