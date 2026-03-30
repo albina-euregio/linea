@@ -1,5 +1,6 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
+import type { Unit } from "../data/units";
 
 enum Mode {
   Delta = "Delta",
@@ -203,14 +204,18 @@ export class MeasurementDatumPlugin {
     if (this.u == null) {
       return "Δy: n/a";
     }
-    return `𝚫y: ${(this.u.data[seriesIdx][dataIdx2] - this.u.data[seriesIdx][dataIdx1]).toPrecision(3)}`;
+    const unit = MeasurementDatumPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    const value = this.u.data[seriesIdx][dataIdx2] - this.u.data[seriesIdx][dataIdx1];
+    return `𝚫y: ${i18n.number(value, {}, unit)}`;
   }
 
   mean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
     if (this.u == null) {
       return "n/a";
     }
-    return `${((this.u.data[seriesIdx][dataIdx1] + this.u.data[seriesIdx][dataIdx2]) / 2).toPrecision(3)}`;
+    const unit = MeasurementDatumPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    const value = (this.u.data[seriesIdx][dataIdx1] + this.u.data[seriesIdx][dataIdx2]) / 2;
+    return `${i18n.number(value, {}, unit)}`;
   }
 
   seriesMean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
@@ -223,7 +228,8 @@ export class MeasurementDatumPlugin {
 
     const sum = dataSlice.reduce((acc, val) => acc + val, 0);
     const mean = sum / dataSlice.length;
-    return `${mean.toFixed(2)}`;
+    const unit = MeasurementDatumPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    return `${i18n.number(mean, {}, unit)}`;
   }
 
   /**
@@ -266,11 +272,35 @@ export class MeasurementDatumPlugin {
     }
 
     const integralValue = isPSUM ? integral : integral / 3_600_000;
-    const [number, unit] = MeasurementDatumPlugin.resolveUnit(integralValue, seriesLabel);
-    return `∫: ${number.toFixed(1)} ${unit}`;
+    const unit = MeasurementDatumPlugin.resolveUnit(seriesLabel);
+    const [number, integratedUnit] = MeasurementDatumPlugin.integrateUnit(integralValue, unit);
+    return `∫: ${i18n.number(number, {}, integratedUnit)}`;
   }
 
-  static resolveUnit(integratedValue: number, seriesLabel: string): [number, IntegratedUnits] {
+  static integrateUnit(integratedValue: number, unit: Unit | "dps"): [number, IntegratedUnits] {
+    switch (unit) {
+      case "°C":
+        return [integratedValue, "℃*h"];
+      case "km/h":
+        return [integratedValue * 1000, "m"]; // convert km/h * h = km to m
+      case "%":
+        return [integratedValue, "%*h"];
+      case "W/m²":
+        return [Math.round(integratedValue * 3600 * 1e-6), "MJ/m²"]; // convert W/m² * h to MJ/m²
+      case "°":
+        return [integratedValue, "°*h"];
+      case "dps":
+        return [integratedValue, "dps*days"];
+      case "mm":
+        return [integratedValue, "mm"];
+      case "cm":
+        return [integratedValue, "cm*h"];
+      default:
+        return [integratedValue, "h"];
+    }
+  }
+
+  static resolveUnit(seriesLabel: string): Unit | "dps" {
     if (
       seriesLabel == i18n.message("linea:parameter:TA") ||
       seriesLabel == i18n.message("linea:parameter:TD") ||
@@ -280,34 +310,45 @@ export class MeasurementDatumPlugin {
       seriesLabel == i18n.message("linea:parameter:TEMP_max") ||
       seriesLabel == i18n.message("linea:parameter:TEMP_median")
     ) {
-      return [integratedValue, "℃*h"];
+      return "°C";
     } else if (
       seriesLabel == i18n.message("linea:parameter:VW") ||
       seriesLabel == i18n.message("linea:parameter:VW_MAX")
     ) {
-      return [integratedValue * 1000, "m"]; // convert km/h * h = km to m
+      return "km/h";
     } else if (seriesLabel == i18n.message("linea:parameter:RH")) {
-      return [integratedValue, "%*h"];
+      return "%";
     } else if (seriesLabel == i18n.message("linea:parameter:ISWR")) {
-      return [Math.round(integratedValue * 3600 * 1e-6), "MJ/m²"]; // convert W/m² * h to MJ/m²:
+      return "W/m²";
     } else if (seriesLabel == i18n.message("linea:parameter:DW")) {
-      return [integratedValue, "°h"]; // cm * h
+      return "°";
     } else if (seriesLabel == i18n.message("linea:parameter:NS")) {
-      return [integratedValue, "cm*h"];
+      return "cm";
     } else if (seriesLabel == i18n.message("linea:unit:DATAPOINTS")) {
-      return [integratedValue * 24, "h"];
+      return "dps";
     } else if (seriesLabel == i18n.message("linea:parameter:PSUM")) {
-      return [integratedValue, "mm"];
+      return "mm";
     } else if (
       seriesLabel == i18n.message("linea:parameter:HS") ||
       seriesLabel == i18n.message("linea:parameter:HS_max") ||
       seriesLabel == i18n.message("linea:parameter:HS_min") ||
       seriesLabel == i18n.message("linea:parameter:HS_median")
     ) {
-      return [integratedValue, "m*h"];
+      return "cm";
     } else {
-      return [integratedValue, "h"];
+      return "1";
     }
   }
 }
-type IntegratedUnits = "m" | "°h" | "℃*h" | "%*h" | "MJ/m²" | "cm*h" | "mm" | "h" | "m*h";
+type IntegratedUnits =
+  | "m"
+  | "°h"
+  | "℃*h"
+  | "%*h"
+  | "MJ/m²"
+  | "cm*h"
+  | "mm"
+  | "h"
+  | "m*h"
+  | "dps*days"
+  | "°*h";
