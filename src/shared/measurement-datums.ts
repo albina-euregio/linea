@@ -1,4 +1,5 @@
 import uPlot from "uplot";
+import { i18n } from "../i18n";
 
 enum Mode {
   Delta = "Delta",
@@ -90,7 +91,6 @@ export class MeasurementDatumPlugin {
         if (seriesY1 == null || seriesY2 == null) {
           return;
         }
-
         const labelValue = this.ModeFunctions[this.mode](idx1, idx2, i);
         labels.push(`${s.label}: ${labelValue}`);
       });
@@ -229,7 +229,53 @@ export class MeasurementDatumPlugin {
       const y1 = dataSlice[i];
       integral += ((y0 + y1) / 2) * (x1 - x0);
     }
+
     const integralInHours = integral / 3_600_000;
-    return `∫: ${integralInHours.toFixed(3)} unit*h`;
+    const [number, unit] = MeasurementDatumPlugin.resolveUnit(
+      integralInHours,
+      this.u.series[seriesIdx].label as string,
+    );
+    return `∫: ${number.toFixed(3)} ${unit}`;
+  }
+
+  static resolveUnit(integratedValue: number, seriesLabel: string): [number, IntegratedUnits] {
+    if (
+      seriesLabel == i18n.message("linea:parameter:TA") ||
+      seriesLabel == i18n.message("linea:parameter:TD") ||
+      seriesLabel == i18n.message("linea:parameter:TSS") ||
+      seriesLabel == i18n.message("linea:parameter:TEMP") ||
+      seriesLabel == i18n.message("linea:parameter:TEMP_min") ||
+      seriesLabel == i18n.message("linea:parameter:TEMP_max") ||
+      seriesLabel == i18n.message("linea:parameter:TEMP_median")
+    ) {
+      return [integratedValue, "℃*h"];
+    } else if (
+      seriesLabel == i18n.message("linea:parameter:VW") ||
+      seriesLabel == i18n.message("linea:parameter:VW_MAX")
+    ) {
+      return [integratedValue * 1000, "m"]; // convert km/h * h = km to m
+    } else if (seriesLabel == i18n.message("linea:parameter:RH")) {
+      return [integratedValue, "%*h"];
+    } else if (seriesLabel == i18n.message("linea:parameter:ISWR")) {
+      return [integratedValue * 3600, "J/m²"]; // convert W/m² * h to J/m²:
+    } else if (seriesLabel == i18n.message("linea:parameter:DW")) {
+      return [integratedValue, "°h"]; // cm * h
+    } else if (seriesLabel == i18n.message("linea:parameter:NS")) {
+      return [integratedValue, "cm*h"];
+    } else if (seriesLabel == i18n.message("linea:unit:DATAPOINTS")) {
+      return [integratedValue * 24, "h"];
+    } else if (seriesLabel == i18n.message("linea:parameter:PSUM")) {
+      return [integratedValue, "mm"];
+    } else if (
+      seriesLabel == i18n.message("linea:parameter:HS") ||
+      seriesLabel == i18n.message("linea:parameter:HS_max") ||
+      seriesLabel == i18n.message("linea:parameter:HS_min") ||
+      seriesLabel == i18n.message("linea:parameter:HS_median")
+    ) {
+      return [integratedValue, "m*h"];
+    } else {
+      return [integratedValue, "h"];
+    }
   }
 }
+type IntegratedUnits = "m" | "°h" | "℃*h" | "%*h" | "J/m²" | "cm*h" | "mm" | "h" | "m*h";
