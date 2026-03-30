@@ -2,6 +2,7 @@ import uPlot from "uplot";
 import { TouchZoom } from "../shared/touch-zoom";
 import { OptsHelper } from "../shared/opts-helper";
 import { cursorOpts } from "../shared/cursor-opts";
+import { MeasurementDatumPlugin } from "../shared/measurement-datums";
 
 // Create a single sync instance for all charts
 const syncCursor = uPlot.sync("weather-charts");
@@ -42,7 +43,7 @@ export class LineaOptsHelper extends OptsHelper {
           match: [(own, ext) => own == ext, (own, ext) => own == ext],
         },
       },
-      plugins: [TouchZoom.touchZoomPlugin()],
+      plugins: [TouchZoom.touchZoomPlugin(), MeasurementDatumPlugin.datumsPlugin()],
       legend: {
         show: true,
         live: true,
