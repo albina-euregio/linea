@@ -221,21 +221,32 @@ export class MeasurementDatumPlugin {
     const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
 
     // Simple numerical integration using the Riemann sum
+    const seriesLabel = this.u.series[seriesIdx].label as string;
+    const isPSUM = seriesLabel == i18n.message("linea:parameter:PSUM");
     let integral = 0;
-    for (let i = 1; i < dataSlice.length; i++) {
-      const x0 = this.u.data[0][dataMinIdx + i - 1] as number;
-      const x1 = this.u.data[0][dataMinIdx + i] as number;
-      const y0 = dataSlice[i - 1];
-      const y1 = dataSlice[i];
-      integral += ((y0 + y1) / 2) * (x1 - x0);
+    if (isPSUM) {
+      for (let i = 1; i < dataSlice.length; i++) {
+        const y0 = dataSlice[i - 1];
+        const y1 = dataSlice[i];
+
+        // PSUM already stores accumulated precipitation since 07:00 local time.
+        // Sum positive increments; when the series resets, continue from current value.
+        const diff = y1 - y0;
+        integral += diff >= 0 ? diff : y1;
+      }
+    } else {
+      for (let i = 1; i < dataSlice.length; i++) {
+        const x0 = this.u.data[0][dataMinIdx + i - 1] as number;
+        const x1 = this.u.data[0][dataMinIdx + i] as number;
+        const y0 = dataSlice[i - 1];
+        const y1 = dataSlice[i];
+        integral += ((y0 + y1) / 2) * (x1 - x0);
+      }
     }
 
-    const integralInHours = integral / 3_600_000;
-    const [number, unit] = MeasurementDatumPlugin.resolveUnit(
-      integralInHours,
-      this.u.series[seriesIdx].label as string,
-    );
-    return `∫: ${number.toFixed(3)} ${unit}`;
+    const integralValue = isPSUM ? integral : integral / 3_600_000;
+    const [number, unit] = MeasurementDatumPlugin.resolveUnit(integralValue, seriesLabel);
+    return `∫: ${number.toFixed(1)} ${unit}`;
   }
 
   static resolveUnit(integratedValue: number, seriesLabel: string): [number, IntegratedUnits] {
@@ -257,7 +268,7 @@ export class MeasurementDatumPlugin {
     } else if (seriesLabel == i18n.message("linea:parameter:RH")) {
       return [integratedValue, "%*h"];
     } else if (seriesLabel == i18n.message("linea:parameter:ISWR")) {
-      return [integratedValue * 3600, "J/m²"]; // convert W/m² * h to J/m²:
+      return [Math.round(integratedValue * 3600 * 1e-6), "MJ/m²"]; // convert W/m² * h to MJ/m²:
     } else if (seriesLabel == i18n.message("linea:parameter:DW")) {
       return [integratedValue, "°h"]; // cm * h
     } else if (seriesLabel == i18n.message("linea:parameter:NS")) {
@@ -278,4 +289,4 @@ export class MeasurementDatumPlugin {
     }
   }
 }
-type IntegratedUnits = "m" | "°h" | "℃*h" | "%*h" | "J/m²" | "cm*h" | "mm" | "h" | "m*h";
+type IntegratedUnits = "m" | "°h" | "℃*h" | "%*h" | "MJ/m²" | "cm*h" | "mm" | "h" | "m*h";
