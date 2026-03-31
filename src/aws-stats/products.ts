@@ -44,7 +44,6 @@ export class ProductsChart extends AbstractChart {
     const blogData: { timestamps: number[]; data: number[] }[] = [];
 
     for (const blog of blogs) {
-      console.log(blog);
       const data = BlogService.getBlogsPerDay(blog);
       blogData.push(data);
     }
