@@ -20,14 +20,6 @@ export class ProductsChart extends AbstractChart {
   }
 
   async render() {
-    if (this.bulletins.length === 0) {
-      const empty = document.createElement("div");
-      empty.textContent = "No bulletin data available";
-      empty.style.padding = "16px";
-      this.appendChild(empty);
-      return;
-    }
-
     const bulletinData = new BulletinData(this.bulletins);
     const bulletins = bulletinData.filterRegionCode("all").bulletinsPerDay;
 
@@ -69,9 +61,9 @@ export class ProductsChart extends AbstractChart {
       "rgba(196, 114, 81, 0.62)",
       "rgba(196, 160, 81, 0.62)",
     ];
-    const pre_opts = opts_products_bars;
+    const series = [...opts_products_bars.series] as uPlot.Series[];
     plotInformation.blogLabels.forEach((label, index) => {
-      pre_opts.series.push({
+      series.push({
         ...opts_series_products,
         label: `${i18n.message(`linea:yearly:products:series:blogs`)} ${label}`,
         stroke: strokes[index % strokes.length],
@@ -79,7 +71,10 @@ export class ProductsChart extends AbstractChart {
       });
     });
     let { opts, data } = getStackedOpts(
-      opts_products_bars,
+      {
+        ...opts_products_bars,
+        series: series,
+      },
       plotInformation.data as number[][],
       null,
     );
