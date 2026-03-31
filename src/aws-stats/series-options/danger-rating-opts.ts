@@ -2,6 +2,7 @@ import uPlot from "uplot";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import { i18n } from "../../i18n";
+import { DANGER_LEVEL_MAX_SIZE, LOADED_DANGER_LEVEL_ICONS } from "../../shared/danger-level-icons";
 
 export const opts_danger_rating: uPlot.Options = {
   ...AwsStatsOptsHelper.getDefaultOptions(),
@@ -21,6 +22,32 @@ export const opts_danger_rating: uPlot.Options = {
         );
       },
     ],
+    draw: [
+      (u: uPlot) => {
+        for (let level = 1; level <= 5; level++) {
+          const img = LOADED_DANGER_LEVEL_ICONS.get(level);
+          if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+            const sourceSize = Math.min(img.naturalWidth, img.naturalHeight);
+            const calcIconSize = (36 / 200) * u.bbox.height;
+            const iconSize = Math.min(calcIconSize, sourceSize, DANGER_LEVEL_MAX_SIZE);
+            const posY = u.valToPos(level, "y", true);
+            const posX = u.bbox.left - iconSize - 4;
+
+            u.ctx.save();
+            u.ctx.imageSmoothingEnabled = true;
+            u.ctx.imageSmoothingQuality = "high";
+            u.ctx.drawImage(
+              img,
+              posX,
+              posY - iconSize / 2,
+              (iconSize * img.naturalWidth) / img.naturalHeight,
+              iconSize,
+            );
+            u.ctx.restore();
+          }
+        }
+      },
+    ],
   },
   scales: {
     x: { ...timeScale },
@@ -35,6 +62,7 @@ export const opts_danger_rating: uPlot.Options = {
       grid: { stroke: "#e5e5e5" },
       ticks: { stroke: "#333" },
       splits: [1, 2, 3, 4, 5],
+      label: "", // Remove text labels since we're using icons
     },
   ],
   series: [{}],

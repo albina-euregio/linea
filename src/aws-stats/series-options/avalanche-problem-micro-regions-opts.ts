@@ -2,6 +2,8 @@ import uPlot from "uplot";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import { i18n, type messagesEN_t } from "../../i18n";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
+import { LOADED_AVALANCHE_PROBLEM_ICONS } from "../../shared/avalanche-problem-icons";
+import { DANGER_LEVEL_MAX_SIZE } from "../../shared/danger-level-icons";
 
 export const opts_avalanche_problem_micro_regions: uPlot.Options = {
   ...AwsStatsOptsHelper.getDefaultOptions(),
@@ -22,6 +24,32 @@ export const opts_avalanche_problem_micro_regions: uPlot.Options = {
           "#000000",
           "#000000",
         );
+      },
+    ],
+    draw: [
+      (u: uPlot) => {
+        for (let level = 1; level <= 5; level++) {
+          const img = LOADED_AVALANCHE_PROBLEM_ICONS.get(level);
+          if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+            const sourceSize = Math.min(img.naturalWidth, img.naturalHeight);
+            const calcIconSize = (36 / 200) * u.bbox.height;
+            const iconSize = Math.min(calcIconSize, sourceSize, DANGER_LEVEL_MAX_SIZE);
+            const posY = u.valToPos(level, "y", true);
+            const posX = u.bbox.left - iconSize - 20;
+
+            u.ctx.save();
+            u.ctx.imageSmoothingEnabled = true;
+            u.ctx.imageSmoothingQuality = "high";
+            u.ctx.drawImage(
+              img,
+              posX,
+              posY - iconSize / 2,
+              (iconSize * img.naturalWidth) / img.naturalHeight,
+              iconSize,
+            );
+            u.ctx.restore();
+          }
+        }
       },
     ],
   },
