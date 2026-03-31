@@ -1,6 +1,6 @@
 import type uPlot from "uplot";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import { BlogService, BulletinData, Observations } from "./datastore";
+import { BlogService, BulletinData, Observations, type BlogData } from "./datastore";
 import {
   getStackedOpts,
   opts_products_bars,
@@ -14,7 +14,9 @@ interface ProductsPlotInformation extends PlotInformation {
 
 export class ProductsChart extends AbstractChart {
   async onConnected(): Promise<void> {
-    this.parseBulletins(this.getAttribute("bulletins"));
+    if (this.hasAttribute("bulletins")) {
+      this.parseBulletins(this.getAttribute("bulletins"));
+    }
   }
 
   async render() {
@@ -36,20 +38,14 @@ export class ProductsChart extends AbstractChart {
       ? JSON.parse(this.getAttribute("virtual-trainings")!)
       : [];
 
-    const blogUrls = this.getAttribute("blog-urls")
-      ? (JSON.parse(this.getAttribute("blog-urls")!) as {
-          regionCode: string;
-          label: string;
-          url: string;
-        }[])
-      : ([] as { regionCode: string; label: string; url: string }[]);
+    const blogs: BlogData[] = this.getAttribute("blogs")
+      ? this.parseBlogs(this.getAttribute("blogs")!)
+      : [];
     const blogData: { timestamps: number[]; data: number[] }[] = [];
 
-    for (const regionBlog of blogUrls) {
-      const url2 = regionBlog.url
-        .replace("{before}", this.getAttribute("end-date") + "T23:59:59.999Z")
-        .replace("{after}", this.getAttribute("start-date")! + "T00:00:00.000Z");
-      const data = await BlogService.loadBlogData(url2, regionBlog.regionCode.slice(0, 2));
+    for (const blog of blogs) {
+      console.log(blog);
+      const data = BlogService.getBlogsPerDay(blog);
       blogData.push(data);
     }
 
@@ -62,7 +58,7 @@ export class ProductsChart extends AbstractChart {
 
     this.plotInformation = {
       data: [timestamps, ...seriesData] as uPlot.AlignedData,
-      blogLabels: blogUrls.map((url) => url.label),
+      blogLabels: blogs.map((b) => b.regionCode),
     } as ProductsPlotInformation;
     this.plotData(this.plotInformation as ProductsPlotInformation);
   }

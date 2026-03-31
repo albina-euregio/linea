@@ -959,38 +959,32 @@ export class BulletinData {
 export class BlogService {
   /**
    *
-   * @param url a url to a wordpress pages API endpoint with field {page} e.g. "https://blog.avalanche.report/at-07/wp-json/wp/v2/posts?_fields=date&before=2025-03-11&after=2025-03-28&per_page=100&page={page}"
-   * @returns
+   * @param a BlogData object
+   * @returns the blogs per day
    */
-  static async loadBlogData(
-    url: string,
-    country: string,
-  ): Promise<{ timestamps: number[]; data: number[] }> {
+  static getBlogsPerDay(blogData: BlogData): { timestamps: number[]; data: number[] } {
     const map: Map<string, number> = new Map();
-    let page = 1;
-    while (true) {
-      const res = await fetch(url.replace("{page}", page.toString()));
-      if (res.status !== 200) {
-        break;
-      }
-      let response = await res.json();
 
-      for (const v of response) {
-        if (v.polylang_current_lang.toLowerCase().includes(country.toLocaleLowerCase())) {
-          const dateKey = new Date(v.date).toISOString().split("T")[0];
-          map.set(dateKey, (map.get(dateKey) ?? 0) + 1);
-        }
-      }
-      //max. 100 blog posts per request due to wordpress restrictions
-      if (response.length < 100) {
-        break;
-      }
-      page = page + 1;
+    for (const blogItem of blogData.blogItems) {
+      const dateKey = new Date(blogItem.published).toISOString().split("T")[0];
+      map.set(dateKey, (map.get(dateKey) ?? 0) + 1);
     }
-
     return {
       timestamps: Array.from(map.keys()).map((date) => new Date(date).getTime()),
       data: Array.from(map.values()),
     };
   }
+}
+
+export interface BlogData {
+  regionCode: string;
+  lang: string;
+  blogItems: BlogItem[];
+}
+
+export interface BlogItem {
+  id: number;
+  title: string;
+  published: string;
+  categories: string[];
 }
