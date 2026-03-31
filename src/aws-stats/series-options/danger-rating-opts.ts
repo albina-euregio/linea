@@ -2,25 +2,7 @@ import uPlot from "uplot";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import { i18n } from "../../i18n";
-import icon1 from "../../assets/Icon-Avalanche-Danger-Level-Dry-Snow-1-EAWS.svg";
-import icon2 from "../../assets/Icon-Avalanche-Danger-Level-Dry-Snow-2-EAWS.svg";
-import icon3 from "../../assets/Icon-Avalanche-Danger-Level-Dry-Snow-3-EAWS.svg";
-import icon4 from "../../assets/Icon-Avalanche-Danger-Level-Dry-Snow-4-EAWS.svg";
-import icon5 from "../../assets/Icon-Avalanche-Danger-Level-Dry-Snow-5-EAWS.svg";
-
-const iconUrls = [icon1, icon2, icon3, icon4, icon5];
-const loadedIcons = new Map<number, HTMLImageElement>();
-const maxIconSize = 80; // Maximum size for the icons in pixels
-const iconPadding = 4;
-
-function preloadIcons() {
-  iconUrls.forEach((url, index) => {
-    const img = new Image();
-    img.src = url;
-    loadedIcons.set(index + 1, img);
-  });
-}
-preloadIcons();
+import { DANGER_LEVEL_MAX_SIZE, LOADED_DANGER_LEVEL_ICONS } from "../../shared/danger-level-icons";
 
 export const opts_danger_rating: uPlot.Options = {
   ...AwsStatsOptsHelper.getDefaultOptions(),
@@ -43,13 +25,13 @@ export const opts_danger_rating: uPlot.Options = {
     draw: [
       (u: uPlot) => {
         for (let level = 1; level <= 5; level++) {
-          const img = loadedIcons.get(level);
+          const img = LOADED_DANGER_LEVEL_ICONS.get(level);
           if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
             const sourceSize = Math.min(img.naturalWidth, img.naturalHeight);
             const calcIconSize = (36 / 200) * u.bbox.height;
-            const iconSize = Math.min(calcIconSize, sourceSize, maxIconSize);
+            const iconSize = Math.min(calcIconSize, sourceSize, DANGER_LEVEL_MAX_SIZE);
             const posY = u.valToPos(level, "y", true);
-            const posX = u.bbox.left - iconSize - iconPadding;
+            const posX = u.bbox.left - iconSize - 4;
 
             u.ctx.save();
             u.ctx.imageSmoothingEnabled = true;
