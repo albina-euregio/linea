@@ -28,8 +28,8 @@ export class DangerRatingChart extends AbstractChart {
   async render(): Promise<void> {
     const bulletinData = new BulletinData(this.bulletins);
     if (
-      !this.getAttribute("bulletin-filter-micro-region") ||
-      this.getAttribute("bulletin-filter-micro-region") == ""
+      !this.getAttribute("filter-micro-region") ||
+      this.getAttribute("filter-micro-region") == ""
     ) {
       const { timestamps, rating } = bulletinData.highestDangerRatingPerDay;
       this.createPlot(opts_danger_rating, [timestamps]);
@@ -37,7 +37,7 @@ export class DangerRatingChart extends AbstractChart {
     } else {
       const dataPairs: { timestamps: number[]; data: number[] }[] = [];
       const microRegionNames: string[] = [];
-      let microRegionIds = JSON.parse(this.getAttribute("bulletin-filter-micro-region")!);
+      let microRegionIds = JSON.parse(this.getAttribute("filter-micro-region")!);
       if (!Array.isArray(microRegionIds)) {
         microRegionIds = [microRegionIds];
       }
