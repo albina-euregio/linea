@@ -7,26 +7,38 @@ export class Observations {
     this.observations = observations;
   }
 
-  async loadObservations(url: string) {
+  async loadObservations(url: string, filterMicroRegions: string[]) {
     try {
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to load observations: ${response.statusText}`);
       }
+      console.log(filterMicroRegions);
       const observations = await response.json();
 
-      this.observations = observations.features.map((feature: any) => {
-        return {
-          id: feature.id,
-          source: feature.source,
-          type: feature.type,
-          geometry: {
-            type: feature.geometry.type,
-            coordinates: feature.geometry.coordinates,
-          },
-          properties: feature.properties,
-        };
-      });
+      this.observations = observations.features
+        .filter((feature: any) => {
+          if (filterMicroRegions.length === 0) {
+            return true;
+          }
+          return (
+            feature.properties.region &&
+            filterMicroRegions.some((region) => feature.properties.region.startsWith(region))
+          );
+        })
+        .map((feature: any) => {
+          return {
+            id: feature.id,
+            source: feature.source,
+            type: feature.type,
+            geometry: {
+              type: feature.geometry.type,
+              coordinates: feature.geometry.coordinates,
+            },
+            properties: feature.properties,
+            region: feature.region ?? undefined,
+          };
+        });
     } catch (error) {
       console.error(error);
     }
@@ -119,6 +131,7 @@ export class Observation {
   public id: string;
   public source: string;
   public type: string;
+  public region?: string;
 
   public geometry: {
     type: string;
