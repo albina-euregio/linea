@@ -137,6 +137,10 @@ export class AwsStats extends HTMLElement {
         (async () => {
           for (const chart of charts) {
             chart.setAttribute("bulletins", this.getAttribute("bulletins")!);
+            chart.setAttribute(
+              "bulletin-filter-micro-region",
+              this.getAttribute("bulletin-filter-micro-region")!,
+            );
           }
         })(),
       );
