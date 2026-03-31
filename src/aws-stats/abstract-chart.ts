@@ -1,8 +1,9 @@
 import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
-import type { Bulletin } from "../schema/caaml";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
+import type { Bulletin } from "../schema/caaml";
+import type { BlogData } from "./datastore";
 
 export interface PlotInformation {
   data: uPlot.AlignedData;
@@ -77,6 +78,14 @@ export abstract class AbstractChart extends HTMLElement {
       this.bulletins = JSON.parse(raw) as Bulletin[];
     } catch {
       this.bulletins = [];
+    }
+  }
+
+  protected parseBlogs(raw: string): BlogData[] {
+    try {
+      return JSON.parse(raw) as BlogData[];
+    } catch {
+      return [];
     }
   }
 

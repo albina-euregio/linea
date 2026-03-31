@@ -1,6 +1,6 @@
 import type uPlot from "uplot";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import { BlogService, BulletinData, Observations } from "./datastore";
+import { BlogService, BulletinData, Observations, type BlogData } from "./datastore";
 import {
   getStackedOpts,
   opts_products_bars,
@@ -14,18 +14,12 @@ interface ProductsPlotInformation extends PlotInformation {
 
 export class ProductsChart extends AbstractChart {
   async onConnected(): Promise<void> {
-    this.parseBulletins(this.getAttribute("bulletins"));
+    if (this.hasAttribute("bulletins")) {
+      this.parseBulletins(this.getAttribute("bulletins"));
+    }
   }
 
   async render() {
-    if (this.bulletins.length === 0) {
-      const empty = document.createElement("div");
-      empty.textContent = "No bulletin data available";
-      empty.style.padding = "16px";
-      this.appendChild(empty);
-      return;
-    }
-
     const bulletinData = new BulletinData(this.bulletins);
     const bulletins = bulletinData.filterRegionCode("all").bulletinsPerDay;
 
@@ -36,20 +30,13 @@ export class ProductsChart extends AbstractChart {
       ? JSON.parse(this.getAttribute("virtual-trainings")!)
       : [];
 
-    const blogUrls = this.getAttribute("blog-urls")
-      ? (JSON.parse(this.getAttribute("blog-urls")!) as {
-          regionCode: string;
-          label: string;
-          url: string;
-        }[])
-      : ([] as { regionCode: string; label: string; url: string }[]);
+    const blogs: BlogData[] = this.getAttribute("blogs")
+      ? this.parseBlogs(this.getAttribute("blogs")!)
+      : [];
     const blogData: { timestamps: number[]; data: number[] }[] = [];
 
-    for (const regionBlog of blogUrls) {
-      const url2 = regionBlog.url
-        .replace("{before}", this.getAttribute("end-date") + "T23:59:59.999Z")
-        .replace("{after}", this.getAttribute("start-date")! + "T00:00:00.000Z");
-      const data = await BlogService.loadBlogData(url2, regionBlog.regionCode.slice(0, 2));
+    for (const blog of blogs) {
+      const data = BlogService.getBlogsPerDay(blog);
       blogData.push(data);
     }
 
@@ -62,7 +49,7 @@ export class ProductsChart extends AbstractChart {
 
     this.plotInformation = {
       data: [timestamps, ...seriesData] as uPlot.AlignedData,
-      blogLabels: blogUrls.map((url) => url.label),
+      blogLabels: blogs.map((b) => b.regionCode),
     } as ProductsPlotInformation;
     this.plotData(this.plotInformation as ProductsPlotInformation);
   }
@@ -74,9 +61,9 @@ export class ProductsChart extends AbstractChart {
       "rgba(196, 114, 81, 0.62)",
       "rgba(196, 160, 81, 0.62)",
     ];
-    const pre_opts = opts_products_bars;
+    const series = [...opts_products_bars.series] as uPlot.Series[];
     plotInformation.blogLabels.forEach((label, index) => {
-      pre_opts.series.push({
+      series.push({
         ...opts_series_products,
         label: `${i18n.message(`linea:yearly:products:series:blogs`)} ${label}`,
         stroke: strokes[index % strokes.length],
@@ -84,7 +71,10 @@ export class ProductsChart extends AbstractChart {
       });
     });
     let { opts, data } = getStackedOpts(
-      opts_products_bars,
+      {
+        ...opts_products_bars,
+        series: series,
+      },
       plotInformation.data as number[][],
       null,
     );

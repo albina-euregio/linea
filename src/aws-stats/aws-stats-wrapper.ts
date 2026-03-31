@@ -2,13 +2,12 @@ import "./observations-chart";
 import "./danger-rating-altitude-chart";
 import "./danger-rating-distribution";
 import css from "./aws-stats-wrapper.css?raw";
-import { BulletinData, Observations } from "./datastore";
+import { Observations } from "./datastore";
 import { fetchSMET } from "../data/smet-data";
 import { StationData } from "../data/station-data";
 import type { AbstractChart } from "./abstract-chart";
 import { AwsStatsExportModal } from "./aws-stats-export-modal";
 import { i18n } from "../i18n";
-import type { Bulletin } from "../schema/caaml";
 
 export function parseDateBoundary(date: string | null, isEnd: boolean): number | null {
   if (!date) return null;
@@ -133,43 +132,15 @@ export class AwsStats extends HTMLElement {
       );
     }
 
-    if (this.getAttribute("bulletin-urls")) {
+    if (this.getAttribute("bulletins")) {
       loadPromises.push(
         (async () => {
-          try {
-            const bulletinUrls = this.getAttribute("bulletin-urls")
-              ? JSON.parse(this.getAttribute("bulletin-urls")!)
-              : [];
-            const bulletinData: Bulletin[] = [];
-
-            for (const url of bulletinUrls) {
-              const bulletins = await BulletinData.loadBulletins(
-                url,
-                this.getAttribute("start-date")!,
-                this.getAttribute("end-date")!,
-              );
-              bulletinData.push(...bulletins);
-            }
-
-            const bulletins = new BulletinData(bulletinData);
-            for (const chart of charts) {
-              chart.setAttribute(
-                "bulletins",
-                JSON.stringify(
-                  this.getAttribute("bulletin-filter-micro-region") != "all"
-                    ? bulletins.filterForMicroRegions(
-                        JSON.parse(this.getAttribute("bulletin-filter-micro-region")!),
-                      ).bulletins
-                    : bulletinData,
-                ),
-              );
-              chart.setAttribute(
-                "bulletin-filter-micro-region",
-                this.getAttribute("bulletin-filter-micro-region") ?? "",
-              );
-            }
-          } catch (error) {
-            console.error("Failed to load bulletin data:", error);
+          for (const chart of charts) {
+            chart.setAttribute("bulletins", this.getAttribute("bulletins")!);
+            chart.setAttribute(
+              "bulletin-filter-micro-region",
+              this.getAttribute("bulletin-filter-micro-region")!,
+            );
           }
         })(),
       );
@@ -197,9 +168,9 @@ export class AwsStats extends HTMLElement {
             chart.setAttribute("end-date", this.getAttribute("end-date")!);
           }
         }
-        if (this.hasAttribute("blog-urls")) {
+        if (this.hasAttribute("blogs")) {
           for (const chart of charts) {
-            chart.setAttribute("blog-urls", this.getAttribute("blog-urls")!);
+            chart.setAttribute("blogs", this.getAttribute("blogs")!);
           }
         }
       })(),
