@@ -1,5 +1,4 @@
-import { type Bulletin, type BulletinCollection, bulletinCollectionSchema } from "../schema/caaml";
-import { i18n } from "../i18n";
+import { type Bulletin } from "../schema/caaml";
 
 export class Observations {
   public observations: Observation[];
@@ -495,52 +494,6 @@ export class BulletinData {
 
   constructor(bulletins: Bulletin[] = []) {
     this.bulletins = bulletins;
-  }
-
-  /**
-   * Loads bulletins from a remote source within a date range.
-   * @param url a url to a CAAMLv6 JSON in with {date} and {lang} for the according variables, e.g. https://static.avalanche.report/bulletins/${dateStr}/${dateStr}_EUREGIO_${i18n.lang}_CAAMLv6.json
-   * @param startDate
-   * @param endDate
-   * @returns
-   */
-  static async loadBulletins(url: string, startDate: string, endDate: string): Promise<Bulletin[]> {
-    const urls: string[] = [];
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split("T")[0];
-      urls.push(url.replaceAll("{date}", dateStr).replaceAll("{lang}", i18n.lang));
-    }
-
-    const allBulletins: Bulletin[] = [];
-    for (const u of urls) {
-      try {
-        const response = await fetch(u);
-        if (!response.ok) {
-          console.error(`Failed to load bulletin from ${u}: ${response.statusText}`);
-          continue;
-        }
-        const payload: unknown = await response.json();
-        const parsed = bulletinCollectionSchema.parse(payload);
-        allBulletins.push(...parsed.bulletins);
-      } catch (error) {
-        console.error(`Error loading bulletin from ${u}:`, error);
-      }
-    }
-    return allBulletins;
-  }
-
-  async loadBulletinsSingleSource(url: string): Promise<BulletinCollection> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to load bulletins: ${response.statusText}`);
-    }
-    const payload: unknown = await response.json();
-    const parsed = bulletinCollectionSchema.parse(payload);
-    this.bulletins = parsed.bulletins;
-    return parsed;
   }
 
   get length() {
