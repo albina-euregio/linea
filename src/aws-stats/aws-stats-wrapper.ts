@@ -94,7 +94,19 @@ export class AwsStats extends HTMLElement {
       loadPromises.push(
         (async () => {
           const results: Observations = new Observations();
-          await results.loadObservations(this.getAttribute("observations") || "");
+          let attr = this.getAttribute("bulletin-filter-micro-region");
+          const filterMicroRegions: string[] = [];
+          if (!attr || attr == "all") {
+          } else {
+            const regions = JSON.parse(attr);
+            if (Array.isArray(regions)) {
+              filterMicroRegions.push(...regions);
+            }
+          }
+          await results.loadObservations(
+            this.getAttribute("observations") || "",
+            filterMicroRegions,
+          );
           for (const chart of charts) {
             chart.setAttribute("observations", JSON.stringify(results.observations));
           }
