@@ -1,4 +1,12 @@
 import { type Bulletin } from "../schema/caaml";
+import {
+  AvalancheObservation,
+  Observation,
+  SizedAvalancheObservation,
+  TriggeredAvalancheObservation,
+  type BlogData,
+} from "./datatypes";
+import type { DangerSourceVariant } from "./danger-source-data";
 
 export class Observations {
   public observations: Observation[];
@@ -126,49 +134,6 @@ export class Observations {
   }
 }
 
-export class Observation {
-  public id: string;
-  public source: string;
-  public type: string;
-  public region?: string;
-
-  public geometry: {
-    type: string;
-    coordinates: number[];
-  };
-
-  public properties: {
-    [key: string]: any;
-  };
-}
-
-export class AvalancheObservation extends Observation {
-  declare properties: {
-    stability: string;
-    authorName: string;
-    content: string;
-    elevation: number;
-    eventDate: string;
-    latitude: number;
-    locationName: string;
-    longitude: number;
-    region: string;
-    regionLabel: string;
-    reportDate: string;
-    [key: string]: any;
-  };
-}
-
-export class SizedAvalancheObservation extends AvalancheObservation {
-  declare public properties: AvalancheObservation["properties"] & {
-    avalancheSize: number | null;
-  };
-
-  static fromObservation(observation: AvalancheObservation): SizedAvalancheObservation {
-    return SizedAvalancheObservations.normalizeObservation(observation);
-  }
-}
-
 export class AvalancheObservations extends Observations {
   constructor(observations: AvalancheObservation[] = []) {
     super(observations);
@@ -262,17 +227,6 @@ export class SizedAvalancheObservations extends AvalancheObservations {
       timestamps,
       avalancheIndices,
     };
-  }
-}
-
-export class TriggeredAvalancheObservation extends AvalancheObservation {
-  declare public properties: AvalancheObservation["properties"] & {
-    avalancheType: string | null;
-    triggerType: string | null;
-  };
-
-  static fromObservation(observation: AvalancheObservation): TriggeredAvalancheObservation {
-    return TriggeredAvalancheObservations.normalizeObservation(observation);
   }
 }
 
@@ -556,7 +510,7 @@ export class BulletinData {
     );
   }
 
-  private static dayTimestamp(value: string | undefined): number | null {
+  static dayTimestamp(value: string | undefined): number | null {
     if (!value) {
       return null;
     }
@@ -941,15 +895,89 @@ export class BlogService {
   }
 }
 
-export interface BlogData {
-  regionCode: string;
-  lang: string;
-  blogItems: BlogItem[];
-}
+export class DangerSourceVariantService {
+  private dangerSourceVariants: DangerSourceVariant[] = [];
 
-export interface BlogItem {
-  id: number;
-  title: string;
-  published: string;
-  categories: string[];
+  constructor(dangerSourceVariants: DangerSourceVariant[]) {
+    this.dangerSourceVariants = dangerSourceVariants;
+  }
+
+  get analysis(): DangerSourceVariantService {
+    return new DangerSourceVariantService(
+      this.dangerSourceVariants.filter((variant) => variant.dangerSourceVariantType === "analysis"),
+    );
+  }
+
+  get active(): DangerSourceVariantService {
+    return new DangerSourceVariantService(
+      this.dangerSourceVariants.filter((variant) => variant.dangerSourceVariantStatus === "active"),
+    );
+  }
+
+  get activeOrDormant(): DangerSourceVariantService {
+    return new DangerSourceVariantService(
+      this.dangerSourceVariants.filter(
+        (variant) =>
+          variant.dangerSourceVariantStatus === "active" ||
+          variant.dangerSourceVariantStatus === "dormant",
+      ),
+    );
+  }
+
+  get inactive(): DangerSourceVariantService {
+    return new DangerSourceVariantService(
+      this.dangerSourceVariants.filter(
+        (variant) => variant.dangerSourceVariantStatus === "inactive",
+      ),
+    );
+  }
+
+  getDangerRatingPerDangerSourceVariantPerDay(microRegion: string): {
+    timestamps: number[];
+    ratings: Record<string, number[]>;
+  } {
+    const perDay: Record<number, Record<string, number>> = {};
+    this.dangerSourceVariants
+      .filter((variant) => variant.regions.includes(microRegion))
+      .forEach((variant) => {
+        const day = new Date(variant.validUntil.toISOString().split("T")[0]).getTime();
+        if (day === null) {
+          return;
+        }
+        if (!perDay[day]) {
+          perDay[day] = {};
+        }
+        const key = variant.dangerSource.title ?? "unknown";
+        perDay[day][key] =
+          DangerSourceVariantService.convertStringDangerRatingToNumber(
+            variant.eawsMatrixInformation?.dangerRating,
+          ) ?? null;
+      });
+
+    const timestamps: number[] = Object.keys(perDay)
+      .map((date) => Number(date))
+      .sort((a, b) => a - b);
+    const ratings = timestamps.map((ts) => perDay[ts]);
+    const allKeys = new Set<string>();
+    ratings.forEach((rating) => {
+      Object.keys(rating).forEach((key) => allKeys.add(key));
+    });
+    const sortedKeys = Array.from(allKeys).sort();
+    const filledRatings: Record<string, number[]> = {};
+    sortedKeys.forEach((key) => {
+      filledRatings[key] = ratings.map((rating) => rating[key]);
+    });
+    return { timestamps, ratings: filledRatings };
+  }
+
+  static convertStringDangerRatingToNumber(rating: string | undefined): number {
+    const conversion: Record<string, number> = {
+      low: 1,
+      moderate: 2,
+      considerable: 3,
+      high: 4,
+      very_high: 5,
+    };
+    return conversion[rating?.toLowerCase() ?? ""] ?? 0;
+  }
 }

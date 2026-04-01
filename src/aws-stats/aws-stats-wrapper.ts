@@ -155,6 +155,19 @@ export class AwsStats extends HTMLElement {
       );
     }
 
+    if (this.getAttribute("danger-sources")) {
+      loadPromises.push(
+        (async () => {
+          for (const chart of charts) {
+            chart.setAttribute(
+              "danger-source-variants",
+              this.getAttribute("danger-source-variants")!,
+            );
+          }
+        })(),
+      );
+    }
+
     loadPromises.push(
       (async () => {
         if (this.hasAttribute("virtual-trainings")) {

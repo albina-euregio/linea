@@ -1,9 +1,11 @@
+import { z } from "zod";
 import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import type { Bulletin } from "../schema/caaml";
-import type { BlogData } from "./datastore";
+import { dangerSourceVariantSchema, type DangerSourceVariant } from "./danger-source-data";
+import type { BlogData } from "./datatypes";
 
 export interface PlotInformation {
   data: uPlot.AlignedData;
@@ -78,6 +80,33 @@ export abstract class AbstractChart extends HTMLElement {
       this.bulletins = JSON.parse(raw) as Bulletin[];
     } catch {
       this.bulletins = [];
+    }
+  }
+
+  protected parseDangerSourceVariants(raw: string | null): DangerSourceVariant[] {
+    if (!raw) {
+      console.warn("No danger source variants provided");
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      const variantSchema = Array.isArray(parsed)
+        ? z.array(dangerSourceVariantSchema)
+        : dangerSourceVariantSchema;
+      const validated = variantSchema.parse(Array.isArray(parsed) ? parsed : [parsed]);
+      return Array.isArray(validated) ? validated : [validated];
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Zod validation failed for DangerSourceVariant:");
+        error.issues.forEach((issue) => {
+          console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
+        });
+      } else if (error instanceof SyntaxError) {
+        console.error("JSON parse error:", error.message);
+      } else {
+        console.error("Unknown error while parsing danger source variants:", error);
+      }
+      return [];
     }
   }
 
