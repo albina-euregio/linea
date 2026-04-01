@@ -641,9 +641,9 @@ export class BulletinData {
           case "gliding_snow":
             return 5;
           case "cornices":
-            return 6;
-          case "no_distinct_avalanche_problem":
             return 7;
+          case "no_distinct_avalanche_problem":
+            return 6;
           case "favourable_situation":
             return 8;
         }

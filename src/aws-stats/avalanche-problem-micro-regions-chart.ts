@@ -36,22 +36,7 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
       ),
     } as AvalancheProblemPlotInformation;
 
-    if (avalancheProblems.ratings[8].filter((v) => !!v || v !== 0).length > 0) {
-      pi.range = [0.5, 8.5];
-      pi.splits = [1, 2, 3, 4, 5, 6, 7, 8];
-      pi.values = [
-        "persistent_weak_layer",
-        "new_snow",
-        "wind_slab",
-        "wet_snow",
-        "gliding_snow",
-        "cornices",
-        "no_distinct_avalanche_problem",
-        "favourable_situation",
-      ].map((v) =>
-        i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
-      );
-    } else if (avalancheProblems.ratings[7].filter((v) => !!v || v !== 0).length > 0) {
+    if (avalancheProblems.ratings[7].filter((v) => !!v || v !== 0).length > 0) {
       pi.range = [0.5, 7.5];
       pi.splits = [1, 2, 3, 4, 5, 6, 7];
       pi.values = [
@@ -60,8 +45,8 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
         "wind_slab",
         "wet_snow",
         "gliding_snow",
-        "cornices",
         "no_distinct_avalanche_problem",
+        "cornices",
       ].map((v) =>
         i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
       );
@@ -99,7 +84,8 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
     };
     opts.scales!.y.range = plotInformation.range;
     opts.axes[1].splits = plotInformation.splits;
-    opts.axes[1].values = plotInformation.values;
+    opts.axes[1].values = plotInformation.splits.map((_split) => "");
+    // opts.axes[1].values = plotInformation.values;
     this.createPlot(opts, plotInformation.data);
   }
 
