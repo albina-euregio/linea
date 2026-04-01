@@ -13,7 +13,6 @@ export class Observations {
       if (!response.ok) {
         throw new Error(`Failed to load observations: ${response.statusText}`);
       }
-      console.log(filterMicroRegions);
       const observations = await response.json();
 
       this.observations = observations.features
