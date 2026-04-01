@@ -58,12 +58,10 @@ export class AwsStatsExportModal extends AbstractExportModal {
    * @param {AbstractChart} chart - The AbstractChart instance to export
    */
   constructor(modal: HTMLDivElement, wrapper: AwsStats) {
-    super(modal);
+    super(modal, true);
     this.wrapper = wrapper;
 
     (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
-    (this.modal.querySelector("#btnExportInteractiveBlog") as HTMLElement)!.style!.display =
-      "block";
     const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
     titleInput.style.display = "none";
   }
@@ -85,7 +83,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     this.addDiagramsToExportSettings(this.wrapper.charts.map((c) => c.plot));
   }
 
-  private generateInteractivExportData(): string[] {
+  private generateInteractivExportData(): { height: number; elements: string[] } {
     const selectedChartIndices = this.getCheckedDiagramIndices();
     if (selectedChartIndices.length === 0) {
       alert(i18n.message("linea:message:noplotselected"));
@@ -103,18 +101,19 @@ export class AwsStatsExportModal extends AbstractExportModal {
     }
 
     const elements: string[] = [];
-
+    let height: number = 0;
     for (const i of selectedChartIndices) {
       const chart: AbstractChart = this.wrapper.charts[i];
+      height += chart.plot.root.clientHeight;
       elements.push(
         `<${chartTypes[i]} class="linea-custom-element" data='${JSON.stringify(chart.plotInformation)}'></${chartTypes[i]}>`,
       );
     }
-    return elements;
+    return { height, elements };
   }
   protected async exportAsIframe() {
     this.hideAllSeriesSelectionCheckboxes();
-    const elements = this.generateInteractivExportData();
+    const { height, elements } = this.generateInteractivExportData();
     const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
     const body = `<body>
         ${elements.join("\n")}
@@ -123,17 +122,13 @@ export class AwsStatsExportModal extends AbstractExportModal {
     let html = iframeTemplate.replace("BODY", body).replace('lang="en"', `lang="${i18n.lang}"`);
 
     const exports = this.getExportSettings();
-    const estimatedHeight = Math.max(
-      250,
-      (exports.heightPerCanvas + 90) * this.getCheckedDiagramIndices().length,
-    );
     const iframeTitle = AbstractExportModal.escapeHtmlAttribute(exports.title || "AWS Stats");
 
     const iframecode = `<iframe
           srcdoc="${AbstractExportModal.escapeHtmlAttribute(html)}"
           frameborder="0"
           scrolling="no"
-          style="width: 100%; height: ${estimatedHeight}px;border:none;overflow:hidden;"
+          style="width: 100%; height: ${height}px;border:none;overflow:hidden;"
           title="${iframeTitle}">
       </iframe>`;
 
@@ -157,7 +152,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
       return;
     }
     const exports = this.getExportSettings();
-    const elements = this.generateInteractivExportData();
+    const { elements } = this.generateInteractivExportData();
     const dataUrl = await this.exportAllPlotsToPNG(
       { width: 750, heightPerCanvas: 200, title: exports.title },
       true,
@@ -173,11 +168,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
     </div>`;
 
     const binary = AbstractExportModal.toBinary(html);
-
-    let totalCanvases = 0;
-    this.getCheckedDiagramIndices().forEach((index) => {
-      totalCanvases += this.getCheckedSeriesIndices(index).length;
-    });
 
     const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
@@ -293,7 +283,9 @@ export class AwsStatsExportModal extends AbstractExportModal {
     { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
     noshow: boolean = false,
   ): Promise<string> {
-    this.showAllSeriesSelectionCheckboxes();
+    if (!noshow) {
+      this.showAllSeriesSelectionCheckboxes();
+    }
     const sections: Array<{
       chart: AbstractChart;
       chartTitle: string;
