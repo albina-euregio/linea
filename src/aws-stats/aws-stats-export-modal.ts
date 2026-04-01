@@ -107,7 +107,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     for (const i of selectedChartIndices) {
       const chart: AbstractChart = this.wrapper.charts[i];
       elements.push(
-        `<${chartTypes[i]} data='${JSON.stringify(chart.plotInformation)}'></${chartTypes[i]}>`,
+        `<${chartTypes[i]} class="linea-custom-element" data='${JSON.stringify(chart.plotInformation)}'></${chartTypes[i]}>`,
       );
     }
     return elements;

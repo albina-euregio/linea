@@ -260,7 +260,7 @@ export class LineaExportModal extends AbstractExportModal {
     const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
     let html = `<div style="position: relative;" data-lineaplot-wrapper>
           <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
-          <linea-plot style="position: absolute; inset: 0; z-index: 2;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
+          <linea-plot class="linea-custom-element" style="position: absolute; inset: 0; z-index: 2;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
         </div>`;
 
     if (this.lineaPlot.view instanceof WinterView) {
