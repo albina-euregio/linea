@@ -165,13 +165,12 @@ export class AwsStatsExportModal extends AbstractExportModal {
     if (!dataUrl) {
       return;
     }
-
-    let html = `<div style="position: relative;" data-lineaplot-wrapper>
-                  <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
-                  <div style="position: absolute; inset: 0; z-index: 2;">
-                    ${elements.join("\n")}
-                  </div>
-                </div>`;
+    let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
+      <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
+      <div style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;">
+        ${elements.join("\n")}
+      </div>
+    </div>`;
 
     const binary = AbstractExportModal.toBinary(html);
 
@@ -180,7 +179,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
       totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
-    const iframeshortcode = `[lineaplotblog height="${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.getCheckedDiagramIndices().length}px" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+    const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
     document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;

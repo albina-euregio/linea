@@ -258,10 +258,10 @@ export class LineaExportModal extends AbstractExportModal {
     }
 
     const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
-    let html = `<div style="position: relative;" data-lineaplot-wrapper>
-          <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
-          <linea-plot class="linea-custom-element" style="position: absolute; inset: 0; z-index: 2;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
-        </div>`;
+    let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
+      <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
+      <linea-plot class="linea-custom-element" style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
+    </div>`;
 
     if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot ", "<linea-plot showonlywinter");
@@ -273,7 +273,7 @@ export class LineaExportModal extends AbstractExportModal {
       totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
-    const iframeshortcode = `[lineaplotblog height="${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+    const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
     document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;
