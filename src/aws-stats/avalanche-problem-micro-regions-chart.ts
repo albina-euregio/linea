@@ -3,6 +3,7 @@ import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData } from "./datastore";
 import { opts_avalanche_problem_micro_regions } from "./series-options/avalanche-problem-micro-regions-opts";
 import { i18n, type messagesEN_t } from "../i18n";
+import { colorForPercentage } from "./series-options/colorizer";
 
 interface AvalancheProblemPlotInformation extends PlotInformation {
   range: uPlot.Scale.Range;
@@ -108,10 +109,6 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
       draw: (u: uPlot) => {
         const { ctx } = u;
         const xData = u.data[0] as number[];
-        const colorForPercentage = (percentage: number): string => {
-          const alpha = Math.max(0.2, Math.min(1, percentage / 100));
-          return `rgba(65, 8, 230, ${alpha})`;
-        };
 
         ctx.save();
         ctx.beginPath();

@@ -2,6 +2,7 @@ import { i18n } from "../i18n";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import type { DangerSourceVariant } from "./danger-source-data";
 import { DangerSourceVariantService } from "./datastore";
+import { COLORS } from "./series-options/colorizer";
 import {
   opts_danger_rating,
   opts_danger_rating_series_base,
@@ -21,16 +22,6 @@ export class DangerRatingDangerSourceVariantsChart extends AbstractChart {
       this.getAttribute("danger-source-variants"),
     );
   }
-
-  static COLORS = [
-    "#4108e6",
-    "#dd0841e6",
-    "#1b7a35e6",
-    "#db08dde6",
-    "#07d7e6",
-    "#dd0861e6",
-    "#6108dde6",
-  ];
 
   async render(): Promise<void> {
     const dsv = new DangerSourceVariantService(this.dangerSourceVariants);
@@ -59,10 +50,7 @@ export class DangerRatingDangerSourceVariantsChart extends AbstractChart {
       this.addSeries(
         {
           ...opts_danger_rating_series_base,
-          stroke:
-            DangerRatingDangerSourceVariantsChart.COLORS[
-              index % DangerRatingDangerSourceVariantsChart.COLORS.length
-            ],
+          stroke: COLORS[index % COLORS.length],
           label: plotInformation.variants[index],
         },
         rating as number[],
