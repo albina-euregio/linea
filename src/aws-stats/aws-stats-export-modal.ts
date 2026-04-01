@@ -64,6 +64,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
     const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
     titleInput.style.display = "none";
+    titleInput.labels.forEach((l) => (l.style.display = "none"));
   }
 
   /**
