@@ -550,8 +550,8 @@ export class LineaExportModal extends AbstractExportModal {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
       lineachart.resizeObserver.observe(lineachart);
     }
+    const dataUrl = outCanvas.toDataURL();
     if (!noshow) {
-      const dataUrl = outCanvas.toDataURL();
       outCanvas.toBlob((blobdata) => {
         this.exportdata = {
           blob: blobdata,
@@ -565,7 +565,7 @@ export class LineaExportModal extends AbstractExportModal {
       document.getElementById("exportResult").style.display = "block";
       return dataUrl;
     }
-    return "";
+    return dataUrl;
   }
 
   /**
