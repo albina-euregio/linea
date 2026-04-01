@@ -49,7 +49,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     ],
     setSelect: [
       (u) => {
-        LineaOptsHelper.calculateAxisLimitsInZoom(u, [1, 2, 3]);
+        LineaOptsHelper.calculateAxisLimitsInZoom(u, [1, 2, u.series.length - 1]);
       },
     ],
   },
