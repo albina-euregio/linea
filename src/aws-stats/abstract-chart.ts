@@ -19,6 +19,8 @@ export abstract class AbstractChart extends HTMLElement {
   protected bulletins!: Bulletin[];
   public plotInformation: PlotInformation;
 
+  protected filterMicroRegions: string[] = [];
+
   constructor() {
     super();
     this.resizeObserver = new ResizeObserver(() => {
@@ -29,6 +31,9 @@ export abstract class AbstractChart extends HTMLElement {
   }
 
   connectedCallback() {
+    if (this.hasAttribute("filter-micro-region")) {
+      this.filterMicroRegions = JSON.parse(this.getAttribute("filter-micro-region")) as string[];
+    }
     this.onConnected()
       .then(() => {
         this.buildLayout();
