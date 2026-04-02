@@ -64,6 +64,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
     const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
     titleInput.style.display = "none";
+    titleInput.labels.forEach((l) => (l.style.display = "none"));
   }
 
   /**
@@ -341,14 +342,25 @@ export class AwsStatsExportModal extends AbstractExportModal {
           continue;
         }
 
-        const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
-        if (selectedSeries.length === 0) {
-          continue;
-        }
-
         const titleFromDom = plot.root.querySelector(".u-title")?.textContent?.trim() ?? "";
         const titleFromOpts = (plot as unknown as { opts?: { title?: string } }).opts?.title ?? "";
         const chartTitle = titleFromDom || titleFromOpts || title || "";
+        const legendLines: Array<{
+          items: Array<{ label: string; color: string; width: number }>;
+        }> = [];
+        const sectionTitleHeight = chartTitle ? 40 : 0;
+
+        const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
+        if (selectedSeries.length === 0 && plot.series.length === 1) {
+          sections.push({
+            chart,
+            chartTitle,
+            legendLines,
+            sectionHeight: sectionTitleHeight + canvas.height,
+            canvasWidth: canvas.width,
+          });
+          continue;
+        }
 
         const legendItems: Record<string, string> = {};
         selectedSeries.forEach((seriesIndex) => {
@@ -366,10 +378,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
           }
           legendItems[String(label)] = color;
         });
-
-        const legendLines: Array<{
-          items: Array<{ label: string; color: string; width: number }>;
-        }> = [];
         if (drawLegend && Object.keys(legendItems).length > 0) {
           const legendCtx = canvas.getContext("2d")!;
           legendCtx.textAlign = "left";
@@ -399,8 +407,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
             legendLines.push({ items: currentLine });
           }
         }
-
-        const sectionTitleHeight = chartTitle ? 40 : 0;
         const sectionLegendHeight = drawLegend
           ? (legendLines.length * this.legendItemHeight * 3) / 2
           : 0;
@@ -411,11 +417,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
           sectionHeight: sectionTitleHeight + canvas.height + sectionLegendHeight,
           canvasWidth: canvas.width,
         });
-      }
-
-      if (sections.length === 0) {
-        alert(i18n.message("linea:message:noplotselected"));
-        return "";
       }
 
       const outCanvas = document.createElement("canvas");
