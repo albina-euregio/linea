@@ -290,7 +290,7 @@ export class MeasurementDatesPlugin {
     return `∫: ${i18n.number(number, {}, integratedUnit)}`;
   }
 
-  static integrateUnit(integratedValue: number, unit: Unit | "dps"): [number, IntegratedUnits] {
+  static integrateUnit(integratedValue: number, unit: Unit | ""): [number, IntegratedUnits] {
     switch (unit) {
       case "°C":
         return [integratedValue, "℃*h"];
@@ -313,7 +313,7 @@ export class MeasurementDatesPlugin {
     }
   }
 
-  static resolveUnit(seriesLabel: string): Unit | "dps" {
+  static resolveUnit(seriesLabel: string): Unit | "" {
     if (
       seriesLabel == i18n.message("linea:parameter:TA") ||
       seriesLabel == i18n.message("linea:parameter:TD") ||
@@ -337,8 +337,8 @@ export class MeasurementDatesPlugin {
       return "°";
     } else if (seriesLabel == i18n.message("linea:parameter:NS")) {
       return "cm";
-    } else if (seriesLabel == i18n.message("linea:unit:DATAPOINTS")) {
-      return "dps";
+    } else if (seriesLabel == i18n.message("linea:parameter:DATAPOINTS:amount")) {
+      return "";
     } else if (seriesLabel == i18n.message("linea:parameter:PSUM")) {
       return "mm";
     } else if (
