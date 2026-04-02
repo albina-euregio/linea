@@ -1,6 +1,5 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
-import type { Unit } from "../data/units";
 
 enum Mode {
   Delta = "Delta",
@@ -353,6 +352,23 @@ export class MeasurementDatesPlugin {
     }
   }
 }
+type Unit =
+  // temperature
+  | "K"
+  | "°C"
+  // length
+  | "m"
+  | "cm"
+  | "mm"
+  // 1
+  | "1"
+  | "%"
+  | "°"
+  // speed
+  | "m∕s"
+  | "km∕h"
+  // intensity (power per area)
+  | "W∕m²";
 type IntegratedUnits =
   | "m"
   | "°h"

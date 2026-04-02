@@ -17,13 +17,13 @@ export type Unit =
   | "%"
   | "°"
   // speed
-  | "m∕s"
-  | "km∕h"
+  | "m/s"
+  | "km/h"
   // pressure
   | "hPa"
   | "Pa"
   // intensity (power per area)
-  | "W∕m²";
+  | "W/m²";
 
 class Quantity<U extends Unit> {
   constructor(
@@ -39,9 +39,9 @@ class Quantity<U extends Unit> {
 export class Temperature extends Quantity<"K" | "℃"> {}
 export class Length extends Quantity<"m" | "cm" | "mm"> {}
 export class Scalar extends Quantity<"1" | "%" | "°"> {}
-export class Speed extends Quantity<"m∕s" | "km∕h"> {}
+export class Speed extends Quantity<"m/s" | "km/h"> {}
 export class Pressure extends Quantity<"hPa" | "Pa"> {}
-export class Intensity extends Quantity<"W∕m²"> {}
+export class Intensity extends Quantity<"W/m²"> {}
 
 export function unitTransformer(
   fromUnit: Unit,
@@ -69,9 +69,9 @@ export function unitTransformer(
     case "from % to 1":
       return (v) => v / 100;
     // speed
-    case "from m∕s to km∕h":
+    case "from m/s to km/h":
       return (v) => v * 3.6;
-    case "from km∕h to m∕s":
+    case "from km/h to m/s":
       return (v) => v / 3.6;
     // pressure
     case "from hPa to Pa":
