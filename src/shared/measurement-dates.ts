@@ -293,21 +293,21 @@ export class MeasurementDatesPlugin {
   static integrateUnit(integratedValue: number, unit: Unit | ""): [number, IntegratedUnits] {
     switch (unit) {
       case "°C":
-        return [integratedValue, "℃*h"];
-      case "km/h":
-        return [integratedValue * 1000, "m"]; // convert km/h * h = km to m
+        return [integratedValue, "℃ h"];
+      case "km∕h":
+        return [integratedValue * 1000, "m"]; // convert km∕h * h = km to m
       case "%":
-        return [integratedValue, "%*h"];
-      case "W/m²":
-        return [Math.round(integratedValue * 3600 * 1e-6), "MJ/m²"]; // convert W/m² * h to MJ/m²
+        return [integratedValue, "% h"];
+      case "W∕m²":
+        return [Math.round(integratedValue * 3600 * 1e-6), "MJ∕m²"]; // convert W/m² * h to MJ/m²
       case "°":
-        return [integratedValue, "°*h"];
-      case "dps":
-        return [integratedValue, "dps*days"];
+        return [integratedValue, "° h"];
+      case "":
+        return [integratedValue, "days"];
       case "mm":
         return [integratedValue, "mm"];
       case "cm":
-        return [integratedValue, "cm*h"];
+        return [integratedValue, "cm h"];
       default:
         return [integratedValue, "h"];
     }
@@ -328,11 +328,11 @@ export class MeasurementDatesPlugin {
       seriesLabel == i18n.message("linea:parameter:VW") ||
       seriesLabel == i18n.message("linea:parameter:VW_MAX")
     ) {
-      return "km/h";
+      return "km∕h";
     } else if (seriesLabel == i18n.message("linea:parameter:RH")) {
       return "%";
     } else if (seriesLabel == i18n.message("linea:parameter:ISWR")) {
-      return "W/m²";
+      return "W∕m²";
     } else if (seriesLabel == i18n.message("linea:parameter:DW")) {
       return "°";
     } else if (seriesLabel == i18n.message("linea:parameter:NS")) {
@@ -356,12 +356,12 @@ export class MeasurementDatesPlugin {
 type IntegratedUnits =
   | "m"
   | "°h"
-  | "℃*h"
-  | "%*h"
-  | "MJ/m²"
-  | "cm*h"
+  | "℃ h"
+  | "% h"
+  | "MJ∕m²"
+  | "cm h"
   | "mm"
   | "h"
-  | "m*h"
-  | "dps*days"
-  | "°*h";
+  | "m h"
+  | "days"
+  | "° h";
