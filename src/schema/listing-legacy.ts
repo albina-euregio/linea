@@ -59,17 +59,17 @@ export const FeaturePropertiesSchema = z
       .transform((v) => new Pressure(v, "hPa"))
       .meta({ unit: "hPa" }),
     LT_MAX: number
-      .describe("Max. air temperature over the last 24h in °C")
-      .transform((v) => new Temperature(v, "°C"))
-      .meta({ unit: "°C" }),
+      .describe("Max. air temperature over the last 24h in ℃")
+      .transform((v) => new Temperature(v, "℃"))
+      .meta({ unit: "℃" }),
     LT_MIN: number
-      .describe("Min. air temperature over the last 24h in °C")
-      .transform((v) => new Temperature(v, "°C"))
-      .meta({ unit: "°C" }),
+      .describe("Min. air temperature over the last 24h in ℃")
+      .transform((v) => new Temperature(v, "℃"))
+      .meta({ unit: "℃" }),
     LT: number
-      .describe("Air temperature in °C")
-      .transform((v) => new Temperature(v, "°C"))
-      .meta({ unit: "°C" }),
+      .describe("Air temperature in ℃")
+      .transform((v) => new Temperature(v, "℃"))
+      .meta({ unit: "℃" }),
     N24: number
       .describe("Precipitation over the last 24h in mm")
       .transform((v) => new Length(v, "mm"))
@@ -87,17 +87,17 @@ export const FeaturePropertiesSchema = z
       .transform((v) => new Length(v, "mm"))
       .meta({ unit: "mm" }),
     OFT: number
-      .describe("Surface temperature in °C")
-      .transform((v) => new Temperature(v, "°C"))
-      .meta({ unit: "°C" }),
+      .describe("Surface temperature in ℃")
+      .transform((v) => new Temperature(v, "℃"))
+      .meta({ unit: "℃" }),
     RH: number
       .describe("Relative humidity in %")
       .transform((v) => new Scalar(v, "%"))
       .meta({ unit: "%" }),
     TD: number
-      .describe("Dew point temperature in °C")
-      .transform((v) => new Temperature(v, "°C"))
-      .meta({ unit: "°C" }),
+      .describe("Dew point temperature in ℃")
+      .transform((v) => new Temperature(v, "℃"))
+      .meta({ unit: "℃" }),
     WG_BOE: number
       .describe("Max. wind velocity (max over the last 3h) in km/h")
       .transform((v) => new Speed(v, "km/h"))
