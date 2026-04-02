@@ -54,23 +54,23 @@ export class LineaChart extends AbstractLineaChart {
       if (this.showSurfaceHoarSeries && values.TD && values.TSS) {
         this.updateData(this.plots[i], [
           timestamps,
-          values.TA,
           values.TD ??
             (values.TA && values.RH
               ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
               : undefined),
           values.TSS,
           this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
+          values.TA,
         ]);
       } else {
         this.updateData(this.plots[i], [
           timestamps,
-          values.TA,
           values.TD ??
             (values.TA && values.RH
               ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
               : undefined),
           values.TSS,
+          values.TA,
         ]);
       }
       i += 1;
@@ -148,7 +148,6 @@ export class LineaChart extends AbstractLineaChart {
 
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
-      this.addSeries(p, opts_TA, this.result.values.TA);
       this.addSeries(p, opts_TD, TD);
 
       // show snow surface temperature and therefore surface hoar only if available
@@ -165,6 +164,7 @@ export class LineaChart extends AbstractLineaChart {
       } else {
         this.addSeries(p, opts_TSS, []);
       }
+      this.addSeries(p, opts_TA, this.result.values.TA);
     }
 
     if (this.result.values.RH || this.result.values.ISWR) {
