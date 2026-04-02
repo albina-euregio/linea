@@ -219,7 +219,7 @@ export class MeasurementDatesPlugin {
     }
     const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     const value = this.u.data[seriesIdx][dataIdx2] - this.u.data[seriesIdx][dataIdx1];
-    return `𝚫y: ${i18n.number(value, {}, unit)}`;
+    return `Δy: ${i18n.number(value, {}, unit)}`;
   }
 
   mean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
