@@ -15,7 +15,7 @@ StationData {
   "units": {
     "HS": "cm",
     "RH": "%",
-    "TA": "°C",
+    "TA": "℃",
     "timestamp": "",
   },
   "values": {
@@ -61,7 +61,7 @@ StationData {
   "units": {
     "HS": "cm",
     "RH": "%",
-    "TA": "°C",
+    "TA": "℃",
     "timestamp": "",
   },
   "values": {
@@ -101,7 +101,7 @@ StationData {
   "units": {
     "HS": "cm",
     "RH": "%",
-    "TA": "°C",
+    "TA": "℃",
     "timestamp": "",
   },
   "values": {
@@ -142,13 +142,13 @@ StationData {
     "HS": "cm",
     "ISWR": "W/m²",
     "LF": "%",
-    "TA": "°C",
-    "TD": "°C",
+    "TA": "℃",
+    "TD": "℃",
     "TS.000": "°C",
     "TS.020": "°C",
     "TS.040": "°C",
     "TS.060": "°C",
-    "TSS": "°C",
+    "TSS": "℃",
     "timestamp": "ISO8601",
   },
   "values": {

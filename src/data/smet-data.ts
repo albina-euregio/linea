@@ -23,7 +23,7 @@ const DEFAULT_UNITS: Units = {
 };
 
 const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number }> = {
-  K: { to: "°C", convert: unitTransformer("K", "°C") },
+  K: { to: "℃", convert: unitTransformer("K", "℃") },
   m: { to: "cm", convert: unitTransformer("m", "cm") },
   "1": { to: "%", convert: unitTransformer("1", "%") },
   "m/s": { to: "km/h", convert: unitTransformer("m/s", "km/h") },

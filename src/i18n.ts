@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 import messagesEN from "./i18n/en.json";
+import type { Unit } from "./data/units.ts";
 const messages = import.meta.glob("./i18n/*.json", {
   import: "default",
   eager: true,
@@ -21,12 +22,16 @@ class I18n {
     return this.messages?.[id] ?? messagesEN[id] ?? id;
   }
 
-  number(num: number | null | undefined, opts?: Intl.NumberFormatOptions, unit = ""): string {
+  number(
+    num: number | null | undefined,
+    opts?: Intl.NumberFormatOptions,
+    unit: Unit | undefined = undefined,
+  ): string {
     if (typeof num !== "number" || !isFinite(num)) return "–";
     let s = new Intl.NumberFormat(this.lang, {
       useGrouping: num >= 10000,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 1,
+      minimumFractionDigits: unit === "℃" ? 1 : 0,
+      maximumFractionDigits: unit === "℃" ? 1 : 0,
       ...opts,
     }).format(num);
     if (unit) s += ` ${unit}`;
