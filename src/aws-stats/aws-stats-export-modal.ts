@@ -301,10 +301,10 @@ export class AwsStatsExportModal extends AbstractExportModal {
     }> = [];
 
     const selectedChartIndices = this.getCheckedDiagramIndices();
-    if (selectedChartIndices.length === 0) {
-      alert(i18n.message("linea:message:noplotselected"));
-      return "";
-    }
+    // if (selectedChartIndices.length === 0) {
+    //   alert(i18n.message("linea:message:noplotselected"));
+    //   return "";
+    // }
 
     try {
       for (const chartIndex of selectedChartIndices) {

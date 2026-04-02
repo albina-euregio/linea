@@ -1,6 +1,6 @@
 import uPlot from "uplot";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
-import { i18n, type messagesEN_t } from "../../i18n";
+import { i18n } from "../../i18n";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
 import { LOADED_AVALANCHE_PROBLEM_ICONS } from "../../shared/avalanche-problem-icons";
 import { DANGER_LEVEL_MAX_SIZE } from "../../shared/danger-level-icons";
@@ -28,8 +28,16 @@ export const opts_avalanche_problem_micro_regions: uPlot.Options = {
     ],
     draw: [
       (u: uPlot) => {
-        for (let level = 1; level <= 5; level++) {
+        for (
+          let level = Math.ceil((u.scales.y.range as [number, number])?.[0] ?? 1);
+          level <= Math.ceil((u.scales.y.range as [number, number])?.[1] ?? 5);
+          level++
+        ) {
           const img = LOADED_AVALANCHE_PROBLEM_ICONS.get(level);
+          if (!img) {
+            // TODO: implement fallback with label
+            continue;
+          }
           if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
             const sourceSize = Math.min(img.naturalWidth, img.naturalHeight);
             const calcIconSize = (36 / 200) * u.bbox.height;
@@ -66,10 +74,6 @@ export const opts_avalanche_problem_micro_regions: uPlot.Options = {
       grid: { stroke: "#e5e5e5" },
       ticks: { stroke: "#333" },
       splits: [1, 2, 3, 4, 5],
-      values: ["persistent_weak_layer", "new_snow", "wind_slab", "wet_snow", "gliding_snow"].map(
-        (v) =>
-          i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
-      ),
     },
   ],
   series: [
