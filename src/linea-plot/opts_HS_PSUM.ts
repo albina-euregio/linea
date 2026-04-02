@@ -38,14 +38,15 @@ export const opts_HS_PSUM: uPlot.Options = {
     x: timeScale,
     y: {
       range: (_u, _dataMin, dataMax) => {
-        return dataMax > 250 ? [0, 500] : [0, 250];
+        return dataMax > 200 ? [0, 400] : [0, 200];
       },
     },
     y2: {
-      range: [0, 100],
+      range: (_u, _dataMin, dataMax) => {
+        return dataMax > 60 ? [0, 120] : [0, 60];
+      },
     },
   },
-
   axes: [
     timeAxis,
     {
@@ -54,19 +55,33 @@ export const opts_HS_PSUM: uPlot.Options = {
         return LineaOptsHelper.getSplits({
           uplot: u,
           mins: [0, 0],
-          maxs: [250, 500],
+          maxs: [200, 400],
           splits: [
-            [0, 50, 100, 150, 200, 250],
-            [0, 100, 200, 300, 400, 500],
+            [0, 50, 100, 150, 200],
+            [0, 100, 200, 300, 400],
           ],
-          splitcount: 6,
+          splitcount: 5,
         } as SplitOptions);
       },
       stroke: "#08519C",
     },
     {
       scale: "y2",
-      splits: [0, 20, 40, 60, 80, 100],
+      splits: (u) => {
+        return LineaOptsHelper.getSplits(
+          {
+            uplot: u,
+            mins: [0, 0],
+            maxs: [60, 120],
+            splits: [
+              [0, 15, 30, 45, 60],
+              [0, 30, 60, 90, 120],
+            ],
+            splitcount: 5,
+          } as SplitOptions,
+          "y2",
+        );
+      },
       stroke: "#6aafd5",
       side: 1,
       grid: {
