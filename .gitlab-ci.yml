@@ -5,9 +5,7 @@ build:
   script:
     - corepack enable
     - pnpm install --frozen-lockfile
-    - pnpm lint
-    - pnpm test
-    - pnpm build
+    - pnpm run ci
     - pnpm pack
   artifacts:
     paths:
