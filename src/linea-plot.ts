@@ -119,7 +119,9 @@ export class LineaPlot extends HTMLElement {
 
     this.lineaViews = new Map();
     if (!this.hasAttribute("showonlywinter")) {
-      this.lineaViews.set("station", new StationView(this.backgroundColors, this));
+      const stationView = new StationView(this.backgroundColors, this);
+      this.daterange.addEventListener("focus", () => stationView.fetchLazySrc());
+      this.lineaViews.set("station", stationView);
     }
     this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
 

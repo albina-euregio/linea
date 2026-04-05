@@ -26,9 +26,6 @@ export class StationView extends LineaView {
       this.loadFromDataAttribute();
     } else {
       await this.fetchData("src");
-      if (this.lineaplot.hasAttribute("lazysrc")) {
-        this.fetchData("lazysrc");
-      }
     }
     for (const i in this.results) {
       const result = this.results[i];
@@ -96,7 +93,20 @@ export class StationView extends LineaView {
     this.filterAndUpdateData(startDate, endDate);
   }
 
+  private lazySrcLoaded = false;
+  async fetchLazySrc() {
+    if (this.lineaplot.hasAttribute("lazysrc") && !this.lazySrcLoaded) {
+      await this.fetchData("lazysrc");
+      this.lazySrcLoaded = true;
+    }
+  }
+
   previous(previous: HTMLButtonElement, next: HTMLButtonElement): void {
+    void this.previous0(previous, next);
+  }
+
+  private async previous0(previous: HTMLButtonElement, next: HTMLButtonElement) {
+    await this.fetchLazySrc();
     if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length < 2) return;
     const start = this.dateToZonedDateTime(new Date(this.dp.selectedDates[0]));
     const end = this.dateToZonedDateTime(new Date(this.dp.selectedDates[1]));
