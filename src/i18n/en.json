@@ -122,5 +122,6 @@
   "linea:measurement-dates:usage": "Use  <kbd style='background: #f0f0f0; padding: 2px 4px; border-radius: 2px; font-family: monospace;'>control</kbd> + mouse dragging to activate the analyzer.",
   "linea:measurement-dates:usage:keybinding": "Keybinding",
   "linea:measurement-dates:usage:keybinding:press": "Press",
-  "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings"
+  "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings",
+  "linea:measurement-dates:usage:exit": "Close Analyzer"
 }

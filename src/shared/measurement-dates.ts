@@ -274,6 +274,10 @@ export class MeasurementDatesPlugin {
           modalTitle.style.marginTop = "0";
           modalContent.appendChild(modalTitle);
 
+          const escapeHint = document.createElement("p");
+          escapeHint.innerHTML = `<strong>${i18n.message("linea:measurement-dates:usage:exit")}:</strong> ${i18n.message("linea:measurement-dates:usage:keybinding:press")} <kbd style="background: #f0f0f0; padding: 2px 4px; border-radius: 2px; font-family: monospace;">Escape</kbd>`;
+          modalContent.appendChild(escapeHint);
+
           Object.entries(this.modeInfo).forEach(([mode, info]) => {
             const modeContainer = document.createElement("div");
             modeContainer.style.marginBottom = "16px";
