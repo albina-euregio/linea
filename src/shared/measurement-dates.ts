@@ -117,8 +117,11 @@ export class MeasurementDatesPlugin {
 
     let labels: { seriesLabel: string; value: string; color: string }[] = [
       {
-        seriesLabel: `Timerange`,
-        value: `${((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000).toFixed(1)} h`,
+        seriesLabel: i18n.message("linea:measurement-dates:timerange"),
+        value: i18n.number((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000, {
+          style: "unit",
+          unit: "hour",
+        }),
         color: "#00000000",
       },
     ];
