@@ -359,7 +359,7 @@ export class MeasurementDatesPlugin {
           u.root.insertBefore(legend, u.root.lastChild);
 
           u.over.addEventListener("mousedown", (e: MouseEvent) => {
-            if (e.ctrlKey && e.button === 0) {
+            if ((e.ctrlKey || e.metaKey) && e.button === 0) {
               u.cursor.drag.x = false; // disable default zooming behavior when dragging with ctrl
               this.isDragging = true;
               MeasurementDatesPlugin.isKeyboardSelection = false;
@@ -375,7 +375,7 @@ export class MeasurementDatesPlugin {
           u.over.addEventListener(
             "mousemove",
             (e: MouseEvent) => {
-              if (this.isDragging && e.ctrlKey) {
+              if (this.isDragging && (e.ctrlKey || e.metaKey)) {
                 const { left, top } = u.cursor;
                 if (left >= 0 && top >= 0) {
                   MeasurementDatesPlugin.x2 = u.posToVal(left, "x");
