@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { dailyBarChartTimeAxis as dailyBarChartTimeAxis, dailyBarChartTimeScale, timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
+import { dailyBarChartTimeAxis, dailyBarChartTimeScale } from "../../linea-plot/opts_time_axis";
 import { i18n } from "../../i18n";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import type { SplitOptions } from "../../shared/opts-helper";

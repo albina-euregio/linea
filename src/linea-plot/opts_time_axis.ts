@@ -106,7 +106,6 @@ export const dailyBarChartTimeAxis: uPlot.Axis = {
   },
 };
 
-
 export const dailyBarChartTimeScale: uPlot.Scale = {
   time: true,
   range: (_self, newMin, newMax) => {
