@@ -6,7 +6,7 @@ import {
   TriggeredAvalancheObservation,
   type BlogData,
 } from "./datatypes";
-import type { DangerSourceVariant } from "./danger-source-data";
+import type { DangerSourceVariant, EAWSMatrixInformation } from "./danger-source-data";
 
 export class Observations {
   public observations: Observation[];
@@ -930,6 +930,49 @@ export class DangerSourceVariantService {
         (variant) => variant.dangerSourceVariantStatus === "inactive",
       ),
     );
+  }
+
+  getMatrixParamtersPerDangerSourceVariantPerDay(microRegion: string): {
+    timestamps: number[];
+    matrixParameters: Record<string, EAWSMatrixInformation[]>;
+  } {
+    const perDay: Record<number, Record<string, EAWSMatrixInformation>> = {};
+
+    this.dangerSourceVariants
+      .filter((variant) => variant.regions.includes(microRegion))
+      .forEach((variant) => {
+        const day = new Date(variant.validUntil.toISOString().split("T")[0]).getTime();
+        if (day === null) {
+          return;
+        }
+        if (!perDay[day]) {
+          perDay[day] = {};
+        }
+        const key = variant.dangerSource.title ?? "unknown";
+        if (variant.eawsMatrixInformation) {
+          perDay[day][key] = variant.eawsMatrixInformation;
+        }
+      });
+
+    const timestamps: number[] = Object.keys(perDay)
+      .map((date) => Number(date))
+      .sort((a, b) => a - b);
+
+    const allKeys = new Set<string>();
+    Object.values(perDay).forEach((dayData) => {
+      Object.keys(dayData).forEach((key) => allKeys.add(key));
+    });
+
+    const sortedKeys = Array.from(allKeys).sort();
+
+    const matrixParameters: Record<string, EAWSMatrixInformation[]> = {};
+    sortedKeys.forEach((key) => {
+      matrixParameters[key] = timestamps
+        .map((ts) => perDay[ts]?.[key])
+        .filter((v): v is EAWSMatrixInformation => !!v);
+    });
+
+    return { timestamps, matrixParameters };
   }
 
   getDangerRatingPerDangerSourceVariantPerDay(microRegion: string): {

@@ -10,3 +10,4 @@ import "./products";
 import "./danger-pattern-micro-regions-chart";
 import "./avalanche-problem-micro-regions-chart";
 import "./danger-rating-danger-source-variants";
+import "./danger-source-variants-matrix-parameter";

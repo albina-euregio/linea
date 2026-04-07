@@ -42,6 +42,7 @@ export class DangerRatingDangerSourceVariantsChart extends AbstractChart {
     this.createPlot(
       {
         ...opts_danger_rating,
+
         title: `${i18n.message("linea:dangerrating:title")} – ${this.filterMicroRegions[0]}`,
       },
       [plotInformation.data[0]],
