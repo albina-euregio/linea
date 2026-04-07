@@ -154,7 +154,7 @@ export class AwsStats extends HTMLElement {
       );
     }
 
-    if (this.getAttribute("danger-sources")) {
+    if (this.getAttribute("danger-source-variants")) {
       loadPromises.push(
         (async () => {
           for (const chart of charts) {
