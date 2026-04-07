@@ -6,6 +6,8 @@ enum Mode {
   Integral = "Integral",
   Mean = "Mean",
   SeriesMean = "SeriesMean",
+  Min = "Min",
+  "Max" = "Max",
 }
 
 /**
@@ -35,6 +37,8 @@ export class MeasurementDatesPlugin {
     [Mode.Mean]: (dataIdx1, dataIdx2, seriesIdx) => this.mean(dataIdx1, dataIdx2, seriesIdx),
     [Mode.SeriesMean]: (dataIdx1, dataIdx2, seriesIdx) =>
       this.seriesMean(dataIdx1, dataIdx2, seriesIdx),
+    [Mode.Min]: (dataIdx1, dataIdx2, seriesIdx) => this.min(dataIdx1, dataIdx2, seriesIdx),
+    [Mode.Max]: (dataIdx1, dataIdx2, seriesIdx) => this.max(dataIdx1, dataIdx2, seriesIdx),
   };
 
   public u: uPlot | null = null;
@@ -111,6 +115,12 @@ export class MeasurementDatesPlugin {
           break;
         case Mode.Integral:
           title = i18n.message("linea:measurement-dates:integral");
+          break;
+        case Mode.Min:
+          title = i18n.message("linea:measurement-dates:min");
+          break;
+        case Mode.Max:
+          title = i18n.message("linea:measurement-dates:max");
           break;
       }
       let labels = [
@@ -240,6 +250,12 @@ export class MeasurementDatesPlugin {
               } else if (e.key == "s") {
                 MeasurementDatesPlugin.mode = Mode.SeriesMean;
                 this.mode = Mode.SeriesMean;
+              } else if (e.key == "k") {
+                MeasurementDatesPlugin.mode = Mode.Min;
+                this.mode = Mode.Min;
+              } else if (e.key == "l") {
+                MeasurementDatesPlugin.mode = Mode.Max;
+                this.mode = Mode.Max;
               } else {
                 const { left, top } = u.cursor;
 
@@ -332,6 +348,32 @@ export class MeasurementDatesPlugin {
     const mean = sum / dataSlice.length;
     const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     return `${i18n.number(mean, {}, unit)}`;
+  }
+
+  min(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
+    if (this.u == null) {
+      return "n/a";
+    }
+    const dataMinIdx = Math.min(dataIdx1, dataIdx2);
+    const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
+    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+
+    const min = Math.min(...dataSlice.filter((v): v is number => v != null));
+    const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    return `${i18n.number(min, {}, unit)}`;
+  }
+
+  max(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
+    if (this.u == null) {
+      return "n/a";
+    }
+    const dataMinIdx = Math.min(dataIdx1, dataIdx2);
+    const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
+    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+
+    const max = Math.max(...dataSlice.filter((v): v is number => v != null));
+    const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
+    return `${i18n.number(max, {}, unit)}`;
   }
 
   /**

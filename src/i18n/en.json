@@ -117,5 +117,7 @@
   "linea:measurement-dates:seriesmean": "Series Mean",
   "linea:measurement-dates:delta": "Total Difference",
   "linea:measurement-dates:integral": "Integral",
-  "linea:measurement-dates:usage": "Data Analyzing:\n1) Focus a plot and press 1 to set border 1 (red).\n2) Move the mouse to another point and press 2 to set border 2 (blue).\n3) Use d/i/m/s to switch mode (Difference/Integral/Mean/Series Mean).\n4) Press x or Escape to clear borders."
+  "linea:measurement-dates:min": "Minimum",
+  "linea:measurement-dates:max": "Maximum",
+  "linea:measurement-dates:usage": "Data Analyzing:\n1) Focus a plot and press 1 to set border 1 (red).\n2) Move the mouse to another point and press 2 to set border 2 (blue).\n3) Use d/i/m/s/k/l to switch mode (Difference/Integral/Mean/Series Mean/Minimum/Maximum).\n4) Press x or Escape to clear borders."
 }
