@@ -1,6 +1,6 @@
 import uPlot from "uplot";
 const { bars } = uPlot.paths;
-import { dailyBarChartTimeScale, timeAxis } from "../../linea-plot/opts_time_axis";
+import { dailyBarChartTimeAxis, dailyBarChartTimeScale, timeAxis } from "../../linea-plot/opts_time_axis";
 import { i18n } from "../../i18n";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import {
@@ -61,7 +61,7 @@ export const opts_danger_rating_micro_regions_bars: uPlot.Options = {
   },
 
   axes: [
-    timeAxis,
+    dailyBarChartTimeAxis,
     {
       scale: "y",
       splits: [0, 20, 40, 60, 80, 100],

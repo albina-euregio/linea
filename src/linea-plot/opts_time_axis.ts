@@ -68,6 +68,45 @@ export const timeScale: uPlot.Scale = {
   },
 };
 
+export const dailyBarChartTimeAxis: uPlot.Axis = {
+  splits(_self, _axisIdx, scaleMin, scaleMax, foundIncr, _foundSpace) {
+    const splits: number[] = [];
+    const increment = Math.max(foundIncr, d);
+    const startDate = new Date(scaleMin);
+    startDate.setUTCHours(0, 0, 0, 0);
+    let current = startDate.getTime();
+    while (current <= scaleMax) {
+      if (current >= scaleMin) {
+        splits.push(current);
+      }
+      current += increment;
+    }
+    return splits;
+  },
+  values(_self, splits, _axisIdx, _foundSpace, foundIncr) {
+    let opts:
+      | [Intl.DateTimeFormatOptions]
+      | [Intl.DateTimeFormatOptions, Intl.DateTimeFormatOptions] = [{}];
+    if (foundIncr >= y) {
+      opts = [{ year: "numeric" }];
+    } else if (foundIncr >= 28 * d) {
+      opts = [{ month: "short" }, { year: "numeric" }];
+    } else {
+      opts = [
+        { weekday: "short", day: "numeric" },
+        { month: "short", year: "2-digit" },
+      ];
+    }
+    return splits.map((s) =>
+      opts.map((o) => i18n.time(s % 100_000 === 99_999 ? s + 1 : s, o)).join("\n"),
+    );
+  },
+  grid: {
+    show: false,
+  },
+};
+
+
 export const dailyBarChartTimeScale: uPlot.Scale = {
   time: true,
   range: (_self, newMin, newMax) => {
