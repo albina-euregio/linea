@@ -38,12 +38,14 @@ export class MeasurementDatesPlugin {
   };
 
   public u: uPlot | null = null;
-  public x1: number | null = null;
-  public x2: number | null = null;
-  public y1: number | null = null;
-  public y2: number | null = null;
-  public dataIdxs1: (number | null)[] = null;
-  public dataIdxs2: (number | null)[] = null;
+  public syncKey: string | null = null;
+  public static x1: number | null = null;
+  public static x2: number | null = null;
+  public static y1: number | null = null;
+  public static y2: number | null = null;
+  public static dataIdxs1: (number | null)[] = null;
+  public static dataIdxs2: (number | null)[] = null;
+  public static mode: Mode = Mode.Delta;
   public mode: Mode = Mode.Delta;
 
   public plugin(): uPlot.Plugin {
@@ -62,14 +64,28 @@ export class MeasurementDatesPlugin {
     };
 
     const clearDatums = (u: uPlot) => {
-      this.x1 = this.x2 = this.y1 = this.y2 = null;
-      this.dataIdxs1 = this.dataIdxs2 = null;
-      u.redraw();
+      for (const u0 of uPlot.sync(u.cursor.sync.key).plots) {
+        MeasurementDatesPlugin.x1 =
+          MeasurementDatesPlugin.x2 =
+          MeasurementDatesPlugin.y1 =
+          MeasurementDatesPlugin.y2 =
+            null;
+        MeasurementDatesPlugin.dataIdxs1 = MeasurementDatesPlugin.dataIdxs2 = null;
+        u0.redraw();
+      }
     };
 
     const drawDelta = (u: uPlot) => {
-      let cxleft = u.valToPos(Math.min(this.x1, this.x2), "x", true);
-      let cxright = u.valToPos(Math.max(this.x1, this.x2), "x", true);
+      let cxleft = u.valToPos(
+        Math.min(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
+        "x",
+        true,
+      );
+      let cxright = u.valToPos(
+        Math.max(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
+        "x",
+        true,
+      );
 
       u.ctx.fillStyle = "#c0c0c038";
       u.ctx.beginPath();
@@ -81,7 +97,7 @@ export class MeasurementDatesPlugin {
       u.ctx.fillRect(cxleft, top, cxright - cxleft, bottom - top);
 
       let title = "";
-      switch (this.mode) {
+      switch (MeasurementDatesPlugin.mode) {
         case Mode.Delta:
           title = i18n.message("linea:measurement-dates:delta");
           break;
@@ -95,7 +111,10 @@ export class MeasurementDatesPlugin {
           title = i18n.message("linea:measurement-dates:integral");
           break;
       }
-      let labels = [title, `Timerange: ${((this.x2 - this.x1) / 3_600_000).toFixed(1)} h`];
+      let labels = [
+        title,
+        `Timerange: ${((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000).toFixed(1)} h`,
+      ];
 
       u.series.forEach((s, i) => {
         if (
@@ -106,8 +125,8 @@ export class MeasurementDatesPlugin {
           return;
         }
 
-        const idx1 = this.dataIdxs1[i];
-        const idx2 = this.dataIdxs2[i];
+        const idx1 = MeasurementDatesPlugin.dataIdxs1[i];
+        const idx2 = MeasurementDatesPlugin.dataIdxs2[i];
 
         if (idx1 == null || idx2 == null) {
           return;
@@ -119,13 +138,15 @@ export class MeasurementDatesPlugin {
         if (seriesY1 == null || seriesY2 == null) {
           return;
         }
-        const labelValue = this.ModeFunctions[this.mode](idx1, idx2, i);
+        const labelValue = this.ModeFunctions[MeasurementDatesPlugin.mode](idx1, idx2, i);
         labels.push(`${s.label}: ${labelValue}`);
       });
 
       const lineHeight = 14;
-      let xPos = u.valToPos((this.x1 + this.x2) / 2, "x", true);
-      let yPos = u.valToPos((this.y1 + this.y2) / 2, "y", true) - (labels.length / 2) * lineHeight;
+      let xPos = u.valToPos((MeasurementDatesPlugin.x1 + MeasurementDatesPlugin.x2) / 2, "x", true);
+      let yPos =
+        u.valToPos((MeasurementDatesPlugin.y1 + MeasurementDatesPlugin.y2) / 2, "y", true) -
+        (labels.length / 2) * lineHeight;
       const maxWidth = Math.max(...labels.map((l) => u.ctx.measureText(l).width));
       const padding = 4;
       const rectHeight = labels.length * lineHeight + padding * 2;
@@ -144,6 +165,7 @@ export class MeasurementDatesPlugin {
       hooks: {
         init: (u: uPlot) => {
           this.u = u;
+          this.syncKey = u.cursor.sync.key;
           u.over.tabIndex = -1; // required for key handlers
           u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
 
@@ -155,52 +177,64 @@ export class MeasurementDatesPlugin {
               } else if (e.key == "x") {
                 clearDatums(u);
               } else if (e.key == "m") {
+                MeasurementDatesPlugin.mode = Mode.Mean;
                 this.mode = Mode.Mean;
               } else if (e.key == "i") {
+                MeasurementDatesPlugin.mode = Mode.Integral;
                 this.mode = Mode.Integral;
               } else if (e.key == "d") {
+                MeasurementDatesPlugin.mode = Mode.Delta;
                 this.mode = Mode.Delta;
               } else if (e.key == "s") {
+                MeasurementDatesPlugin.mode = Mode.SeriesMean;
                 this.mode = Mode.SeriesMean;
               } else {
                 const { left, top } = u.cursor;
 
                 if (left >= 0 && top >= 0) {
                   if (e.key == "1") {
-                    this.x1 = u.posToVal(left, "x");
-                    this.y1 = u.posToVal(top, "y");
-                    this.dataIdxs1 = [...u.cursor.idxs];
+                    MeasurementDatesPlugin.x1 = u.posToVal(left, "x");
+                    MeasurementDatesPlugin.y1 = u.posToVal(top, "y");
+                    MeasurementDatesPlugin.dataIdxs1 = [...u.cursor.idxs];
                   } else if (e.key == "2") {
-                    this.x2 = u.posToVal(left, "x");
-                    this.y2 = u.posToVal(top, "y");
-                    this.dataIdxs2 = [...u.cursor.idxs];
+                    MeasurementDatesPlugin.x2 = u.posToVal(left, "x");
+                    MeasurementDatesPlugin.y2 = u.posToVal(top, "y");
+                    MeasurementDatesPlugin.dataIdxs2 = [...u.cursor.idxs];
                   }
                 }
               }
-              u.redraw();
+
+              // Redraw all synced plots
+              if (this.syncKey) {
+                for (const u0 of uPlot.sync(this.syncKey).plots) {
+                  u0.redraw();
+                }
+              } else {
+                u.redraw();
+              }
             },
             true,
           );
         },
         draw: (u: uPlot) => {
-          if (this.x1 != null || this.x2 != null) {
+          if (MeasurementDatesPlugin.x1 != null || MeasurementDatesPlugin.x2 != null) {
             u.ctx.save();
 
             u.ctx.lineWidth = 2;
 
-            if (this.x1 != null) {
-              drawDatumLine(u, this.x1, "#fd0000");
+            if (MeasurementDatesPlugin.x1 != null) {
+              drawDatumLine(u, MeasurementDatesPlugin.x1, "#fd0000");
             }
 
-            if (this.x2 != null) {
-              drawDatumLine(u, this.x2, "#0026ff");
+            if (MeasurementDatesPlugin.x2 != null) {
+              drawDatumLine(u, MeasurementDatesPlugin.x2, "#0026ff");
             }
 
             if (
-              this.x1 != null &&
-              this.x2 != null &&
-              this.dataIdxs1 != null &&
-              this.dataIdxs2 != null
+              MeasurementDatesPlugin.x1 != null &&
+              MeasurementDatesPlugin.x2 != null &&
+              MeasurementDatesPlugin.dataIdxs1 != null &&
+              MeasurementDatesPlugin.dataIdxs2 != null
             ) {
               drawDelta(u);
             }
