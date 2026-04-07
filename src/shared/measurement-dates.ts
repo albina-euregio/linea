@@ -39,6 +39,7 @@ export class MeasurementDatesPlugin {
 
   public u: uPlot | null = null;
   public syncKey: string | null = null;
+  private isDragging: boolean = false;
   public static x1: number | null = null;
   public static x2: number | null = null;
   public static y1: number | null = null;
@@ -46,6 +47,7 @@ export class MeasurementDatesPlugin {
   public static dataIdxs1: (number | null)[] = null;
   public static dataIdxs2: (number | null)[] = null;
   public static mode: Mode = Mode.Delta;
+  public static isKeyboardSelection: boolean = false;
   public mode: Mode = Mode.Delta;
 
   public plugin(): uPlot.Plugin {
@@ -169,6 +171,56 @@ export class MeasurementDatesPlugin {
           u.over.tabIndex = -1; // required for key handlers
           u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
 
+          u.over.addEventListener("mousedown", (e: MouseEvent) => {
+            if (e.ctrlKey && e.button === 0) {
+              u.cursor.drag.x = false; // disable default zooming behavior when dragging with ctrl
+              this.isDragging = true;
+              MeasurementDatesPlugin.isKeyboardSelection = false;
+              const { left, top } = u.cursor;
+              if (left >= 0 && top >= 0) {
+                MeasurementDatesPlugin.x1 = u.posToVal(left, "x");
+                MeasurementDatesPlugin.y1 = u.posToVal(top, "y");
+                MeasurementDatesPlugin.dataIdxs1 = [...u.cursor.idxs];
+              }
+            }
+          });
+
+          u.over.addEventListener(
+            "mousemove",
+            (e: MouseEvent) => {
+              if (this.isDragging && e.ctrlKey) {
+                const { left, top } = u.cursor;
+                if (left >= 0 && top >= 0) {
+                  MeasurementDatesPlugin.x2 = u.posToVal(left, "x");
+                  MeasurementDatesPlugin.y2 = u.posToVal(top, "y");
+                  MeasurementDatesPlugin.dataIdxs2 = [...u.cursor.idxs];
+                  // Redraw all synced plots
+                  if (this.syncKey) {
+                    for (const u0 of uPlot.sync(this.syncKey).plots) {
+                      u0.redraw();
+                    }
+                  } else {
+                    u.redraw();
+                  }
+                }
+              }
+            },
+            { passive: true },
+          );
+
+          u.over.addEventListener(
+            "mouseup",
+            () => {
+              if (this.isDragging) {
+                this.isDragging = false;
+                setTimeout(() => {
+                  u.cursor.drag.x = true; // re-enable default zooming behavior after dragging
+                }, 100);
+              }
+            },
+            { passive: true },
+          );
+
           u.over.addEventListener(
             "keydown",
             (e) => {
@@ -193,10 +245,12 @@ export class MeasurementDatesPlugin {
 
                 if (left >= 0 && top >= 0) {
                   if (e.key == "1") {
+                    MeasurementDatesPlugin.isKeyboardSelection = true;
                     MeasurementDatesPlugin.x1 = u.posToVal(left, "x");
                     MeasurementDatesPlugin.y1 = u.posToVal(top, "y");
                     MeasurementDatesPlugin.dataIdxs1 = [...u.cursor.idxs];
                   } else if (e.key == "2") {
+                    MeasurementDatesPlugin.isKeyboardSelection = true;
                     MeasurementDatesPlugin.x2 = u.posToVal(left, "x");
                     MeasurementDatesPlugin.y2 = u.posToVal(top, "y");
                     MeasurementDatesPlugin.dataIdxs2 = [...u.cursor.idxs];
@@ -222,12 +276,14 @@ export class MeasurementDatesPlugin {
 
             u.ctx.lineWidth = 2;
 
-            if (MeasurementDatesPlugin.x1 != null) {
-              drawDatumLine(u, MeasurementDatesPlugin.x1, "#fd0000");
-            }
+            if (MeasurementDatesPlugin.isKeyboardSelection) {
+              if (MeasurementDatesPlugin.x1 != null) {
+                drawDatumLine(u, MeasurementDatesPlugin.x1, "#fd0000");
+              }
 
-            if (MeasurementDatesPlugin.x2 != null) {
-              drawDatumLine(u, MeasurementDatesPlugin.x2, "#0026ff");
+              if (MeasurementDatesPlugin.x2 != null) {
+                drawDatumLine(u, MeasurementDatesPlugin.x2, "#0026ff");
+              }
             }
 
             if (
