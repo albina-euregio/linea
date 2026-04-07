@@ -55,6 +55,7 @@ export class MeasurementDatesPlugin {
   public mode: Mode = Mode.Delta;
   public tooltip: HTMLTableSectionElement | null = null;
   private tooltipTable: HTMLTableElement | null = null;
+  private select: HTMLSelectElement | null = null;
 
   public plugin(): uPlot.Plugin {
     // Helper object with mode information: formula and keybinding
@@ -83,6 +84,10 @@ export class MeasurementDatesPlugin {
         formula: "Max = max(y₁...y₂)",
         keybinding: "l",
       },
+    };
+
+    const updateSelectValue = () => {
+      this.select.value = MeasurementDatesPlugin.mode;
     };
 
     const drawDatumLine = (u: uPlot, x: number, color: string) => {
@@ -231,24 +236,23 @@ export class MeasurementDatesPlugin {
           headerContainer.style.gap = "0px";
 
           // Combobox
-          const select = document.createElement("select");
-          select.classList.add("toggle-btn");
-          select.style.borderTopRightRadius = "0px";
-          select.style.borderBottomRightRadius = "0px";
-          select.style.cursor = "pointer";
+          this.select = document.createElement("select");
+          this.select.classList.add("toggle-btn");
+          this.select.style.borderTopRightRadius = "0px";
+          this.select.style.borderBottomRightRadius = "0px";
+          this.select.style.cursor = "pointer";
 
           Object.values(Mode).forEach((mode) => {
             const option = document.createElement("option");
             option.value = mode;
             option.textContent = this.modeLabel(mode);
-            select.appendChild(option);
+            this.select.appendChild(option);
           });
 
-          select.value = MeasurementDatesPlugin.mode;
-          select.addEventListener("change", (e) => {
+          this.select.value = MeasurementDatesPlugin.mode;
+          this.select.addEventListener("change", (e) => {
             const newMode = (e.target as HTMLSelectElement).value as Mode;
             MeasurementDatesPlugin.mode = newMode;
-            this.mode = newMode;
             if (this.syncKey) {
               for (const u0 of uPlot.sync(this.syncKey).plots) {
                 u0.redraw();
@@ -258,7 +262,7 @@ export class MeasurementDatesPlugin {
             }
           });
 
-          headerContainer.appendChild(select);
+          headerContainer.appendChild(this.select);
 
           // Help button
           const helpBtn = document.createElement("button");
@@ -358,11 +362,6 @@ export class MeasurementDatesPlugin {
           this.tooltip = legend.createTBody();
           u.root.insertBefore(legend, u.root.lastChild);
 
-          // Update select when mode changes via keyboard
-          const updateSelectValue = () => {
-            select.value = MeasurementDatesPlugin.mode;
-          };
-
           u.over.addEventListener("mousedown", (e: MouseEvent) => {
             if (e.ctrlKey && e.button === 0) {
               u.cursor.drag.x = false; // disable default zooming behavior when dragging with ctrl
@@ -422,27 +421,21 @@ export class MeasurementDatesPlugin {
                 clearDatums(u);
               } else if (e.key == "m") {
                 MeasurementDatesPlugin.mode = Mode.Mean;
-                this.mode = Mode.Mean;
                 updateSelectValue();
               } else if (e.key == "i") {
                 MeasurementDatesPlugin.mode = Mode.Integral;
-                this.mode = Mode.Integral;
                 updateSelectValue();
               } else if (e.key == "d") {
                 MeasurementDatesPlugin.mode = Mode.Delta;
-                this.mode = Mode.Delta;
                 updateSelectValue();
               } else if (e.key == "s") {
                 MeasurementDatesPlugin.mode = Mode.SeriesMean;
-                this.mode = Mode.SeriesMean;
                 updateSelectValue();
               } else if (e.key == "k") {
                 MeasurementDatesPlugin.mode = Mode.Min;
-                this.mode = Mode.Min;
                 updateSelectValue();
               } else if (e.key == "l") {
                 MeasurementDatesPlugin.mode = Mode.Max;
-                this.mode = Mode.Max;
                 updateSelectValue();
               } else {
                 const { left, top } = u.cursor;
@@ -496,6 +489,7 @@ export class MeasurementDatesPlugin {
               MeasurementDatesPlugin.dataIdxs1 != null &&
               MeasurementDatesPlugin.dataIdxs2 != null
             ) {
+              updateSelectValue();
               drawDelta(u);
             }
 
