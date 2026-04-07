@@ -27,7 +27,7 @@ enum Mode {
  * - Press 'Escape' to clear datums
  */
 export class MeasurementDatesPlugin {
-  ModeFunctions: Record<
+  private readonly modeFunctions: Record<
     Mode,
     (dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null) => string
   > = {
@@ -41,8 +41,8 @@ export class MeasurementDatesPlugin {
     [Mode.Max]: (dataIdx1, dataIdx2, seriesIdx) => this.max(dataIdx1, dataIdx2, seriesIdx),
   };
 
-  public u: uPlot | null = null;
-  public syncKey: string | null = null;
+  private u: uPlot | null = null;
+  private syncKey: string | null = null;
   private isDragging: boolean = false;
   public static x1: number | null = null;
   public static x2: number | null = null;
@@ -53,159 +53,138 @@ export class MeasurementDatesPlugin {
   public static mode: Mode = Mode.Delta;
   public static isKeyboardSelection: boolean = false;
   public mode: Mode = Mode.Delta;
-  public tooltip: HTMLTableSectionElement | null = null;
+  private tooltip: HTMLTableSectionElement | null = null;
   private tooltipTable: HTMLTableElement | null = null;
   private select: HTMLSelectElement | null = null;
 
+  // Helper object with mode information: formula and keybinding
+  private readonly modeInfo: Record<Mode, { formula: string; keybinding: string }> = {
+    [Mode.Delta]: {
+      formula: "Δy = y₂ - y₁",
+      keybinding: "d",
+    },
+    [Mode.Integral]: {
+      formula: "∫ = ∑(y₁ + y₂)/2 × Δx",
+      keybinding: "i",
+    },
+    [Mode.Mean]: {
+      formula: "Mean = (y₁ + y₂) / 2",
+      keybinding: "m",
+    },
+    [Mode.SeriesMean]: {
+      formula: "Mean = (∑y) / n",
+      keybinding: "s",
+    },
+    [Mode.Min]: {
+      formula: "Min = min(y₁...yₙ)",
+      keybinding: "k",
+    },
+    [Mode.Max]: {
+      formula: "Max = max(y₁...yₙ)",
+      keybinding: "l",
+    },
+  };
+
+  private updateSelectValue() {
+    if (!this.select) {
+      return;
+    }
+    this.select.value = MeasurementDatesPlugin.mode;
+  }
+
+  private drawDelta() {
+    let cxleft = this.u.valToPos(
+      Math.min(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
+      "x",
+      true,
+    );
+    let cxright = this.u.valToPos(
+      Math.max(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
+      "x",
+      true,
+    );
+
+    this.u.ctx.fillStyle = "#c0c0c038";
+    this.u.ctx.beginPath();
+
+    const top = this.u.bbox.top;
+    const bottom = this.u.bbox.top + this.u.bbox.height;
+    this.u.ctx.moveTo(cxleft, bottom);
+    this.u.ctx.lineTo(cxright, top);
+    this.u.ctx.fillRect(cxleft, top, cxright - cxleft, bottom - top);
+
+    let labels: { seriesLabel: string; value: string; color: string }[] = [
+      {
+        seriesLabel: `Timerange`,
+        value: `${((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000).toFixed(1)} h`,
+        color: "#00000000",
+      },
+    ];
+    this.u.series.forEach((s, i) => {
+      if (
+        i == 0 ||
+        s.label == i18n.message("linea:parameter:SH:potential") ||
+        s.label == i18n.message("linea:parameter:snowcover")
+      ) {
+        return;
+      }
+
+      const idx1 = MeasurementDatesPlugin.dataIdxs1[i];
+      const idx2 = MeasurementDatesPlugin.dataIdxs2[i];
+
+      if (idx1 == null || idx2 == null) {
+        return;
+      }
+
+      const seriesY1 = this.u.data[i][idx1] as number | null;
+      const seriesY2 = this.u.data[i][idx2] as number | null;
+
+      if (seriesY1 == null || seriesY2 == null) {
+        return;
+      }
+      const labelValue = this.modeFunctions[MeasurementDatesPlugin.mode](idx1, idx2, i);
+      let color = "#00000000";
+      if (typeof s.stroke === "string") {
+        color = s.stroke;
+      } else if (typeof s.stroke === "function") {
+        const c = s.stroke(this.u, i + 1);
+        if (typeof c === "string") color = c;
+      }
+      labels.push({ seriesLabel: `${s.label}`, value: labelValue, color });
+    });
+    if (!this.tooltip || !this.tooltipTable) {
+      return;
+    }
+
+    this.tooltip.innerHTML = "";
+    this.tooltipTable.style.display = "table";
+    labels.forEach((label) => {
+      const row = document.createElement("tr");
+      row.classList.add("u-series");
+
+      const th = document.createElement("th");
+      const marker = document.createElement("div");
+      marker.classList.add("u-marker");
+      marker.style.backgroundColor = label.color;
+      th.appendChild(marker);
+
+      const labelDiv = document.createElement("div");
+      labelDiv.classList.add("u-label");
+      labelDiv.textContent = label.seriesLabel;
+      th.appendChild(labelDiv);
+      row.appendChild(th);
+
+      const td = document.createElement("td");
+      td.classList.add("u-value");
+      td.textContent = label.value;
+      td.style.display = "block";
+      row.appendChild(td);
+
+      this.tooltip.appendChild(row);
+    });
+  }
+
   public plugin(): uPlot.Plugin {
-    // Helper object with mode information: formula and keybinding
-    const modeInfo: Record<Mode, { formula: string; keybinding: string }> = {
-      [Mode.Delta]: {
-        formula: "Δy = y₂ - y₁",
-        keybinding: "d",
-      },
-      [Mode.Integral]: {
-        formula: "∫ = ∑(y₁ + y₂)/2 × Δx",
-        keybinding: "i",
-      },
-      [Mode.Mean]: {
-        formula: "Mean = (y₁ + y₂) / 2",
-        keybinding: "m",
-      },
-      [Mode.SeriesMean]: {
-        formula: "Mean = (∑y) / n",
-        keybinding: "s",
-      },
-      [Mode.Min]: {
-        formula: "Min = min(y₁...y₂)",
-        keybinding: "k",
-      },
-      [Mode.Max]: {
-        formula: "Max = max(y₁...y₂)",
-        keybinding: "l",
-      },
-    };
-
-    const updateSelectValue = () => {
-      this.select.value = MeasurementDatesPlugin.mode;
-    };
-
-    const drawDatumLine = (u: uPlot, x: number, color: string) => {
-      let cx = u.valToPos(x, "x", true);
-
-      u.ctx.strokeStyle = color;
-      u.ctx.beginPath();
-
-      const top = u.bbox.top;
-      const bottom = u.bbox.top + u.bbox.height;
-      u.ctx.moveTo(cx, bottom);
-      u.ctx.lineTo(cx, top);
-
-      u.ctx.stroke();
-    };
-
-    const clearDatums = (u: uPlot) => {
-      for (const u0 of uPlot.sync(u.cursor.sync.key).plots) {
-        MeasurementDatesPlugin.x1 =
-          MeasurementDatesPlugin.x2 =
-          MeasurementDatesPlugin.y1 =
-          MeasurementDatesPlugin.y2 =
-            null;
-        MeasurementDatesPlugin.dataIdxs1 = MeasurementDatesPlugin.dataIdxs2 = null;
-        u0.redraw();
-      }
-    };
-
-    const drawDelta = (u: uPlot) => {
-      let cxleft = u.valToPos(
-        Math.min(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
-        "x",
-        true,
-      );
-      let cxright = u.valToPos(
-        Math.max(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
-        "x",
-        true,
-      );
-
-      u.ctx.fillStyle = "#c0c0c038";
-      u.ctx.beginPath();
-
-      const top = u.bbox.top;
-      const bottom = u.bbox.top + u.bbox.height;
-      u.ctx.moveTo(cxleft, bottom);
-      u.ctx.lineTo(cxright, top);
-      u.ctx.fillRect(cxleft, top, cxright - cxleft, bottom - top);
-
-      let labels: { seriesLabel: string; value: string; color: string }[] = [
-        {
-          seriesLabel: `Timerange`,
-          value: `${((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000).toFixed(1)} h`,
-          color: "#00000000",
-        },
-      ];
-      u.series.forEach((s, i) => {
-        if (
-          i == 0 ||
-          s.label == i18n.message("linea:parameter:SH:potential") ||
-          s.label == i18n.message("linea:parameter:snowcover")
-        ) {
-          return;
-        }
-
-        const idx1 = MeasurementDatesPlugin.dataIdxs1[i];
-        const idx2 = MeasurementDatesPlugin.dataIdxs2[i];
-
-        if (idx1 == null || idx2 == null) {
-          return;
-        }
-
-        const seriesY1 = u.data[i][idx1] as number | null;
-        const seriesY2 = u.data[i][idx2] as number | null;
-
-        if (seriesY1 == null || seriesY2 == null) {
-          return;
-        }
-        const labelValue = this.ModeFunctions[MeasurementDatesPlugin.mode](idx1, idx2, i);
-        let color = "#00000000";
-        if (typeof s.stroke === "string") {
-          color = s.stroke;
-        } else if (typeof s.stroke === "function") {
-          const c = s.stroke(u, i + 1);
-          if (typeof c === "string") color = c;
-        }
-        labels.push({ seriesLabel: `${s.label}`, value: `${labelValue}`, color });
-      });
-      this.tooltip.innerHTML = "";
-      if (this.tooltipTable) {
-        this.tooltipTable.style.display = "table";
-      }
-      labels.forEach((label) => {
-        const row = document.createElement("tr");
-        row.classList.add("u-series");
-
-        const th = document.createElement("th");
-        const marker = document.createElement("div");
-        marker.classList.add("u-marker");
-        marker.style.backgroundColor = label.color;
-        th.appendChild(marker);
-
-        const labelDiv = document.createElement("div");
-        labelDiv.classList.add("u-label");
-        labelDiv.textContent = label.seriesLabel;
-        th.appendChild(labelDiv);
-        row.appendChild(th);
-
-        const td = document.createElement("td");
-        td.classList.add("u-value");
-        td.textContent = label.value;
-        td.style.display = "block";
-        row.appendChild(td);
-
-        this.tooltip.appendChild(row);
-      });
-    };
-
     return {
       hooks: {
         init: (u: uPlot) => {
@@ -245,7 +224,7 @@ export class MeasurementDatesPlugin {
           Object.values(Mode).forEach((mode) => {
             const option = document.createElement("option");
             option.value = mode;
-            option.textContent = this.modeLabel(mode);
+            option.textContent = MeasurementDatesPlugin.modeLabel(mode);
             this.select.appendChild(option);
           });
 
@@ -253,13 +232,7 @@ export class MeasurementDatesPlugin {
           this.select.addEventListener("change", (e) => {
             const newMode = (e.target as HTMLSelectElement).value as Mode;
             MeasurementDatesPlugin.mode = newMode;
-            if (this.syncKey) {
-              for (const u0 of uPlot.sync(this.syncKey).plots) {
-                u0.redraw();
-              }
-            } else {
-              u.redraw();
-            }
+            this.redraw();
           });
 
           headerContainer.appendChild(this.select);
@@ -297,14 +270,14 @@ export class MeasurementDatesPlugin {
           modalTitle.style.marginTop = "0";
           modalContent.appendChild(modalTitle);
 
-          Object.entries(modeInfo).forEach(([mode, info]) => {
+          Object.entries(this.modeInfo).forEach(([mode, info]) => {
             const modeContainer = document.createElement("div");
             modeContainer.style.marginBottom = "16px";
             modeContainer.style.paddingBottom = "12px";
             modeContainer.style.borderBottom = "1px solid #eee";
 
             const modeTitle = document.createElement("strong");
-            modeTitle.textContent = `${this.modeLabel(mode)}`;
+            modeTitle.textContent = `${MeasurementDatesPlugin.modeLabel(mode)}`;
             modeTitle.style.display = "block";
             modeTitle.style.marginBottom = "4px";
 
@@ -385,14 +358,7 @@ export class MeasurementDatesPlugin {
                   MeasurementDatesPlugin.x2 = u.posToVal(left, "x");
                   MeasurementDatesPlugin.y2 = u.posToVal(top, "y");
                   MeasurementDatesPlugin.dataIdxs2 = [...u.cursor.idxs];
-                  // Redraw all synced plots
-                  if (this.syncKey) {
-                    for (const u0 of uPlot.sync(this.syncKey).plots) {
-                      u0.redraw();
-                    }
-                  } else {
-                    u.redraw();
-                  }
+                  this.redraw();
                 }
               }
             },
@@ -416,27 +382,27 @@ export class MeasurementDatesPlugin {
             "keydown",
             (e) => {
               if (e.key == "Escape") {
-                clearDatums(u);
+                MeasurementDatesPlugin.clearDatums(u);
               } else if (e.key == "x") {
-                clearDatums(u);
+                MeasurementDatesPlugin.clearDatums(u);
               } else if (e.key == "m") {
                 MeasurementDatesPlugin.mode = Mode.Mean;
-                updateSelectValue();
+                this.updateSelectValue();
               } else if (e.key == "i") {
                 MeasurementDatesPlugin.mode = Mode.Integral;
-                updateSelectValue();
+                this.updateSelectValue();
               } else if (e.key == "d") {
                 MeasurementDatesPlugin.mode = Mode.Delta;
-                updateSelectValue();
+                this.updateSelectValue();
               } else if (e.key == "s") {
                 MeasurementDatesPlugin.mode = Mode.SeriesMean;
-                updateSelectValue();
+                this.updateSelectValue();
               } else if (e.key == "k") {
                 MeasurementDatesPlugin.mode = Mode.Min;
-                updateSelectValue();
+                this.updateSelectValue();
               } else if (e.key == "l") {
                 MeasurementDatesPlugin.mode = Mode.Max;
-                updateSelectValue();
+                this.updateSelectValue();
               } else {
                 const { left, top } = u.cursor;
 
@@ -454,15 +420,7 @@ export class MeasurementDatesPlugin {
                   }
                 }
               }
-
-              // Redraw all synced plots
-              if (this.syncKey) {
-                for (const u0 of uPlot.sync(this.syncKey).plots) {
-                  u0.redraw();
-                }
-              } else {
-                u.redraw();
-              }
+              this.redraw();
             },
             true,
           );
@@ -475,11 +433,11 @@ export class MeasurementDatesPlugin {
 
             if (MeasurementDatesPlugin.isKeyboardSelection) {
               if (MeasurementDatesPlugin.x1 != null) {
-                drawDatumLine(u, MeasurementDatesPlugin.x1, "#fd0000");
+                MeasurementDatesPlugin.drawDatumLine(u, MeasurementDatesPlugin.x1, "#fd0000");
               }
 
               if (MeasurementDatesPlugin.x2 != null) {
-                drawDatumLine(u, MeasurementDatesPlugin.x2, "#0026ff");
+                MeasurementDatesPlugin.drawDatumLine(u, MeasurementDatesPlugin.x2, "#0026ff");
               }
             }
 
@@ -489,8 +447,8 @@ export class MeasurementDatesPlugin {
               MeasurementDatesPlugin.dataIdxs1 != null &&
               MeasurementDatesPlugin.dataIdxs2 != null
             ) {
-              updateSelectValue();
-              drawDelta(u);
+              this.updateSelectValue();
+              this.drawDelta();
             }
 
             u.ctx.restore();
@@ -502,6 +460,16 @@ export class MeasurementDatesPlugin {
         },
       },
     };
+  }
+
+  redraw() {
+    if (this.syncKey) {
+      for (const u0 of uPlot.sync(this.syncKey).plots) {
+        u0.redraw();
+      }
+    } else {
+      this.u.redraw();
+    }
   }
 
   delta(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
@@ -607,7 +575,7 @@ export class MeasurementDatesPlugin {
     return `∫: ${i18n.number(number, {}, integratedUnit)}`;
   }
 
-  modeLabel(mode: string): string {
+  private static modeLabel(mode: string): string {
     switch (mode) {
       case Mode.Delta:
         return i18n.message("linea:measurement-dates:delta");
@@ -625,6 +593,32 @@ export class MeasurementDatesPlugin {
         return MeasurementDatesPlugin.mode;
     }
   }
+
+  private static drawDatumLine = (u: uPlot, x: number, color: string) => {
+    let cx = u.valToPos(x, "x", true);
+
+    u.ctx.strokeStyle = color;
+    u.ctx.beginPath();
+
+    const top = u.bbox.top;
+    const bottom = u.bbox.top + u.bbox.height;
+    u.ctx.moveTo(cx, bottom);
+    u.ctx.lineTo(cx, top);
+
+    u.ctx.stroke();
+  };
+
+  private static clearDatums = (u: uPlot) => {
+    for (const u0 of uPlot.sync(u.cursor.sync.key).plots) {
+      MeasurementDatesPlugin.x1 =
+        MeasurementDatesPlugin.x2 =
+        MeasurementDatesPlugin.y1 =
+        MeasurementDatesPlugin.y2 =
+          null;
+      MeasurementDatesPlugin.dataIdxs1 = MeasurementDatesPlugin.dataIdxs2 = null;
+      u0.redraw();
+    }
+  };
 
   static integrateUnit(integratedValue: number, unit: Unit | ""): [number, IntegratedUnits] {
     switch (unit) {
