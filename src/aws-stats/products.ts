@@ -1,12 +1,13 @@
 import type uPlot from "uplot";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import { BlogService, BulletinData, Observations, type BlogData } from "./datastore";
+import { BlogService, BulletinData, Observations } from "./datastore";
 import {
   getStackedOpts,
   opts_products_bars,
   opts_series_products,
 } from "./series-options/products-opts";
 import { i18n } from "../i18n";
+import type { BlogData } from "./datatypes";
 
 interface ProductsPlotInformation extends PlotInformation {
   blogLabels: string[];
