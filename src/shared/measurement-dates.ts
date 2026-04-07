@@ -172,14 +172,14 @@ export class MeasurementDatesPlugin {
 
       const labelDiv = document.createElement("div");
       labelDiv.classList.add("u-label");
-      labelDiv.textContent = label.seriesLabel;
+      labelDiv.textContent = `${label.seriesLabel}:`;
       th.appendChild(labelDiv);
       row.appendChild(th);
 
       const td = document.createElement("td");
       td.classList.add("u-value");
       td.textContent = label.value;
-      td.style.display = "block";
+      td.style.display = "inline-block";
       row.appendChild(td);
 
       this.tooltip.appendChild(row);
@@ -221,6 +221,7 @@ export class MeasurementDatesPlugin {
           this.select.classList.add("toggle-btn");
           this.select.style.borderTopRightRadius = "0px";
           this.select.style.borderBottomRightRadius = "0px";
+          this.select.style.padding = "2px 4px";
           this.select.style.cursor = "pointer";
 
           Object.values(Mode).forEach((mode) => {
@@ -245,6 +246,7 @@ export class MeasurementDatesPlugin {
           helpBtn.style.borderTopLeftRadius = "0px";
           helpBtn.style.borderBottomLeftRadius = "0px";
           helpBtn.style.borderLeftWidth = "0px";
+          helpBtn.style.padding = "2px 4px";
           helpBtn.textContent = "?";
 
           // Help modal
@@ -476,11 +478,11 @@ export class MeasurementDatesPlugin {
 
   delta(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
     if (this.u == null) {
-      return "Δy: n/a";
+      return "n/a";
     }
     const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     const value = this.u.data[seriesIdx][dataIdx2] - this.u.data[seriesIdx][dataIdx1];
-    return `Δy: ${i18n.number(value, {}, unit)}`;
+    return `${i18n.number(value, {}, unit)}`;
   }
 
   mean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
