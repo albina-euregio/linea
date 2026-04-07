@@ -237,8 +237,16 @@ export class MeasurementDatesPlugin {
             MeasurementDatesPlugin.mode = newMode;
             this.redraw();
           });
-
           headerContainer.appendChild(this.select);
+
+          // Close button
+          const closeAnalyzerBtn = document.createElement("button");
+          closeAnalyzerBtn.textContent = "×";
+          closeAnalyzerBtn.classList.add("toggle-btn");
+          closeAnalyzerBtn.style.borderRadius = "0px";
+          closeAnalyzerBtn.style.borderLeftWidth = "0px";
+          closeAnalyzerBtn.style.padding = "2px 4px";
+          headerContainer.appendChild(closeAnalyzerBtn);
 
           // Help button
           const helpBtn = document.createElement("button");
@@ -248,6 +256,7 @@ export class MeasurementDatesPlugin {
           helpBtn.style.borderLeftWidth = "0px";
           helpBtn.style.padding = "2px 4px";
           helpBtn.textContent = "?";
+          headerContainer.appendChild(helpBtn);
 
           // Help modal
           const helpModal = document.createElement("div");
@@ -325,6 +334,10 @@ export class MeasurementDatesPlugin {
           helpModal.appendChild(modalContent);
           document.body.appendChild(helpModal);
 
+          closeAnalyzerBtn.addEventListener("click", () => {
+            MeasurementDatesPlugin.clearDatums(u);
+          });
+
           helpBtn.addEventListener("click", () => {
             helpModal.style.display = "flex";
           });
@@ -335,7 +348,6 @@ export class MeasurementDatesPlugin {
             }
           });
 
-          headerContainer.appendChild(helpBtn);
           headerCell.appendChild(headerContainer);
           headerRow.appendChild(headerCell);
           thead.appendChild(headerRow);
