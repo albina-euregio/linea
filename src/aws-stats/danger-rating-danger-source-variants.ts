@@ -46,7 +46,7 @@ export class DangerRatingDangerSourceVariantsChart extends AbstractChart {
       },
       [plotInformation.data[0]],
     );
-    Object.entries(plotInformation.data.slice(1)).forEach(([variantId, rating], index) => {
+    Object.entries(plotInformation.data.slice(1)).forEach(([_variantId, rating], index) => {
       this.addSeries(
         {
           ...opts_danger_rating_series_base,
@@ -55,7 +55,6 @@ export class DangerRatingDangerSourceVariantsChart extends AbstractChart {
         },
         rating as number[],
       );
-      console.log(variantId, rating);
     });
   }
 }
