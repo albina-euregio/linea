@@ -7,9 +7,18 @@ import { dewPoint } from "./dew-point";
 import type { StationData, Values } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
+import { TouchZoom } from "../shared/touch-zoom";
+import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 
 export class LineaChart extends AbstractLineaChart {
   private showSurfaceHoarSeries: boolean;
+
+  private withFreshPlugins(opts: uPlot.Options): uPlot.Options {
+    return {
+      ...opts,
+      plugins: [TouchZoom.touchZoomPlugin(), new MeasurementDatesPlugin().plugin()],
+    };
+  }
 
   constructor(
     result: StationData,
@@ -91,10 +100,10 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.HS || this.result.values.PSUM) {
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_HS_PSUM,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_HS_PSUM,
       );
@@ -115,10 +124,10 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_VW_VWG_DW,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_VW_VWG_DW,
       );
@@ -137,10 +146,10 @@ export class LineaChart extends AbstractLineaChart {
           ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
           : undefined);
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_TA_TD_TSS,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_TA_TD_TSS,
       );
@@ -169,10 +178,10 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.RH || this.result.values.ISWR) {
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_RH_GR,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_RH_GR,
       );

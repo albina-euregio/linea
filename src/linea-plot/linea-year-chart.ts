@@ -23,6 +23,8 @@ import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year } from "./opts_datapo
 import { YearData } from "../data/year-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import type { StationData, Values } from "../data/station-data";
+import { TouchZoom } from "../shared/touch-zoom";
+import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 
 /**
  * This component creates interactive uPlot diagrams displaying:
@@ -43,6 +45,13 @@ import type { StationData, Values } from "../data/station-data";
 export class LineaYearChart extends AbstractLineaChart {
   public startDate: Temporal.PlainDate;
   public endDate: Temporal.PlainDate;
+
+  private withFreshPlugins(opts: uPlot.Options): uPlot.Options {
+    return {
+      ...opts,
+      plugins: [TouchZoom.touchZoomPlugin(), new MeasurementDatesPlugin().plugin()],
+    };
+  }
 
   constructor(
     result: StationData,
@@ -188,10 +197,10 @@ export class LineaYearChart extends AbstractLineaChart {
         values.HS,
       );
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_HS_year,
           ...this.getStationTitle(),
-        },
+        }),
         [yearDataHS.timestamps],
         plot_HS_year,
       );
@@ -214,10 +223,10 @@ export class LineaYearChart extends AbstractLineaChart {
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
 
       const pDatapoints = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_DATAPOINTS_year,
           ...this.getStationTitle(),
-        },
+        }),
         [yearDataHS.timestamps],
         plot_DATAPOINTS_year,
       );
@@ -236,10 +245,10 @@ export class LineaYearChart extends AbstractLineaChart {
         values.NS,
       );
       let pNewSnow = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_NS_year,
           ...this.getStationTitle(),
-        },
+        }),
         [yearDataNS.timestamps],
         plot_NS_year,
       );
@@ -276,10 +285,10 @@ export class LineaYearChart extends AbstractLineaChart {
         values.TA,
       );
       const pTemp = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_TEMP_year,
           ...this.getStationTitle(),
-        },
+        }),
         [yearDataTA.timestamps],
         plot_TEMP_year,
       );
