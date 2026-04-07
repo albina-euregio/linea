@@ -110,8 +110,10 @@ export class MeasurementDatesPlugin {
     const top = this.u.bbox.top;
     const bottom = this.u.bbox.top + this.u.bbox.height;
     this.u.ctx.moveTo(cxleft, bottom);
-    this.u.ctx.lineTo(cxright, top);
     this.u.ctx.fillRect(cxleft, top, cxright - cxleft, bottom - top);
+    this.u.ctx.strokeStyle = "#696363fd";
+    this.u.ctx.lineWidth = 0.5;
+    this.u.ctx.strokeRect(cxleft, top, cxright - cxleft, bottom - top);
 
     let labels: { seriesLabel: string; value: string; color: string }[] = [
       {
