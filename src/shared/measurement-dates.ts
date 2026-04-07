@@ -7,7 +7,7 @@ enum Mode {
   Mean = "Mean",
   SeriesMean = "SeriesMean",
   Min = "Min",
-  "Max" = "Max",
+  Max = "Max",
 }
 
 /**
@@ -53,8 +53,38 @@ export class MeasurementDatesPlugin {
   public static mode: Mode = Mode.Delta;
   public static isKeyboardSelection: boolean = false;
   public mode: Mode = Mode.Delta;
+  public tooltip: HTMLTableSectionElement | null = null;
+  private tooltipTable: HTMLTableElement | null = null;
 
   public plugin(): uPlot.Plugin {
+    // Helper object with mode information: formula and keybinding
+    const modeInfo: Record<Mode, { formula: string; keybinding: string }> = {
+      [Mode.Delta]: {
+        formula: "Δy = y₂ - y₁",
+        keybinding: "d",
+      },
+      [Mode.Integral]: {
+        formula: "∫ = ∑(y₁ + y₂)/2 × Δx",
+        keybinding: "i",
+      },
+      [Mode.Mean]: {
+        formula: "Mean = (y₁ + y₂) / 2",
+        keybinding: "m",
+      },
+      [Mode.SeriesMean]: {
+        formula: "Mean = (∑y) / n",
+        keybinding: "s",
+      },
+      [Mode.Min]: {
+        formula: "Min = min(y₁...y₂)",
+        keybinding: "k",
+      },
+      [Mode.Max]: {
+        formula: "Max = max(y₁...y₂)",
+        keybinding: "l",
+      },
+    };
+
     const drawDatumLine = (u: uPlot, x: number, color: string) => {
       let cx = u.valToPos(x, "x", true);
 
@@ -102,32 +132,13 @@ export class MeasurementDatesPlugin {
       u.ctx.lineTo(cxright, top);
       u.ctx.fillRect(cxleft, top, cxright - cxleft, bottom - top);
 
-      let title = "";
-      switch (MeasurementDatesPlugin.mode) {
-        case Mode.Delta:
-          title = i18n.message("linea:measurement-dates:delta");
-          break;
-        case Mode.Mean:
-          title = i18n.message("linea:measurement-dates:mean");
-          break;
-        case Mode.SeriesMean:
-          title = i18n.message("linea:measurement-dates:seriesmean");
-          break;
-        case Mode.Integral:
-          title = i18n.message("linea:measurement-dates:integral");
-          break;
-        case Mode.Min:
-          title = i18n.message("linea:measurement-dates:min");
-          break;
-        case Mode.Max:
-          title = i18n.message("linea:measurement-dates:max");
-          break;
-      }
-      let labels = [
-        title,
-        `Timerange: ${((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000).toFixed(1)} h`,
+      let labels: { seriesLabel: string; value: string; color: string }[] = [
+        {
+          seriesLabel: `Timerange`,
+          value: `${((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000).toFixed(1)} h`,
+          color: "#00000000",
+        },
       ];
-
       u.series.forEach((s, i) => {
         if (
           i == 0 ||
@@ -151,25 +162,42 @@ export class MeasurementDatesPlugin {
           return;
         }
         const labelValue = this.ModeFunctions[MeasurementDatesPlugin.mode](idx1, idx2, i);
-        labels.push(`${s.label}: ${labelValue}`);
+        let color = "#00000000";
+        if (typeof s.stroke === "string") {
+          color = s.stroke;
+        } else if (typeof s.stroke === "function") {
+          const c = s.stroke(u, i + 1);
+          if (typeof c === "string") color = c;
+        }
+        labels.push({ seriesLabel: `${s.label}`, value: `${labelValue}`, color });
       });
+      this.tooltip.innerHTML = "";
+      if (this.tooltipTable) {
+        this.tooltipTable.style.display = "table";
+      }
+      labels.forEach((label) => {
+        const row = document.createElement("tr");
+        row.classList.add("u-series");
 
-      const lineHeight = 14;
-      let xPos = u.valToPos((MeasurementDatesPlugin.x1 + MeasurementDatesPlugin.x2) / 2, "x", true);
-      let yPos =
-        u.valToPos((MeasurementDatesPlugin.y1 + MeasurementDatesPlugin.y2) / 2, "y", true) -
-        (labels.length / 2) * lineHeight;
-      const maxWidth = Math.max(...labels.map((l) => u.ctx.measureText(l).width));
-      const padding = 4;
-      const rectHeight = labels.length * lineHeight + padding * 2;
-      const rectWidth = maxWidth + padding * 2;
-      u.ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-      u.ctx.fillRect(xPos - rectWidth / 2, yPos - padding * 2.5, rectWidth, rectHeight);
-      u.ctx.textAlign = "center";
-      u.ctx.textBaseline = "middle";
-      u.ctx.fillStyle = "black";
-      labels.forEach((label, index) => {
-        u.ctx.fillText(label, xPos, yPos + index * lineHeight);
+        const th = document.createElement("th");
+        const marker = document.createElement("div");
+        marker.classList.add("u-marker");
+        marker.style.backgroundColor = label.color;
+        th.appendChild(marker);
+
+        const labelDiv = document.createElement("div");
+        labelDiv.classList.add("u-label");
+        labelDiv.textContent = label.seriesLabel;
+        th.appendChild(labelDiv);
+        row.appendChild(th);
+
+        const td = document.createElement("td");
+        td.classList.add("u-value");
+        td.textContent = label.value;
+        td.style.display = "block";
+        row.appendChild(td);
+
+        this.tooltip.appendChild(row);
       });
     };
 
@@ -180,6 +208,160 @@ export class MeasurementDatesPlugin {
           this.syncKey = u.cursor.sync.key;
           u.over.tabIndex = -1; // required for key handlers
           u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
+
+          const legend = document.createElement("table");
+          legend.classList.add("u-legend");
+          legend.classList.add("u-inline");
+          legend.style.borderBottom = "2px solid rgb(221, 221, 221)";
+          legend.style.display = "none"; // Hide by default
+          this.tooltipTable = legend;
+
+          // Create header section with combobox and help button
+          const thead = legend.createTHead();
+          const headerRow = document.createElement("tr");
+
+          const headerCell = document.createElement("th");
+          headerCell.style.padding = "8px";
+          headerCell.style.textAlign = "left";
+          headerCell.colSpan = 2;
+
+          const headerContainer = document.createElement("div");
+          headerContainer.style.display = "flex";
+          headerContainer.style.alignItems = "center";
+          headerContainer.style.gap = "0px";
+
+          // Combobox
+          const select = document.createElement("select");
+          select.classList.add("toggle-btn");
+          select.style.borderTopRightRadius = "0px";
+          select.style.borderBottomRightRadius = "0px";
+          select.style.cursor = "pointer";
+
+          Object.values(Mode).forEach((mode) => {
+            const option = document.createElement("option");
+            option.value = mode;
+            option.textContent = this.modeLabel(mode);
+            select.appendChild(option);
+          });
+
+          select.value = MeasurementDatesPlugin.mode;
+          select.addEventListener("change", (e) => {
+            const newMode = (e.target as HTMLSelectElement).value as Mode;
+            MeasurementDatesPlugin.mode = newMode;
+            this.mode = newMode;
+            if (this.syncKey) {
+              for (const u0 of uPlot.sync(this.syncKey).plots) {
+                u0.redraw();
+              }
+            } else {
+              u.redraw();
+            }
+          });
+
+          headerContainer.appendChild(select);
+
+          // Help button
+          const helpBtn = document.createElement("button");
+          helpBtn.classList.add("toggle-btn");
+          helpBtn.style.borderTopLeftRadius = "0px";
+          helpBtn.style.borderBottomLeftRadius = "0px";
+          helpBtn.style.borderLeftWidth = "0px";
+          helpBtn.textContent = "?";
+
+          // Help modal
+          const helpModal = document.createElement("div");
+          helpModal.style.position = "fixed";
+          helpModal.style.top = "0";
+          helpModal.style.left = "0";
+          helpModal.style.width = "100%";
+          helpModal.style.height = "100%";
+          helpModal.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+          helpModal.style.display = "none";
+          helpModal.style.alignItems = "center";
+          helpModal.style.justifyContent = "center";
+          helpModal.style.zIndex = "10000";
+
+          const modalContent = document.createElement("div");
+          modalContent.style.backgroundColor = "white";
+          modalContent.style.padding = "20px";
+          modalContent.style.maxHeight = "80vh";
+          modalContent.style.overflowY = "auto";
+          modalContent.style.maxWidth = "900px";
+
+          const modalTitle = document.createElement("h3");
+          modalTitle.textContent = i18n.message("linea:measurement-dates:usage:title");
+          modalTitle.style.marginTop = "0";
+          modalContent.appendChild(modalTitle);
+
+          Object.entries(modeInfo).forEach(([mode, info]) => {
+            const modeContainer = document.createElement("div");
+            modeContainer.style.marginBottom = "16px";
+            modeContainer.style.paddingBottom = "12px";
+            modeContainer.style.borderBottom = "1px solid #eee";
+
+            const modeTitle = document.createElement("strong");
+            modeTitle.textContent = `${this.modeLabel(mode)}`;
+            modeTitle.style.display = "block";
+            modeTitle.style.marginBottom = "4px";
+
+            const formula = document.createElement("div");
+            formula.style.fontFamily = "monospace";
+            formula.style.fontSize = "12px";
+            formula.style.backgroundColor = "#f5f5f5";
+            formula.style.padding = "6px";
+            formula.style.borderRadius = "3px";
+            formula.style.marginBottom = "4px";
+            formula.textContent = info.formula;
+
+            const keybinding = document.createElement("div");
+            keybinding.style.fontSize = "12px";
+            keybinding.style.color = "#666";
+            keybinding.innerHTML = `<strong>${i18n.message("linea:measurement-dates:usage:keybinding")}:</strong> ${i18n.message("linea:measurement-dates:usage:keybinding:press")} <kbd style="background: #f0f0f0; padding: 2px 4px; border-radius: 2px; font-family: monospace;">${info.keybinding}</kbd>`;
+
+            modeContainer.appendChild(modeTitle);
+            modeContainer.appendChild(formula);
+            modeContainer.appendChild(keybinding);
+            modalContent.appendChild(modeContainer);
+          });
+
+          const closeBtn = document.createElement("button");
+          closeBtn.textContent = "Close";
+          closeBtn.style.marginTop = "16px";
+          closeBtn.style.padding = "8px 16px";
+          closeBtn.style.borderRadius = "4px";
+          closeBtn.style.border = "1px solid #ccc";
+          closeBtn.style.cursor = "pointer";
+          closeBtn.style.backgroundColor = "#f0f0f0";
+          closeBtn.addEventListener("click", () => {
+            helpModal.style.display = "none";
+          });
+          modalContent.appendChild(closeBtn);
+
+          helpModal.appendChild(modalContent);
+          document.body.appendChild(helpModal);
+
+          helpBtn.addEventListener("click", () => {
+            helpModal.style.display = "flex";
+          });
+
+          helpModal.addEventListener("click", (e) => {
+            if (e.target === helpModal) {
+              helpModal.style.display = "none";
+            }
+          });
+
+          headerContainer.appendChild(helpBtn);
+          headerCell.appendChild(headerContainer);
+          headerRow.appendChild(headerCell);
+          thead.appendChild(headerRow);
+
+          this.tooltip = legend.createTBody();
+          u.root.insertBefore(legend, u.root.lastChild);
+
+          // Update select when mode changes via keyboard
+          const updateSelectValue = () => {
+            select.value = MeasurementDatesPlugin.mode;
+          };
 
           u.over.addEventListener("mousedown", (e: MouseEvent) => {
             if (e.ctrlKey && e.button === 0) {
@@ -241,21 +423,27 @@ export class MeasurementDatesPlugin {
               } else if (e.key == "m") {
                 MeasurementDatesPlugin.mode = Mode.Mean;
                 this.mode = Mode.Mean;
+                updateSelectValue();
               } else if (e.key == "i") {
                 MeasurementDatesPlugin.mode = Mode.Integral;
                 this.mode = Mode.Integral;
+                updateSelectValue();
               } else if (e.key == "d") {
                 MeasurementDatesPlugin.mode = Mode.Delta;
                 this.mode = Mode.Delta;
+                updateSelectValue();
               } else if (e.key == "s") {
                 MeasurementDatesPlugin.mode = Mode.SeriesMean;
                 this.mode = Mode.SeriesMean;
+                updateSelectValue();
               } else if (e.key == "k") {
                 MeasurementDatesPlugin.mode = Mode.Min;
                 this.mode = Mode.Min;
+                updateSelectValue();
               } else if (e.key == "l") {
                 MeasurementDatesPlugin.mode = Mode.Max;
                 this.mode = Mode.Max;
+                updateSelectValue();
               } else {
                 const { left, top } = u.cursor;
 
@@ -312,6 +500,10 @@ export class MeasurementDatesPlugin {
             }
 
             u.ctx.restore();
+          } else {
+            if (this.tooltipTable) {
+              this.tooltipTable.style.display = "none";
+            }
           }
         },
       },
@@ -419,6 +611,25 @@ export class MeasurementDatesPlugin {
     const unit = MeasurementDatesPlugin.resolveUnit(seriesLabel);
     const [number, integratedUnit] = MeasurementDatesPlugin.integrateUnit(integralValue, unit);
     return `∫: ${i18n.number(number, {}, integratedUnit)}`;
+  }
+
+  modeLabel(mode: string): string {
+    switch (mode) {
+      case Mode.Delta:
+        return i18n.message("linea:measurement-dates:delta");
+      case Mode.Mean:
+        return i18n.message("linea:measurement-dates:mean");
+      case Mode.SeriesMean:
+        return i18n.message("linea:measurement-dates:seriesmean");
+      case Mode.Integral:
+        return i18n.message("linea:measurement-dates:integral");
+      case Mode.Min:
+        return i18n.message("linea:measurement-dates:min");
+      case Mode.Max:
+        return i18n.message("linea:measurement-dates:max");
+      default:
+        return MeasurementDatesPlugin.mode;
+    }
   }
 
   static integrateUnit(integratedValue: number, unit: Unit | ""): [number, IntegratedUnits] {

@@ -119,5 +119,8 @@
   "linea:measurement-dates:integral": "Integral",
   "linea:measurement-dates:min": "Minimum",
   "linea:measurement-dates:max": "Maximum",
-  "linea:measurement-dates:usage": "Data Analyzing:\n1) Focus a plot and press 1 to set border 1 (red).\n2) Move the mouse to another point and press 2 to set border 2 (blue).\n3) Use d/i/m/s/k/l to switch mode (Difference/Integral/Mean/Series Mean/Minimum/Maximum).\n4) Press x or Escape to clear borders."
+  "linea:measurement-dates:usage": "Use  <kbd style='background: #f0f0f0; padding: 2px 4px; border-radius: 2px; font-family: monospace;'>control</kbd> + mouse dragging to activate the analyzer.",
+  "linea:measurement-dates:usage:keybinding": "Keybinding",
+  "linea:measurement-dates:usage:keybinding:press": "Press",
+  "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings"
 }
