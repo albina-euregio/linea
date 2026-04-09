@@ -1,11 +1,12 @@
 import { expect, test, vi } from "vite-plus/test";
 import { fetchSMET } from "./smet-data";
 
-function mockFetch(text: string) {
+function mockFetch(text: string): string {
   vi.stubGlobal(
     "fetch",
     vi.fn(() => Promise.resolve(new Response(text, { headers: { "Content-Type": "text/plain" } }))),
   );
+  return "https://example.com/test.smet";
 }
 
 test("parse AT-07", async () => {
@@ -29,8 +30,8 @@ fields = timestamp ISWR HS LF TA TD TS.000 TS.020 TS.040 TS.060 TSS
 2025-11-26T20:00:00Z 1 0.339723 97.9 263.95 263.680857094 -777 -99.9 -99.9 -99.9 264.35
 2025-11-26T20:10:00Z 1 0.341 97.8 263.85 263.56816033 -777 -99.9 -99.9 -99.9 264.15
 `;
-  mockFetch(smet);
-  expect(await fetchSMET("https://example.com/test.smet")).toMatchSnapshot();
+  const url = mockFetch(smet);
+  expect(await fetchSMET(url)).toMatchSnapshot();
 });
 
 test("parse AT-02 (with tz = 1: UTC+1)", async () => {
@@ -51,8 +52,8 @@ tz = 1
 2025-11-26T19:10:00\t265.95\t0.939\t34.1
 2025-11-26T19:20:00\t265.95\t0.947\t34
 `;
-  mockFetch(smet);
-  expect(await fetchSMET("https://example.com/test.smet")).toMatchSnapshot();
+  const url = mockFetch(smet);
+  expect(await fetchSMET(url)).toMatchSnapshot();
 });
 
 test("parse AT-02 (assume tz = 0: UTC)", async () => {
@@ -72,8 +73,8 @@ fields = timestamp\tTA\tRH\tHS
 2025-11-26T19:10:00\t265.95\t0.939\t34.1
 2025-11-26T19:20:00\t265.95\t0.947\t34
 `;
-  mockFetch(smet);
-  expect(await fetchSMET("https://example.com/test.smet")).toMatchSnapshot();
+  const url = mockFetch(smet);
+  expect(await fetchSMET(url)).toMatchSnapshot();
 });
 
 test("parse AT-02 (2025-12-09)", async () => {
@@ -98,6 +99,6 @@ fields           = timestamp HS RH TA
 2025-12-02T20:30:00   38.000   0.941   272.25
 2025-12-02T21:30:00   37.800    -999   271.95
 `;
-  mockFetch(smet);
-  expect(await fetchSMET("https://example.com/test.smet")).toMatchSnapshot();
+  const url = mockFetch(smet);
+  expect(await fetchSMET(url)).toMatchSnapshot();
 });
