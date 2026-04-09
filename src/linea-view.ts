@@ -61,10 +61,8 @@ export abstract class LineaView {
     }
 
     const results = new StationDataArray();
-    for (const src of this.srcs) {
-      const result = await fetchSMET(src);
-      results.push(result);
-    }
+    const data = await Promise.all(this.srcs.map((src) => fetchSMET(src)));
+    results.push(...data);
     this.results.mergeWith(results);
     this.results.generalize();
     [this.minTime, this.maxTime] = this.results.minMaxTime;
