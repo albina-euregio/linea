@@ -5,7 +5,11 @@ import {
   TriggeredAvalancheObservation,
   type BlogData,
 } from "./datatypes";
-import type { DangerSourceVariant, EAWSMatrixInformation } from "./danger-source-data";
+import type {
+  DangerRatingModificator,
+  DangerSourceVariant,
+  EAWSMatrixInformation,
+} from "./danger-source-data";
 import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
 
 export class Observations {
@@ -352,8 +356,8 @@ function extractAvalancheType(properties: Record<string, any>): string | null {
   // Try extraDialogRows
   const byExtra = Array.isArray(properties.$extraDialogRows)
     ? properties.$extraDialogRows.find(
-      (row: any) => row?.label?.includes("avalancheType") || row?.label?.includes("Lawinenart"),
-    )
+        (row: any) => row?.label?.includes("avalancheType") || row?.label?.includes("Lawinenart"),
+      )
     : undefined;
   if (byExtra?.value) {
     return String(byExtra.value);
@@ -401,12 +405,12 @@ function extractTriggerType(
   // Try extraDialogRows
   const byExtra = Array.isArray(properties.$extraDialogRows)
     ? properties.$extraDialogRows.find(
-      (row: any) =>
-        (row?.label?.includes("release") ||
-          row?.label?.includes("Sprengung") ||
-          row?.label?.includes("trigger")) &&
-        (row?.value !== undefined || row?.boolean !== undefined),
-    )
+        (row: any) =>
+          (row?.label?.includes("release") ||
+            row?.label?.includes("Sprengung") ||
+            row?.label?.includes("trigger")) &&
+          (row?.value !== undefined || row?.boolean !== undefined),
+      )
     : undefined;
   if (byExtra?.value !== undefined) {
     return convertTriggerType(String(byExtra.value));
@@ -952,10 +956,15 @@ export class DangerSourceVariantService {
           perDay[day] = {};
         }
         const key = variant.dangerSource.title ?? "unknown";
-        perDay[day][key] =
+        const rating =
           DangerSourceVariantService.convertStringDangerRatingToNumber(
             variant.eawsMatrixInformation?.dangerRating,
           ) ?? null;
+        const subrating =
+          DangerSourceVariantService.convertModificatorToNumber(
+            variant.eawsMatrixInformation?.dangerRatingModificator,
+          ) ?? 0;
+        perDay[day][key] = rating ? rating + subrating : null;
       });
 
     const timestamps: number[] = Object.keys(perDay)
@@ -983,5 +992,14 @@ export class DangerSourceVariantService {
       very_high: 5,
     };
     return conversion[rating?.toLowerCase() ?? ""] ?? 0;
+  }
+
+  static convertModificatorToNumber(subRating: DangerRatingModificator | undefined): number {
+    const conversion: Record<string, number> = {
+      minus: -0.33,
+      equal: 0,
+      plus: +0.33,
+    };
+    return conversion[subRating ?? ""] ?? 0;
   }
 }
