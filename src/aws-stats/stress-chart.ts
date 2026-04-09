@@ -1,7 +1,7 @@
 import type { StressData } from "../schema/stress";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import { DangerRatingChart } from "./danger-rating-chart";
 import { BulletinData, Observations, StressService } from "./datastore";
+import { COLORS } from "./series-options/colorizer";
 import {
   opts_stress,
   opts_stress_danger_rating_series_all,
@@ -66,7 +66,7 @@ export class StressChart extends AbstractChart {
       this.addSeries(
         {
           ...opts_stress_series_base,
-          stroke: DangerRatingChart.COLORS[i % DangerRatingChart.COLORS.length],
+          stroke: COLORS[i % COLORS.length],
           label: StressChart.NAMES[i % StressChart.NAMES.length],
         },
         plotInformation.data[i] as number[],
