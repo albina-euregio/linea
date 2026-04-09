@@ -68,19 +68,19 @@ export class MeasurementDatesPlugin {
       keybinding: "i",
     },
     [Mode.Median]: {
-      formula: "Median = med(y₁...yₙ)",
+      formula: `${i18n.message("linea:measurement-dates:median")} = med(y₁...yₙ)`,
       keybinding: "m",
     },
     [Mode.SeriesMean]: {
-      formula: "Mean = (∑y) / n",
+      formula: `${i18n.message("linea:measurement-dates:seriesmean")} = (y₁ + ... + yₙ) / n`,
       keybinding: "s",
     },
     [Mode.Min]: {
-      formula: "Min = min(y₁...yₙ)",
+      formula: `${i18n.message("linea:measurement-dates:min")} = min(y₁...yₙ)`,
       keybinding: "k",
     },
     [Mode.Max]: {
-      formula: "Max = max(y₁...yₙ)",
+      formula: `${i18n.message("linea:measurement-dates:max")} = max(y₁...yₙ)`,
       keybinding: "l",
     },
   };
