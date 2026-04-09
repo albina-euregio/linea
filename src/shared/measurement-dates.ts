@@ -648,7 +648,10 @@ export class MeasurementDatesPlugin {
     }
   };
 
-  static integrateUnit(integratedValue: number, unit: Unit | ""): [number, IntegratedUnits] {
+  static integrateUnit(
+    integratedValue: number,
+    unit: AnalyzerUnit | "",
+  ): [number, AnalyzerIntegratedUnit] {
     switch (unit) {
       case "°C":
         return [integratedValue, "℃ h"];
@@ -671,7 +674,7 @@ export class MeasurementDatesPlugin {
     }
   }
 
-  static resolveUnit(seriesLabel: string): Unit | "" {
+  static resolveUnit(seriesLabel: string): AnalyzerUnit | "" {
     if (
       seriesLabel == i18n.message("linea:parameter:TA") ||
       seriesLabel == i18n.message("linea:parameter:TD") ||
@@ -711,7 +714,7 @@ export class MeasurementDatesPlugin {
     }
   }
 }
-type Unit =
+export type AnalyzerUnit =
   // temperature
   | "K"
   | "°C"
@@ -728,7 +731,7 @@ type Unit =
   | "km∕h"
   // intensity (power per area)
   | "W∕m²";
-type IntegratedUnits =
+export type AnalyzerIntegratedUnit =
   | "m"
   | "°h"
   | "℃ h"
