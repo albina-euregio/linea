@@ -73,6 +73,20 @@ export const opts_danger_rating_series_base: uPlot.Series = {
   stroke: "#4108dd69",
   scale: "y",
   width: 1.5,
+  value: (_u, v) => {
+    if (v == null) {
+      return "-";
+    }
+    const sub = v - Math.round(v);
+    if (sub === 0) {
+      return v.toFixed(0);
+    }
+    if (sub > 0) {
+      return `${Math.floor(v)}+`;
+    } else {
+      return `${Math.ceil(v)}-`;
+    }
+  },
 };
 
 export const opts_danger_rating_series_all: uPlot.Series = {
