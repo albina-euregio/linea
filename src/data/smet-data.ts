@@ -46,20 +46,18 @@ export async function fetchSMET(url: string): Promise<StationData> {
     return parseGeosphereData(await metadata.json(), await response.json());
   }
 
+  let stream = response.body;
   if (
     response.headers.get("Content-Encoding") === "gzip" ||
     response.headers.get("Content-Type") === "application/x-gzip"
   ) {
-    const blob = await response.blob();
-    const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
-    response = new Response(stream);
+    stream = stream.pipeThrough(new DecompressionStream("gzip"));
   }
 
-  const smet = await response.text();
-  return parseSMET(smet);
+  return parseSMET(stream);
 }
 
-export function parseSMET(smet: string): StationData {
+export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<StationData> {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
   let values: number[][] = [];
@@ -72,10 +70,10 @@ export function parseSMET(smet: string): StationData {
    * SMET: timezone of the measurements, decimal number positive going east. If not provided, utc is assumed.
    */
   let tz = 0;
-  const lines = smet.split(/\r?\n/);
   const timestamps = [] as number[];
   let dataIndex = 0;
-  lines.forEach((line) => {
+
+  function processLine(line: string) {
     function parseHeader(prefix: string) {
       if (!line.startsWith(prefix)) return "";
       line = line.slice(prefix.length).trim();
@@ -89,45 +87,60 @@ export function parseSMET(smet: string): StationData {
       fields = header.split(separator);
       units = fields.map((f) => DEFAULT_UNITS[f as ParameterType] ?? "");
       values = fields.map(() => [] as number[]);
-      return;
     } else if ((header = parseHeader("#units"))) {
       units = header.split(separator);
-      return;
     } else if ((header = parseHeader("nodata"))) {
       nodata = header;
-      return;
     } else if ((header = parseHeader("tz"))) {
       tz = +header;
-      return;
     } else if ((header = parseHeader("station_name"))) {
       station = header;
-      return;
     } else if ((header = parseHeader("altitude"))) {
       altitude = +header;
-      return;
-    } else if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
-      return;
-    }
-    const cells = line.split(separator);
-    let dateString = cells[0];
-    if (dateString.length === "2025-11-26T19:00:00".length) {
-      if (tz === 0) {
-        dateString += "Z";
-      } else if (tz > 0) {
-        dateString += `+${String(tz).padStart(2, "0")}:00`; // `tz = 1` -> `+01:00`
-      } else {
-        dateString += `-${String(tz).padStart(2, "0")}:00`;
+    } else if (/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
+      const cells = line.split(separator);
+      let dateString = cells[0];
+      if (dateString.length === "2025-11-26T19:00:00".length) {
+        if (tz === 0) {
+          dateString += "Z";
+        } else if (tz > 0) {
+          dateString += `+${String(tz).padStart(2, "0")}:00`; // `tz = 1` -> `+01:00`
+        } else {
+          dateString += `-${String(tz).padStart(2, "0")}:00`;
+        }
       }
+      timestamps[dataIndex] = Date.parse(dateString);
+      values.forEach((values0, i) => {
+        if (i == 0) return; // timestamp
+        if (cells[i] === nodata) {
+          values0[dataIndex] = null;
+          return;
+        }
+        const value = +cells[i].replace(",", ".");
+        values0[dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
+      });
+      dataIndex++;
     }
-    const date = Date.parse(dateString);
-    timestamps[dataIndex] = date;
-    values.forEach((values0, i) => {
-      if (i == 0) return; // timestamp
-      const value = cells[i] === nodata ? null : +cells[i].replace(",", ".");
-      values0[dataIndex] = value == null ? null : (UNIT_MAPPING[units[i]]?.convert(value) ?? value);
-    });
-    dataIndex++;
-  });
+  }
+
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      if (buffer) {
+        processLine(buffer);
+      }
+      break;
+    }
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop();
+    for (const line of lines) {
+      processLine(line);
+    }
+  }
 
   units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
   return new StationData(
