@@ -30,7 +30,7 @@ class I18n {
   ): string {
     if (typeof num !== "number" || !isFinite(num)) return "–";
     let s = new Intl.NumberFormat(this.lang, {
-      useGrouping: num >= 10000,
+      useGrouping: "min2",
       minimumFractionDigits: unit === "℃" ? 1 : 0,
       maximumFractionDigits: unit === "℃" ? 1 : 0,
       ...opts,
