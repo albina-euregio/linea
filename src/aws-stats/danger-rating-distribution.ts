@@ -9,7 +9,7 @@ import {
   opts_danger_rating_distribution_reference_series,
 } from "./series-options/danger-rating-distribution-opts";
 
-export class DangerRatingChart extends AbstractChart {
+export class DangerRatingDistributionChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
   }
@@ -91,4 +91,4 @@ export class DangerRatingChart extends AbstractChart {
   }
 }
 
-customElements.define("aws-danger-rating-distribution", DangerRatingChart);
+customElements.define("aws-danger-rating-distribution", DangerRatingDistributionChart);
