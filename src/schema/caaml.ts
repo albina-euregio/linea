@@ -35,6 +35,7 @@ const avalancheProblemTypeSchema = z.enum([
   "no_distinct_avalanche_problem",
   "favourable_situation",
 ]);
+export type AvalancheProblemType = z.infer<typeof avalancheProblemTypeSchema>;
 
 const snowpackStabilitySchema = z.enum(["good", "fair", "poor", "very_poor"]);
 

@@ -1,4 +1,4 @@
-import { type Bulletin } from "../schema/caaml";
+import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
 
 export class Observations {
   public observations: Observation[];
@@ -583,30 +583,20 @@ export class BulletinData {
 
   affectedMicroRegionsPerAvalancheProblemPerDay(regionCode: string = "all"): {
     timestamps: number[];
-    ratings: {
-      1: number[];
-      2: number[];
-      3: number[];
-      4: number[];
-      5: number[];
-      6: number[];
-      7: number[];
-      8: number[];
-    };
+    ratings: Record<AvalancheProblemType, number[]>;
   } {
-    const perDay: Record<
-      number,
-      {
-        1: number;
-        2: number;
-        3: number;
-        4: number;
-        5: number;
-        6: number;
-        7: number;
-        8: number;
-      }
-    > = {};
+    const emptyProblemCounts = (): Record<AvalancheProblemType, number> => ({
+      new_snow: 0,
+      wind_slab: 0,
+      persistent_weak_layers: 0,
+      wet_snow: 0,
+      gliding_snow: 0,
+      cornices: 0,
+      no_distinct_avalanche_problem: 0,
+      favourable_situation: 0,
+    });
+
+    const perDay: Record<number, Record<AvalancheProblemType, number>> = {};
 
     this.bulletins.forEach((bulletin) => {
       const day = BulletinData.dayTimestamp(
@@ -628,63 +618,34 @@ export class BulletinData {
         return;
       }
 
-      const avalancheProblems = bulletin.avalancheProblems.map((ap) => {
-        switch (ap.problemType) {
-          case "persistent_weak_layers":
-            return 1;
-          case "new_snow":
-            return 2;
-          case "wind_slab":
-            return 3;
-          case "wet_snow":
-            return 4;
-          case "gliding_snow":
-            return 5;
-          case "cornices":
-            return 7;
-          case "no_distinct_avalanche_problem":
-            return 6;
-          case "favourable_situation":
-            return 8;
-        }
-      }) as (1 | 2 | 3 | 4 | 5 | 6 | 7 | 8)[];
+      const avalancheProblems = bulletin.avalancheProblems;
       if (!perDay[day]) {
-        perDay[day] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+        perDay[day] = emptyProblemCounts();
       }
       for (const avalancheProblem of avalancheProblems) {
-        perDay[day][avalancheProblem] += matchedMicroRegionCount;
+        perDay[day][avalancheProblem.problemType] += matchedMicroRegionCount;
       }
     });
 
     const timestamps: number[] = Object.keys(perDay)
       .map((date) => Number(date))
       .sort((a, b) => a - b);
-    const distribution: {
-      1: number[];
-      2: number[];
-      3: number[];
-      4: number[];
-      5: number[];
-      6: number[];
-      7: number[];
-      8: number[];
-    } = {
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      7: [],
-      8: [],
+    const distribution: Record<AvalancheProblemType, number[]> = {
+      new_snow: [],
+      wind_slab: [],
+      persistent_weak_layers: [],
+      wet_snow: [],
+      gliding_snow: [],
+      cornices: [],
+      no_distinct_avalanche_problem: [],
+      favourable_situation: [],
     };
 
     for (let i = 0; i < timestamps.length; i++) {
       const ratings = perDay[timestamps[i]];
       const sum = Object.values(ratings).reduce((a, b) => a + b, 0);
-      for (let rating = 1; rating <= 8; rating++) {
-        const key = rating as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-        distribution[key].push(sum > 0 ? (ratings[key] / sum) * 100 : 0);
+      for (const problemType of Object.keys(ratings) as AvalancheProblemType[]) {
+        distribution[problemType].push(sum > 0 ? (ratings[problemType] / sum) * 100 : 0);
       }
     }
     return { timestamps, ratings: distribution };

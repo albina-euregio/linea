@@ -4,6 +4,7 @@ import { i18n } from "../../i18n";
 import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
 import { LOADED_AVALANCHE_PROBLEM_ICONS } from "../../shared/avalanche-problem-icons";
 import { DANGER_LEVEL_MAX_SIZE } from "../../shared/danger-level-icons";
+import { AvalancheProblemMicroRegionsChart } from "../avalanche-problem-micro-regions-chart";
 
 export const opts_avalanche_problem_micro_regions: uPlot.Options = {
   ...AwsStatsOptsHelper.getDefaultOptions(),
@@ -30,10 +31,12 @@ export const opts_avalanche_problem_micro_regions: uPlot.Options = {
       (u: uPlot) => {
         for (
           let level = Math.ceil((u.scales.y.range as [number, number])?.[0] ?? 1);
-          level <= Math.ceil((u.scales.y.range as [number, number])?.[1] ?? 5);
+          level <= Math.floor((u.scales.y.range as [number, number])?.[1] ?? 5);
           level++
         ) {
-          const img = LOADED_AVALANCHE_PROBLEM_ICONS.get(level);
+          const img = LOADED_AVALANCHE_PROBLEM_ICONS.get(
+            AvalancheProblemMicroRegionsChart.avalancheProblemTypes[level - 1],
+          );
           if (!img) {
             // TODO: implement fallback with label
             continue;
