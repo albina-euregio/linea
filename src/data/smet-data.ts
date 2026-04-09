@@ -54,7 +54,11 @@ export async function fetchSMET(url: string): Promise<StationData> {
     stream = stream.pipeThrough(new DecompressionStream("gzip"));
   }
 
-  return parseSMET(stream);
+  const lines = stream
+    .pipeThrough(new TextDecoderStream() as ReadableWritablePair<string, Uint8Array>)
+    .pipeThrough(new TextLineStream());
+
+  return parseSMET(lines);
 }
 
 class TextLineStream extends TransformStream<string, string> {
@@ -78,7 +82,7 @@ class TextLineStream extends TransformStream<string, string> {
   }
 }
 
-export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<StationData> {
+export async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
   let values: number[][] = [];
@@ -93,10 +97,6 @@ export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<Sta
   let tz = 0;
   const timestamps = [] as number[];
   let dataIndex = 0;
-
-  const lines = stream
-    .pipeThrough(new TextDecoderStream() as ReadableWritablePair<string, Uint8Array>)
-    .pipeThrough(new TextLineStream());
 
   for await (const line0 of lines) {
     function parseHeader(prefix: string) {

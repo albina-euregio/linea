@@ -1,8 +1,13 @@
 import { expect, test } from "vite-plus/test";
 import { parseSMET } from "./smet-data";
 
-function toStream(text: string): ReadableStream<Uint8Array> {
-  return new Blob([text]).stream();
+function toStream(text: string): ReadableStream<string> {
+  return new ReadableStream({
+    start(controller) {
+      text.split(/\r?\n/).forEach((line) => controller.enqueue(line));
+      controller.close();
+    },
+  });
 }
 
 test("parse AT-07", async () => {
