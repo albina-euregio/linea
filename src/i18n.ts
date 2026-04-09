@@ -26,7 +26,7 @@ class I18n {
   number(
     num: number | null | undefined,
     opts?: Intl.NumberFormatOptions,
-    unit: Unit | AnalyzerUnit | AnalyzerIntegratedUnit | undefined = undefined,
+    unit: Unit | AnalyzerUnit | AnalyzerIntegratedUnit | "" | undefined = undefined,
   ): string {
     if (typeof num !== "number" || !isFinite(num)) return "–";
     let s = new Intl.NumberFormat(this.lang, {
