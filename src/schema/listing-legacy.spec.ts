@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { FeatureSchema } from "./listing-legacy";
-import { expect, test } from "vitest";
+import { expect, test } from "vite-plus/test";
 
 test("parse legacy", () => {
   const feature = FeatureSchema.parse({

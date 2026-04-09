@@ -7,9 +7,18 @@ import { dewPoint } from "./dew-point";
 import type { StationData, Values } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
+import { TouchZoom } from "../shared/touch-zoom";
+import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 
 export class LineaChart extends AbstractLineaChart {
   private showSurfaceHoarSeries: boolean;
+
+  private withFreshPlugins(opts: uPlot.Options): uPlot.Options {
+    return {
+      ...opts,
+      plugins: [TouchZoom.touchZoomPlugin(), new MeasurementDatesPlugin().plugin()],
+    };
+  }
 
   constructor(
     result: StationData,
@@ -54,23 +63,23 @@ export class LineaChart extends AbstractLineaChart {
       if (this.showSurfaceHoarSeries && values.TD && values.TSS) {
         this.updateData(this.plots[i], [
           timestamps,
-          values.TA,
           values.TD ??
             (values.TA && values.RH
               ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
               : undefined),
           values.TSS,
           this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
+          values.TA,
         ]);
       } else {
         this.updateData(this.plots[i], [
           timestamps,
-          values.TA,
           values.TD ??
             (values.TA && values.RH
               ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
               : undefined),
           values.TSS,
+          values.TA,
         ]);
       }
       i += 1;
@@ -91,10 +100,10 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.HS || this.result.values.PSUM) {
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_HS_PSUM,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_HS_PSUM,
       );
@@ -115,10 +124,10 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_VW_VWG_DW,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_VW_VWG_DW,
       );
@@ -137,10 +146,10 @@ export class LineaChart extends AbstractLineaChart {
           ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
           : undefined);
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_TA_TD_TSS,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_TA_TD_TSS,
       );
@@ -148,7 +157,6 @@ export class LineaChart extends AbstractLineaChart {
 
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
-      this.addSeries(p, opts_TA, this.result.values.TA);
       this.addSeries(p, opts_TD, TD);
 
       // show snow surface temperature and therefore surface hoar only if available
@@ -165,14 +173,15 @@ export class LineaChart extends AbstractLineaChart {
       } else {
         this.addSeries(p, opts_TSS, []);
       }
+      this.addSeries(p, opts_TA, this.result.values.TA);
     }
 
     if (this.result.values.RH || this.result.values.ISWR) {
       const p = new uPlot(
-        {
+        this.withFreshPlugins({
           ...opts_RH_GR,
           ...this.getStationTitle(),
-        },
+        }),
         [this.result.timestamps],
         plot_RH_GR,
       );

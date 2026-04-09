@@ -104,9 +104,7 @@ export class LineaExportModal extends AbstractExportModal {
    * Generates the code which can be included into an iframe.
    * @returns Promise<string> - html code to insert into an iframe
    */
-  async #generateInteractiveExportData(): Promise<{
-    resultsFiltered: StationData[];
-  }> {
+  async #generateInteractiveExportData(): Promise<StationData[]> {
     const resultsFiltered: StationData[] = [];
 
     this.#getActiveLineacharts().forEach((lc, index) => {
@@ -184,7 +182,7 @@ export class LineaExportModal extends AbstractExportModal {
       resultsFiltered.push(result);
     });
 
-    return { resultsFiltered };
+    return resultsFiltered;
   }
 
   /**
@@ -207,23 +205,9 @@ export class LineaExportModal extends AbstractExportModal {
     const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
     const body = `
       <body>
-        <div id="chart-container">
-          <img id="fallback" src="" />
-          <linea-plot data="" showsurfacehoarseries showtitle id="linea"></linea-plot>
-        </div>
-
+        <linea-plot data="${serializedData}" showsurfacehoarseries showtitle></linea-plot>
         <script type="module" src="https://albina-euregio.gitlab.io/linea/linea.mjs"></script>
-        <script>
-          const linea = document.getElementById("linea");
-          const fallback = document.getElementById("fallback");
-
-          customElements.whenDefined("linea-plot").then(() => {
-            fallback.style.display = "none";
-          });
-        </script>
-      </body>`
-      .replace('data=""', `data="${serializedData}"`)
-      .replace('<img id="fallback" src="" />', "");
+      </body>`;
     let html = iframeTemplate.replace("BODY", body).replace('lang="en"', `lang="${i18n.lang}"`);
 
     if (this.lineaPlot.view instanceof WinterView) {
@@ -274,10 +258,10 @@ export class LineaExportModal extends AbstractExportModal {
     }
 
     const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
-    let html = `<div data-lineaplot-wrapper>
-                    <img style="position: absolute; inset: 0; z-index: 1;" src="${dataUrl}"/>
-                    <linea-plot style="position: absolute; inset: 0; z-index: 2;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
-                  </div>`;
+    let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
+      <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
+      <linea-plot class="linea-custom-element" style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
+    </div>`;
 
     if (this.lineaPlot.view instanceof WinterView) {
       html = html.replace("<linea-plot ", "<linea-plot showonlywinter");
@@ -289,7 +273,7 @@ export class LineaExportModal extends AbstractExportModal {
       totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
-    const iframeshortcode = `[lineaplotblog height="${(exports.heightPerCanvas + 50) * totalCanvases + 50 * this.#getActiveLineacharts().length}px" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+    const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
     document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;
@@ -566,8 +550,8 @@ export class LineaExportModal extends AbstractExportModal {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
       lineachart.resizeObserver.observe(lineachart);
     }
+    const dataUrl = outCanvas.toDataURL();
     if (!noshow) {
-      const dataUrl = outCanvas.toDataURL();
       outCanvas.toBlob((blobdata) => {
         this.exportdata = {
           blob: blobdata,
@@ -581,7 +565,7 @@ export class LineaExportModal extends AbstractExportModal {
       document.getElementById("exportResult").style.display = "block";
       return dataUrl;
     }
-    return "";
+    return dataUrl;
   }
 
   /**

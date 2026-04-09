@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
+import { dailyBarChartTimeAxis, dailyBarChartTimeScale } from "../../linea-plot/opts_time_axis";
 import { i18n } from "../../i18n";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import type { SplitOptions } from "../../shared/opts-helper";
@@ -38,7 +38,7 @@ export const opts_avalanche_activity_index: uPlot.Options = {
     },
   } as any,
   scales: {
-    x: timeScale,
+    x: dailyBarChartTimeScale,
     y: {
       range: (_u, _dataMin, dataMax) => {
         if (!dataMax || dataMax <= 15) return [0, 15];
@@ -66,7 +66,7 @@ export const opts_avalanche_activity_index: uPlot.Options = {
   },
 
   axes: [
-    timeAxis,
+    dailyBarChartTimeAxis,
     {
       scale: "y",
       splits: (u) => {

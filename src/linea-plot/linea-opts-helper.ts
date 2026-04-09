@@ -1,5 +1,4 @@
 import uPlot from "uplot";
-import { TouchZoom } from "../shared/touch-zoom";
 import { OptsHelper } from "../shared/opts-helper";
 import { cursorOpts } from "../shared/cursor-opts";
 
@@ -42,7 +41,6 @@ export class LineaOptsHelper extends OptsHelper {
           match: [(own, ext) => own == ext, (own, ext) => own == ext],
         },
       },
-      plugins: [TouchZoom.touchZoomPlugin()],
       legend: {
         show: true,
         live: true,

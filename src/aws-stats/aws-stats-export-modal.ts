@@ -1,5 +1,5 @@
 import { i18n } from "../i18n";
-import type { AbstractChart } from "./abstract-chart";
+import { AbstractChart } from "./abstract-chart";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
 import type { AwsStats } from "./aws-stats-wrapper";
 
@@ -58,12 +58,13 @@ export class AwsStatsExportModal extends AbstractExportModal {
    * @param {AbstractChart} chart - The AbstractChart instance to export
    */
   constructor(modal: HTMLDivElement, wrapper: AwsStats) {
-    super(modal);
+    super(modal, true);
     this.wrapper = wrapper;
 
     (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
     const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
     titleInput.style.display = "none";
+    titleInput.labels.forEach((l) => (l.style.display = "none"));
   }
 
   /**
@@ -83,8 +84,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     this.addDiagramsToExportSettings(this.wrapper.charts.map((c) => c.plot));
   }
 
-  protected async exportAsIframe() {
-    this.hideAllSeriesSelectionCheckboxes();
+  private generateInteractivExportData(): { height: number; elements: string[] } {
     const selectedChartIndices = this.getCheckedDiagramIndices();
     if (selectedChartIndices.length === 0) {
       alert(i18n.message("linea:message:noplotselected"));
@@ -102,14 +102,19 @@ export class AwsStatsExportModal extends AbstractExportModal {
     }
 
     const elements: string[] = [];
-
+    let height: number = 0;
     for (const i of selectedChartIndices) {
       const chart: AbstractChart = this.wrapper.charts[i];
+      height += chart.plot.root.clientHeight;
       elements.push(
-        `<${chartTypes[i]} data='${JSON.stringify(chart.plotInformation)}'></${chartTypes[i]}>`,
+        `<${chartTypes[i]} class="linea-custom-element" data='${JSON.stringify(chart.plotInformation)}'></${chartTypes[i]}>`,
       );
     }
-
+    return { height, elements };
+  }
+  protected async exportAsIframe() {
+    this.hideAllSeriesSelectionCheckboxes();
+    const { height, elements } = this.generateInteractivExportData();
     const iframeTemplate = await import("../shared/iframetemplate.html?raw").then((m) => m.default);
     const body = `<body>
         ${elements.join("\n")}
@@ -118,17 +123,13 @@ export class AwsStatsExportModal extends AbstractExportModal {
     let html = iframeTemplate.replace("BODY", body).replace('lang="en"', `lang="${i18n.lang}"`);
 
     const exports = this.getExportSettings();
-    const estimatedHeight = Math.max(
-      250,
-      (exports.heightPerCanvas + 90) * selectedChartIndices.length,
-    );
     const iframeTitle = AbstractExportModal.escapeHtmlAttribute(exports.title || "AWS Stats");
 
     const iframecode = `<iframe
           srcdoc="${AbstractExportModal.escapeHtmlAttribute(html)}"
           frameborder="0"
           scrolling="no"
-          style="width: 100%; height: ${estimatedHeight}px;border:none;overflow:hidden;"
+          style="width: 100%; height: ${height}px;border:none;overflow:hidden;"
           title="${iframeTitle}">
       </iframe>`;
 
@@ -142,6 +143,44 @@ export class AwsStatsExportModal extends AbstractExportModal {
       data: iframecode,
       filename: "export.html",
       type: "text/html",
+    };
+  }
+
+  protected async exportAsBlogElement() {
+    this.hideAllSeriesSelectionCheckboxes();
+    if (this.getCheckedDiagramIndices().length == 0) {
+      alert(i18n.message("linea:message:noplotselected"));
+      return;
+    }
+    const exports = this.getExportSettings();
+    const { elements } = this.generateInteractivExportData();
+    const dataUrl = await this.exportAllPlotsToPNG(
+      { width: 750, heightPerCanvas: 200, title: exports.title },
+      true,
+    );
+    if (!dataUrl) {
+      return;
+    }
+    let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
+      <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
+      <div style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;">
+        ${elements.join("\n")}
+      </div>
+    </div>`;
+
+    const binary = AbstractExportModal.toBinary(html);
+
+    const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+
+    this.exportResult.style.display = "block";
+    document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;
+    this.exportdata = {
+      blob: new Blob([iframeshortcode], {
+        type: "text/plain",
+      }),
+      data: iframeshortcode,
+      filename: "awsstats.txt",
+      type: "text/plain",
     };
   }
 
@@ -245,7 +284,9 @@ export class AwsStatsExportModal extends AbstractExportModal {
     { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
     noshow: boolean = false,
   ): Promise<string> {
-    this.showAllSeriesSelectionCheckboxes();
+    if (!noshow) {
+      this.showAllSeriesSelectionCheckboxes();
+    }
     const sections: Array<{
       chart: AbstractChart;
       chartTitle: string;
@@ -260,10 +301,10 @@ export class AwsStatsExportModal extends AbstractExportModal {
     }> = [];
 
     const selectedChartIndices = this.getCheckedDiagramIndices();
-    if (selectedChartIndices.length === 0) {
-      alert(i18n.message("linea:message:noplotselected"));
-      return "";
-    }
+    // if (selectedChartIndices.length === 0) {
+    //   alert(i18n.message("linea:message:noplotselected"));
+    //   return "";
+    // }
 
     try {
       for (const chartIndex of selectedChartIndices) {
@@ -301,14 +342,25 @@ export class AwsStatsExportModal extends AbstractExportModal {
           continue;
         }
 
-        const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
-        if (selectedSeries.length === 0) {
-          continue;
-        }
-
         const titleFromDom = plot.root.querySelector(".u-title")?.textContent?.trim() ?? "";
         const titleFromOpts = (plot as unknown as { opts?: { title?: string } }).opts?.title ?? "";
         const chartTitle = titleFromDom || titleFromOpts || title || "";
+        const legendLines: Array<{
+          items: Array<{ label: string; color: string; width: number }>;
+        }> = [];
+        const sectionTitleHeight = chartTitle ? 40 : 0;
+
+        const selectedSeries = this.getCheckedSeriesIndices(chartIndex);
+        if (selectedSeries.length === 0 && plot.series.length === 1) {
+          sections.push({
+            chart,
+            chartTitle,
+            legendLines,
+            sectionHeight: sectionTitleHeight + canvas.height,
+            canvasWidth: canvas.width,
+          });
+          continue;
+        }
 
         const legendItems: Record<string, string> = {};
         selectedSeries.forEach((seriesIndex) => {
@@ -326,10 +378,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
           }
           legendItems[String(label)] = color;
         });
-
-        const legendLines: Array<{
-          items: Array<{ label: string; color: string; width: number }>;
-        }> = [];
         if (drawLegend && Object.keys(legendItems).length > 0) {
           const legendCtx = canvas.getContext("2d")!;
           legendCtx.textAlign = "left";
@@ -359,8 +407,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
             legendLines.push({ items: currentLine });
           }
         }
-
-        const sectionTitleHeight = chartTitle ? 40 : 0;
         const sectionLegendHeight = drawLegend
           ? (legendLines.length * this.legendItemHeight * 3) / 2
           : 0;
@@ -371,11 +417,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
           sectionHeight: sectionTitleHeight + canvas.height + sectionLegendHeight,
           canvasWidth: canvas.width,
         });
-      }
-
-      if (sections.length === 0) {
-        alert(i18n.message("linea:message:noplotselected"));
-        return "";
       }
 
       const outCanvas = document.createElement("canvas");

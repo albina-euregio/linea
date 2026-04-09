@@ -72,6 +72,46 @@ export class LineaPlot extends HTMLElement {
   private styleTag!: HTMLStyleElement;
   private winterviewBtn!: HTMLButtonElement;
   private winterviewBtnLabel!: HTMLSpanElement;
+  private helpBtn!: HTMLButtonElement;
+  private helpHint!: HTMLDivElement;
+  private daterangeContainer!: HTMLDivElement;
+  private previousBtn!: HTMLButtonElement;
+  private nextBtn!: HTMLButtonElement;
+
+  #createLoadingOverlay(): HTMLSpanElement {
+    const loader = document.createElement("span");
+    loader.className = "loading-btn-loader";
+    loader.setAttribute("aria-hidden", "true");
+
+    const spinner = document.createElement("span");
+    spinner.className = "loading-btn-spinner";
+    loader.appendChild(spinner);
+
+    return loader;
+  }
+
+  async runWithButtonLoading(
+    button: HTMLElement,
+    action: () => void | Promise<void>,
+  ): Promise<void> {
+    if (button.classList.contains("loading")) {
+      return;
+    }
+
+    button.classList.add("loading");
+    button.setAttribute("aria-busy", "true");
+
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+
+    try {
+      await Promise.resolve(action());
+    } finally {
+      button.classList.remove("loading");
+      button.setAttribute("aria-busy", "false");
+    }
+  }
 
   view!: LineaView;
   private lineaViews!: Map<LineaViewType, LineaView>;
@@ -119,7 +159,14 @@ export class LineaPlot extends HTMLElement {
 
     this.lineaViews = new Map();
     if (!this.hasAttribute("showonlywinter")) {
-      this.lineaViews.set("station", new StationView(this.backgroundColors, this));
+      const stationView = new StationView(this.backgroundColors, this);
+      this.daterange.addEventListener("focus", async () => {
+        await this.runWithButtonLoading(this.daterangeContainer, () => stationView.fetchLazySrc());
+        if (this.dp && !this.dp.visible && document.activeElement === this.daterange) {
+          this.dp.show();
+        }
+      });
+      this.lineaViews.set("station", stationView);
     }
     this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
 
@@ -228,35 +275,53 @@ export class LineaPlot extends HTMLElement {
       this.daterange.classList.add("toggle-btn");
       this.daterange.classList.add("dpclass");
 
-      const previous = document.createElement("button");
-      previous.classList.add("toggle-btn");
-      previous.classList.add("controls-dates-inputs");
-      previous.classList.add("linea-tooltip");
-      previous.innerHTML = `&larr;<span class='linea-tooltiptext'>${i18n.message("linea:controls:tooltips:previous")}</span>`;
+      this.daterangeContainer = document.createElement("div");
+      this.daterangeContainer.classList.add("loading-btn");
+      this.daterangeContainer.classList.add("daterange-loading");
+      this.daterangeContainer.appendChild(this.daterange);
+      this.daterangeContainer.appendChild(this.#createLoadingOverlay());
+
+      this.previousBtn = document.createElement("button");
+      this.previousBtn.classList.add("toggle-btn");
+      this.previousBtn.classList.add("controls-dates-inputs");
+      this.previousBtn.classList.add("linea-tooltip");
+      this.previousBtn.classList.add("loading-btn");
+
+      const previousLabel = document.createElement("span");
+      previousLabel.className = "loading-btn-label";
+      previousLabel.textContent = "\u2190";
+      this.previousBtn.appendChild(previousLabel);
+
+      const previousTooltip = document.createElement("span");
+      previousTooltip.className = "linea-tooltiptext";
+      previousTooltip.textContent = i18n.message("linea:controls:tooltips:previous");
+      this.previousBtn.appendChild(previousTooltip);
+      this.previousBtn.appendChild(this.#createLoadingOverlay());
+
       this.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowLeft") {
-          previous.click();
+        if (e.key === "ArrowLeft" && !this.previousBtn.classList.contains("loading")) {
+          this.previousBtn.click();
         }
       });
-      previous.addEventListener("click", () => {
-        this.view.previous(previous, next);
+      this.previousBtn.addEventListener("click", () => {
+        void this.view.previous(this.previousBtn, this.nextBtn);
       });
-      const next = document.createElement("button");
-      next.classList.add("toggle-btn");
-      next.classList.add("controls-dates-inputs");
-      next.classList.add("linea-tooltip");
-      next.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("linea:controls:tooltips:next")}</span>`;
+      this.nextBtn = document.createElement("button");
+      this.nextBtn.classList.add("toggle-btn");
+      this.nextBtn.classList.add("controls-dates-inputs");
+      this.nextBtn.classList.add("linea-tooltip");
+      this.nextBtn.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("linea:controls:tooltips:next")}</span>`;
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
-          next.click();
+          this.nextBtn.click();
         }
       });
-      next.addEventListener("click", () => {
-        this.view.next(previous, next);
+      this.nextBtn.addEventListener("click", () => {
+        this.view.next(this.previousBtn, this.nextBtn);
       });
-      controlsdates.appendChild(previous);
-      controlsdates.appendChild(this.daterange);
-      controlsdates.appendChild(next);
+      controlsdates.appendChild(this.previousBtn);
+      controlsdates.appendChild(this.daterangeContainer);
+      controlsdates.appendChild(this.nextBtn);
     }
     const menu = document.createElement("div");
     menu.classList.add("controls-menu");
@@ -279,47 +344,82 @@ export class LineaPlot extends HTMLElement {
       !this.#isWinterSrcsEmpty() && !this.hasAttribute("showonlywinter") ? "block" : "none";
     this.winterviewBtn.classList.add("toggle-btn");
     this.winterviewBtn.classList.add("winterview-btn");
+    this.winterviewBtn.classList.add("loading-btn");
     this.winterviewBtn.setAttribute("aria-busy", "false");
     this.winterviewBtn.setAttribute("type", "button");
 
     this.winterviewBtnLabel = document.createElement("span");
-    this.winterviewBtnLabel.className = "winterview-btn-label";
+    this.winterviewBtnLabel.className = "loading-btn-label winterview-btn-label";
     this.winterviewBtnLabel.textContent = i18n.message("linea:controls:value:winterview:winter");
 
-    const loader = document.createElement("span");
-    loader.className = "winterview-btn-loader";
-    loader.setAttribute("aria-hidden", "true");
-
-    const spinner = document.createElement("span");
-    spinner.className = "winterview-btn-spinner";
-    loader.appendChild(spinner);
-
-    this.winterviewBtn.append(this.winterviewBtnLabel, loader);
+    this.winterviewBtn.append(this.winterviewBtnLabel, this.#createLoadingOverlay());
     this.winterviewBtn.addEventListener("click", () => {
       if (this.winterviewBtn.classList.contains("loading")) return;
 
-      this.winterviewBtn.classList.add("loading");
-      this.winterviewBtn.disabled = true;
-
-      const currentViewKey = this.#getCurrentViewKey();
-      if (currentViewKey === "station") {
-        this.#switchView("winter").then(() => {
-          this.winterviewBtn.classList.remove("loading");
-          this.winterviewBtn.disabled = false;
+      void this.runWithButtonLoading(this.winterviewBtn, async () => {
+        const currentViewKey = this.#getCurrentViewKey();
+        if (currentViewKey === "station") {
+          await this.#switchView("winter");
           this.winterviewBtnLabel.textContent = i18n.message(
             "linea:controls:value:winterview:station",
           );
-        });
-      } else {
-        this.#switchView("station");
-        this.winterviewBtn.classList.remove("loading");
-        this.winterviewBtn.disabled = false;
-        this.winterviewBtnLabel.textContent = i18n.message(
-          "linea:controls:value:winterview:winter",
-        );
+        } else {
+          await this.#switchView("station");
+          this.winterviewBtnLabel.textContent = i18n.message(
+            "linea:controls:value:winterview:winter",
+          );
+        }
+      });
+    });
+
+    this.helpBtn = document.createElement("button");
+    this.helpBtn.classList.add("toggle-btn");
+    this.helpBtn.classList.add("linea-help-btn");
+    this.helpBtn.setAttribute("type", "button");
+    this.helpBtn.setAttribute("aria-expanded", "false");
+    this.helpBtn.setAttribute("aria-controls", "linea-measurement-hint");
+    this.helpBtn.textContent = i18n.message("linea:controls:value:help");
+
+    this.helpHint = document.createElement("div");
+    this.helpHint.id = "linea-measurement-hint";
+    this.helpHint.classList.add("linea-help-hint");
+    this.helpHint.setAttribute("role", "dialog");
+    this.helpHint.setAttribute("aria-hidden", "true");
+    this.helpHint.innerHTML = i18n.message("linea:measurement-dates:usage");
+
+    const hideHelpHint = () => {
+      this.helpHint.classList.remove("visible");
+      this.helpHint.setAttribute("aria-hidden", "true");
+      this.helpBtn.setAttribute("aria-expanded", "false");
+    };
+
+    this.helpBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isVisible = this.helpHint.classList.toggle("visible");
+      this.helpHint.setAttribute("aria-hidden", String(!isVisible));
+      this.helpBtn.setAttribute("aria-expanded", String(isVisible));
+    });
+
+    this.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        hideHelpHint();
       }
     });
+
+    this.addEventListener("click", (e) => {
+      if (
+        this.helpHint.classList.contains("visible") &&
+        e.target instanceof Node &&
+        !this.helpHint.contains(e.target) &&
+        e.target !== this.helpBtn
+      ) {
+        hideHelpHint();
+      }
+    });
+
     menu.appendChild(this.winterviewBtn);
+    menu.appendChild(this.helpBtn);
+    menu.appendChild(this.helpHint);
 
     controls.appendChild(menu);
     this.appendChild(controls);
@@ -415,6 +515,7 @@ export class LineaPlot extends HTMLElement {
       multipleDatesSeparator: " - ",
       container: this,
       autoClose: true,
+      showEvent: "none",
     });
 
     //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener

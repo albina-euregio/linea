@@ -7,7 +7,7 @@ declare module "zod" {
 export type Unit =
   // temperature
   | "K"
-  | "°C"
+  | "℃"
   // length
   | "m"
   | "cm"
@@ -36,7 +36,7 @@ class Quantity<U extends Unit> {
   }
 }
 
-export class Temperature extends Quantity<"K" | "°C"> {}
+export class Temperature extends Quantity<"K" | "℃"> {}
 export class Length extends Quantity<"m" | "cm" | "mm"> {}
 export class Scalar extends Quantity<"1" | "%" | "°"> {}
 export class Speed extends Quantity<"m/s" | "km/h"> {}
@@ -50,11 +50,13 @@ export function unitTransformer(
   if (fromUnit === toUnit) {
     return (v) => v;
   }
-  switch (`from ${fromUnit} to ${toUnit}`) {
+  if ((fromUnit as unknown) === "°C") fromUnit = "℃";
+  if ((toUnit as unknown) === "°C") toUnit = "℃";
+  switch (`from ${fromUnit} to ${toUnit}` as const) {
     // temperature
-    case "from K to °C":
+    case "from K to ℃":
       return (v) => v - 273.15;
-    case "from °C to K":
+    case "from ℃ to K":
       return (v) => v + 273.15;
     // length
     case "from m to cm":

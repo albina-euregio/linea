@@ -32,6 +32,7 @@
   "linea:controls:tooltips:previous": "Dia anterior",
   "linea:controls:tooltips:wholetimespan": "Mòstre tot eth periòde de temps disponible",
   "linea:controls:value:export": "Exportar",
+  "linea:controls:value:help": "?",
   "linea:controls:value:winterview:winter": "Estadistiques d'iuèrn",
   "linea:controls:value:winterview:station": "Vista dera estacion",
   "linea:controls:label:exportsettings": "Exportar configuracion",
@@ -110,5 +111,17 @@
   "linea:yearly:avalancheproblemmicroregions:series:cornices": "Cornises",
   "linea:yearly:avalancheproblemmicroregions:series:no_distinct_avalanche_problem": "No Distinct Avalanche Problem",
   "linea:yearly:avalancheproblemmicroregions:series:favourable_situation": "Favourable Situation",
-  "linea:wrapper:loading": "Loading data..."
+  "linea:wrapper:loading": "Loading data...",
+  "linea:measurement-dates:timerange": "Time Range",
+  "linea:measurement-dates:median": "Median",
+  "linea:measurement-dates:mean": "Mean",
+  "linea:measurement-dates:delta": "Total Difference",
+  "linea:measurement-dates:integral": "Integral",
+  "linea:measurement-dates:min": "Minimum",
+  "linea:measurement-dates:max": "Maximum",
+  "linea:measurement-dates:usage": "Use  <kbd style='background: #f0f0f0; padding: 2px 4px; border-radius: 2px; font-family: monospace;'>control</kbd> + mouse dragging to activate the analyzer.",
+  "linea:measurement-dates:usage:keybinding": "Keybinding",
+  "linea:measurement-dates:usage:keybinding:press": "Press",
+  "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings",
+  "linea:measurement-dates:usage:exit": "Close Analyzer"
 }

@@ -13,7 +13,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
     drawAxes: [
       (u) => {
         const ctx = u.ctx;
-        var labely1 = `${i18n.message("linea:parameter:VW")} (km/h)`;
+        var labely1 = `${i18n.message("linea:parameter:VW")} (km∕h)`;
         var labely2 = i18n.message("linea:parameter:DW");
         var labelColor1 = "#00E2B6";
         var labelColor2 = "#084D40";
@@ -27,7 +27,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
           labelColor2,
         );
 
-        // Draw reference line at 25 km/h (working group decision)
+        // Draw reference line at 25 km∕h (working group decision)
         const width = 1;
         const offset = (width % 2) / 2;
         const x0 = u.bbox.left;
@@ -114,7 +114,7 @@ export const opts_VW: uPlot.Series = {
   stroke: "#00E2B6",
   scale: "y",
   width: 1.5,
-  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km∕h"),
 };
 
 export const opts_VW_MAX: uPlot.Series = {
@@ -122,7 +122,7 @@ export const opts_VW_MAX: uPlot.Series = {
   stroke: "#00A484",
   scale: "y",
   width: 1.5,
-  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km/h"),
+  value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km∕h"),
 };
 
 export const opts_DW: uPlot.Series = {

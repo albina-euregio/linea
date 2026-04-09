@@ -86,6 +86,20 @@ An exported `Embed Code (iframe)` is useable in a website. To use in wordpress, 
 
 The export option `Embed Code (blog)` is useable in a wordpress blog, where the `linea-plot-blog.php` plugin is installed. Therefore, per default it should not be shown.
 
+#### Measurements
+
+To do quick analyzes of the displayed weather data there is a small measurement tool implemented. To use the tool, simply click into a chart and set the two borders by pressing key '1' and '2'. As soon both are set, a label shows up, per default with the difference between both points for the different series.
+Following actions can be performed further:
+
+- Press <kbd>d</kbd> to switch to delta mode -> total difference between the two datums: `y2-y1`
+- Press <kbd>i</kbd> to switch to integral mode -> `∫ [series.values] dt`, unit is `unit*hours`
+- Press <kbd>m</kbd> to switch to mean mode -> mean for each series between the datums that are marked: `(y1+y2)/2`
+- Press <kbd>s</kbd> to switch to series mean mode -> mean by `∑ [series.values] / [series.length]`
+- Press <kbd>x</kbd> to clear datums
+- Press <kbd>Escape</kbd> to clear datums
+
+In the `png` export the markers stay!
+
 #### Examples
 
 Minimal working example:

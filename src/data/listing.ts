@@ -72,8 +72,15 @@ type Feature = z.infer<typeof FeatureSchema> & { $smet: string[] };
 
 type FeaturePredicate = (f: Feature, url: URL) => boolean;
 
-export async function fetchAll(predicate: FeaturePredicate = () => true): Promise<Feature[]> {
-  const features$ = config.flatMap((c) => fetchSource(new URL(c.geojson), c.smet, predicate));
+type ConfigPredicate = (c: (typeof config)[number]) => boolean;
+
+export async function fetchAll(
+  configPredicate: ConfigPredicate = () => true,
+  predicate: FeaturePredicate = () => true,
+): Promise<Feature[]> {
+  const features$ = config
+    .filter((c) => configPredicate(c))
+    .flatMap((c) => fetchSource(new URL(c.geojson), c.smet, predicate));
   const features = await Promise.all(features$);
   return features.flat();
 }

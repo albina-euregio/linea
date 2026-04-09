@@ -1,7 +1,4 @@
-import { defineConfig, type Plugin } from "vite";
-import * as z from "zod";
-import { FeatureCollectionSchema as LegacyFeatureCollectionSchema } from "./src/schema/listing-legacy";
-import { FeatureCollectionSchema } from "./src/schema/listing";
+import { defineConfig, type Plugin } from "vite-plus";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -40,17 +37,28 @@ export default defineConfig({
     },
   },
   plugins: [
-    zodToJsonSchemaPlugin(FeatureCollectionSchema, "listing.schema.json"),
-    zodToJsonSchemaPlugin(LegacyFeatureCollectionSchema, "listing-legacy.schema.json"),
+    zodToJsonSchemaPlugin("listing.schema.json"),
+    zodToJsonSchemaPlugin("listing-legacy.schema.json"),
   ],
+  fmt: {
+    ignorePatterns: ["pnpm-lock.yaml", "pnpm-workspace.yaml"],
+  },
+  staged: {
+    "**/*.{js,ts}": "vp lint --fix --max-warnings 0",
+    "**/*": "vp fmt --no-error-on-unmatched-pattern",
+  },
 });
 
-function zodToJsonSchemaPlugin(type: z.ZodType, fileName: string): Plugin {
+function zodToJsonSchemaPlugin(fileName: string): Plugin {
   return {
     name: "zod-to-json-schema",
     apply: "build",
-    buildStart() {
-      const schema = type.toJSONSchema({
+    async buildStart() {
+      const module =
+        fileName === "listing.schema.json"
+          ? await import("./src/schema/listing")
+          : await import("./src/schema/listing-legacy");
+      const schema = module.FeatureCollectionSchema.toJSONSchema({
         unrepresentable: "any",
         override: ({ zodSchema, jsonSchema }) => {
           if (zodSchema._zod.def.type === "date") {
