@@ -30,7 +30,6 @@ export class StressChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
     this.stressData = this.parseStress();
-    console.log(this.stressData);
   }
 
   async render(): Promise<void> {
@@ -55,7 +54,6 @@ export class StressChart extends AbstractChart {
       data: [timestamps, ...seriesData],
       userNames: personNames,
     } as StressPlotInformation;
-    console.log(this.plotInformation);
     this.plotData(this.plotInformation as StressPlotInformation);
   }
 
@@ -66,8 +64,8 @@ export class StressChart extends AbstractChart {
       this.addSeries(
         {
           ...opts_stress_series_base,
-          stroke: COLORS[i % COLORS.length],
-          label: StressChart.NAMES[i % StressChart.NAMES.length],
+          stroke: COLORS[(i - 2) % COLORS.length],
+          label: StressChart.NAMES[(i - 2) % StressChart.NAMES.length],
         },
         plotInformation.data[i] as number[],
       );
