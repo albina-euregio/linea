@@ -510,7 +510,7 @@ export class LineaPlot extends HTMLElement {
     this.styleTag.textContent += cssAirDatepicker;
 
     this.dp = new AirDatepicker(this.daterange, {
-      locale: localizeDatePicker(i18n.lang),
+      locale: localizeDatePicker(),
       range: true,
       multipleDatesSeparator: " - ",
       container: this,
