@@ -149,7 +149,19 @@ export class AwsStats extends HTMLElement {
         (async () => {
           for (const chart of charts) {
             chart.setAttribute("bulletins", this.getAttribute("bulletins")!);
-            chart.setAttribute("filter-micro-region", this.getAttribute("filter-micro-region")!);
+          }
+        })(),
+      );
+    }
+
+    if (this.getAttribute("danger-source-variants")) {
+      loadPromises.push(
+        (async () => {
+          for (const chart of charts) {
+            chart.setAttribute(
+              "danger-source-variants",
+              this.getAttribute("danger-source-variants")!,
+            );
           }
         })(),
       );
@@ -190,6 +202,11 @@ export class AwsStats extends HTMLElement {
         if (this.hasAttribute("blogs")) {
           for (const chart of charts) {
             chart.setAttribute("blogs", this.getAttribute("blogs")!);
+          }
+        }
+        if (this.hasAttribute("filter-micro-region")) {
+          for (const chart of charts) {
+            chart.setAttribute("filter-micro-region", this.getAttribute("filter-micro-region")!);
           }
         }
       })(),

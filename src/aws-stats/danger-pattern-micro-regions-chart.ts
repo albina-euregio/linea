@@ -2,6 +2,7 @@ import uPlot, { type Plugin } from "uplot";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData } from "./datastore";
 import { opts_danger_patterns_micro_regions } from "./series-options/danger-pattern-micro-regions-opts";
+import { colorForPercentage } from "./series-options/colorizer";
 
 export class DangerPatternMicroRegionsChart extends AbstractChart {
   async onConnected(): Promise<void> {
@@ -41,10 +42,6 @@ export class DangerPatternMicroRegionsChart extends AbstractChart {
       draw: (u: uPlot) => {
         const { ctx } = u;
         const xData = u.data[0] as number[];
-        const colorForPercentage = (percentage: number): string => {
-          const alpha = Math.max(0.2, Math.min(1, percentage / 100));
-          return `rgba(65, 8, 230, ${alpha})`;
-        };
 
         ctx.save();
         ctx.beginPath();

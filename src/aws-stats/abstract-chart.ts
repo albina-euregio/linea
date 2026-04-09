@@ -1,9 +1,11 @@
+import { z } from "zod";
 import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import type { Bulletin } from "../schema/caaml";
-import type { BlogData } from "./datastore";
+import { dangerSourceVariantSchema, type DangerSourceVariant } from "../schema/danger-source-data";
+import type { BlogData } from "./datatypes";
 import type { StressData } from "../schema/stress";
 
 export interface PlotInformation {
@@ -18,6 +20,8 @@ export abstract class AbstractChart extends HTMLElement {
   protected bulletins!: Bulletin[];
   public plotInformation: PlotInformation;
 
+  protected filterMicroRegions: string[] = [];
+
   constructor() {
     super();
     this.resizeObserver = new ResizeObserver(() => {
@@ -28,6 +32,9 @@ export abstract class AbstractChart extends HTMLElement {
   }
 
   connectedCallback() {
+    if (this.hasAttribute("filter-micro-region")) {
+      this.filterMicroRegions = JSON.parse(this.getAttribute("filter-micro-region")) as string[];
+    }
     this.onConnected()
       .then(() => {
         this.buildLayout();
@@ -82,6 +89,33 @@ export abstract class AbstractChart extends HTMLElement {
     }
   }
 
+  protected parseDangerSourceVariants(raw: string | null): DangerSourceVariant[] {
+    if (!raw) {
+      console.warn("No danger source variants provided");
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      const variantSchema = Array.isArray(parsed)
+        ? z.array(dangerSourceVariantSchema)
+        : dangerSourceVariantSchema;
+      const validated = variantSchema.parse(Array.isArray(parsed) ? parsed : [parsed]);
+      return Array.isArray(validated) ? validated : [validated];
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Zod validation failed for DangerSourceVariant:");
+        error.issues.forEach((issue) => {
+          console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
+        });
+      } else if (error instanceof SyntaxError) {
+        console.error("JSON parse error:", error.message);
+      } else {
+        console.error("Unknown error while parsing danger source variants:", error);
+      }
+      return [];
+    }
+  }
+
   protected parseBlogs(raw: string): BlogData[] {
     try {
       return JSON.parse(raw) as BlogData[];
@@ -92,7 +126,6 @@ export abstract class AbstractChart extends HTMLElement {
 
   protected parseStress(): StressData {
     const raw = this.getAttribute("stress");
-    console.log(raw);
     try {
       return JSON.parse(raw ?? "{}") as StressData;
     } catch {

@@ -1,5 +1,6 @@
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData, Observations } from "./datastore";
+import { COLORS } from "./series-options/colorizer";
 import {
   opts_danger_rating,
   opts_danger_rating_series_all,
@@ -14,16 +15,6 @@ export class DangerRatingChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
   }
-
-  static COLORS = [
-    "#4108e6",
-    "#dd0841e6",
-    "#1b7a35e6",
-    "#db08dde6",
-    "#07d7e6",
-    "#dd0861e6",
-    "#6108dde6",
-  ];
 
   async render(): Promise<void> {
     const bulletinData = new BulletinData(this.bulletins);
@@ -63,7 +54,7 @@ export class DangerRatingChart extends AbstractChart {
       this.addSeries(
         {
           ...opts_danger_rating_series_base,
-          stroke: DangerRatingChart.COLORS[i % DangerRatingChart.COLORS.length],
+          stroke: COLORS[i % COLORS.length],
           label: plotInformation.microRegionNames[i - 1],
         },
         plotInformation.data[i] as number[],
