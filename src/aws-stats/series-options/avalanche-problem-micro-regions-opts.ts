@@ -8,7 +8,7 @@ import { AvalancheProblemMicroRegionsChart } from "../avalanche-problem-micro-re
 
 export const opts_avalanche_problem_micro_regions: uPlot.Options = {
   ...AwsStatsOptsHelper.getDefaultOptions(),
-  padding: [20, 80, 0, 80],
+  padding: [20, 80, 0, 50],
   title: `${i18n.message("linea:yearly:avalancheproblemmicroregions:title")}`,
   hooks: {
     drawAxes: [
