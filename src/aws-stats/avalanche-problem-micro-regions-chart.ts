@@ -3,6 +3,7 @@ import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData } from "./datastore";
 import { opts_avalanche_problem_micro_regions } from "./series-options/avalanche-problem-micro-regions-opts";
 import { i18n, type messagesEN_t } from "../i18n";
+import type { AvalancheProblemType } from "../schema/caaml";
 
 interface AvalancheProblemPlotInformation extends PlotInformation {
   range: uPlot.Scale.Range;
@@ -11,6 +12,16 @@ interface AvalancheProblemPlotInformation extends PlotInformation {
 }
 
 export class AvalancheProblemMicroRegionsChart extends AbstractChart {
+  static readonly avalancheProblemTypes: AvalancheProblemType[] = [
+    "persistent_weak_layers",
+    "new_snow",
+    "wind_slab",
+    "wet_snow",
+    "gliding_snow",
+    "cornices",
+    "no_distinct_avalanche_problem",
+  ];
+
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
   }
@@ -26,49 +37,35 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
 
     const bulletinData = new BulletinData(this.bulletins);
     const avalancheProblems = bulletinData.affectedMicroRegionsPerAvalancheProblemPerDay();
+    console.log(avalancheProblems);
 
+    const data: number[][] = [];
+    const splits: number[] = [];
+    const values: string[] = [];
+    let counter = 0;
+    AvalancheProblemMicroRegionsChart.avalancheProblemTypes.forEach((problemType) => {
+      if (avalancheProblems.ratings[problemType].filter((v) => !!v || v !== 0).length == 0) {
+        return;
+      }
+      values.push(
+        i18n.message(
+          `linea:yearly:avalancheproblemmicroregions:series:${problemType}` as messagesEN_t,
+        ),
+      );
+      splits.push(++counter);
+      data.push(avalancheProblems.ratings[problemType]);
+    });
+    console.log("AvalancheProblemMicroRegionsChart - data prepared for plotting", {
+      splits,
+      values,
+      data,
+    });
     const pi = {
-      range: [0.5, 5.5],
-      splits: [1, 2, 3, 4, 5],
-      values: ["persistent_weak_layer", "new_snow", "wind_slab", "wet_snow", "gliding_snow"].map(
-        (v) =>
-          i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
-      ),
+      range: [0.5, splits[splits.length - 1] + 0.5],
+      splits: splits,
+      values: values,
+      data: [avalancheProblems.timestamps, ...data] as uPlot.AlignedData,
     } as AvalancheProblemPlotInformation;
-
-    if (avalancheProblems.ratings[7].filter((v) => !!v || v !== 0).length > 0) {
-      pi.range = [0.5, 7.5];
-      pi.splits = [1, 2, 3, 4, 5, 6, 7];
-      pi.values = [
-        "persistent_weak_layer",
-        "new_snow",
-        "wind_slab",
-        "wet_snow",
-        "gliding_snow",
-        "no_distinct_avalanche_problem",
-        "cornices",
-      ].map((v) =>
-        i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
-      );
-    } else if (avalancheProblems.ratings[6].filter((v) => !!v || v !== 0).length > 0) {
-      pi.range = [0.5, 6.5];
-      pi.splits = [1, 2, 3, 4, 5, 6];
-      pi.values = [
-        "persistent_weak_layer",
-        "new_snow",
-        "wind_slab",
-        "wet_snow",
-        "gliding_snow",
-        "cornices",
-      ].map((v) =>
-        i18n.message(`linea:yearly:avalancheproblemmicroregions:series:${v}` as messagesEN_t),
-      );
-    }
-
-    pi.data = [
-      avalancheProblems.timestamps,
-      ...Object.values(avalancheProblems.ratings),
-    ] as uPlot.AlignedData;
 
     this.plotInformation = pi;
     this.plotData(pi);
