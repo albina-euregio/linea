@@ -126,20 +126,19 @@ export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<Sta
   const reader = stream.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      if (buffer) {
-        processLine(buffer);
-      }
-      break;
-    }
+  let done = false;
+  while (!done) {
+    let value: Uint8Array;
+    ({ done, value } = await reader.read());
     buffer += decoder.decode(value, { stream: true });
     const lines = buffer.split(/\r?\n/);
     buffer = lines.pop();
     for (const line of lines) {
       processLine(line);
     }
+  }
+  if (buffer) {
+    processLine(buffer);
   }
 
   units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
