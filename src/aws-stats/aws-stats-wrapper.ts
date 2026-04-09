@@ -167,11 +167,11 @@ export class AwsStats extends HTMLElement {
       );
     }
 
-    if (this.getAttribute("stress")) {
+    if (this.getAttribute("stress-level")) {
       loadPromises.push(
         (async () => {
           for (const chart of charts) {
-            chart.setAttribute("stress", this.getAttribute("stress")!);
+            chart.setAttribute("stress-level", this.getAttribute("stress-level")!);
           }
         })(),
       );

@@ -26,5 +26,5 @@ export const stressItemSchema = z
 
 export const stressDataSchema = z.record(z.string(), z.array(stressItemSchema));
 
-export type StressItem = z.infer<typeof stressItemSchema>;
-export type StressData = z.infer<typeof stressDataSchema>;
+export type StressLevelItem = z.infer<typeof stressItemSchema>;
+export type StressLevelData = z.infer<typeof stressDataSchema>;
