@@ -224,7 +224,10 @@ export class MeasurementDatesPlugin {
           this.select.classList.add("toggle-btn");
           this.select.style.borderTopRightRadius = "0px";
           this.select.style.borderBottomRightRadius = "0px";
-          this.select.style.padding = "2px 4px";
+          this.select.style.height = "20px";
+          this.select.style.boxSizing = "border-box";
+          this.select.style.padding = "1px 3px";
+          this.select.style.alignmentBaseline = "middle";
           this.select.style.cursor = "pointer";
 
           Object.values(Mode).forEach((mode) => {
@@ -248,7 +251,8 @@ export class MeasurementDatesPlugin {
           closeAnalyzerBtn.classList.add("toggle-btn");
           closeAnalyzerBtn.style.borderRadius = "0px";
           closeAnalyzerBtn.style.borderLeftWidth = "0px";
-          closeAnalyzerBtn.style.padding = "2px 4px";
+          closeAnalyzerBtn.style.height = "20px";
+          closeAnalyzerBtn.style.boxSizing = "border-box";
           headerContainer.appendChild(closeAnalyzerBtn);
 
           // Help button
@@ -257,7 +261,8 @@ export class MeasurementDatesPlugin {
           helpBtn.style.borderTopLeftRadius = "0px";
           helpBtn.style.borderBottomLeftRadius = "0px";
           helpBtn.style.borderLeftWidth = "0px";
-          helpBtn.style.padding = "2px 4px";
+          helpBtn.style.height = "20px";
+          helpBtn.style.boxSizing = "border-box";
           helpBtn.textContent = "?";
           headerContainer.appendChild(helpBtn);
 
