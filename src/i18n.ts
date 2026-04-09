@@ -2,6 +2,7 @@
 
 import messagesEN from "./i18n/en.json";
 import type { Unit } from "./data/units.ts";
+import type { AnalyzerIntegratedUnit, AnalyzerUnit } from "./shared/measurement-dates.ts";
 const messages = import.meta.glob("./i18n/*.json", {
   import: "default",
   eager: true,
@@ -25,7 +26,7 @@ class I18n {
   number(
     num: number | null | undefined,
     opts?: Intl.NumberFormatOptions,
-    unit: Unit | undefined = undefined,
+    unit: Unit | AnalyzerUnit | AnalyzerIntegratedUnit | "" | undefined = undefined,
   ): string {
     if (typeof num !== "number" || !isFinite(num)) return "–";
     let s = new Intl.NumberFormat(this.lang, {
