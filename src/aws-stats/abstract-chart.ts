@@ -6,6 +6,7 @@ import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import type { Bulletin } from "../schema/caaml";
 import { dangerSourceVariantSchema, type DangerSourceVariant } from "../schema/danger-source-data";
 import type { BlogData } from "./datatypes";
+import type { StressData } from "../schema/stress";
 
 export interface PlotInformation {
   data: uPlot.AlignedData;
@@ -120,6 +121,16 @@ export abstract class AbstractChart extends HTMLElement {
       return JSON.parse(raw) as BlogData[];
     } catch {
       return [];
+    }
+  }
+
+  protected parseStress(): StressData {
+    const raw = this.getAttribute("stress");
+    console.log(raw);
+    try {
+      return JSON.parse(raw ?? "{}") as StressData;
+    } catch {
+      return {};
     }
   }
 

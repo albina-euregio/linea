@@ -11,6 +11,7 @@ import type {
   EAWSMatrixInformation,
 } from "../schema/danger-source-data";
 import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
+import type { StressData } from "../schema/stress";
 
 export class Observations {
   public observations: Observation[];
@@ -1001,5 +1002,46 @@ export class DangerSourceVariantService {
       plus: +0.33,
     };
     return conversion[subRating ?? ""] ?? 0;
+  }
+}
+
+export class StressService {
+  static getStressPerPersonPerDay(stressData: StressData): {
+    timestamps: number[];
+    stressPerPerson: Record<string, number[]>;
+  } {
+    const stressMap: Record<string, Record<string, number>> = {};
+
+    Object.keys(stressData).forEach((user) => {
+      stressData[user].forEach((entry) => {
+        const dateKey = entry.date;
+        if (!stressMap[dateKey]) {
+          stressMap[dateKey] = {};
+        }
+        stressMap[dateKey][user] = entry.stressLevel;
+      });
+    });
+
+    const users = Object.keys(stressData);
+    const sortedDateKeys = Object.keys(stressMap).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+
+    const stressPerPerson: Record<string, number[]> = {};
+    users.forEach((user) => {
+      stressPerPerson[user] = [];
+    });
+
+    sortedDateKeys.forEach((dateKey) => {
+      const daily = stressMap[dateKey];
+      users.forEach((user) => {
+        stressPerPerson[user].push(daily[user] ?? 0);
+      });
+    });
+
+    return {
+      timestamps: sortedDateKeys.map((date) => new Date(date).getTime()),
+      stressPerPerson,
+    };
   }
 }

@@ -10,7 +10,7 @@ interface DangerRatingAltitudePlotInformation extends PlotInformation {
   maxY: number;
 }
 
-export class DangerRatingChart extends AbstractChart {
+export class DangerRatingAltitudeChart extends AbstractChart {
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
   }
@@ -171,4 +171,4 @@ export class DangerRatingChart extends AbstractChart {
   }
 }
 
-customElements.define("aws-danger-rating-altitude", DangerRatingChart);
+customElements.define("aws-danger-rating-altitude", DangerRatingAltitudeChart);

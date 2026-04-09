@@ -167,6 +167,16 @@ export class AwsStats extends HTMLElement {
       );
     }
 
+    if (this.getAttribute("stress")) {
+      loadPromises.push(
+        (async () => {
+          for (const chart of charts) {
+            chart.setAttribute("stress", this.getAttribute("stress")!);
+          }
+        })(),
+      );
+    }
+
     loadPromises.push(
       (async () => {
         if (this.hasAttribute("virtual-trainings")) {
