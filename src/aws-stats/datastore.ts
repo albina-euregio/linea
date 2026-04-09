@@ -1,4 +1,5 @@
 import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
+import type { StressData } from "../schema/stress";
 
 export class Observations {
   public observations: Observation[];
@@ -13,7 +14,6 @@ export class Observations {
       if (!response.ok) {
         throw new Error(`Failed to load observations: ${response.statusText}`);
       }
-      console.log(filterMicroRegions);
       const observations = await response.json();
 
       this.observations = observations.features
@@ -914,4 +914,45 @@ export interface BlogItem {
   title: string;
   published: string;
   categories: string[];
+}
+
+export class StressService {
+  static getStressPerPersonPerDay(stressData: StressData): {
+    timestamps: number[];
+    stressPerPerson: Record<string, number[]>;
+  } {
+    const stressMap: Record<string, Record<string, number>> = {};
+
+    Object.keys(stressData).forEach((user) => {
+      stressData[user].forEach((entry) => {
+        const dateKey = entry.date;
+        if (!stressMap[dateKey]) {
+          stressMap[dateKey] = {};
+        }
+        stressMap[dateKey][user] = entry.stressLevel;
+      });
+    });
+
+    const users = Object.keys(stressData);
+    const sortedDateKeys = Object.keys(stressMap).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+
+    const stressPerPerson: Record<string, number[]> = {};
+    users.forEach((user) => {
+      stressPerPerson[user] = [];
+    });
+
+    sortedDateKeys.forEach((dateKey) => {
+      const daily = stressMap[dateKey];
+      users.forEach((user) => {
+        stressPerPerson[user].push(daily[user] ?? 0);
+      });
+    });
+
+    return {
+      timestamps: sortedDateKeys.map((date) => new Date(date).getTime()),
+      stressPerPerson,
+    };
+  }
 }

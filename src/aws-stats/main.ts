@@ -9,3 +9,4 @@ import "./danger-rating-micro-regions-bars";
 import "./products";
 import "./danger-pattern-micro-regions-chart";
 import "./avalanche-problem-micro-regions-chart";
+import "./stress-chart";
