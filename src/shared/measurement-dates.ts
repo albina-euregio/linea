@@ -5,7 +5,7 @@ enum Mode {
   Delta = "Delta",
   Integral = "Integral",
   Median = "Median",
-  SeriesMean = "SeriesMean",
+  Mean = "SeriesMean",
   Min = "Min",
   Max = "Max",
 }
@@ -35,8 +35,7 @@ export class MeasurementDatesPlugin {
     [Mode.Integral]: (dataIdx1, dataIdx2, seriesIdx) =>
       this.integrateSeries(dataIdx1, dataIdx2, seriesIdx),
     [Mode.Median]: (dataIdx1, dataIdx2, seriesIdx) => this.median(dataIdx1, dataIdx2, seriesIdx),
-    [Mode.SeriesMean]: (dataIdx1, dataIdx2, seriesIdx) =>
-      this.seriesMean(dataIdx1, dataIdx2, seriesIdx),
+    [Mode.Mean]: (dataIdx1, dataIdx2, seriesIdx) => this.mean(dataIdx1, dataIdx2, seriesIdx),
     [Mode.Min]: (dataIdx1, dataIdx2, seriesIdx) => this.min(dataIdx1, dataIdx2, seriesIdx),
     [Mode.Max]: (dataIdx1, dataIdx2, seriesIdx) => this.max(dataIdx1, dataIdx2, seriesIdx),
   };
@@ -71,8 +70,8 @@ export class MeasurementDatesPlugin {
       formula: `${i18n.message("linea:measurement-dates:median")} = med(y₁...yₙ)`,
       keybinding: "m",
     },
-    [Mode.SeriesMean]: {
-      formula: `${i18n.message("linea:measurement-dates:seriesmean")} = (y₁ + ... + yₙ) / n`,
+    [Mode.Mean]: {
+      formula: `${i18n.message("linea:measurement-dates:mean")} = (y₁ + ... + yₙ) / n`,
       keybinding: "s",
     },
     [Mode.Min]: {
@@ -423,7 +422,7 @@ export class MeasurementDatesPlugin {
                 MeasurementDatesPlugin.mode = Mode.Delta;
                 this.updateSelectValue();
               } else if (e.key == "s") {
-                MeasurementDatesPlugin.mode = Mode.SeriesMean;
+                MeasurementDatesPlugin.mode = Mode.Mean;
                 this.updateSelectValue();
               } else if (e.key == "k") {
                 MeasurementDatesPlugin.mode = Mode.Min;
@@ -530,7 +529,7 @@ export class MeasurementDatesPlugin {
     return `${i18n.number(median, {}, unit)}`;
   }
 
-  seriesMean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
+  mean(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
     if (this.u == null) {
       return "n/a";
     }
@@ -621,8 +620,8 @@ export class MeasurementDatesPlugin {
         return i18n.message("linea:measurement-dates:delta");
       case Mode.Median:
         return i18n.message("linea:measurement-dates:median");
-      case Mode.SeriesMean:
-        return i18n.message("linea:measurement-dates:seriesmean");
+      case Mode.Mean:
+        return i18n.message("linea:measurement-dates:mean");
       case Mode.Integral:
         return i18n.message("linea:measurement-dates:integral");
       case Mode.Min:
