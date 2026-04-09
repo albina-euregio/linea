@@ -82,7 +82,7 @@ class TextLineStream extends TransformStream<string, string> {
   }
 }
 
-export async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
+async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
   let values: number[][] = [];
