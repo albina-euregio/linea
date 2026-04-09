@@ -9,7 +9,7 @@ import type {
   DangerRatingModificator,
   DangerSourceVariant,
   EAWSMatrixInformation,
-} from "./danger-source-data";
+} from "../schema/danger-source-data";
 import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
 
 export class Observations {

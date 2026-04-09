@@ -4,7 +4,7 @@ import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import type { Bulletin } from "../schema/caaml";
-import { dangerSourceVariantSchema, type DangerSourceVariant } from "./danger-source-data";
+import { dangerSourceVariantSchema, type DangerSourceVariant } from "../schema/danger-source-data";
 import type { BlogData } from "./datatypes";
 
 export interface PlotInformation {

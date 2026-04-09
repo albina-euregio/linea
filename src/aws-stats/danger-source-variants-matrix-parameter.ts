@@ -1,6 +1,6 @@
 import type uPlot from "uplot";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import type { DangerSourceVariant, EAWSMatrixInformation } from "./danger-source-data";
+import type { DangerSourceVariant, EAWSMatrixInformation } from "../schema/danger-source-data";
 import { DangerSourceVariantService } from "./datastore";
 import { COLORS } from "./series-options/colorizer";
 import {

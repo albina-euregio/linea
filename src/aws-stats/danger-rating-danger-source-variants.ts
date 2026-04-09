@@ -1,6 +1,6 @@
 import { i18n } from "../i18n";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import type { DangerSourceVariant } from "./danger-source-data";
+import type { DangerSourceVariant } from "../schema/danger-source-data";
 import { DangerSourceVariantService } from "./datastore";
 import { COLORS } from "./series-options/colorizer";
 import {
