@@ -2,10 +2,7 @@
 
 import messagesEN from "./i18n/en.json";
 import type { Unit } from "./data/units.ts";
-import type {
-  AnalyzerIntegratedUnit,
-  AnalyzerUnit,
-} from "./shared/measurement-dates.ts";
+import type { AnalyzerIntegratedUnit, AnalyzerUnit } from "./shared/measurement-dates.ts";
 const messages = import.meta.glob("./i18n/*.json", {
   import: "default",
   eager: true,
