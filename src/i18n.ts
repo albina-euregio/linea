@@ -39,9 +39,10 @@ class I18n {
     return s;
   }
 
-  time(date: Date | number | string, opts?: Intl.DateTimeFormatOptions) {
+  time(date: Temporal.PlainDate | Date | number | string, opts?: Intl.DateTimeFormatOptions) {
     if (typeof date === "string") date = Date.parse(date);
-    if (!isFinite(+date)) return "";
+    if (date instanceof Date) date = +date;
+    if (typeof date === "number" && !isFinite(+date)) return "";
     switch (this.lang) {
       case navigator.language.slice(0, 2):
         return new Intl.DateTimeFormat(navigator.language, opts).format(date);
