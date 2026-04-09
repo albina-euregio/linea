@@ -54,9 +54,7 @@ export async function fetchSMET(url: string): Promise<StationData> {
     stream = stream.pipeThrough(new DecompressionStream("gzip"));
   }
 
-  const lines = stream
-    .pipeThrough(new TextDecoderStream() as ReadableWritablePair<string, Uint8Array>)
-    .pipeThrough(new TextLineStream());
+  const lines = stream.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream());
 
   return parseSMET(lines);
 }
