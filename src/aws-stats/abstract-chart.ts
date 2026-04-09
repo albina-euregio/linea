@@ -4,6 +4,7 @@ import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import type { Bulletin } from "../schema/caaml";
 import type { BlogData } from "./datastore";
+import type { StressData } from "../schema/stress";
 
 export interface PlotInformation {
   data: uPlot.AlignedData;
@@ -86,6 +87,16 @@ export abstract class AbstractChart extends HTMLElement {
       return JSON.parse(raw) as BlogData[];
     } catch {
       return [];
+    }
+  }
+
+  protected parseStress(): StressData {
+    const raw = this.getAttribute("stress");
+    console.log(raw);
+    try {
+      return JSON.parse(raw ?? "{}") as StressData;
+    } catch {
+      return {};
     }
   }
 
