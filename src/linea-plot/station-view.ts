@@ -102,7 +102,7 @@ export class StationView extends LineaView {
   }
 
   previous(previous: HTMLButtonElement, next: HTMLButtonElement): void {
-    void this.previous0(previous, next);
+    this.lineaplot.runWithButtonLoading(previous, () => this.previous0(previous, next));
   }
 
   private async previous0(previous: HTMLButtonElement, next: HTMLButtonElement) {

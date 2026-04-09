@@ -79,6 +79,16 @@ linea-plot {
       flex-wrap: nowrap;
       align-items: stretch;
 
+      .daterange-loading {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: inline-flex;
+      }
+
+      .daterange-loading > input {
+        width: 100%;
+      }
+
       input,
       button {
         box-sizing: border-box;
@@ -166,16 +176,20 @@ linea-plot {
     outline: none;
   }
 
-  .winterview-btn {
+  .loading-btn {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5em 1em;
-    cursor: pointer;
     overflow: hidden;
   }
 
+  .winterview-btn {
+    padding: 0.5em 1em;
+    cursor: pointer;
+  }
+
+  .loading-btn .loading-btn-loader,
   .winterview-btn .winterview-btn-loader {
     position: absolute;
     inset: 0;
@@ -188,14 +202,17 @@ linea-plot {
     z-index: 10;
   }
 
+  .loading-btn.loading .loading-btn-loader,
   .winterview-btn.loading .winterview-btn-loader {
     opacity: 1;
   }
 
+  .loading-btn.loading .loading-btn-label,
   .winterview-btn.loading .winterview-btn-label {
     visibility: hidden;
   }
 
+  .loading-btn-spinner,
   .winterview-btn-spinner {
     width: 1em;
     height: 1em;
