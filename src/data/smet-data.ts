@@ -57,6 +57,27 @@ export async function fetchSMET(url: string): Promise<StationData> {
   return parseSMET(stream);
 }
 
+class TextLineStream extends TransformStream<string, string> {
+  constructor() {
+    let buffer = "";
+    super({
+      transform(chunk, controller) {
+        buffer += chunk;
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop()!;
+        for (const line of lines) {
+          controller.enqueue(line);
+        }
+      },
+      flush(controller) {
+        if (buffer) {
+          controller.enqueue(buffer);
+        }
+      },
+    });
+  }
+}
+
 export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<StationData> {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
@@ -73,8 +94,13 @@ export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<Sta
   const timestamps = [] as number[];
   let dataIndex = 0;
 
-  function processLine(line: string) {
+  const lines = stream
+    .pipeThrough(new TextDecoderStream() as ReadableWritablePair<string, Uint8Array>)
+    .pipeThrough(new TextLineStream());
+
+  for await (const line0 of lines) {
     function parseHeader(prefix: string) {
+      let line = line0;
       if (!line.startsWith(prefix)) return "";
       line = line.slice(prefix.length).trim();
       if (!line.startsWith("=")) return "";
@@ -97,8 +123,8 @@ export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<Sta
       station = header;
     } else if ((header = parseHeader("altitude"))) {
       altitude = +header;
-    } else if (/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line)) {
-      const cells = line.split(separator);
+    } else if (/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line0)) {
+      const cells = line0.split(separator);
       let dateString = cells[0];
       if (dateString.length === "2025-11-26T19:00:00".length) {
         if (tz === 0) {
@@ -121,24 +147,6 @@ export async function parseSMET(stream: ReadableStream<Uint8Array>): Promise<Sta
       });
       dataIndex++;
     }
-  }
-
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let done = false;
-  while (!done) {
-    let value: Uint8Array;
-    ({ done, value } = await reader.read());
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split(/\r?\n/);
-    buffer = lines.pop();
-    for (const line of lines) {
-      processLine(line);
-    }
-  }
-  if (buffer) {
-    processLine(buffer);
   }
 
   units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
