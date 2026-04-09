@@ -126,7 +126,6 @@ export abstract class AbstractChart extends HTMLElement {
 
   protected parseStress(): StressData {
     const raw = this.getAttribute("stress");
-    console.log(raw);
     try {
       return JSON.parse(raw ?? "{}") as StressData;
     } catch {
