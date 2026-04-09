@@ -1,4 +1,3 @@
-import type { StressData } from "../schema/stress";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData, Observations, StressService } from "./datastore";
 import { COLORS } from "./series-options/colorizer";
@@ -12,7 +11,7 @@ interface StressPlotInformation extends PlotInformation {
   userNames: string[];
 }
 
-export class StressChart extends AbstractChart {
+export class StressLevelChart extends AbstractChart {
   // if someone ever will find the joke in here i buy you an icecream
   static readonly NAMES = [
     "Lindelof",
@@ -29,7 +28,7 @@ export class StressChart extends AbstractChart {
 
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
-    this.stressData = this.parseStress();
+    this.stressData = this.parseStressLevel();
   }
 
   async render(): Promise<void> {
@@ -72,4 +71,4 @@ export class StressChart extends AbstractChart {
     }
   }
 }
-customElements.define("aws-stress", StressChart);
+customElements.define("aws-stress-level", StressLevelChart);
