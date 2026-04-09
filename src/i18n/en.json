@@ -113,7 +113,7 @@
   "linea:yearly:avalancheproblemmicroregions:series:favourable_situation": "Favourable Situation",
   "linea:wrapper:loading": "Loading data...",
   "linea:measurement-dates:timerange": "Time Range",
-  "linea:measurement-dates:mean": "Mean",
+  "linea:measurement-dates:median": "Median",
   "linea:measurement-dates:seriesmean": "Series Mean",
   "linea:measurement-dates:delta": "Total Difference",
   "linea:measurement-dates:integral": "Integral",
