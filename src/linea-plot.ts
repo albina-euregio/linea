@@ -278,6 +278,8 @@ export class LineaPlot extends HTMLElement {
       this.daterange.id = "daterangeinput";
       this.daterange.classList.add("toggle-btn");
       this.daterange.classList.add("dpclass");
+      this.daterange.readOnly = true;
+      this.daterange.style.caretColor = "transparent";
 
       this.daterangeContainer = document.createElement("div");
       this.daterangeContainer.classList.add("loading-btn");
