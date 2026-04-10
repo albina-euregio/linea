@@ -160,12 +160,16 @@ export class LineaPlot extends HTMLElement {
     this.lineaViews = new Map();
     if (!this.hasAttribute("showonlywinter")) {
       const stationView = new StationView(this.backgroundColors, this);
-      this.daterange.addEventListener("focus", async () => {
-        await this.runWithButtonLoading(this.daterangeContainer, () => stationView.fetchLazySrc());
-        if (this.dp && !this.dp.visible && document.activeElement === this.daterange) {
-          this.dp.show();
-        }
-      });
+      if (this.hasAttribute("showdatepicker") && this.daterange) {
+        this.daterange.addEventListener("focus", async () => {
+          await this.runWithButtonLoading(this.daterangeContainer, () =>
+            stationView.fetchLazySrc(),
+          );
+          if (this.dp && !this.dp.visible && document.activeElement === this.daterange) {
+            this.dp.show();
+          }
+        });
+      }
       this.lineaViews.set("station", stationView);
     }
     this.lineaViews.set("winter", new WinterView(this.backgroundColors, this));
