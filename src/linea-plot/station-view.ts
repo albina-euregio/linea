@@ -3,6 +3,8 @@ import { LineaChart } from "./linea-chart";
 import { LineaView } from "../linea-view";
 import type { LineaPlot } from "../linea-plot";
 import type { AirDatepickerOptions } from "air-datepicker";
+import { fetchGeosphereForecast } from "../data/geosphere-forecast";
+import { type ParameterType, type Values } from "../data/station-data";
 
 /**
  * Station View - displays non-winter station data with interactive filtering
@@ -12,6 +14,8 @@ export class StationView extends LineaView {
   private savedEndDate: Temporal.ZonedDateTime | undefined;
   private savedDateFormat: string = "";
   private showSurfaceHoarSeries: boolean = false;
+  private measuredMaxTime: number = -Infinity;
+  private forecastMaxTime: number = -Infinity;
 
   constructor(backgroundColors: string[] = [], lineaplot: LineaPlot) {
     super(backgroundColors, lineaplot);
@@ -27,6 +31,36 @@ export class StationView extends LineaView {
     } else {
       await this.fetchData("src");
     }
+
+    this.measuredMaxTime = this.maxTime;
+
+    try {
+      const forecast = await fetchGeosphereForecast();
+      this.forecastMaxTime = forecast.timestamps.at(-1) ?? -Infinity;
+      for (const result of this.results) {
+        const mergedTimestamps = [...new Set([...result.timestamps, ...forecast.timestamps])].sort(
+          (a, b) => a - b,
+        );
+
+        result.values = this.alignValuesToTimeline(
+          result.timestamps,
+          result.values,
+          mergedTimestamps,
+        );
+        result.forecast = {
+          timestamps: mergedTimestamps,
+          values: this.alignValuesToTimeline(
+            forecast.timestamps,
+            forecast.values,
+            mergedTimestamps,
+          ),
+        };
+        result.timestamps = mergedTimestamps;
+      }
+    } catch (error) {
+      console.warn("Failed to fetch Geosphere forecast data", error);
+    }
+
     for (const i in this.results) {
       const result = this.results[i];
       let lc = new LineaChart(
@@ -48,8 +82,40 @@ export class StationView extends LineaView {
       this.lineaplot.appendChild(chart);
     }
 
-    this.lineaplot.setStartEndDateTo(this.minTime, this.maxTime);
+    this.maxTime = this.measuredMaxTime;
+    this.lineaplot.setStartEndDateTo(this.minTime, this.measuredMaxTime);
     this.filterAndUpdateData();
+  }
+
+  private hasForecastRange(): boolean {
+    return this.forecastMaxTime > this.measuredMaxTime;
+  }
+
+  private alignValuesToTimeline(
+    sourceTimestamps: number[],
+    sourceValues: Values,
+    targetTimestamps: number[],
+  ): Values {
+    const aligned: Values = {};
+
+    for (const key of Object.keys(sourceValues) as ParameterType[]) {
+      const sourceSeries = sourceValues[key] ?? [];
+      const byTime = new Map<number, number | null>();
+      for (let i = 0; i < sourceTimestamps.length; i++) {
+        byTime.set(sourceTimestamps[i], sourceSeries[i] ?? null);
+      }
+      aligned[key] = targetTimestamps.map((t) => (byTime.has(t) ? (byTime.get(t) ?? null) : NaN));
+    }
+
+    return aligned;
+  }
+
+  private enableForecastRange(): void {
+    if (!this.hasForecastRange()) {
+      return;
+    }
+    this.maxTime = this.forecastMaxTime;
+    this.lineaplot.updateValidDateInputs();
   }
 
   /**
@@ -136,6 +202,11 @@ export class StationView extends LineaView {
     previous.disabled = false;
     let newStart = start.add({ days: 1 });
     let newEnd = end.add({ days: 1 });
+
+    if (newEnd.toInstant().epochMilliseconds > this.maxTime && this.hasForecastRange()) {
+      this.enableForecastRange();
+    }
+
     if (newEnd.toInstant().epochMilliseconds > this.maxTime) {
       newEnd = Temporal.Instant.fromEpochMilliseconds(this.maxTime).toZonedDateTimeISO(
         i18n.timezone(),

@@ -106,10 +106,10 @@ export abstract class LineaView {
       }
       try {
         const filtered = res.filter(startDate, endDate);
-        this.charts[i].setData(filtered.timestamps, filtered.values);
+        this.charts[i].setData(filtered.timestamps, filtered.values, filtered.forecast);
       } catch (e) {
         console.error("Error filtering data for chart", i, e);
-        this.charts[i].setData(res.timestamps, res.values);
+        this.charts[i].setData(res.timestamps, res.values, res.forecast);
       }
     }
   }

@@ -1,10 +1,25 @@
 import uPlot from "uplot";
-import { opts_TA, opts_TA_TD_TSS, opts_TD, opts_TSS, opts_SurfaceHoar } from "./opts_TA_TD_TSS";
-import { opts_DW, opts_VW, opts_VW_MAX, opts_VW_VWG_DW } from "./opts_VW_VWG_DW";
-import { opts_HS, opts_HS_PSUM, opts_PSUM } from "./opts_HS_PSUM";
-import { opts_ISWR, opts_RH, opts_RH_GR } from "./opts_RH_GR";
+import {
+  opts_TA,
+  opts_TA_FORECAST,
+  opts_TA_TD_TSS,
+  opts_TD,
+  opts_TSS,
+  opts_SurfaceHoar,
+} from "./opts_TA_TD_TSS";
+import {
+  opts_DW,
+  opts_DW_FORECAST,
+  opts_VW,
+  opts_VW_FORECAST,
+  opts_VW_MAX,
+  opts_VW_MAX_FORECAST,
+  opts_VW_VWG_DW,
+} from "./opts_VW_VWG_DW";
+import { opts_HS, opts_HS_PSUM, opts_PSUM, opts_PSUM_FORECAST } from "./opts_HS_PSUM";
+import { opts_ISWR, opts_ISWR_FORECAST, opts_RH, opts_RH_FORECAST, opts_RH_GR } from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
-import type { StationData, Values } from "../data/station-data";
+import type { ForecastValues, StationData, Values } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { TouchZoom } from "../shared/touch-zoom";
@@ -31,61 +46,84 @@ export class LineaChart extends AbstractLineaChart {
     this.createPlots().catch((e) => console.error(e));
   }
 
-  setData(timestamps: number[], values: Values) {
+  setData(timestamps: number[], values: Values, forecast?: ForecastValues) {
     let i = 0;
+    const forecastValues = forecast?.values;
+
     if (values.HS || values.PSUM) {
       if (values.HS && values.PSUM) {
-        this.updateData(this.plots[i], [
-          timestamps,
-          values.HS,
-          this.#sumupPrecipitation(timestamps, values.PSUM),
-        ]);
+        this.updateData(
+          this.plots[i],
+          [timestamps, values.HS, this.#sumupPrecipitation(timestamps, values.PSUM)].concat(
+            forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
+          ),
+        );
       } else if (values.HS) {
-        this.updateData(this.plots[i], [timestamps, values.HS]);
+        this.updateData(
+          this.plots[i],
+          [timestamps, values.HS].concat(
+            forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
+          ),
+        );
       } else if (values.PSUM) {
-        this.updateData(this.plots[i], [
-          timestamps,
-          this.#sumupPrecipitation(timestamps, values.PSUM),
-        ]);
+        this.updateData(
+          this.plots[i],
+          [timestamps, this.#sumupPrecipitation(timestamps, values.PSUM)].concat(
+            forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
+          ),
+        );
       }
       i += 1;
     }
     if (values.VW || values.VW_MAX || values.DW) {
-      this.updateData(this.plots[i], [
-        timestamps,
-        values.VW,
-        values.VW_MAX,
-        this.#filterDWData(values.DW),
-      ]);
+      this.updateData(
+        this.plots[i],
+        [timestamps, values.VW, values.VW_MAX, this.#filterDWData(values.DW)].concat(
+          forecastValues
+            ? [forecastValues.VW, forecastValues.VW_MAX, this.#filterDWData(forecastValues.DW)]
+            : [],
+        ),
+      );
       i += 1;
     }
     if (values.TA || values.TD || values.TSS) {
       if (this.showSurfaceHoarSeries && values.TD && values.TSS) {
-        this.updateData(this.plots[i], [
-          timestamps,
-          values.TD ??
-            (values.TA && values.RH
-              ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
-              : undefined),
-          values.TSS,
-          this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
-          values.TA,
-        ]);
+        this.updateData(
+          this.plots[i],
+          [
+            timestamps,
+            values.TD ??
+              (values.TA && values.RH
+                ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
+                : undefined),
+            values.TSS,
+            this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
+            values.TA,
+          ].concat(forecastValues?.TA ? [forecastValues.TA] : []),
+        );
       } else {
-        this.updateData(this.plots[i], [
-          timestamps,
-          values.TD ??
-            (values.TA && values.RH
-              ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
-              : undefined),
-          values.TSS,
-          values.TA,
-        ]);
+        this.updateData(
+          this.plots[i],
+          [
+            timestamps,
+            values.TD ??
+              (values.TA && values.RH
+                ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
+                : undefined),
+            values.TSS,
+            values.TA,
+          ].concat(forecastValues?.TA ? [forecastValues.TA] : []),
+        );
       }
       i += 1;
     }
     if (values.RH || values.ISWR) {
-      this.updateData(this.plots[i], [timestamps, values.RH, values.ISWR]);
+      this.updateData(
+        this.plots[i],
+        [timestamps, values.RH, values.ISWR].concat(
+          forecastValues ? [forecastValues.RH, forecastValues.ISWR] : [],
+        ),
+      );
     }
     this.resizePlots(this.clientWidth, this.style);
   }
@@ -120,6 +158,16 @@ export class LineaChart extends AbstractLineaChart {
           this.#sumupPrecipitation(this.result.timestamps, this.result.values.PSUM),
         );
       }
+      this.addSeries(
+        p,
+        opts_PSUM_FORECAST,
+        this.result.forecast?.values.PSUM
+          ? this.#sumupPrecipitation(
+              this.result.forecast.timestamps,
+              this.result.forecast.values.PSUM,
+            )
+          : undefined,
+      );
     }
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
@@ -137,6 +185,9 @@ export class LineaChart extends AbstractLineaChart {
       this.addSeries(p, opts_VW, this.result.values.VW);
       this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
       this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
+      this.addSeries(p, opts_VW_FORECAST, this.result.forecast?.values.VW);
+      this.addSeries(p, opts_VW_MAX_FORECAST, this.result.forecast?.values.VW_MAX);
+      this.addSeries(p, opts_DW_FORECAST, this.#filterDWData(this.result.forecast?.values.DW));
     }
 
     if (this.result.values.TA) {
@@ -174,6 +225,7 @@ export class LineaChart extends AbstractLineaChart {
         this.addSeries(p, opts_TSS, []);
       }
       this.addSeries(p, opts_TA, this.result.values.TA);
+      this.addSeries(p, opts_TA_FORECAST, this.result.forecast?.values.TA);
     }
 
     if (this.result.values.RH || this.result.values.ISWR) {
@@ -190,13 +242,18 @@ export class LineaChart extends AbstractLineaChart {
       this.plotnames.push(i18n.message("linea:plotnames:humidity_gr"));
       this.addSeries(p, opts_RH, this.result.values.RH);
       this.addSeries(p, opts_ISWR, this.result.values.ISWR);
+      this.addSeries(p, opts_RH_FORECAST, this.result.forecast?.values.RH);
+      this.addSeries(p, opts_ISWR_FORECAST, this.result.forecast?.values.ISWR);
     }
 
     this.resizePlots(this.clientWidth, this.style);
     this.resizeObserver.observe(this);
   }
 
-  #filterDWData(values: (number | null)[]): (number | null)[] {
+  #filterDWData(values: (number | null)[] | undefined): (number | null)[] {
+    if (!values) {
+      return [];
+    }
     let density = Math.ceil(values.length / 7500);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
     return out;

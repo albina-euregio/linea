@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import type { StationData, Values } from "./data/station-data";
+import type { ForecastValues, StationData, Values } from "./data/station-data";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
@@ -26,7 +26,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
     this.resizeObserver.unobserve(this);
   }
 
-  abstract setData(timestamps: number[], values: Values): void;
+  abstract setData(timestamps: number[], values: Values, forecast?: ForecastValues): void;
 
   protected abstract getStationTitle(): {};
 
