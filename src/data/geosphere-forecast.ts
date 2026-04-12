@@ -1,10 +1,9 @@
 import type { Values } from "./station-data";
 import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
 
-const GEOSPHERE_FORECAST_URL =
-  "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m" +
-  "?lat_lon=48.5666,11.3123" +
-  "&parameters=t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,grad";
+const GEOSPHERE_FORECAST_BASE_URL =
+  "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m";
+const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,grad";
 
 type ForecastData = {
   timestamps: number[];
@@ -51,8 +50,11 @@ function wsPerSquareMeterToWPerSquareMeter(value: number | null): number | null 
   return value / 3600;
 }
 
-export async function fetchGeosphereForecast(): Promise<ForecastData> {
-  const response = await fetch(GEOSPHERE_FORECAST_URL);
+export async function fetchGeosphereForecast(latlon: string): Promise<ForecastData> {
+  const url =
+    `${GEOSPHERE_FORECAST_BASE_URL}?lat_lon=${encodeURIComponent(latlon)}` +
+    `&parameters=${GEOSPHERE_FORECAST_PARAMETERS}`;
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
       `Failed to fetch Geosphere forecast: ${response.status} ${response.statusText}`,

@@ -27,6 +27,7 @@ import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 
 export class LineaChart extends AbstractLineaChart {
   private showSurfaceHoarSeries: boolean;
+  private forecastEnabled: boolean;
 
   private withFreshPlugins(opts: uPlot.Options): uPlot.Options {
     return {
@@ -40,9 +41,11 @@ export class LineaChart extends AbstractLineaChart {
     showTitle: boolean,
     showSurfaceHoarSeries: boolean,
     backgroundColor: string,
+    forecastEnabled: boolean,
   ) {
     super(backgroundColor, showTitle, result);
     this.showSurfaceHoarSeries = showSurfaceHoarSeries;
+    this.forecastEnabled = forecastEnabled;
     this.createPlots().catch((e) => console.error(e));
   }
 
@@ -158,16 +161,18 @@ export class LineaChart extends AbstractLineaChart {
           this.#sumupPrecipitation(this.result.timestamps, this.result.values.PSUM),
         );
       }
-      this.addSeries(
-        p,
-        opts_PSUM_FORECAST,
-        this.result.forecast?.values.PSUM
-          ? this.#sumupPrecipitation(
-              this.result.forecast.timestamps,
-              this.result.forecast.values.PSUM,
-            )
-          : undefined,
-      );
+      if (this.forecastEnabled) {
+        this.addSeries(
+          p,
+          opts_PSUM_FORECAST,
+          this.result.forecast?.values.PSUM
+            ? this.#sumupPrecipitation(
+                this.result.forecast.timestamps,
+                this.result.forecast.values.PSUM,
+              )
+            : undefined,
+        );
+      }
     }
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
@@ -185,9 +190,11 @@ export class LineaChart extends AbstractLineaChart {
       this.addSeries(p, opts_VW, this.result.values.VW);
       this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
       this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
-      this.addSeries(p, opts_VW_FORECAST, this.result.forecast?.values.VW);
-      this.addSeries(p, opts_VW_MAX_FORECAST, this.result.forecast?.values.VW_MAX);
-      this.addSeries(p, opts_DW_FORECAST, this.#filterDWData(this.result.forecast?.values.DW));
+      if (this.forecastEnabled) {
+        this.addSeries(p, opts_VW_FORECAST, this.result.forecast?.values.VW);
+        this.addSeries(p, opts_VW_MAX_FORECAST, this.result.forecast?.values.VW_MAX);
+        this.addSeries(p, opts_DW_FORECAST, this.#filterDWData(this.result.forecast?.values.DW));
+      }
     }
 
     if (this.result.values.TA) {
@@ -225,7 +232,9 @@ export class LineaChart extends AbstractLineaChart {
         this.addSeries(p, opts_TSS, []);
       }
       this.addSeries(p, opts_TA, this.result.values.TA);
-      this.addSeries(p, opts_TA_FORECAST, this.result.forecast?.values.TA);
+      if (this.forecastEnabled) {
+        this.addSeries(p, opts_TA_FORECAST, this.result.forecast?.values.TA);
+      }
     }
 
     if (this.result.values.RH || this.result.values.ISWR) {
@@ -242,8 +251,10 @@ export class LineaChart extends AbstractLineaChart {
       this.plotnames.push(i18n.message("linea:plotnames:humidity_gr"));
       this.addSeries(p, opts_RH, this.result.values.RH);
       this.addSeries(p, opts_ISWR, this.result.values.ISWR);
-      this.addSeries(p, opts_RH_FORECAST, this.result.forecast?.values.RH);
-      this.addSeries(p, opts_ISWR_FORECAST, this.result.forecast?.values.ISWR);
+      if (this.forecastEnabled) {
+        this.addSeries(p, opts_RH_FORECAST, this.result.forecast?.values.RH);
+        this.addSeries(p, opts_ISWR_FORECAST, this.result.forecast?.values.ISWR);
+      }
     }
 
     this.resizePlots(this.clientWidth, this.style);

@@ -30,6 +30,7 @@ type LineaViewType = "station" | "winter";
  * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
  * - `showexport` - toggles if the export button is shown
  * - `showinteractiveblogexport` - toggles if the export for the interactive blog button is shown, just in combination with `showexport`
+ * - `forecast-latlon` {string} - Optional coordinates in format `lat,lon` used to load forecast data when navigating beyond measured data
  *
  *
  * @example

@@ -18,10 +18,37 @@ export class StationView extends LineaView {
   private forecastMaxTime: number = -Infinity;
   private forecastLoaded: boolean = false;
   private forecastLoadPromise: Promise<void> | undefined;
+  private forecastLatLon: string | undefined;
 
   constructor(backgroundColors: string[] = [], lineaplot: LineaPlot) {
     super(backgroundColors, lineaplot);
     this.showSurfaceHoarSeries = this.lineaplot.hasAttribute("showsurfacehoarseries");
+    this.forecastLatLon = this.#parseForecastLatLon(this.lineaplot.getAttribute("forecast-latlon"));
+  }
+
+  #parseForecastLatLon(raw: string | null): string | undefined {
+    if (!raw) {
+      return undefined;
+    }
+    const value = raw.trim();
+    if (!value) {
+      return undefined;
+    }
+
+    const parts = value.split(",").map((part) => part.trim());
+    if (parts.length !== 2) {
+      console.warn("Invalid forecast-latlon format. Expected 'lat,lon'.", value);
+      return undefined;
+    }
+
+    const lat = Number(parts[0]);
+    const lon = Number(parts[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      console.warn("Invalid forecast-latlon coordinates. Expected numeric values.", value);
+      return undefined;
+    }
+
+    return `${lat},${lon}`;
   }
 
   /**
@@ -43,6 +70,7 @@ export class StationView extends LineaView {
         this.showTitle,
         this.showSurfaceHoarSeries,
         this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
+        Boolean(this.forecastLatLon),
       );
       this.charts.push(lc);
     }
@@ -63,10 +91,13 @@ export class StationView extends LineaView {
   }
 
   private hasForecastRange(): boolean {
-    return this.forecastMaxTime > this.measuredMaxTime;
+    return Boolean(this.forecastLatLon) && this.forecastMaxTime > this.measuredMaxTime;
   }
 
   private async ensureForecastLoaded(): Promise<void> {
+    if (!this.forecastLatLon) {
+      return;
+    }
     if (this.forecastLoaded) {
       return;
     }
@@ -77,7 +108,11 @@ export class StationView extends LineaView {
 
     this.forecastLoadPromise = (async () => {
       try {
-        const forecast = await fetchGeosphereForecast();
+        const forecastLatLon = this.forecastLatLon;
+        if (!forecastLatLon) {
+          return;
+        }
+        const forecast = await fetchGeosphereForecast(forecastLatLon);
         this.forecastMaxTime = forecast.timestamps.at(-1) ?? -Infinity;
 
         for (const result of this.results) {
