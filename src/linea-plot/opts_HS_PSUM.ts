@@ -114,3 +114,10 @@ export const opts_PSUM: uPlot.Series = {
   width: 1.5,
   value: (_u, v) => i18n.number(v, {}, "mm"),
 };
+
+export const opts_PSUM_FORECAST: uPlot.Series = {
+  ...opts_PSUM,
+  label: "Forecast",
+  fill: undefined,
+  dash: [8, 6],
+};

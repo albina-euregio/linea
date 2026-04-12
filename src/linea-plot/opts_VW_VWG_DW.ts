@@ -137,3 +137,28 @@ export const opts_DW: uPlot.Series = {
   scale: "y2",
   value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "°"),
 };
+
+export const opts_VW_FORECAST: uPlot.Series = {
+  ...opts_VW,
+  label: "Forecast",
+  dash: [8, 6],
+};
+
+export const opts_VW_MAX_FORECAST: uPlot.Series = {
+  ...opts_VW_MAX,
+  label: "Forecast",
+  dash: [8, 6],
+};
+
+export const opts_DW_FORECAST: uPlot.Series = {
+  ...opts_DW,
+  label: "Forecast",
+  points: {
+    space: 0,
+    fill: "#084D40",
+    stroke: "#084D40",
+    width: 1,
+    size: 4,
+    dash: [8, 6],
+  },
+};

@@ -123,11 +123,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   ],
 };
 
-const createSeries = (labelKey: any, color: string): uPlot.Series => ({
+const createSeries = (labelKey: any, color: string, dashed = false): uPlot.Series => ({
   label: i18n.message(labelKey),
   stroke: color,
   scale: "y",
   width: 1.5,
+  dash: dashed ? [8, 6] : undefined,
   spanGaps: false,
   value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
 });
@@ -135,6 +136,8 @@ const createSeries = (labelKey: any, color: string): uPlot.Series => ({
 export const opts_TA = createSeries("linea:parameter:TA", "#DE2D26");
 export const opts_TD = createSeries("linea:parameter:TD", "#6aafd5");
 export const opts_TSS = createSeries("linea:parameter:TSS", "#FC9272");
+export const opts_TA_FORECAST = createSeries("linea:parameter:TA", "#DE2D26", true);
+opts_TA_FORECAST.label = "Forecast";
 
 export const opts_SurfaceHoar: uPlot.Series = {
   label: i18n.message("linea:parameter:SH:potential"),
