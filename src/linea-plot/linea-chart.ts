@@ -16,7 +16,13 @@ import {
   opts_VW_MAX_FORECAST,
   opts_VW_VWG_DW,
 } from "./opts_VW_VWG_DW";
-import { opts_HS, opts_HS_PSUM, opts_PSUM, opts_PSUM_FORECAST } from "./opts_HS_PSUM";
+import {
+  opts_HS,
+  opts_HS_FORECAST,
+  opts_HS_PSUM,
+  opts_PSUM,
+  opts_PSUM_FORECAST,
+} from "./opts_HS_PSUM";
 import { opts_ISWR, opts_ISWR_FORECAST, opts_RH, opts_RH_FORECAST, opts_RH_GR } from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
 import type { ForecastValues, StationData, Values } from "../data/station-data";
@@ -58,6 +64,7 @@ export class LineaChart extends AbstractLineaChart {
         this.updateData(
           this.plots[i],
           [timestamps, values.HS, this.#sumupPrecipitation(timestamps, values.PSUM)].concat(
+            forecastValues?.HS ? [forecastValues.HS] : [],
             forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
           ),
         );
@@ -65,6 +72,7 @@ export class LineaChart extends AbstractLineaChart {
         this.updateData(
           this.plots[i],
           [timestamps, values.HS].concat(
+            forecastValues?.HS ? [forecastValues.HS] : [],
             forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
           ),
         );
@@ -162,6 +170,7 @@ export class LineaChart extends AbstractLineaChart {
         );
       }
       if (this.forecastEnabled) {
+        this.addSeries(p, opts_HS_FORECAST, this.result.forecast?.values.HS);
         this.addSeries(
           p,
           opts_PSUM_FORECAST,

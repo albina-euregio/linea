@@ -106,6 +106,12 @@ export const opts_HS: uPlot.Series = {
   value: (_u, v) => i18n.number(v, {}, "cm"),
 };
 
+export const opts_HS_FORECAST: uPlot.Series = {
+  ...opts_HS,
+  label: "Forecast",
+  dash: [8, 6],
+};
+
 export const opts_PSUM: uPlot.Series = {
   label: i18n.message("linea:parameter:PSUM"),
   stroke: "#6aafd5",

@@ -14,6 +14,7 @@ const forecastParametersSchema = z.object({
   vgust: forecastParameterValueSchema.optional(),
   rh2m: forecastParameterValueSchema.optional(),
   rr_acc: forecastParameterValueSchema.optional(),
+  snow_acc: forecastParameterValueSchema.optional(),
   grad: forecastParameterValueSchema.optional(),
 });
 

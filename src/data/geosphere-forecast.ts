@@ -3,7 +3,7 @@ import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
 
 const GEOSPHERE_FORECAST_BASE_URL =
   "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m";
-const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,grad";
+const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,snow_acc,grad";
 
 type ForecastData = {
   timestamps: number[];
@@ -74,6 +74,7 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
   const ugust = parameters.ugust?.data;
   const vgust = parameters.vgust?.data;
   const rrAcc = parameters.rr_acc?.data;
+  const snowAcc = parameters.snow_acc?.data;
   const grad = parameters.grad?.data;
 
   const vw = u10m && v10m ? u10m.map((u, i) => vectorToSpeedKmH(u, v10m[i] ?? null)) : undefined;
@@ -91,6 +92,7 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
       VW_MAX: vwMax,
       DW: dw,
       PSUM: rrAcc ? accumulatedToIncrement(rrAcc) : undefined,
+      NS: snowAcc,
       ISWR: grad ? grad.map((v) => wsPerSquareMeterToWPerSquareMeter(v)) : undefined,
     },
   };

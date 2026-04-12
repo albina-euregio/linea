@@ -133,6 +133,10 @@ export class StationView extends LineaView {
               mergedTimestamps,
             ),
           };
+          result.forecast.values.HS = this.createForecastSnowHeight(
+            result.values.HS,
+            result.forecast.values.NS,
+          );
           result.timestamps = mergedTimestamps;
         }
 
@@ -164,6 +168,42 @@ export class StationView extends LineaView {
     }
 
     return aligned;
+  }
+
+  private createForecastSnowHeight(
+    measuredHs: (number | null)[] | undefined,
+    accumulatedSnow: (number | null)[] | undefined,
+  ): (number | null)[] | undefined {
+    if (!measuredHs || !accumulatedSnow) {
+      return undefined;
+    }
+
+    const firstForecastIdx = accumulatedSnow.findIndex((v) => v !== null && !Number.isNaN(v));
+    if (firstForecastIdx < 0) {
+      return undefined;
+    }
+
+    let hsBaseline: number | undefined = undefined;
+    for (let i = firstForecastIdx; i >= 0; i--) {
+      const hs = measuredHs[i];
+      if (hs !== null && !Number.isNaN(hs)) {
+        hsBaseline = hs;
+        break;
+      }
+    }
+    if (hsBaseline === undefined) {
+      return undefined;
+    }
+
+    return accumulatedSnow.map((snow) => {
+      if (snow === null) {
+        return null;
+      }
+      if (Number.isNaN(snow)) {
+        return NaN;
+      }
+      return hsBaseline + snow;
+    });
   }
 
   private enableForecastRange(): void {
