@@ -16,6 +16,8 @@ export class StationView extends LineaView {
   private showSurfaceHoarSeries: boolean = false;
   private measuredMaxTime: number = -Infinity;
   private forecastMaxTime: number = -Infinity;
+  private forecastLoaded: boolean = false;
+  private forecastLoadPromise: Promise<void> | undefined;
 
   constructor(backgroundColors: string[] = [], lineaplot: LineaPlot) {
     super(backgroundColors, lineaplot);
@@ -33,33 +35,6 @@ export class StationView extends LineaView {
     }
 
     this.measuredMaxTime = this.maxTime;
-
-    try {
-      const forecast = await fetchGeosphereForecast();
-      this.forecastMaxTime = forecast.timestamps.at(-1) ?? -Infinity;
-      for (const result of this.results) {
-        const mergedTimestamps = [...new Set([...result.timestamps, ...forecast.timestamps])].sort(
-          (a, b) => a - b,
-        );
-
-        result.values = this.alignValuesToTimeline(
-          result.timestamps,
-          result.values,
-          mergedTimestamps,
-        );
-        result.forecast = {
-          timestamps: mergedTimestamps,
-          values: this.alignValuesToTimeline(
-            forecast.timestamps,
-            forecast.values,
-            mergedTimestamps,
-          ),
-        };
-        result.timestamps = mergedTimestamps;
-      }
-    } catch (error) {
-      console.warn("Failed to fetch Geosphere forecast data", error);
-    }
 
     for (const i in this.results) {
       const result = this.results[i];
@@ -89,6 +64,52 @@ export class StationView extends LineaView {
 
   private hasForecastRange(): boolean {
     return this.forecastMaxTime > this.measuredMaxTime;
+  }
+
+  private async ensureForecastLoaded(): Promise<void> {
+    if (this.forecastLoaded) {
+      return;
+    }
+    if (this.forecastLoadPromise) {
+      await this.forecastLoadPromise;
+      return;
+    }
+
+    this.forecastLoadPromise = (async () => {
+      try {
+        const forecast = await fetchGeosphereForecast();
+        this.forecastMaxTime = forecast.timestamps.at(-1) ?? -Infinity;
+
+        for (const result of this.results) {
+          const mergedTimestamps = [
+            ...new Set([...result.timestamps, ...forecast.timestamps]),
+          ].sort((a, b) => a - b);
+
+          result.values = this.alignValuesToTimeline(
+            result.timestamps,
+            result.values,
+            mergedTimestamps,
+          );
+          result.forecast = {
+            timestamps: mergedTimestamps,
+            values: this.alignValuesToTimeline(
+              forecast.timestamps,
+              forecast.values,
+              mergedTimestamps,
+            ),
+          };
+          result.timestamps = mergedTimestamps;
+        }
+
+        this.forecastLoaded = true;
+      } catch (error) {
+        console.warn("Failed to fetch Geosphere forecast data", error);
+      } finally {
+        this.forecastLoadPromise = undefined;
+      }
+    })();
+
+    await this.forecastLoadPromise;
   }
 
   private alignValuesToTimeline(
@@ -195,6 +216,10 @@ export class StationView extends LineaView {
   }
 
   next(previous: HTMLButtonElement, next: HTMLButtonElement): void {
+    this.lineaplot.runWithButtonLoading(next, () => this.next0(previous, next));
+  }
+
+  private async next0(previous: HTMLButtonElement, next: HTMLButtonElement): Promise<void> {
     if (!this.dp || !this.dp.selectedDates || this.dp.selectedDates.length < 2) return;
     const start = this.dateToZonedDateTime(new Date(this.dp.selectedDates[0]));
     const end = this.dateToZonedDateTime(new Date(this.dp.selectedDates[1]));
@@ -202,6 +227,10 @@ export class StationView extends LineaView {
     previous.disabled = false;
     let newStart = start.add({ days: 1 });
     let newEnd = end.add({ days: 1 });
+
+    if (newEnd.toInstant().epochMilliseconds > this.maxTime && !this.forecastLoaded) {
+      await this.ensureForecastLoaded();
+    }
 
     if (newEnd.toInstant().epochMilliseconds > this.maxTime && this.hasForecastRange()) {
       this.enableForecastRange();

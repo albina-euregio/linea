@@ -54,6 +54,23 @@ export abstract class AbstractLineaChart extends HTMLElement {
       data.push(element ?? this.#createNullArray());
     }
     plot.setData(data);
+    this.#syncForecastSeriesVisibility(plot);
+  }
+
+  #syncForecastSeriesVisibility(plot: uPlot) {
+    const data = plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]];
+    for (let seriesIdx = 1; seriesIdx < plot.series.length; seriesIdx++) {
+      const series = plot.series[seriesIdx];
+      if (series.label !== "Forecast") {
+        continue;
+      }
+
+      const values = data[seriesIdx] ?? [];
+      const hasData = values.some((value) => value !== null && !Number.isNaN(value));
+      if (hasData && !series.show) {
+        plot.setSeries(seriesIdx, { show: true });
+      }
+    }
   }
 
   #createNullArray() {
