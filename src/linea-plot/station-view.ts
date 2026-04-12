@@ -230,6 +230,13 @@ export class StationView extends LineaView {
           result.timestamps = mergedTimestamps;
         }
         this.forecastLoaded = true;
+
+        // Add forecast series to all charts and refresh data
+        for (const chart of this.charts) {
+          (chart as any).addForecastSeries();
+        }
+        this.enableForecastRange();
+        this.filterAndUpdateData();
       } catch (error) {
         console.warn("Failed to fetch Geosphere forecast data", error);
       } finally {

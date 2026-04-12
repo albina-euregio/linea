@@ -169,19 +169,7 @@ export class LineaChart extends AbstractLineaChart {
           this.#sumupPrecipitation(this.result.timestamps, this.result.values.PSUM),
         );
       }
-      if (this.forecastEnabled) {
-        this.addSeries(p, opts_HS_FORECAST, this.result.forecast?.values.HS);
-        this.addSeries(
-          p,
-          opts_PSUM_FORECAST,
-          this.result.forecast?.values.PSUM
-            ? this.#sumupPrecipitation(
-                this.result.forecast.timestamps,
-                this.result.forecast.values.PSUM,
-              )
-            : undefined,
-        );
-      }
+      // Forecast series will be added after forecast data is loaded
     }
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
@@ -199,11 +187,7 @@ export class LineaChart extends AbstractLineaChart {
       this.addSeries(p, opts_VW, this.result.values.VW);
       this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
       this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
-      if (this.forecastEnabled) {
-        this.addSeries(p, opts_VW_FORECAST, this.result.forecast?.values.VW);
-        this.addSeries(p, opts_VW_MAX_FORECAST, this.result.forecast?.values.VW_MAX);
-        this.addSeries(p, opts_DW_FORECAST, this.#filterDWData(this.result.forecast?.values.DW));
-      }
+      // Forecast series will be added after forecast data is loaded
     }
 
     if (this.result.values.TA) {
@@ -241,9 +225,7 @@ export class LineaChart extends AbstractLineaChart {
         this.addSeries(p, opts_TSS, []);
       }
       this.addSeries(p, opts_TA, this.result.values.TA);
-      if (this.forecastEnabled) {
-        this.addSeries(p, opts_TA_FORECAST, this.result.forecast?.values.TA);
-      }
+      // Forecast series will be added after forecast data is loaded
     }
 
     if (this.result.values.RH || this.result.values.ISWR) {
@@ -260,10 +242,7 @@ export class LineaChart extends AbstractLineaChart {
       this.plotnames.push(i18n.message("linea:plotnames:humidity_gr"));
       this.addSeries(p, opts_RH, this.result.values.RH);
       this.addSeries(p, opts_ISWR, this.result.values.ISWR);
-      if (this.forecastEnabled) {
-        this.addSeries(p, opts_RH_FORECAST, this.result.forecast?.values.RH);
-        this.addSeries(p, opts_ISWR_FORECAST, this.result.forecast?.values.ISWR);
-      }
+      // Forecast series will be added after forecast data is loaded
     }
 
     this.resizePlots(this.clientWidth, this.style);
@@ -353,6 +332,72 @@ export class LineaChart extends AbstractLineaChart {
           title: `${this.result.station} (${i18n.number(this.result.altitude, { maximumFractionDigits: 0 })}m)`,
         }
       : {};
+  }
+
+  /**
+   * Add forecast series to all plots after forecast data has been loaded.
+   * This is called after ensureForecastLoaded() completes.
+   */
+  addForecastSeries(): void {
+    if (!this.forecastEnabled || !this.result.forecast) {
+      return;
+    }
+
+    let plotIdx = 0;
+
+    // HS/PSUM plot
+    if (this.result.values.HS || this.result.values.PSUM) {
+      const plot = this.plots[plotIdx];
+      if (this.result.forecast.values.HS) {
+        this.addSeries(plot, opts_HS_FORECAST, this.result.forecast.values.HS);
+      }
+      if (this.result.forecast.values.PSUM) {
+        this.addSeries(
+          plot,
+          opts_PSUM_FORECAST,
+          this.#sumupPrecipitation(
+            this.result.forecast.timestamps,
+            this.result.forecast.values.PSUM,
+          ),
+        );
+      }
+      plotIdx += 1;
+    }
+
+    // VW/VW_MAX/DW plot
+    if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
+      const plot = this.plots[plotIdx];
+      if (this.result.forecast.values.VW) {
+        this.addSeries(plot, opts_VW_FORECAST, this.result.forecast.values.VW);
+      }
+      if (this.result.forecast.values.VW_MAX) {
+        this.addSeries(plot, opts_VW_MAX_FORECAST, this.result.forecast.values.VW_MAX);
+      }
+      if (this.result.forecast.values.DW) {
+        this.addSeries(plot, opts_DW_FORECAST, this.#filterDWData(this.result.forecast.values.DW));
+      }
+      plotIdx += 1;
+    }
+
+    // TA/TD/TSS plot
+    if (this.result.values.TA) {
+      const plot = this.plots[plotIdx];
+      if (this.result.forecast.values.TA) {
+        this.addSeries(plot, opts_TA_FORECAST, this.result.forecast.values.TA);
+      }
+      plotIdx += 1;
+    }
+
+    // RH/ISWR plot
+    if (this.result.values.RH || this.result.values.ISWR) {
+      const plot = this.plots[plotIdx];
+      if (this.result.forecast.values.RH) {
+        this.addSeries(plot, opts_RH_FORECAST, this.result.forecast.values.RH);
+      }
+      if (this.result.forecast.values.ISWR) {
+        this.addSeries(plot, opts_ISWR_FORECAST, this.result.forecast.values.ISWR);
+      }
+    }
   }
 }
 
