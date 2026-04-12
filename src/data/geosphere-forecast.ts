@@ -1,0 +1,95 @@
+import type { Values } from "./station-data";
+import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
+
+const GEOSPHERE_FORECAST_URL =
+  "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m" +
+  "?lat_lon=48.5666,11.3123" +
+  "&parameters=t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,grad";
+
+type ForecastData = {
+  timestamps: number[];
+  values: Values;
+};
+
+function vectorToSpeedKmH(u: number | null, v: number | null): number | null {
+  if (u === null || v === null) {
+    return null;
+  }
+  return Math.sqrt(u * u + v * v) * 3.6;
+}
+
+function vectorToDirectionDeg(u: number | null, v: number | null): number | null {
+  if (u === null || v === null) {
+    return null;
+  }
+  // Meteorological wind direction: where wind comes from, clockwise from north.
+  const deg = (270 - (Math.atan2(v, u) * 180) / Math.PI + 360) % 360;
+  return deg;
+}
+
+function accumulatedToIncrement(values: (number | null)[]): (number | null)[] {
+  if (values.length === 0) {
+    return [];
+  }
+  const out: (number | null)[] = [values[0] ?? 0];
+  for (let i = 1; i < values.length; i++) {
+    const prev = values[i - 1];
+    const current = values[i];
+    if (prev === null || current === null) {
+      out.push(null);
+      continue;
+    }
+    out.push(Math.max(0, current - prev));
+  }
+  return out;
+}
+
+function wsPerSquareMeterToWPerSquareMeter(value: number | null): number | null {
+  if (value === null) {
+    return null;
+  }
+  return value / 3600;
+}
+
+export async function fetchGeosphereForecast(): Promise<ForecastData> {
+  const response = await fetch(GEOSPHERE_FORECAST_URL);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch Geosphere forecast: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const parsed = GeosphereForecastSchema.parse(await response.json(), { reportInput: true });
+  const feature = parsed.features[0];
+  const parameters = feature.properties.parameters;
+
+  const timestamps = parsed.timestamps.map((t) => Date.parse(t));
+
+  const ta = parameters.t2m?.data;
+  const rh = parameters.rh2m?.data;
+  const u10m = parameters.u10m?.data;
+  const v10m = parameters.v10m?.data;
+  const ugust = parameters.ugust?.data;
+  const vgust = parameters.vgust?.data;
+  const rrAcc = parameters.rr_acc?.data;
+  const grad = parameters.grad?.data;
+
+  const vw = u10m && v10m ? u10m.map((u, i) => vectorToSpeedKmH(u, v10m[i] ?? null)) : undefined;
+  const vwMax =
+    ugust && vgust ? ugust.map((u, i) => vectorToSpeedKmH(u, vgust[i] ?? null)) : undefined;
+  const dw =
+    u10m && v10m ? u10m.map((u, i) => vectorToDirectionDeg(u, v10m[i] ?? null)) : undefined;
+
+  return {
+    timestamps,
+    values: {
+      TA: ta,
+      RH: rh,
+      VW: vw,
+      VW_MAX: vwMax,
+      DW: dw,
+      PSUM: rrAcc ? accumulatedToIncrement(rrAcc) : undefined,
+      ISWR: grad ? grad.map((v) => wsPerSquareMeterToWPerSquareMeter(v)) : undefined,
+    },
+  };
+}
