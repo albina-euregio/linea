@@ -322,6 +322,34 @@ export class LineaPlot extends HTMLElement {
           this.nextBtn.click();
         }
       });
+      this.addEventListener("keydown", (e) => {
+        let days = 0;
+        switch (e.key) {
+          case "1":
+          case "2":
+          case "3":
+          case "4":
+          case "5":
+          case "6":
+          case "7":
+            days = parseInt(e.key);
+            break;
+          case "8":
+            days = 14;
+            break;
+          case "9":
+            days = 21;
+            break;
+          case "0":
+            days = 28;
+            break;
+        }
+        if (days) {
+          const endDate = this.view.getDatePickerEndDate();
+          const startDate = endDate.subtract({ days });
+          this.view.select(startDate, endDate.subtract({ days: 1 }));
+        }
+      });
       this.nextBtn.addEventListener("click", () => {
         this.view.next(this.previousBtn, this.nextBtn);
       });
