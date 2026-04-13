@@ -257,11 +257,12 @@ export class LineaExportModal extends AbstractExportModal {
     if (!dataUrl) {
       return;
     }
-
+    const labelText = LineaExportModal.escapeHtmlAttribute(exports.blogCaption ?? "");
     const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
     let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
       <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
       <linea-plot class="linea-custom-element" style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
+      ${labelText ? `<p class="wp-element-caption">${labelText}</p>` : ""}
     </div>`;
 
     if (this.lineaPlot.view instanceof WinterView) {
