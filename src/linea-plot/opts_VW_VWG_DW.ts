@@ -26,22 +26,8 @@ export const opts_VW_VWG_DW: uPlot.Options = {
           labelColor1,
           labelColor2,
         );
-
         // Draw reference line at 25 km∕h (working group decision)
-        const width = 1;
-        const offset = (width % 2) / 2;
-        const x0 = u.bbox.left;
-        const y0 = u.valToPos(25, "y", true);
-        const x1 = u.bbox.left + u.bbox.width;
-
-        ctx.strokeStyle = "#000";
-        ctx.setLineDash([5, 5]);
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        ctx.moveTo(x0 + offset, y0 + offset);
-        ctx.lineTo(x1 + offset, y0 + offset);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        LineaOptsHelper.drawReferenceLine(u, 25, "#000");
         LineaOptsHelper.drawForecastInformation(u);
 
         ctx.restore();

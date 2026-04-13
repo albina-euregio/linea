@@ -28,6 +28,23 @@ export class LineaOptsHelper extends OptsHelper {
     );
   }
 
+  static drawReferenceLine(u: uPlot, yValue: number, color: string, dash: number[] = [5, 5]) {
+    const width = 1;
+    const offset = (width % 2) / 2;
+    const x0 = u.bbox.left;
+    const y0 = u.valToPos(yValue, "y", true);
+    const x1 = u.bbox.left + u.bbox.width;
+    const ctx = u.ctx;
+    ctx.strokeStyle = color;
+    ctx.setLineDash(dash);
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x0 + offset, y0 + offset);
+    ctx.lineTo(x1 + offset, y0 + offset);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
   static drawForecastInformation(u: uPlot) {
     const ctx = u.ctx;
     const width = 1;

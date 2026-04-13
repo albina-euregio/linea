@@ -29,20 +29,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         );
 
         // Draw reference line at 0℃
-        const width = 1;
-        const offset = (width % 2) / 2;
-        const x0 = u.bbox.left;
-        const y0 = u.valToPos(0, "y", true);
-        const x1 = u.bbox.left + u.bbox.width;
-
-        ctx.strokeStyle = "#000";
-        ctx.setLineDash([5, 5]);
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        ctx.moveTo(x0 + offset, y0 + offset);
-        ctx.lineTo(x1 + offset, y0 + offset);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        LineaOptsHelper.drawReferenceLine(u, 0, "#000");
         LineaOptsHelper.drawForecastInformation(u);
         ctx.restore();
       },
