@@ -153,10 +153,10 @@ export const opts_VW_MAX_FORECAST: uPlot.Series = {
 export const opts_DW_FORECAST: uPlot.Series = {
   ...opts_DW,
   label: "Forecast",
+  stroke: "#687976",
   points: {
+    fill: "#687976",
     space: 0,
-    fill: "#084D40",
-    stroke: "#084D40",
     width: 1,
     size: 4,
     dash: [8, 6],
