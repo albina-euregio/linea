@@ -3,7 +3,7 @@ import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
 
 const GEOSPHERE_FORECAST_BASE_URL =
   "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m";
-const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,snow_acc";
+const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,snow_acc,grad";
 
 export const GEOSPHERE_BBOX_OUTER = {
   minLat: 42.96974998874999,
@@ -50,6 +50,13 @@ function accumulatedToIncrement(values: (number | null)[]): (number | null)[] {
   return out;
 }
 
+function wsPerSquareMeterToWPerSquareMeter(value: number | null): number | null {
+  if (value === null) {
+    return null;
+  }
+  return value / 3600;
+}
+
 export async function fetchGeosphereForecast(latlon: string): Promise<ForecastData> {
   const url =
     `${GEOSPHERE_FORECAST_BASE_URL}?lat_lon=${encodeURIComponent(latlon)}` +
@@ -75,13 +82,13 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
   const vgust = parameters.vgust?.data;
   const rrAcc = parameters.rr_acc?.data;
   const snowAcc = parameters.snow_acc?.data;
+  const grad = parameters.grad?.data;
 
   const vw = u10m && v10m ? u10m.map((u, i) => vectorToSpeedKmH(u, v10m[i] ?? null)) : undefined;
   const vwMax =
     ugust && vgust ? ugust.map((u, i) => vectorToSpeedKmH(u, vgust[i] ?? null)) : undefined;
   const dw =
     u10m && v10m ? u10m.map((u, i) => vectorToDirectionDeg(u, v10m[i] ?? null)) : undefined;
-
   return {
     timestamps,
     values: {
@@ -92,7 +99,7 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
       DW: dw,
       PSUM: rrAcc ? accumulatedToIncrement(rrAcc) : undefined,
       NS: snowAcc,
-      ISWR: undefined,
+      ISWR: grad ? accumulatedToIncrement(grad).map(wsPerSquareMeterToWPerSquareMeter) : undefined,
     },
   };
 }
