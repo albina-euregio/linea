@@ -64,7 +64,7 @@ export class StressLevelChart extends AbstractChart {
         {
           ...opts_stress_series_base,
           stroke: COLORS[(i - 2) % COLORS.length],
-          label: StressChart.NAMES[(i - 2) % StressChart.NAMES.length],
+          label: StressLevelChart.NAMES[(i - 2) % StressLevelChart.NAMES.length],
         },
         plotInformation.data[i] as number[],
       );
