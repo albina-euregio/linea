@@ -339,7 +339,8 @@ export class MeasurementDatesPlugin {
           modalContent.appendChild(closeBtn);
 
           helpModal.appendChild(modalContent);
-          document.body.appendChild(helpModal);
+          const modalHost = (u.root.closest("linea-plot") as HTMLElement | null) ?? u.root;
+          modalHost.appendChild(helpModal);
 
           closeAnalyzerBtn.addEventListener("click", () => {
             MeasurementDatesPlugin.clearDatums(u);
