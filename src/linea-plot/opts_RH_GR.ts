@@ -92,6 +92,5 @@ export const opts_RH_FORECAST: uPlot.Series = {
 export const opts_ISWR_FORECAST: uPlot.Series = {
   ...opts_ISWR,
   label: "Forecast",
-  fill: undefined,
   dash: [8, 6],
 };

@@ -53,7 +53,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
   protected updateData(plot: uPlot, values: (number | null)[][]) {
     let data = [] as unknown as [xValues: number[], ...yValues: (number | null | undefined)[][]];
     for (const element of values) {
-      data.push(element ?? this.#createNullArray());
+      data.push(this.#normalizePlotSeriesData(element ?? this.#createNullArray()));
     }
     plot.setData(data);
     this.#syncForecastSeriesVisibility(plot);
@@ -124,6 +124,15 @@ export abstract class AbstractLineaChart extends HTMLElement {
     return nulls;
   }
 
+  #normalizePlotSeriesData(series: (number | null | undefined)[]): (number | null | undefined)[] {
+    return series.map((value) => {
+      if (typeof value === "number" && Number.isNaN(value)) {
+        return null;
+      }
+      return value;
+    });
+  }
+
   addSeries(plot: uPlot, series: uPlot.Series, data: (number | null)[]) {
     if (!this.plots.includes(plot)) {
       this.plots.push(plot);
@@ -134,7 +143,9 @@ export abstract class AbstractLineaChart extends HTMLElement {
     }
     const isForecastSeries = series.label === "Forecast";
     plot.addSeries({ ...series, show: isForecastSeries ? true : !!data?.length });
-    (plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]]).push(data);
+    (plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]]).push(
+      this.#normalizePlotSeriesData(data),
+    );
     this.#syncForecastSeriesVisibility(plot);
     this.#hideForecastLegendRows(plot);
   }
