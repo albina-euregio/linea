@@ -113,7 +113,7 @@ export class LineaChart extends AbstractLineaChart {
             timestamps,
             values.TD ??
               (values.TA && values.RH
-                ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
+                ? this.#calculateDewPointSeries(values.TA, values.RH)
                 : undefined),
             values.TSS,
             this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
@@ -127,7 +127,7 @@ export class LineaChart extends AbstractLineaChart {
             timestamps,
             values.TD ??
               (values.TA && values.RH
-                ? values.TA.map((temp, i) => dewPoint(temp, values.RH[i]))
+                ? this.#calculateDewPointSeries(values.TA, values.RH)
                 : undefined),
             values.TSS,
             values.TA,
@@ -202,7 +202,7 @@ export class LineaChart extends AbstractLineaChart {
       const TD =
         this.result.values.TD ??
         (this.result.values.TA && this.result.values.RH
-          ? this.result.values.TA.map((temp, i) => dewPoint(temp, this.result.values.RH[i]))
+          ? this.#calculateDewPointSeries(this.result.values.TA, this.result.values.RH)
           : undefined);
       const p = new uPlot(
         this.withFreshPlugins({
