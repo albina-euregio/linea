@@ -322,7 +322,7 @@ export class LineaPlot extends HTMLElement {
           this.nextBtn.click();
         }
       });
-      this.addEventListener("keydown", (e) => {
+      this.addEventListener("keydown", async (e) => {
         let days = 0;
         switch (e.key) {
           case "1":
@@ -343,6 +343,12 @@ export class LineaPlot extends HTMLElement {
           case "0":
             days = 28;
             break;
+        }
+        if (days > 7) {
+          const stationView = this.lineaViews.get("station");
+          if (stationView instanceof StationView) {
+            await stationView.fetchLazySrc();
+          }
         }
         if (days) {
           const endDate = this.view.getDatePickerEndDate();
