@@ -329,7 +329,18 @@ export class LineaPlot extends HTMLElement {
       this.nextBtn.classList.add("toggle-btn");
       this.nextBtn.classList.add("controls-dates-inputs");
       this.nextBtn.classList.add("linea-tooltip");
-      this.nextBtn.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("linea:controls:tooltips:next")}</span>`;
+      this.nextBtn.classList.add("loading-btn");
+
+      const nextLabel = document.createElement("span");
+      nextLabel.className = "loading-btn-label";
+      nextLabel.textContent = "\u2192";
+      this.nextBtn.appendChild(nextLabel);
+
+      const nextTooltip = document.createElement("span");
+      nextTooltip.className = "linea-tooltiptext";
+      nextTooltip.textContent = i18n.message("linea:controls:tooltips:next");
+      this.nextBtn.appendChild(nextTooltip);
+      this.nextBtn.appendChild(this.#createLoadingOverlay());
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           this.nextBtn.click();
