@@ -426,8 +426,6 @@ export class AwsStatsExportModal extends AbstractExportModal {
       const ctx = outCanvas.getContext("2d")!;
       ctx.imageSmoothingEnabled = false;
       ctx.imageSmoothingQuality = "high";
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
 
       let y = 0;
       for (const section of sections) {
