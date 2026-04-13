@@ -667,7 +667,7 @@ export class MeasurementDatesPlugin {
       case "°C":
         return [integratedValue, "℃ h"];
       case "km∕h":
-        return [integratedValue * 1000, "m"]; // convert km∕h * h = km to m
+        return [integratedValue, "km"]; // convert km∕h * h = km to m
       case "%":
         return [integratedValue, "% h"];
       case "W∕m²":
@@ -743,7 +743,7 @@ export type AnalyzerUnit =
   // intensity (power per area)
   | "W∕m²";
 export type AnalyzerIntegratedUnit =
-  | "m"
+  | "km"
   | "°h"
   | "℃ h"
   | "% h"
