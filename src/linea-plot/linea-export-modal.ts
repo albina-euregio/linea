@@ -175,7 +175,8 @@ export class LineaExportModal extends AbstractExportModal {
             const precipitationIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:PSUM"),
             );
-            result.values.PSUM = lc.plots[index].data[precipitationIndex] as (number | null)[];
+            const cumulativePSUM = lc.plots[index].data[precipitationIndex] as (number | null)[];
+            result.values.PSUM = this.#reconstructPSUMSeries(cumulativePSUM);
           }
         });
       }
@@ -285,6 +286,28 @@ export class LineaExportModal extends AbstractExportModal {
       filename: this.#generateFilename() + ".txt",
       type: "text/plain",
     };
+  }
+
+  #reconstructPSUMSeries(cumulativePSUM: (number | null)[]): (number | null)[] {
+    const reconstructed: (number | null)[] = [];
+    for (let i = 0; i < cumulativePSUM.length; i++) {
+      const current = cumulativePSUM[i];
+      if (current == null) {
+        reconstructed[i] = null;
+        continue;
+      }
+      if (i === 0) {
+        reconstructed[i] = current;
+        continue;
+      }
+      const previous = cumulativePSUM[i - 1];
+      if (previous == null) {
+        reconstructed[i] = current;
+        continue;
+      }
+      reconstructed[i] = current < previous ? current : current - previous;
+    }
+    return reconstructed;
   }
 
   /**
