@@ -196,6 +196,12 @@ export abstract class AbstractExportModal {
       this.openExport();
     });
 
+    window.onkeydown = (e) => {
+      if (e.key === "Escape") {
+        this.modal.style.display = "none";
+      }
+    };
+
     // Close modal when clicking outside
     window.onclick = function (event) {
       const modal = document.getElementById("exportModal");
