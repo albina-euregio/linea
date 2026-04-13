@@ -1,6 +1,7 @@
 import uPlot from "uplot";
 import { OptsHelper } from "../shared/opts-helper";
 import { cursorOpts } from "../shared/cursor-opts";
+import { i18n } from "../i18n";
 
 // Create a single sync instance for all charts
 const syncCursor = uPlot.sync("weather-charts");
@@ -43,6 +44,8 @@ export class LineaOptsHelper extends OptsHelper {
       ctx.lineTo(forecastX + offset, u.bbox.top + u.bbox.height);
       ctx.stroke();
       ctx.setLineDash([]);
+      ctx.fillStyle = "#00000056";
+      ctx.fillText(i18n.message("linea:forecast:arome"), forecastX + 5, u.bbox.top - 10);
     }
   }
 
