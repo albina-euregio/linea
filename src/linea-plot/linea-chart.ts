@@ -4,6 +4,7 @@ import {
   opts_TA_FORECAST,
   opts_TA_TD_TSS,
   opts_TD,
+  opts_TD_FORECAST,
   opts_TSS,
   opts_SurfaceHoar,
 } from "./opts_TA_TD_TSS";
@@ -98,6 +99,7 @@ export class LineaChart extends AbstractLineaChart {
       i += 1;
     }
     if (values.TA || values.TD || values.TSS) {
+      const forecastTd = this.#calculateDewPointSeries(forecastValues?.TA, forecastValues?.RH);
       if (this.showSurfaceHoarSeries && values.TD && values.TSS) {
         this.updateData(
           this.plots[i],
@@ -110,7 +112,7 @@ export class LineaChart extends AbstractLineaChart {
             values.TSS,
             this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
             values.TA,
-          ].concat(forecastValues?.TA ? [forecastValues.TA] : []),
+          ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
         );
       } else {
         this.updateData(
@@ -123,7 +125,7 @@ export class LineaChart extends AbstractLineaChart {
                 : undefined),
             values.TSS,
             values.TA,
-          ].concat(forecastValues?.TA ? [forecastValues.TA] : []),
+          ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
         );
       }
       i += 1;
@@ -326,6 +328,16 @@ export class LineaChart extends AbstractLineaChart {
     return result;
   }
 
+  #calculateDewPointSeries(
+    temperature: (number | null)[] | undefined,
+    humidity: (number | null)[] | undefined,
+  ): (number | null)[] | undefined {
+    if (!temperature || !humidity) {
+      return undefined;
+    }
+    return temperature.map((temp, i) => dewPoint(temp, humidity[i] ?? null));
+  }
+
   protected getStationTitle(): {} {
     return this.showTitle && !this.drawedTitle
       ? {
@@ -382,6 +394,13 @@ export class LineaChart extends AbstractLineaChart {
     // TA/TD/TSS plot
     if (this.result.values.TA) {
       const plot = this.plots[plotIdx];
+      const forecastTd = this.#calculateDewPointSeries(
+        this.result.forecast.values.TA,
+        this.result.forecast.values.RH,
+      );
+      if (forecastTd) {
+        this.addSeries(plot, opts_TD_FORECAST, forecastTd);
+      }
       if (this.result.forecast.values.TA) {
         this.addSeries(plot, opts_TA_FORECAST, this.result.forecast.values.TA);
       }

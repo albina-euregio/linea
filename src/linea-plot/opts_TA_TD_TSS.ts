@@ -137,7 +137,9 @@ export const opts_TA = createSeries("linea:parameter:TA", "#DE2D26");
 export const opts_TD = createSeries("linea:parameter:TD", "#6aafd5");
 export const opts_TSS = createSeries("linea:parameter:TSS", "#FC9272");
 export const opts_TA_FORECAST = createSeries("linea:parameter:TA", "#DE2D26", true);
+export const opts_TD_FORECAST = createSeries("linea:parameter:TD", "#6aafd5", true);
 opts_TA_FORECAST.label = "Forecast";
+opts_TD_FORECAST.label = "Forecast";
 
 export const opts_SurfaceHoar: uPlot.Series = {
   label: i18n.message("linea:parameter:SH:potential"),
