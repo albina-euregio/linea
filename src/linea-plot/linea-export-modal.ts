@@ -5,6 +5,7 @@ import { StationData } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { WinterView } from "./winter-view";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
+import { OptsHelper } from "../shared/opts-helper";
 
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
@@ -433,13 +434,7 @@ export class LineaExportModal extends AbstractExportModal {
       plots.map((p) =>
         p.series.slice(1).map((s, i) => {
           const label = s.label ?? `Series ${i + 1}`;
-          let color = "#000000";
-          if (typeof s.stroke === "string") {
-            color = s.stroke;
-          } else if (typeof s.stroke === "function") {
-            const c = s.stroke(p, i + 1);
-            if (typeof c === "string") color = c;
-          }
+          const color = OptsHelper.resolveSeriesStroke(p, i + 1);
           legendItems[String(label)] = color;
         }),
       );

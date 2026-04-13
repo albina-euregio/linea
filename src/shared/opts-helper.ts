@@ -9,6 +9,24 @@ export interface SplitOptions {
 }
 
 export class OptsHelper {
+  /**
+   *
+   * @param plot the uPlot instance to resolve the series stroke for
+   * @param seriesIdx the index of the series to resolve the stroke for, starting with 1 for the first y-series (0 is x-series)
+   * @returns the series stroke as string, per defualt "#000000".
+   */
+  static resolveSeriesStroke(plot: uPlot, seriesIdx: number): string {
+    const stroke = plot.series[seriesIdx].stroke;
+    if (typeof stroke === "string") {
+      return stroke;
+    }
+    if (typeof stroke === "function") {
+      const resolved = stroke(plot, seriesIdx);
+      return typeof resolved === "string" ? resolved : "";
+    }
+    return "#000000";
+  }
+
   static UpdateAxisLabels(
     u: uPlot,
     leftLabel: string,

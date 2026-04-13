@@ -2,6 +2,7 @@ import { i18n } from "../i18n";
 import { AbstractChart } from "./abstract-chart";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
 import type { AwsStats } from "./aws-stats-wrapper";
+import { OptsHelper } from "../shared/opts-helper";
 
 /**
  * ExportModal class handles the export functionality for AwsStats charts.
@@ -458,13 +459,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
             return;
           }
           const label = s.label ?? `Series ${seriesIndex}`;
-          let color = "#000000";
-          if (typeof s.stroke === "string") {
-            color = s.stroke;
-          } else if (typeof s.stroke === "function") {
-            const c = s.stroke(plot, seriesIndex);
-            if (typeof c === "string") color = c;
-          }
+          const color = OptsHelper.resolveSeriesStroke(plot, seriesIndex);
           legendItems[String(label)] = color;
         });
         if (drawLegend && Object.keys(legendItems).length > 0) {
