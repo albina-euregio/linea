@@ -73,7 +73,8 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
   If there are more SMET files than colorcodes for the other stations there is no background color set. Per default the first station is set in light grey, if there is more than one.
 - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
 - `showexport` - toggles if the export button is shown
-- `showinteractiveblogexport`- in combination with `showexport` it shows a button to export a wordpress shortcode, which can be used together with the `linea-plot-blog.php` plugin for Wordpress. See Export options for more details.
+- `showinteractiveblogexport` - in combination with `showexport` it shows a button to export a wordpress shortcode, which can be used together with the `linea-plot-blog.php` plugin for Wordpress. See Export options for more details.
+- `forecast-latlon` - JSON-encoded array of strings in the format lat,lon, e.g. `'["47.180105,11.288011"]'`. Must lie in the bbox [ 42.96974998874999, 5.486749988749989, 51.83025001125035, 22.113250011249765 ] fro mthe geosphere AROME data
 
 If the data from `src` is not a subset from `lazysrc`, the inital view for the user is not changed after loading and replacing the data from `src` with data from `lazysrc` element. Available dates for the date picker are updated to timespan of data of `lazysrc` element. Clicking the previous/next week button for the first time lead to a zoom to the whole available timespan of the data of `lazysrc` element.
 
@@ -120,6 +121,7 @@ Maximum example, uses every available attribute:
   showsurfacehoarseries
   showtitle
   showexport
+  forecast-latlon='["47.180105,11.288011"]'
 >
 </linea-plot>
 ```
