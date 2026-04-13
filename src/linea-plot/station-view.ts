@@ -3,7 +3,7 @@ import { LineaChart } from "./linea-chart";
 import { LineaView } from "../linea-view";
 import type { LineaPlot } from "../linea-plot";
 import type { AirDatepickerOptions } from "air-datepicker";
-import { fetchGeosphereForecast } from "../data/geosphere-forecast";
+import { fetchGeosphereForecast, GEOSPHERE_BBOX_OUTER } from "../data/geosphere-forecast";
 import { type ParameterType, type Values } from "../data/station-data";
 
 /**
@@ -90,6 +90,14 @@ export class StationView extends LineaView {
     const lon = Number(parts[1]);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
       console.warn("Invalid forecast-latlon coordinates. Expected numeric values.", trimmed);
+      return undefined;
+    }
+
+    const bbox = GEOSPHERE_BBOX_OUTER;
+    const isInsideBbox =
+      lat >= bbox.minLat && lat <= bbox.maxLat && lon >= bbox.minLon && lon <= bbox.maxLon;
+    if (!isInsideBbox) {
+      console.warn("forecast-latlon is outside coverage bbox and will be ignored.", trimmed);
       return undefined;
     }
 

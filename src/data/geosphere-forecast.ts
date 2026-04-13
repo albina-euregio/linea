@@ -5,6 +5,13 @@ const GEOSPHERE_FORECAST_BASE_URL =
   "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m";
 const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,snow_acc";
 
+export const GEOSPHERE_BBOX_OUTER = {
+  minLat: 42.96974998874999,
+  minLon: 5.486749988749989,
+  maxLat: 51.83025001125035,
+  maxLon: 22.113250011249765,
+};
+
 type ForecastData = {
   timestamps: number[];
   values: Values;
