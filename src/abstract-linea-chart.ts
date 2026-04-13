@@ -1,10 +1,12 @@
 import uPlot from "uplot";
 import type { ForecastValues, StationData, Values } from "./data/station-data";
+import { OptsHelper } from "./shared/opts-helper";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
   resizeObserver = new ResizeObserver(() => this.resizePlots(this.clientWidth, this.style));
 
+  private forecastSeriesHooks = new WeakSet<uPlot>();
   protected drawedTitle: boolean = false;
   protected backgroundColor: string;
   protected showTitle: boolean;
@@ -58,19 +60,62 @@ export abstract class AbstractLineaChart extends HTMLElement {
   }
 
   #syncForecastSeriesVisibility(plot: uPlot) {
-    const data = plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]];
-    for (let seriesIdx = 1; seriesIdx < plot.series.length; seriesIdx++) {
-      const series = plot.series[seriesIdx];
-      if (series.label !== "Forecast") {
+    if (this.forecastSeriesHooks.has(plot)) {
+      return;
+    }
+
+    this.forecastSeriesHooks.add(plot);
+    plot.hooks.setSeries = plot.hooks.setSeries || [];
+    plot.hooks.setSeries.push((u) => {
+      try {
+        for (let seriesIdx = 1; seriesIdx < u.series.length; seriesIdx++) {
+          const series = u.series[seriesIdx];
+          if (series.label !== "Forecast") {
+            continue;
+          }
+
+          const baseSeriesIdx = this.#findBaseSeriesForForecast(u, seriesIdx);
+          const baseSeriesVisible = baseSeriesIdx > 0 ? !!u.series[baseSeriesIdx].show : false;
+          const forecastValues = (u.data[seriesIdx] ?? []) as (number | null | undefined)[];
+          const hasData = forecastValues.some((value) => value != null && !Number.isNaN(value));
+          const shouldShow = hasData && baseSeriesVisible;
+
+          if (series.show !== shouldShow) {
+            u.setSeries(seriesIdx, { show: shouldShow });
+          }
+        }
+      } finally {
+        this.#hideForecastLegendRows(u);
+      }
+    });
+    this.#hideForecastLegendRows(plot);
+  }
+
+  #findBaseSeriesForForecast(plot: uPlot, forecastSeriesIdx: number): number {
+    const forecastColor = OptsHelper.resolveSeriesStroke(plot, forecastSeriesIdx);
+
+    for (let idx = forecastSeriesIdx - 1; idx >= 1; idx--) {
+      const candidate = plot.series[idx];
+      if (candidate.label === "Forecast") {
         continue;
       }
 
-      const values = data[seriesIdx] ?? [];
-      const hasData = values.some((value) => value !== null && !Number.isNaN(value));
-      if (hasData && !series.show) {
-        plot.setSeries(seriesIdx, { show: true });
+      if (OptsHelper.resolveSeriesStroke(plot, idx) === forecastColor) {
+        return idx;
       }
     }
+
+    return -1;
+  }
+
+  #hideForecastLegendRows(plot: uPlot) {
+    const rows = plot.root.querySelectorAll<HTMLElement>(".u-legend .u-series");
+    rows.forEach((row) => {
+      const label = row.querySelector<HTMLElement>(".u-label")?.textContent?.trim();
+      if (label?.startsWith("Forecast")) {
+        row.style.display = "none";
+      }
+    });
   }
 
   #createNullArray() {
@@ -87,8 +132,11 @@ export abstract class AbstractLineaChart extends HTMLElement {
       console.debug("addSeries called with undefined data", series.label);
       data = [] as number[];
     }
-    plot.addSeries({ ...series, show: !!data?.length });
+    const isForecastSeries = series.label === "Forecast";
+    plot.addSeries({ ...series, show: isForecastSeries ? true : !!data?.length });
     (plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]]).push(data);
+    this.#syncForecastSeriesVisibility(plot);
+    this.#hideForecastLegendRows(plot);
   }
 
   modifyDrawHook(p: uPlot, backgroundColor: string) {
