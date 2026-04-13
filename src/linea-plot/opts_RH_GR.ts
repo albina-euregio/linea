@@ -24,6 +24,7 @@ export const opts_RH_GR: uPlot.Options = {
           labelColor1,
           labelColor2,
         );
+        LineaOptsHelper.drawForecastInformation(u);
       },
     ],
   },

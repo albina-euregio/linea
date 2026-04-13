@@ -25,6 +25,7 @@ export const opts_HS_PSUM: uPlot.Options = {
           labelColor1,
           labelColor2,
         );
+        LineaOptsHelper.drawForecastInformation(u);
       },
     ],
     setSelect: [

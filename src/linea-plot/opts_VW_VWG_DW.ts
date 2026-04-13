@@ -42,6 +42,7 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         ctx.lineTo(x1 + offset, y0 + offset);
         ctx.stroke();
         ctx.setLineDash([]);
+        LineaOptsHelper.drawForecastInformation(u);
 
         ctx.restore();
       },

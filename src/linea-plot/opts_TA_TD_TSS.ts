@@ -43,7 +43,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         ctx.lineTo(x1 + offset, y0 + offset);
         ctx.stroke();
         ctx.setLineDash([]);
-
+        LineaOptsHelper.drawForecastInformation(u);
         ctx.restore();
       },
     ],

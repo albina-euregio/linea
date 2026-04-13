@@ -27,6 +27,25 @@ export class LineaOptsHelper extends OptsHelper {
     );
   }
 
+  static drawForecastInformation(u: uPlot) {
+    const ctx = u.ctx;
+    const width = 1;
+    const offset = (width % 2) / 2;
+    const now = new Date().getTime();
+    const lastData = u.data[0][u.data[0].length - 1];
+    if (lastData != null && lastData > now) {
+      const forecastX = u.valToPos(now, "x", true);
+      ctx.strokeStyle = "#00000056";
+      ctx.setLineDash([10, 5]);
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.moveTo(forecastX + offset, u.bbox.top);
+      ctx.lineTo(forecastX + offset, u.bbox.top + u.bbox.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
   static getLineaOptions(): Omit<uPlot.Options, "series"> {
     return {
       ms: 1, // timestamp multiplier that yields 1 millisecond
