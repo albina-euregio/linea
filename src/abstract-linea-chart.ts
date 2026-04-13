@@ -11,6 +11,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
   protected backgroundColor: string;
   protected showTitle: boolean;
   public result: StationData;
+  private forecastCursorValueSync = new WeakMap<uPlot, Set<number>>();
 
   constructor(backgroundColor: string, showTitle: boolean, result: StationData) {
     super();
@@ -118,6 +119,39 @@ export abstract class AbstractLineaChart extends HTMLElement {
     });
   }
 
+  #syncBaseSeriesCursorValue(plot: uPlot, baseSeriesIdx: number, forecastSeriesIdx: number): void {
+    if (baseSeriesIdx < 1 || forecastSeriesIdx < 1) {
+      return;
+    }
+
+    if (!this.forecastCursorValueSync.has(plot)) {
+      this.forecastCursorValueSync.set(plot, new Set<number>());
+    }
+
+    const syncedSeries = this.forecastCursorValueSync.get(plot)!;
+    if (syncedSeries.has(baseSeriesIdx)) {
+      return;
+    }
+
+    const originalValue = plot.series[baseSeriesIdx].value;
+    plot.series[baseSeriesIdx].value = (u, v, seriesIdx, dataIdx) => {
+      const measured = typeof v === "number" && !Number.isNaN(v) ? v : null;
+      const forecast =
+        typeof dataIdx === "number"
+          ? ((u.data[forecastSeriesIdx]?.[dataIdx] as number | null | undefined) ?? null)
+          : null;
+      const merged = measured ?? forecast;
+
+      if (typeof originalValue === "function") {
+        return originalValue(u, merged, seriesIdx, dataIdx);
+      }
+
+      return merged == null ? "-" : `${merged}`;
+    };
+
+    syncedSeries.add(baseSeriesIdx);
+  }
+
   #createNullArray() {
     let nulls: number | null[] = [];
     this.result.timestamps.forEach(() => nulls.push(null));
@@ -146,6 +180,13 @@ export abstract class AbstractLineaChart extends HTMLElement {
     (plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]]).push(
       this.#normalizePlotSeriesData(data),
     );
+
+    if (isForecastSeries) {
+      const forecastSeriesIdx = plot.series.length - 1;
+      const baseSeriesIdx = this.#findBaseSeriesForForecast(plot, forecastSeriesIdx);
+      this.#syncBaseSeriesCursorValue(plot, baseSeriesIdx, forecastSeriesIdx);
+    }
+
     this.#syncForecastSeriesVisibility(plot);
     this.#hideForecastLegendRows(plot);
   }
