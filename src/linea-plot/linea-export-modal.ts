@@ -145,7 +145,7 @@ export class LineaExportModal extends AbstractExportModal {
             result.values.TSS = lc.plots[index].data[surfaceIndex] as (number | null)[];
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:wind")) {
             const windIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:VW_MAX"),
+              (s) => s.label === i18n.message("linea:parameter:VW"),
             );
             result.values.VW = lc.plots[index].data[windIndex] as (number | null)[];
             const windMaxIndex = lc.plots[index].series.findIndex(
