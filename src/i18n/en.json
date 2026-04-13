@@ -37,6 +37,7 @@
   "linea:controls:value:winterview:station": "Stationview",
   "linea:controls:label:exportsettings": "Export Settings",
   "linea:controls:label:heightpercanvas": "Height per canvas",
+  "linea:controls:label:caption": "Caption",
   "linea:controls:label:width": "Width",
   "linea:controls:label:title": "Title",
   "linea:controls:label:exportchart": "Export Chart",

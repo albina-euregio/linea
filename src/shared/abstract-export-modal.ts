@@ -113,6 +113,10 @@ export abstract class AbstractExportModal {
                               <input type="text" id="exportTitle" value="">
                           </div>
                         </div>
+                          <div id="exportBlogCaptionField" style="display: none; flex-direction: column; gap: 6px;">
+                            <label for="exportBlogCaption" style="display: block; margin-bottom: 0;">${i18n.message("linea:controls:label:caption")}</label>
+                            <textarea id="exportBlogCaption" rows="3"></textarea>
+                          </div>
                         <div>
                             <label for="exportDiagrams">${i18n.message("linea:controls:label:selectdiagrams")}</label>
                             <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
@@ -163,23 +167,27 @@ export abstract class AbstractExportModal {
     );
 
     this.modal.querySelector("#btnExportSmet")!.addEventListener("click", () => {
+      document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.exportAsSMET();
     });
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
       document.getElementById("exportSizes")!.style.display = "none";
+      document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.resetCopyToClipboardButton();
       this.exportAsIframe();
     });
 
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
       document.getElementById("exportSizes")!.style.display = "grid";
+      document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.resetCopyToClipboardButton();
       this.exportAllPlotsToPNG(this.getExportSettings());
     });
 
     this.modal.querySelector("#btnExportInteractiveBlog")?.addEventListener("click", () => {
       document.getElementById("exportSizes")!.style.display = "none";
+      document.getElementById("exportBlogCaptionField")!.style.display = "flex";
       this.resetCopyToClipboardButton();
       this.exportAsBlogElement();
     });
@@ -479,10 +487,14 @@ export abstract class AbstractExportModal {
     const widthInput = document.getElementById("exportWidth") as HTMLInputElement;
     const heightInput = document.getElementById("exportHeight") as HTMLInputElement;
     const titleInput = document.getElementById("exportTitle") as HTMLInputElement;
+    const blogCaptionInput = document.getElementById(
+      "exportBlogCaption",
+    ) as HTMLInputElement | null;
     return {
       width: parseInt(widthInput.value),
       heightPerCanvas: parseInt(heightInput.value),
       title: titleInput.value,
+      blogCaption: blogCaptionInput?.value ?? "",
     };
   }
 
