@@ -61,12 +61,20 @@ export class LineaChart extends AbstractLineaChart {
     const forecastValues = forecast?.values;
 
     if (values.HS || values.PSUM) {
+      const measuredPsumAccum = values.PSUM
+        ? this.#sumupPrecipitation(timestamps, values.PSUM)
+        : undefined;
+      const forecastPsumAccum =
+        forecastValues?.PSUM && measuredPsumAccum
+          ? this.#sumupForecastPrecipitation(timestamps, forecastValues.PSUM, measuredPsumAccum)
+          : undefined;
+
       if (values.HS && values.PSUM) {
         this.updateData(
           this.plots[i],
-          [timestamps, values.HS, this.#sumupPrecipitation(timestamps, values.PSUM)].concat(
+          [timestamps, values.HS, measuredPsumAccum].concat(
             forecastValues?.HS ? [forecastValues.HS] : [],
-            forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
+            forecastPsumAccum ? [forecastPsumAccum] : [],
           ),
         );
       } else if (values.HS) {
@@ -74,15 +82,13 @@ export class LineaChart extends AbstractLineaChart {
           this.plots[i],
           [timestamps, values.HS].concat(
             forecastValues?.HS ? [forecastValues.HS] : [],
-            forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
+            forecastPsumAccum ? [forecastPsumAccum] : [],
           ),
         );
       } else if (values.PSUM) {
         this.updateData(
           this.plots[i],
-          [timestamps, this.#sumupPrecipitation(timestamps, values.PSUM)].concat(
-            forecastValues?.PSUM ? [this.#sumupPrecipitation(timestamps, forecastValues.PSUM)] : [],
-          ),
+          [timestamps, measuredPsumAccum].concat(forecastPsumAccum ? [forecastPsumAccum] : []),
         );
       }
       i += 1;
@@ -328,6 +334,63 @@ export class LineaChart extends AbstractLineaChart {
     return result;
   }
 
+  #sumupForecastPrecipitation(
+    timestamps: number[],
+    forecastPsum: (number | null)[],
+    measuredAccum: number[],
+  ): (number | null)[] {
+    const result: (number | null)[] = [];
+    let started = false;
+    let sum = 0;
+    const timezone = i18n.timezone();
+
+    for (let i = 0; i < forecastPsum.length; i++) {
+      const value = forecastPsum[i];
+      const isMissing = value === null || Number.isNaN(value);
+
+      if (!started) {
+        if (isMissing) {
+          result[i] = NaN;
+          continue;
+        }
+
+        const baseline = this.#findLastMeasuredAccum(measuredAccum, i);
+        sum = baseline + value;
+        started = true;
+        result[i] = sum;
+        continue;
+      }
+
+      const prevDate = Temporal.Instant.fromEpochMilliseconds(timestamps[i - 1]).toZonedDateTimeISO(
+        timezone,
+      );
+      const currentDate = Temporal.Instant.fromEpochMilliseconds(timestamps[i]).toZonedDateTimeISO(
+        timezone,
+      );
+      const crossedSeven = prevDate.hour < 7 && currentDate.hour >= 7;
+
+      if (crossedSeven) {
+        sum = isMissing ? 0 : value;
+      } else if (!isMissing) {
+        sum += value;
+      }
+
+      result[i] = isMissing ? sum : sum;
+    }
+
+    return result;
+  }
+
+  #findLastMeasuredAccum(measuredAccum: number[], atIndex: number): number {
+    for (let i = atIndex; i >= 0; i--) {
+      const value = measuredAccum[i];
+      if (!Number.isNaN(value)) {
+        return value;
+      }
+    }
+    return 0;
+  }
+
   #calculateDewPointSeries(
     temperature: (number | null)[] | undefined,
     humidity: (number | null)[] | undefined,
@@ -367,10 +430,16 @@ export class LineaChart extends AbstractLineaChart {
         this.addSeries(
           plot,
           opts_PSUM_FORECAST,
-          this.#sumupPrecipitation(
-            this.result.forecast.timestamps,
-            this.result.forecast.values.PSUM,
-          ),
+          this.result.values.PSUM
+            ? this.#sumupForecastPrecipitation(
+                this.result.forecast.timestamps,
+                this.result.forecast.values.PSUM,
+                this.#sumupPrecipitation(this.result.forecast.timestamps, this.result.values.PSUM),
+              )
+            : this.#sumupPrecipitation(
+                this.result.forecast.timestamps,
+                this.result.forecast.values.PSUM,
+              ),
         );
       }
       plotIdx += 1;
