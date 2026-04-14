@@ -1,5 +1,6 @@
+import { fetchOrThrow } from "./fetchOrThrow";
 import * as geosphere from "./geosphere-data";
-import { parseSLFAPIData } from "./slf-data";
+import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 
@@ -32,24 +33,19 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
 };
 
 export async function fetchSMET(url: string): Promise<StationData> {
-  let response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch SMET data from ${url}: ${response.status} ${response.statusText}`,
-    );
-  }
+  let response = await fetchOrThrow(url);
 
   if (url.startsWith("https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min")) {
     // https://dataset.api.hub.geosphere.at/
-    const metadata0 = await fetch(
+    const metadata0 = await fetchOrThrow(
       "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
     );
     const metadata = geosphere.MetadataSchema.parse(await metadata0.json());
     const collection = geosphere.FeatureCollectionSchema.parse(await response.json());
     return geosphere.parseGeosphereData(metadata, collection);
   } else if (url.startsWith("https://measurement-api.slf.ch/public/api/imis/station/")) {
-    const metadata = await fetch("https://measurement-api.slf.ch/public/api/imis/stations");
-    return parseSLFAPIData(await metadata.json(), await response.json());
+    const metadata = await fetchOrThrow(slf.URL);
+    return slf.parseSLFAPIData(await metadata.json(), await response.json());
   }
 
   let stream = response.body;

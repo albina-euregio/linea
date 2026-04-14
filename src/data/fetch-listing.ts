@@ -1,7 +1,9 @@
 import { FeatureCollectionSchema as LegacyFeatureCollectionSchema } from "../schema/listing-legacy";
 import { FeatureCollectionSchema, FeatureSchema } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
+import * as slf from "./slf-data";
 import { type z } from "zod";
+import { fetchOrThrow } from "./fetchOrThrow";
 
 type Config = {
   regions: string[];
@@ -91,6 +93,13 @@ const config: Config[] = [
     smet: (id: string) => [`https://lawinen.at/smet/slo/woche/${id}.smet.gz`],
     geojson: "https://lawinen.at/smet/slo/stations_slo.geojson",
   },
+  {
+    regions: ["CH"],
+    smet: (id: string) => [
+      `https://measurement-api.slf.ch/public/api/imis/station/${id}/measurements?period_in_days=7`,
+    ],
+    geojson: slf.URL,
+  },
 ];
 
 type Feature = z.infer<typeof FeatureSchema> & { $smet: string[] };
@@ -109,13 +118,11 @@ export async function fetchSource(
   geojson: URL,
   smet: (id: string) => string[],
 ): Promise<Feature[]> {
-  const response = await fetch(geojson, { cache: "no-cache" });
-  if (!response.ok) {
-    console.warn("Not OK", response);
-    return [];
-  }
-  if (response.status === 404) {
-    console.warn("HTTP 404", response);
+  let response;
+  try {
+    response = await fetchOrThrow(geojson, { cache: "no-cache" });
+  } catch (e) {
+    console.warn(e);
     return [];
   }
   if (
@@ -129,6 +136,15 @@ export async function fetchSource(
         $smet: smet(f.id),
       }),
     );
+  } else if (geojson.toString() === slf.URL) {
+    const features = await slf.mapAndFetchCurrentStationData(await response.json());
+    const stations = features.map(
+      (f): Feature => ({
+        ...f,
+        $smet: smet(f.id),
+      }),
+    );
+    return stations;
   }
 
   const json = await response.json();

@@ -12,6 +12,7 @@ import type {
 } from "../schema/danger-source-data";
 import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
 import type { StressLevelData } from "../schema/stress-level";
+import { fetchOrThrow } from "../data/fetchOrThrow";
 
 export class Observations {
   public observations: Observation[];
@@ -22,10 +23,7 @@ export class Observations {
 
   async loadObservations(url: string, filterMicroRegions: string[]) {
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to load observations: ${response.statusText}`);
-      }
+      const response = await fetchOrThrow(url);
       const observations = await response.json();
 
       this.observations = observations.features
