@@ -128,7 +128,7 @@ export async function fetchSource(
     geojson.toString() ===
     "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata"
   ) {
-    const metadata: geosphere.Metadata = await response.json();
+    const metadata = geosphere.MetadataSchema.parse(await response.json());
     return metadata.stations
       .map(
         (f): Feature => ({

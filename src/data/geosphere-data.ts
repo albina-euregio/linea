@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { FeatureSchema } from "../schema/listing";
 import { StationData } from "./station-data";
 
@@ -36,41 +37,43 @@ interface FeatureCollection {
   features: Feature[];
 }
 
-export interface Metadata {
-  title: string;
-  parameters: Parameter[];
-  frequency: string;
-  type: string;
-  mode: string;
-  response_formats: string[];
-  start_time: string;
-  end_time: string;
-  stations: Station[];
-  id_type: string;
-}
+export const ParameterSchema = z.object({
+  name: z.string(),
+  long_name: z.string(),
+  desc: z.string(),
+  unit: z.string(),
+});
+export type Parameter = z.infer<typeof ParameterSchema>;
 
-export interface Parameter {
-  name: string;
-  long_name: string;
-  desc: string;
-  unit: string;
-}
+export const StationSchema = z.object({
+  type: z.string(),
+  id: z.string(),
+  name: z.string(),
+  state: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  altitude: z.number(),
+  valid_from: z.coerce.date(),
+  valid_to: z.coerce.date(),
+  has_sunshine: z.boolean(),
+  has_global_radiation: z.boolean(),
+  is_active: z.boolean(),
+});
+export type Station = z.infer<typeof StationSchema>;
 
-export interface Station {
-  type: string;
-  id: string;
-  group_id: null;
-  name: string;
-  state: string;
-  lat: number;
-  lon: number;
-  altitude: number;
-  valid_from: string;
-  valid_to: string;
-  has_sunshine: boolean;
-  has_global_radiation: boolean;
-  is_active: boolean;
-}
+export const MetadataSchema = z.object({
+  title: z.string(),
+  parameters: ParameterSchema.array(),
+  frequency: z.string(),
+  type: z.string(),
+  mode: z.string(),
+  response_formats: z.string().array(),
+  start_time: z.string(),
+  end_time: z.string(),
+  stations: StationSchema.array(),
+  id_type: z.string(),
+});
+export type Metadata = z.infer<typeof MetadataSchema>;
 
 export function parseGeosphereData(metadata: Metadata, collection: FeatureCollection): StationData {
   if (collection?.features?.length !== 1) throw new Error();
