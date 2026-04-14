@@ -59,6 +59,8 @@
   "linea:controls:button:download": "Download",
   "linea:controls:button:open": "Open",
   "linea:controls:label:selectdiagrams": "Select Diagrams to Export",
+  "linea:controls:label:showplottitles": "Show plot titles",
+  "linea:controls:label:datastalehint": "Settings changed\nClick update graphic",
   "linea:plotnames:temperature": "Temperatures",
   "linea:plotnames:wind": "Wind",
   "linea:plotnames:precipitation": "Precipitation",

@@ -74,6 +74,42 @@ export abstract class AbstractExportModal {
                 <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
                 <h2>${i18n.message("linea:controls:label:exportchart")}</h2>
 
+                <div class="export-settings" id="exportSettings" style="display:none;">
+                    <div style="display: grid; gap: 15px;">
+                        <fieldset
+                          id="exportSizes"
+                          class="diagram-fieldset"
+                          style="
+                          display: none;
+                          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                          gap: 15px;"
+                        >
+                          <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">${i18n.message("linea:controls:label:exportsettings")}</legend>
+                          <div>
+                            <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
+                            <input type="number" id="exportWidth" value="1000" min="400" max="2600" step="100">
+                          </div>
+                          <div>
+                            <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
+                            <input type="number" id="exportHeight" value="200" min="150" max="600" step="50">
+                          </div>
+                          <div>
+                            <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
+                            <input type="text" id="exportTitle" value="">
+                          </div>
+                        </fieldset>
+                          <div id="exportBlogCaptionField" style="display: none; flex-direction: column; gap: 6px;">
+                            <label for="exportBlogCaption" style="display: block; margin-bottom: 0;">${i18n.message("linea:controls:label:caption")}</label>
+                            <textarea id="exportBlogCaption" rows="3"></textarea>
+                          </div>
+                        <fieldset class="diagram-fieldset">
+                            <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">${i18n.message("linea:controls:label:selectdiagrams")}</legend>
+                            <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
                 <div class="export-options">
                     <div class="export-option" id="btnExportIframe">
                         <h4>${i18n.message("linea:controls:button:iframe")}</h4>
@@ -96,46 +132,20 @@ export abstract class AbstractExportModal {
                     </div>
                 </div>
 
-                <div class="export-settings" id="exportSettings" style="display:none;">
-                    <h4>${i18n.message("linea:controls:label:exportsettings")}</h4>
-                    <div style="display: grid; gap: 15px;">
-                        <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                          <div>
-                              <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
-                              <input type="number" id="exportWidth" value="1000" min="400" max="2600" step="100">
-                          </div>
-                          <div>
-                              <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
-                              <input type="number" id="exportHeight" value="200" min="150" max="600" step="50">
-                          </div>
-                          <div>
-                              <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
-                              <input type="text" id="exportTitle" value="">
-                          </div>
-                        </div>
-                          <div id="exportBlogCaptionField" style="display: none; flex-direction: column; gap: 6px;">
-                            <label for="exportBlogCaption" style="display: block; margin-bottom: 0;">${i18n.message("linea:controls:label:caption")}</label>
-                            <textarea id="exportBlogCaption" rows="3"></textarea>
-                          </div>
-                        <div>
-                            <label for="exportDiagrams">${i18n.message("linea:controls:label:selectdiagrams")}</label>
-                            <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-                            </div>
-                        </div>
+                <fieldset
+                  id="exportResult"
+                  class="diagram-fieldset"
+                >
+                  <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">${i18n.message("linea:controls:label:exportresult")}</legend>
+                  <div class="code-container" style="position: relative;">
+                    <div class="code-container-buttons" style="position: absolute; top: 0px; right: 0px; z-index: 1; margin-bottom: 0;">
+                      <button class="copy-btn" id="copyExportBtn">${i18n.message("linea:controls:button:copytoclipboard")}</button>
+                      <button class="dwn-btn" id="downloadBtn">${i18n.message("linea:controls:button:download")}</button>
+                      <button class="open-btn" id="openBtn">${i18n.message("linea:controls:button:open")}</button>
                     </div>
-                </div>
-
-                <div id="exportResult" style="display:none;">
-                    <h3>${i18n.message("linea:controls:label:exportresult")}</h3>
-                    <div class="code-container">
-                        <div class="code-container-buttons">
-                            <button class="copy-btn" id="copyExportBtn">${i18n.message("linea:controls:button:copytoclipboard")}</button>
-                            <button class="dwn-btn" id="downloadBtn">${i18n.message("linea:controls:button:download")}</button>
-                            <button class="open-btn" id="openBtn">${i18n.message("linea:controls:button:open")}</button>
-                        </div>
-                        <pre id="exportCode"></pre>
-                    </div>
-                </div>
+                    <pre id="exportCode" style="padding-top: 0px;"></pre>
+                  </div>
+                </fieldset>
             </div>`,
     );
 
@@ -145,6 +155,38 @@ export abstract class AbstractExportModal {
       "#btnExportInteractiveBlog",
     ) as HTMLDivElement;
     interactiveBlogExportOption.style.display = showInteractibeBlogExportOption ? "block" : "none";
+
+    this.modal.querySelectorAll(".export-option").forEach((option) => {
+      option.setAttribute("data-stale-hint", i18n.message("linea:controls:label:datastalehint"));
+    });
+
+    const clearExportOptionStaleness = () => {
+      this.modal.querySelectorAll(".export-option.export-option-stale").forEach((option) => {
+        option.classList.remove("export-option-stale");
+      });
+    };
+
+    const markActiveExportOptionStale = () => {
+      if (!this.exportdata) {
+        return;
+      }
+      clearExportOptionStaleness();
+      const exportOptionId = this.getExportOptionIdByType(this.exportdata.type);
+      if (!exportOptionId) {
+        return;
+      }
+      const exportOption = this.modal.querySelector(`#${exportOptionId}`);
+      if (exportOption) {
+        exportOption.classList.add("export-option-stale");
+      }
+    };
+
+    this.exportSettings.addEventListener("input", () => {
+      markActiveExportOptionStale();
+    });
+    this.exportSettings.addEventListener("change", () => {
+      markActiveExportOptionStale();
+    });
 
     const keyListener = (e: KeyboardEvent) => {
       if (!this.exportdata || e.key !== "Enter") {
@@ -167,11 +209,13 @@ export abstract class AbstractExportModal {
     );
 
     this.modal.querySelector("#btnExportSmet")!.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.exportAsSMET();
     });
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportSizes")!.style.display = "none";
       document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.resetCopyToClipboardButton();
@@ -179,6 +223,7 @@ export abstract class AbstractExportModal {
     });
 
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportSizes")!.style.display = "grid";
       document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.resetCopyToClipboardButton();
@@ -186,6 +231,7 @@ export abstract class AbstractExportModal {
     });
 
     this.modal.querySelector("#btnExportInteractiveBlog")?.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportSizes")!.style.display = "none";
       document.getElementById("exportBlogCaptionField")!.style.display = "flex";
       this.resetCopyToClipboardButton();
@@ -203,13 +249,24 @@ export abstract class AbstractExportModal {
     this.modal.querySelector("#openBtn")?.addEventListener("click", () => {
       this.openExport();
     });
+    this.addEscapeExit();
+  }
 
+  /**
+   * Adds an event listener to close the modal when the Escape key is pressed.
+   */
+  protected addEscapeExit() {
     window.onkeydown = (e) => {
       if (e.key === "Escape") {
         this.modal.style.display = "none";
       }
     };
+  }
 
+  /**
+   * adds a click listener to the window to close the modal when clicking outside of it
+   */
+  protected addClickExit() {
     // Close modal when clicking outside
     window.onclick = function (event) {
       const modal = document.getElementById("exportModal");
@@ -266,13 +323,15 @@ export abstract class AbstractExportModal {
           .join("");
 
         return `
-          <div style="display: flex; flex-direction: row; gap:20px; align-items: flex-start;">
-            <label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
-              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-              ${title}
-            </label>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px;">${seriesCheckboxes}</div>
-          </div>
+          <fieldset class="diagram-fieldset" style="border-color: #bebebe;">
+            <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">
+              <label style="display: inline-flex; align-items: center; gap: 8px; margin: 0; white-space: nowrap; font-weight: inherit;">
+                <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin: 0; padding: 0; flex-shrink: 0;"/>
+                ${title}
+              </label>
+            </legend>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;">${seriesCheckboxes}</div>
+          </fieldset>
         `;
       })
       .join("");
@@ -300,6 +359,19 @@ export abstract class AbstractExportModal {
     return Array.from(this.modal.querySelectorAll(`.diagram-series-checkbox-${chartIndex}:checked`))
       .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
       .filter((n) => Number.isFinite(n));
+  }
+
+  protected getExportOptionIdByType(type: string): string | null {
+    if (type === "image/png") {
+      return "btnExportPNG";
+    }
+    if (type === "text/html") {
+      return "btnExportIframe";
+    }
+    if (type === "text/plain") {
+      return "btnExportInteractiveBlog";
+    }
+    return null;
   }
 
   protected hideAllSeriesSelectionCheckboxes() {

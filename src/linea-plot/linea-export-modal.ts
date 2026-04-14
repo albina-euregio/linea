@@ -83,6 +83,7 @@ export class LineaExportModal extends AbstractExportModal {
           this.#generateTitleString();
       });
     });
+    this.addClickExit();
   }
 
   /**
@@ -583,7 +584,7 @@ export class LineaExportModal extends AbstractExportModal {
         };
       });
       document.getElementById("exportCode").innerHTML =
-        `<img src="${dataUrl}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+        `<img src="${dataUrl}" alt="Chart Preview" class="chart-preview"/>`;
       document.getElementById("exportResult").style.display = "block";
       return dataUrl;
     }
