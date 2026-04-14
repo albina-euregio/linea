@@ -37,10 +37,10 @@ import type { AwsStats } from "./aws-stats-wrapper";
  */
 export class AwsStatsExportModal extends AbstractExportModal {
   private wrapper: AwsStats;
-  private readonly swatchSize = 18;
-  private readonly legendItemHeight = 22;
+  private readonly swatchSize = 10;
+  private readonly legendItemHeight = 16;
   private readonly legendPadding = 20;
-  private readonly labelFontSize = 16;
+  private readonly labelFontSize = 10;
 
   private readonly titleFontFamily =
     'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
@@ -65,7 +65,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     if (exportSizes && !this.modal.querySelector("#exportIncludePlotTitles")) {
       exportSizes.insertAdjacentHTML(
         "beforeend",
-        `<div>
+        `<div style=">
           <label style="display: flex; align-items: center; gap: 8px; margin-top: 24px;">
             <input type="checkbox" id="exportIncludePlotTitles" checked style="width: auto; margin: 0;" />
             ${i18n.message("linea:controls:label:showplottitles") || "Include plot titles"}
@@ -238,7 +238,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
-      let fontSize = 24;
+      let fontSize = 16;
       ctx.font = `bold ${fontSize}px ${this.titleFontFamily}`;
       let titleWidth = ctx.measureText(chartTitle).width;
 
@@ -247,7 +247,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
         ctx.font = `bold ${fontSize}px ${this.titleFontFamily}`;
         titleWidth = ctx.measureText(chartTitle).width;
       }
-      ctx.fillText(chartTitle, outCanvas.width / 2, yOffset + 18);
+      ctx.fillText(chartTitle, outCanvas.width / 2, yOffset + 22);
     }
 
     let y = yOffset + titleHeight;
