@@ -1,3 +1,4 @@
+import { FeatureSchema } from "../schema/listing";
 import { StationData } from "./station-data";
 
 interface ParameterValues {
@@ -107,4 +108,25 @@ export function parseGeosphereData(metadata: Metadata, collection: FeatureCollec
           : parameters.FF?.data,
     },
   );
+}
+
+export function parseGeosphereFeature(station: Station) {
+  return FeatureSchema.parse({
+    type: "Feature",
+    id: station.id,
+    geometry: {
+      type: "Point",
+      coordinates: [station.lon, station.lat, station.altitude],
+    },
+    properties: {
+      name: station.name
+        .toLocaleLowerCase("de")
+        // capitalize "ACHENKIRCH CAMPINGPLATZ"
+        .replace(/(^|[-./()\s])\w/g, (c) => c.toLocaleUpperCase("de")),
+      operator: "GeoSphere Austria",
+      operatorLink: "https://www.geosphere.at/",
+      operatorLicense: "CC BY 4.0",
+      operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/legalcode",
+    },
+  });
 }

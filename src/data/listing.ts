@@ -1,6 +1,7 @@
 import { FeatureCollectionSchema as LegacyFeatureCollectionSchema } from "../schema/listing-legacy";
 import { FeatureCollectionSchema, FeatureSchema } from "../schema/listing";
-import type { z } from "zod";
+import * as geosphere from "./geosphere-data";
+import { type z } from "zod";
 
 const config = [
   {
@@ -57,6 +58,22 @@ const config = [
     geojson: "https://lawinen.at/smet/vor/stations_vor.geojson",
   },
   {
+    regions: ["AT-01", "AT-02", "AT-03", "AT-04", "AT-05", "AT-06", "AT-07", "AT-08", "AT-09"],
+    smet: (id: string) => {
+      const end = Temporal.Now.instant().round("minute");
+      const start = end.subtract({ hours: 7 * 24 });
+      const params = new URLSearchParams({
+        station_ids: id,
+        parameters: "TL,FF,FFX,DD,P,RF,SCHNEE,TP",
+        output_format: "geojson",
+        start: start.toString(),
+        end: end.toString(),
+      });
+      return `https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min?${params}`;
+    },
+    geojson: "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
+  },
+  {
     regions: ["DE-BY"],
     smet: (id: string) => [`https://lawinen.at/smet/bay/woche/${id}.smet.gz`],
     geojson: "https://lawinen.at/smet/bay/stations_bay.geojson",
@@ -98,6 +115,20 @@ export async function fetchSource(
   if (response.status === 404) {
     console.warn("HTTP 404", response);
     return [];
+  }
+  if (
+    geojson.toString() ===
+    "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata"
+  ) {
+    const metadata: geosphere.Metadata = await response.json();
+    return metadata.stations
+      .map(
+        (f): Feature => ({
+          ...geosphere.parseGeosphereFeature(f),
+          $smet: smet(f.id),
+        }),
+      )
+      .filter((f) => predicate(f, geojson));
   }
 
   const json = await response.json();
