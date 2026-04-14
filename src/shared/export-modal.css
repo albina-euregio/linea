@@ -147,3 +147,11 @@ input:focus {
   width: 100%;
   max-width: 200px;
 }
+
+.diagram-fieldset {
+  border: 1px solid #3498db;
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+  margin: 0;
+  min-inline-size: 0;
+}

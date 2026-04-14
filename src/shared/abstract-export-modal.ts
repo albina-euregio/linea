@@ -117,11 +117,11 @@ export abstract class AbstractExportModal {
                             <label for="exportBlogCaption" style="display: block; margin-bottom: 0;">${i18n.message("linea:controls:label:caption")}</label>
                             <textarea id="exportBlogCaption" rows="3"></textarea>
                           </div>
-                        <div>
-                            <label for="exportDiagrams">${i18n.message("linea:controls:label:selectdiagrams")}</label>
-                            <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+                        <fieldset class="diagram-fieldset">
+                            <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">${i18n.message("linea:controls:label:selectdiagrams")}</legend>
+                            <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
                             </div>
-                        </div>
+                        </fieldset>
                     </div>
                 </div>
 
@@ -266,13 +266,15 @@ export abstract class AbstractExportModal {
           .join("");
 
         return `
-          <div style="display: flex; flex-direction: row; gap:20px; align-items: flex-start;">
-            <label style="display: flex; align-items: center; margin-bottom: 0; white-space: nowrap;">
-              <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin-right: 8px; padding: 0; flex-shrink: 0;"/>
-              ${title}
-            </label>
-            <div style="display: flex; flex-wrap: wrap; gap: 12px;">${seriesCheckboxes}</div>
-          </div>
+          <fieldset class="diagram-fieldset" style="border-color: #bebebe;">
+            <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">
+              <label style="display: inline-flex; align-items: center; gap: 8px; margin: 0; white-space: nowrap; font-weight: inherit;">
+                <input type="checkbox" class="diagram-checkbox" id="exportDiagram_${index}" value="${index}" checked style="width: auto; margin: 0; padding: 0; flex-shrink: 0;"/>
+                ${title}
+              </label>
+            </legend>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;">${seriesCheckboxes}</div>
+          </fieldset>
         `;
       })
       .join("");
