@@ -107,6 +107,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
 
     this.addDiagramsToExportSettings(this.wrapper.charts.map((c) => c.plot));
     this.addPerChartTitleInputs();
+    this.addClickExit();
   }
 
   private addPerChartTitleInputs() {
