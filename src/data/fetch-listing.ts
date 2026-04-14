@@ -3,7 +3,13 @@ import { FeatureCollectionSchema, FeatureSchema } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
 import { type z } from "zod";
 
-const config = [
+type Config = {
+  regions: string[];
+  smet: (id: string) => string[];
+  geojson: string;
+};
+
+const config: Config[] = [
   {
     regions: ["AT-07", "IT-32-BZ", "IT-32-TN"],
     smet: (id: string) => [
