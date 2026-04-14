@@ -3,6 +3,7 @@ import { FeatureCollectionSchema, FeatureSchema } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
 import { type z } from "zod";
+import { fetchOrThrow } from "./fetchOrThrow";
 
 type Config = {
   regions: string[];
@@ -117,13 +118,11 @@ export async function fetchSource(
   geojson: URL,
   smet: (id: string) => string[],
 ): Promise<Feature[]> {
-  const response = await fetch(geojson, { cache: "no-cache" });
-  if (!response.ok) {
-    console.warn("Not OK", response);
-    return [];
-  }
-  if (response.status === 404) {
-    console.warn("HTTP 404", response);
+  let response;
+  try {
+    response = await fetchOrThrow(geojson, { cache: "no-cache" });
+  } catch (e) {
+    console.warn(e);
     return [];
   }
   if (
