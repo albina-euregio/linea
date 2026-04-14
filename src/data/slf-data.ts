@@ -120,9 +120,7 @@ export function parseSLFFeature(station: SLFStationMetadata) {
       coordinates: [station.lon, station.lat, station.elevation],
     },
     properties: {
-      name: station.label
-        .toLocaleLowerCase("de")
-        .replace(/(^|[-./()\s])\w/g, (c) => c.toLocaleUpperCase("de")),
+      name: station.label,
       operator: "SLF",
       operatorLink: "https://www.slf.ch/",
       operatorLicense: "CC BY 4.0",
