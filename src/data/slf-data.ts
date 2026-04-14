@@ -126,7 +126,7 @@ export function parseSLFFeature(station: SLFStationMetadata) {
       operator: "SLF",
       operatorLink: "https://www.slf.ch/",
       operatorLicense: "CC BY 4.0",
-      operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/legalcode",
+      operatorLicenseLink: "https://www.slf.ch/de/services-und-produkte/slf-datenservice/",
     },
   } satisfies z.infer<typeof listing.FeatureSchema>);
 }
