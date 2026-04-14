@@ -8,14 +8,14 @@ import { Length, Scalar, Speed, Temperature } from "./units";
 export const SLFStationDataSchema = z.object({
   station_code: z.string(),
   measure_date: z.string(),
-  HS: z.number().nullable().optional(),
-  TA_30MIN_MEAN: z.number().nullable().optional(),
-  RH_30MIN_MEAN: z.number().nullable().optional(),
-  TSS_30MIN_MEAN: z.number().nullable().optional(),
-  RSWR_30MIN_MEAN: z.number().nullable().optional(),
-  VW_30MIN_MEAN: z.number().nullable().optional(),
-  VW_30MIN_MAX: z.number().nullable().optional(),
-  DW_30MIN_MEAN: z.number().nullable().optional(),
+  HS: z.number().nullish(),
+  TA_30MIN_MEAN: z.number().nullish(),
+  RH_30MIN_MEAN: z.number().nullish(),
+  TSS_30MIN_MEAN: z.number().nullish(),
+  RSWR_30MIN_MEAN: z.number().nullish(),
+  VW_30MIN_MEAN: z.number().nullish(),
+  VW_30MIN_MAX: z.number().nullish(),
+  DW_30MIN_MEAN: z.number().nullish(),
 });
 export type SLFStationData = z.infer<typeof SLFStationDataSchema>;
 
