@@ -95,17 +95,12 @@ const config: Config[] = [
 
 type Feature = z.infer<typeof FeatureSchema> & { $smet: string[] };
 
-type FeaturePredicate = (f: Feature, url: URL) => boolean;
-
 type ConfigPredicate = (c: (typeof config)[number]) => boolean;
 
-export async function fetchAll(
-  configPredicate: ConfigPredicate = () => true,
-  predicate: FeaturePredicate = () => true,
-): Promise<Feature[]> {
+export async function fetchAll(configPredicate: ConfigPredicate = () => true): Promise<Feature[]> {
   const features$ = config
     .filter((c) => configPredicate(c))
-    .flatMap((c) => fetchSource(new URL(c.geojson), c.smet, predicate));
+    .flatMap((c) => fetchSource(new URL(c.geojson), c.smet));
   const features = await Promise.all(features$);
   return features.flat();
 }
@@ -113,7 +108,6 @@ export async function fetchAll(
 export async function fetchSource(
   geojson: URL,
   smet: (id: string) => string[],
-  predicate: FeaturePredicate,
 ): Promise<Feature[]> {
   const response = await fetch(geojson, { cache: "no-cache" });
   if (!response.ok) {
@@ -129,27 +123,23 @@ export async function fetchSource(
     "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata"
   ) {
     const metadata = geosphere.MetadataSchema.parse(await response.json());
-    return metadata.stations
-      .map(
-        (f): Feature => ({
-          ...geosphere.parseGeosphereFeature(f),
-          $smet: smet(f.id),
-        }),
-      )
-      .filter((f) => predicate(f, geojson));
+    return metadata.stations.map(
+      (f): Feature => ({
+        ...geosphere.parseGeosphereFeature(f),
+        $smet: smet(f.id),
+      }),
+    );
   }
 
   const json = await response.json();
   const isLegacy = geojson.searchParams.get("v") === "legacy";
   const schema = isLegacy ? LegacyFeatureCollectionSchema : FeatureCollectionSchema;
   const collection = schema.parse(json, { reportInput: true });
-  return collection.features
-    .map(
-      (f): Feature => ({
-        ...f,
-        properties: f.properties!,
-        $smet: smet(f.properties.shortName || f.id),
-      }),
-    )
-    .filter((f) => predicate(f, geojson));
+  return collection.features.map(
+    (f): Feature => ({
+      ...f,
+      properties: f.properties!,
+      $smet: smet(f.properties.shortName || f.id),
+    }),
+  );
 }
