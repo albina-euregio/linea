@@ -1,6 +1,6 @@
 import { fetchOrThrow } from "./fetchOrThrow";
 import * as geosphere from "./geosphere-data";
-import { parseSLFAPIData } from "./slf-data";
+import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 
@@ -44,8 +44,8 @@ export async function fetchSMET(url: string): Promise<StationData> {
     const collection = geosphere.FeatureCollectionSchema.parse(await response.json());
     return geosphere.parseGeosphereData(metadata, collection);
   } else if (url.startsWith("https://measurement-api.slf.ch/public/api/imis/station/")) {
-    const metadata = await fetchOrThrow("https://measurement-api.slf.ch/public/api/imis/stations");
-    return parseSLFAPIData(await metadata.json(), await response.json());
+    const metadata = await fetchOrThrow(slf.URL);
+    return slf.parseSLFAPIData(await metadata.json(), await response.json());
   }
 
   let stream = response.body;

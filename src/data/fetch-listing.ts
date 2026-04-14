@@ -98,7 +98,7 @@ const config: Config[] = [
     smet: (id: string) => [
       `https://measurement-api.slf.ch/public/api/imis/station/${id}/measurements?period_in_days=7`,
     ],
-    geojson: "https://measurement-api.slf.ch/public/api/imis/stations",
+    geojson: slf.URL,
   },
 ];
 
@@ -136,7 +136,7 @@ export async function fetchSource(
         $smet: smet(f.id),
       }),
     );
-  } else if (geojson.toString() === "https://measurement-api.slf.ch/public/api/imis/stations") {
+  } else if (geojson.toString() === slf.URL) {
     const features = await slf.mapAndFetchCurrentStationData(await response.json());
     const stations = features.map(
       (f): Feature => ({

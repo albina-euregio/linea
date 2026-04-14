@@ -6,6 +6,8 @@ import * as listing from "../schema/listing";
 import { Length, Scalar, Speed, Temperature } from "./units";
 import { fetchOrThrow } from "./fetchOrThrow";
 
+export const URL = "https://measurement-api.slf.ch/public/api/imis/stations";
+
 export const SLFStationDataSchema = z.object({
   station_code: z.string(),
   measure_date: z.string(),
