@@ -65,7 +65,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     if (exportSizes && !this.modal.querySelector("#exportIncludePlotTitles")) {
       exportSizes.insertAdjacentHTML(
         "beforeend",
-        `<div style=">
+        `<div>
           <label style="display: flex; align-items: center; gap: 8px; margin-top: 24px;">
             <input type="checkbox" id="exportIncludePlotTitles" checked style="width: auto; margin: 0;" />
             ${i18n.message("linea:controls:label:showplottitles") || "Include plot titles"}
@@ -106,6 +106,49 @@ export class AwsStatsExportModal extends AbstractExportModal {
     this.exportResult.style.display = "none";
 
     this.addDiagramsToExportSettings(this.wrapper.charts.map((c) => c.plot));
+    this.addPerChartTitleInputs();
+  }
+
+  private addPerChartTitleInputs() {
+    const diagramCheckboxes = this.modal.querySelectorAll(".diagram-checkbox");
+    diagramCheckboxes.forEach((checkboxNode) => {
+      const checkbox = checkboxNode as HTMLInputElement;
+      const chartIndex = Number(checkbox.value);
+      if (!Number.isFinite(chartIndex)) {
+        return;
+      }
+
+      const fieldset = checkbox.closest("fieldset");
+      if (!fieldset || fieldset.querySelector(`#exportDiagramTitle_${chartIndex}`)) {
+        return;
+      }
+
+      const chart = this.wrapper.charts[chartIndex];
+      const plot = chart?.plot;
+      const titleFromDom = plot?.root.querySelector(".u-title")?.textContent?.trim() ?? "";
+      const titleFromOpts =
+        (plot as unknown as { opts?: { title?: string } } | undefined)?.opts?.title ?? "";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = `exportDiagramTitle_${chartIndex}`;
+      input.value = titleFromDom || titleFromOpts || "";
+      input.style.width = "100%";
+      input.style.maxWidth = "100%";
+      input.style.boxSizing = "border-box";
+
+      fieldset.appendChild(input);
+    });
+  }
+
+  private getPerChartTitle(chartIndex: number): string | null {
+    const input = this.modal.querySelector(
+      `#exportDiagramTitle_${chartIndex}`,
+    ) as HTMLInputElement | null;
+    if (!input) {
+      return null;
+    }
+    return input.value;
   }
 
   private generateInteractivExportData(): { height: number; elements: string[] } {
@@ -385,7 +428,11 @@ export class AwsStatsExportModal extends AbstractExportModal {
 
         const titleFromDom = plot.root.querySelector(".u-title")?.textContent?.trim() ?? "";
         const titleFromOpts = (plot as unknown as { opts?: { title?: string } }).opts?.title ?? "";
-        const chartTitle = includePlotTitles ? titleFromDom || titleFromOpts || title || "" : "";
+        const editedChartTitle = this.getPerChartTitle(chartIndex);
+        const defaultChartTitle = titleFromDom || titleFromOpts || title || "";
+        const chartTitleCandidate =
+          editedChartTitle !== null ? editedChartTitle : defaultChartTitle;
+        const chartTitle = includePlotTitles ? chartTitleCandidate : "";
         const legendLines: Array<{
           items: Array<{ label: string; color: string; width: number }>;
         }> = [];
