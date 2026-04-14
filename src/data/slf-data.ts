@@ -3,6 +3,7 @@ import { dewPoint } from "../linea-plot/dew-point";
 import type { ParameterType, Units, Values } from "./station-data";
 import { z } from "zod";
 import * as listing from "../schema/listing";
+import { Length, Scalar, Speed, Temperature } from "./units";
 
 export const SLFStationDataSchema = z.object({
   station_code: z.string(),
@@ -157,11 +158,11 @@ export function mapSLFStationToFeature(
     properties: {
       ...feature.properties,
       date: dateString ? new Date(dateString) : undefined,
-      HS: typeof hs === "number" ? hs / 100 : undefined,
-      TA: typeof ta === "number" ? ta + 273.15 : undefined,
-      TSS: typeof tss === "number" ? tss + 273.15 : undefined,
-      VW: typeof windSpeed === "number" ? windSpeed / 3.6 : undefined,
-      DW: typeof windDirection === "number" ? windDirection : undefined,
+      HS: new Length(typeof hs === "number" ? hs : undefined, "cm"),
+      TA: new Temperature(typeof ta === "number" ? ta : undefined, "℃"),
+      TSS: new Temperature(typeof tss === "number" ? tss : undefined, "℃"),
+      VW: new Speed(typeof windSpeed === "number" ? windSpeed : undefined, "m/s"),
+      DW: new Scalar(typeof windDirection === "number" ? windDirection : undefined, "°"),
     },
   } as unknown as z.infer<typeof listing.FeatureSchema>;
 }
