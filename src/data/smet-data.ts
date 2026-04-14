@@ -1,4 +1,5 @@
 import { parseGeosphereData } from "./geosphere-data";
+import { parseSLFAPIData } from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 
@@ -44,6 +45,9 @@ export async function fetchSMET(url: string): Promise<StationData> {
       "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
     );
     return parseGeosphereData(await metadata.json(), await response.json());
+  } else if (url.startsWith("https://measurement-api.slf.ch/public/api/imis/station/")) {
+    const metadata = await fetch("https://measurement-api.slf.ch/public/api/imis/stations");
+    return parseSLFAPIData(await metadata.json(), await response.json());
   }
 
   let stream = response.body;
