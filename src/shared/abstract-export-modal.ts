@@ -97,22 +97,29 @@ export abstract class AbstractExportModal {
                 </div>
 
                 <div class="export-settings" id="exportSettings" style="display:none;">
-                    <h4>${i18n.message("linea:controls:label:exportsettings")}</h4>
                     <div style="display: grid; gap: 15px;">
-                        <div id="exportSizes" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <fieldset
+                          id="exportSizes"
+                          class="diagram-fieldset"
+                          style="
+                          display: none;
+                          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                          gap: 15px;"
+                        >
+                          <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">${i18n.message("linea:controls:label:exportsettings")}</legend>
                           <div>
-                              <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
-                              <input type="number" id="exportWidth" value="1000" min="400" max="2600" step="100">
+                            <label for="exportWidth">${i18n.message("linea:controls:label:width")} (px)</label>
+                            <input type="number" id="exportWidth" value="1000" min="400" max="2600" step="100">
                           </div>
                           <div>
-                              <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
-                              <input type="number" id="exportHeight" value="200" min="150" max="600" step="50">
+                            <label for="exportHeight">${i18n.message("linea:controls:label:heightpercanvas")} (px):</label>
+                            <input type="number" id="exportHeight" value="200" min="150" max="600" step="50">
                           </div>
                           <div>
-                              <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
-                              <input type="text" id="exportTitle" value="">
+                            <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
+                            <input type="text" id="exportTitle" value="">
                           </div>
-                        </div>
+                        </fieldset>
                           <div id="exportBlogCaptionField" style="display: none; flex-direction: column; gap: 6px;">
                             <label for="exportBlogCaption" style="display: block; margin-bottom: 0;">${i18n.message("linea:controls:label:caption")}</label>
                             <textarea id="exportBlogCaption" rows="3"></textarea>
@@ -125,17 +132,27 @@ export abstract class AbstractExportModal {
                     </div>
                 </div>
 
-                <div id="exportResult" style="display:none;">
-                    <h3>${i18n.message("linea:controls:label:exportresult")}</h3>
-                    <div class="code-container">
-                        <div class="code-container-buttons">
-                            <button class="copy-btn" id="copyExportBtn">${i18n.message("linea:controls:button:copytoclipboard")}</button>
-                            <button class="dwn-btn" id="downloadBtn">${i18n.message("linea:controls:button:download")}</button>
-                            <button class="open-btn" id="openBtn">${i18n.message("linea:controls:button:open")}</button>
-                        </div>
-                        <pre id="exportCode"></pre>
+                <fieldset
+                  id="exportResult"
+                  style="
+                  display: none;
+                  border: 1px solid #c9ced6;
+                  border-radius: 8px;
+                  padding: 12px;
+                  margin: 0;
+                  min-inline-size: 0;
+                  "
+                >
+                  <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">${i18n.message("linea:controls:label:exportresult")}</legend>
+                  <div class="code-container" style="margin-top: 4px;">
+                    <div class="code-container-buttons">
+                      <button class="copy-btn" id="copyExportBtn">${i18n.message("linea:controls:button:copytoclipboard")}</button>
+                      <button class="dwn-btn" id="downloadBtn">${i18n.message("linea:controls:button:download")}</button>
+                      <button class="open-btn" id="openBtn">${i18n.message("linea:controls:button:open")}</button>
                     </div>
-                </div>
+                    <pre id="exportCode"></pre>
+                  </div>
+                </fieldset>
             </div>`,
     );
 

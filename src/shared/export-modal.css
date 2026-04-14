@@ -89,10 +89,6 @@ input:focus {
 
 .code-container {
   background: #ffffff;
-  border: 1px solid #444;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 15px 0;
 }
 
 .code-container-buttons {
@@ -127,7 +123,6 @@ input:focus {
 
 .export-settings {
   background: #ffffff;
-  padding: 15px;
   border-radius: 8px;
   margin: 15px 0;
   display: flex;
