@@ -112,7 +112,7 @@ export const parseSLFAPIData = (
 };
 
 export function parseSLFFeature(station: SLFStationMetadata) {
-  return {
+  return listing.FeatureSchema.parse({
     type: "Feature",
     id: station.code,
     geometry: {
@@ -128,7 +128,7 @@ export function parseSLFFeature(station: SLFStationMetadata) {
       operatorLicense: "CC BY 4.0",
       operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/legalcode",
     },
-  } as unknown as z.infer<typeof listing.FeatureSchema>;
+  } satisfies z.infer<typeof listing.FeatureSchema>);
 }
 
 export function mapSLFStationToFeature(
