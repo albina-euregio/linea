@@ -4,6 +4,7 @@ import type { ParameterType, Units, Values } from "./station-data";
 import { z } from "zod";
 import * as listing from "../schema/listing";
 import { Length, Scalar, Speed, Temperature } from "./units";
+import { fetchOrThrow } from "./fetchOrThrow";
 
 export const SLFStationDataSchema = z.object({
   station_code: z.string(),
@@ -35,23 +36,33 @@ const SLFCurrentStationFeatureSchema = z.object({
   type: z.enum(["Feature"]),
   properties: z.object({
     code: z.string(),
-    timestamp: z.string().nullish(),
+    timestamp: z.coerce.date().nullish(),
     value: z.number().nullish(),
     velocity: z.number().nullish(),
     direction: z.number().nullish(),
   }),
 });
+type Feature = z.infer<typeof SLFCurrentStationFeatureSchema>;
 
 export const SLFStationCollectionSchema = z.object({
   type: z.enum(["FeatureCollection"]),
-  features: z.array(SLFCurrentStationFeatureSchema),
+  features: z
+    .array(SLFCurrentStationFeatureSchema)
+    .transform((features) =>
+      features.filter(
+        (f) =>
+          typeof f.properties.value === "number" ||
+          typeof f.properties.velocity === "number" ||
+          typeof f.properties.direction === "number",
+      ),
+    )
+    .transform((features) =>
+      features.reduce(
+        (map, f) => map.set(f.properties.code, f),
+        new Map<Feature["properties"]["code"], Feature>(),
+      ),
+    ),
 });
-
-type SLFSingleValueMap = Record<string, { timestamp: string | null; value: number | null }>;
-type SLFWindValueMap = Record<
-  string,
-  { timestamp: string | null; value: [number | null, number | null] }
->;
 
 export function parseSLFAPIData(
   stationsMetadata: SLFStationMetadata[],
@@ -111,111 +122,70 @@ export function parseSLFAPIData(
   );
 }
 
-export function parseSLFFeature(station: SLFStationMetadata) {
-  return listing.FeatureSchema.parse({
-    type: "Feature",
-    id: station.code,
-    geometry: {
-      type: "Point",
-      coordinates: [station.lon, station.lat, station.elevation],
-    },
-    properties: {
-      name: station.label,
-      operator: "SLF",
-      operatorLink: "https://www.slf.ch/",
-      operatorLicense: "CC BY 4.0",
-      operatorLicenseLink: "https://www.slf.ch/de/services-und-produkte/slf-datenservice/",
-    },
-  } satisfies z.infer<typeof listing.FeatureSchema>);
-}
-
-export function mapSLFStationToFeature(
-  station: SLFStationMetadata,
-  HS: SLFSingleValueMap,
-  TA: SLFSingleValueMap,
-  TSS: SLFSingleValueMap,
-  VW: SLFWindValueMap,
-): z.infer<typeof listing.FeatureSchema> {
-  const hsEntry = HS[station.code];
-  const taEntry = TA[station.code];
-  const tssEntry = TSS[station.code];
-  const windEntry = VW[station.code];
-
-  const hs = hsEntry?.value;
-  const ta = taEntry?.value;
-  const tss = tssEntry?.value;
-  const wind = windEntry?.value;
-  const windSpeed = wind?.[0];
-  const windDirection = wind?.[1];
-  const dateString =
-    hsEntry?.timestamp ?? taEntry?.timestamp ?? tssEntry?.timestamp ?? windEntry?.timestamp;
-
-  const feature = parseSLFFeature(station);
-  return {
-    ...feature,
-    properties: {
-      ...feature.properties,
-      date: dateString ? new Date(dateString) : undefined,
-      HS: new Length(typeof hs === "number" ? hs : undefined, "cm"),
-      TA: new Temperature(typeof ta === "number" ? ta : undefined, "℃"),
-      TSS: new Temperature(typeof tss === "number" ? tss : undefined, "℃"),
-      VW: new Speed(typeof windSpeed === "number" ? windSpeed : undefined, "m/s"),
-      DW: new Scalar(typeof windDirection === "number" ? windDirection : undefined, "°"),
-    },
-  } as unknown as z.infer<typeof listing.FeatureSchema>;
-}
-
-export async function parseSLFCurrentStationData(key: "WIND_MEAN"): Promise<SLFWindValueMap>;
-export async function parseSLFCurrentStationData(
-  key: "SNOW_HEIGHT" | "TEMPERATURE_AIR" | "TEMPERATURE_SNOW_SURFACE",
-): Promise<SLFSingleValueMap>;
-export async function parseSLFCurrentStationData(
-  key: "SNOW_HEIGHT" | "TEMPERATURE_AIR" | "TEMPERATURE_SNOW_SURFACE" | "WIND_MEAN",
-): Promise<SLFSingleValueMap | SLFWindValueMap> {
-  const response = await fetch(
-    `https://public-meas-data-v2.slf.ch/public/station-data/timepoint/${key}/current/geojson`,
-    { cache: "no-cache" },
-  );
-  if (!response.ok) {
-    throw new Error();
-  }
-  const collection = SLFStationCollectionSchema.parse(await response.json());
-
-  if (key !== "WIND_MEAN") {
-    const data: SLFSingleValueMap = {};
-    for (const feature of collection.features) {
-      if (feature.properties.value !== undefined && feature.properties.value !== null) {
-        data[feature.properties.code] = {
-          timestamp: feature.properties.timestamp ?? null,
-          value: feature.properties.value,
-        };
-      }
-    }
-    return data;
-  }
-
-  const data: SLFWindValueMap = {};
-  for (const feature of collection.features) {
-    if (
-      feature.properties.velocity !== undefined &&
-      feature.properties.velocity !== null &&
-      feature.properties.direction !== undefined &&
-      feature.properties.direction !== null
-    ) {
-      data[feature.properties.code] = {
-        timestamp: feature.properties.timestamp ?? null,
-        value: [feature.properties.velocity, feature.properties.direction],
-      };
-    }
-  }
-  return data;
-}
-
 export async function mapAndFetchCurrentStationData(json: unknown) {
   const metadata = SLFStationMetadataSchema.array().parse(json);
-  const HS = await parseSLFCurrentStationData("SNOW_HEIGHT");
-  const TA = await parseSLFCurrentStationData("TEMPERATURE_AIR");
-  const TSS = await parseSLFCurrentStationData("TEMPERATURE_SNOW_SURFACE");
-  const VW = await parseSLFCurrentStationData("WIND_MEAN");
-  return metadata.map((station) => mapSLFStationToFeature(station, HS, TA, TSS, VW));
+
+  const SNOW_HEIGHT = await fetchOrThrow(
+    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson",
+  )
+    .then((r) => r.json())
+    .then((j) => SLFStationCollectionSchema.parseAsync(j));
+  const TEMPERATURE_AIR = await fetchOrThrow(
+    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_AIR/current/geojson",
+  )
+    .then((r) => r.json())
+    .then((j) => SLFStationCollectionSchema.parseAsync(j));
+  const TEMPERATURE_SNOW_SURFACE = await fetchOrThrow(
+    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_SNOW_SURFACE/current/geojson",
+  )
+    .then((r) => r.json())
+    .then((j) => SLFStationCollectionSchema.parseAsync(j));
+  const WIND_MEAN = await fetchOrThrow(
+    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson",
+  )
+    .then((r) => r.json())
+    .then((j) => SLFStationCollectionSchema.parseAsync(j));
+
+  return metadata.map((station) => {
+    const feature = listing.FeatureSchema.parse({
+      type: "Feature",
+      id: station.code,
+      geometry: {
+        type: "Point",
+        coordinates: [station.lon, station.lat, station.elevation],
+      },
+      properties: {
+        name: station.label,
+        operator: "SLF",
+        operatorLink: "https://www.slf.ch/",
+        operatorLicense: "CC BY 4.0",
+        operatorLicenseLink: "https://www.slf.ch/de/services-und-produkte/slf-datenservice/",
+      },
+    } satisfies z.infer<typeof listing.FeatureSchema>);
+    feature.properties.date =
+      TEMPERATURE_AIR.features.get(feature.id)?.properties?.timestamp ??
+      SNOW_HEIGHT.features.get(feature.id)?.properties?.timestamp;
+    feature.properties.HS = new Length(
+      SNOW_HEIGHT.features.get(feature.id)?.properties?.value ?? undefined,
+      "cm",
+    );
+    feature.properties.TA = new Temperature(
+      TEMPERATURE_AIR.features.get(feature.id)?.properties?.value ?? undefined,
+      "℃",
+    );
+    feature.properties.TSS = new Temperature(
+      TEMPERATURE_SNOW_SURFACE.features.get(feature.id)?.properties?.value ?? undefined,
+      "℃",
+    );
+    feature.properties.VW = new Speed(
+      WIND_MEAN.features.get(feature.id)?.properties?.velocity ?? undefined,
+      "m/s",
+    );
+    feature.properties.DW = new Scalar(
+      WIND_MEAN.features.get(feature.id)?.properties?.direction ?? undefined,
+      "°",
+    );
+
+    return feature;
+  });
 }
