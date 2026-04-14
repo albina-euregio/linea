@@ -68,12 +68,30 @@ h2 {
 }
 
 .export-option {
+  position: relative;
+  overflow: hidden;
   background: #3498db;
   padding: 10px;
   border-radius: 8px;
   text-align: center;
   cursor: pointer;
   transition: background 0.3s ease;
+}
+
+.export-option.export-option-stale::after {
+  content: attr(data-stale-hint);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  color: #005ad8;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  white-space: pre-line;
+  z-index: 2;
 }
 
 .export-option:hover {

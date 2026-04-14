@@ -156,6 +156,38 @@ export abstract class AbstractExportModal {
     ) as HTMLDivElement;
     interactiveBlogExportOption.style.display = showInteractibeBlogExportOption ? "block" : "none";
 
+    this.modal.querySelectorAll(".export-option").forEach((option) => {
+      option.setAttribute("data-stale-hint", i18n.message("linea:controls:label:datastalehint"));
+    });
+
+    const clearExportOptionStaleness = () => {
+      this.modal.querySelectorAll(".export-option.export-option-stale").forEach((option) => {
+        option.classList.remove("export-option-stale");
+      });
+    };
+
+    const markActiveExportOptionStale = () => {
+      if (!this.exportdata) {
+        return;
+      }
+      clearExportOptionStaleness();
+      const exportOptionId = this.getExportOptionIdByType(this.exportdata.type);
+      if (!exportOptionId) {
+        return;
+      }
+      const exportOption = this.modal.querySelector(`#${exportOptionId}`);
+      if (exportOption) {
+        exportOption.classList.add("export-option-stale");
+      }
+    };
+
+    this.exportSettings.addEventListener("input", () => {
+      markActiveExportOptionStale();
+    });
+    this.exportSettings.addEventListener("change", () => {
+      markActiveExportOptionStale();
+    });
+
     const keyListener = (e: KeyboardEvent) => {
       if (!this.exportdata || e.key !== "Enter") {
         return;
@@ -177,11 +209,13 @@ export abstract class AbstractExportModal {
     );
 
     this.modal.querySelector("#btnExportSmet")!.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.exportAsSMET();
     });
 
     this.modal.querySelector("#btnExportIframe")?.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportSizes")!.style.display = "none";
       document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.resetCopyToClipboardButton();
@@ -189,6 +223,7 @@ export abstract class AbstractExportModal {
     });
 
     this.modal.querySelector("#btnExportPNG")?.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportSizes")!.style.display = "grid";
       document.getElementById("exportBlogCaptionField")!.style.display = "none";
       this.resetCopyToClipboardButton();
@@ -196,6 +231,7 @@ export abstract class AbstractExportModal {
     });
 
     this.modal.querySelector("#btnExportInteractiveBlog")?.addEventListener("click", () => {
+      clearExportOptionStaleness();
       document.getElementById("exportSizes")!.style.display = "none";
       document.getElementById("exportBlogCaptionField")!.style.display = "flex";
       this.resetCopyToClipboardButton();
@@ -312,6 +348,19 @@ export abstract class AbstractExportModal {
     return Array.from(this.modal.querySelectorAll(`.diagram-series-checkbox-${chartIndex}:checked`))
       .map((cb) => parseInt((cb as HTMLInputElement).value, 10))
       .filter((n) => Number.isFinite(n));
+  }
+
+  protected getExportOptionIdByType(type: string): string | null {
+    if (type === "image/png") {
+      return "btnExportPNG";
+    }
+    if (type === "text/html") {
+      return "btnExportIframe";
+    }
+    if (type === "text/plain") {
+      return "btnExportInteractiveBlog";
+    }
+    return null;
   }
 
   protected hideAllSeriesSelectionCheckboxes() {
