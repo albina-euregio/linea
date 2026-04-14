@@ -45,7 +45,8 @@ export async function fetchSMET(url: string): Promise<StationData> {
       "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
     );
     const metadata = geosphere.MetadataSchema.parse(await metadata0.json());
-    return geosphere.parseGeosphereData(metadata, await response.json());
+    const collection = geosphere.FeatureCollectionSchema.parse(await response.json());
+    return geosphere.parseGeosphereData(metadata, collection);
   } else if (url.startsWith("https://measurement-api.slf.ch/public/api/imis/station/")) {
     const metadata = await fetch("https://measurement-api.slf.ch/public/api/imis/stations");
     return parseSLFAPIData(await metadata.json(), await response.json());

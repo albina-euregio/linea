@@ -1,41 +1,39 @@
 import { z } from "zod";
-import { FeatureSchema } from "../schema/listing";
+import * as listing from "../schema/listing";
 import { StationData } from "./station-data";
 
-interface ParameterValues {
-  name: string;
-  unit: string;
-  data: number[];
-}
+export const GeometrySchema = z.object({
+  type: z.enum(["Point"]),
+  coordinates: z.number().array(),
+});
 
-interface Feature {
-  type: string;
-  geometry: {
-    type: string;
-    coordinates: number[];
-  };
-  properties: {
-    parameters: {
-      TL?: ParameterValues;
-      FF?: ParameterValues;
-      FFX?: ParameterValues;
-      DD?: ParameterValues;
-      P?: ParameterValues;
-      RF?: ParameterValues;
-      SCHNEE?: ParameterValues;
-      TP?: ParameterValues;
-    };
-    station: string;
-  };
-}
+export const ParameterTypeSchema = z.enum(["TL", "FF", "FFX", "DD", "P", "RF", "SCHNEE", "TP"]);
 
-interface FeatureCollection {
-  media_type: string;
-  type: string;
-  version: string;
-  timestamps: string[];
-  features: Feature[];
-}
+export const ParameterValuesSchema = z.object({
+  name: z.string(),
+  unit: z.string(),
+  data: z.number().nullable().array(),
+});
+
+export const PropertiesSchema = z.object({
+  parameters: z.looseRecord(ParameterTypeSchema, ParameterValuesSchema),
+  station: z.string(),
+});
+
+export const FeatureSchema = z.object({
+  type: z.enum(["Feature"]),
+  geometry: GeometrySchema,
+  properties: PropertiesSchema,
+});
+
+export const FeatureCollectionSchema = z.object({
+  media_type: z.string(),
+  type: z.enum(["FeatureCollection"]),
+  version: z.string(),
+  timestamps: z.string().array(),
+  features: FeatureSchema.array(),
+});
+export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
 
 export const ParameterSchema = z.object({
   name: z.string(),
@@ -114,7 +112,7 @@ export function parseGeosphereData(metadata: Metadata, collection: FeatureCollec
 }
 
 export function parseGeosphereFeature(station: Station) {
-  return FeatureSchema.parse({
+  return listing.FeatureSchema.parse({
     type: "Feature",
     id: station.id,
     geometry: {
