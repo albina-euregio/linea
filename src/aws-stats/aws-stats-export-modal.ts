@@ -490,7 +490,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
           };
         });
         document.getElementById("exportCode")!.innerHTML =
-          `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" style="max-width: 100%; border: 1px solid #333; border-radius: 4px;"/>`;
+          `<img src="${outCanvas.toDataURL()}" alt="Chart Preview" class="chart-preview"/>`;
         document.getElementById("exportResult")!.style.display = "block";
       }
 

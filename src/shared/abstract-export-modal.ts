@@ -134,23 +134,16 @@ export abstract class AbstractExportModal {
 
                 <fieldset
                   id="exportResult"
-                  style="
-                  display: none;
-                  border: 1px solid #c9ced6;
-                  border-radius: 8px;
-                  padding: 12px;
-                  margin: 0;
-                  min-inline-size: 0;
-                  "
+                  class="diagram-fieldset"
                 >
                   <legend style="padding: 0 6px; font-weight: 600; color: #2f3640;">${i18n.message("linea:controls:label:exportresult")}</legend>
-                  <div class="code-container" style="margin-top: 4px;">
-                    <div class="code-container-buttons">
+                  <div class="code-container" style="position: relative;">
+                    <div class="code-container-buttons" style="position: absolute; top: 0px; right: 0px; z-index: 1; margin-bottom: 0;">
                       <button class="copy-btn" id="copyExportBtn">${i18n.message("linea:controls:button:copytoclipboard")}</button>
                       <button class="dwn-btn" id="downloadBtn">${i18n.message("linea:controls:button:download")}</button>
                       <button class="open-btn" id="openBtn">${i18n.message("linea:controls:button:open")}</button>
                     </div>
-                    <pre id="exportCode"></pre>
+                    <pre id="exportCode" style="padding-top: 0px;"></pre>
                   </div>
                 </fieldset>
             </div>`,

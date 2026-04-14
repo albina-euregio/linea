@@ -150,3 +150,7 @@ input:focus {
   margin: 0;
   min-inline-size: 0;
 }
+
+.chart-preview {
+  max-width: 100%;
+}
