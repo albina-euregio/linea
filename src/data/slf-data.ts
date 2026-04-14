@@ -53,10 +53,10 @@ type SLFWindValueMap = Record<
   { timestamp: string | null; value: [number | null, number | null] }
 >;
 
-export const parseSLFAPIData = (
+export function parseSLFAPIData(
   stationsMetadata: SLFStationMetadata[],
   collection: SLFStationData[],
-): StationData => {
+): StationData {
   if (collection.length === 0) {
     throw new Error("No data");
   }
@@ -109,7 +109,7 @@ export const parseSLFAPIData = (
     units,
     values,
   );
-};
+}
 
 export function parseSLFFeature(station: SLFStationMetadata) {
   return listing.FeatureSchema.parse({
