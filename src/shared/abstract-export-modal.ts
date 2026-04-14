@@ -249,13 +249,24 @@ export abstract class AbstractExportModal {
     this.modal.querySelector("#openBtn")?.addEventListener("click", () => {
       this.openExport();
     });
+    this.addEscapeExit();
+  }
 
+  /**
+   * Adds an event listener to close the modal when the Escape key is pressed.
+   */
+  protected addEscapeExit() {
     window.onkeydown = (e) => {
       if (e.key === "Escape") {
         this.modal.style.display = "none";
       }
     };
+  }
 
+  /**
+   * adds a click listener to the window to close the modal when clicking outside of it
+   */
+  protected addClickExit() {
     // Close modal when clicking outside
     window.onclick = function (event) {
       const modal = document.getElementById("exportModal");

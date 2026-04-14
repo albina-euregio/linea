@@ -83,6 +83,7 @@ export class LineaExportModal extends AbstractExportModal {
           this.#generateTitleString();
       });
     });
+    this.addClickExit();
   }
 
   /**
