@@ -1,6 +1,7 @@
 import { FeatureCollectionSchema as LegacyFeatureCollectionSchema } from "../schema/listing-legacy";
 import { FeatureCollectionSchema, FeatureSchema } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
+import * as slf from "./slf-data";
 import { type z } from "zod";
 
 type Config = {
@@ -91,6 +92,13 @@ const config: Config[] = [
     smet: (id: string) => [`https://lawinen.at/smet/slo/woche/${id}.smet.gz`],
     geojson: "https://lawinen.at/smet/slo/stations_slo.geojson",
   },
+  {
+    regions: ["CH"],
+    smet: (id: string) => [
+      `https://measurement-api.slf.ch/public/api/imis/station/${id}/measurements?period_in_days=7`,
+    ],
+    geojson: "https://measurement-api.slf.ch/public/api/imis/stations",
+  },
 ];
 
 type Feature = z.infer<typeof FeatureSchema> & { $smet: string[] };
@@ -129,6 +137,21 @@ export async function fetchSource(
         $smet: smet(f.id),
       }),
     );
+  } else if (geojson.toString() === "https://measurement-api.slf.ch/public/api/imis/stations") {
+    const metadata = slf.SLFStationMetadataSchema.array().parse(await response.json());
+
+    const HS = await slf.parseSLFCurrentStationData("SNOW_HEIGHT");
+    const TA = await slf.parseSLFCurrentStationData("TEMPERATURE_AIR");
+    const TSS = await slf.parseSLFCurrentStationData("TEMPERATURE_SNOW_SURFACE");
+    const VW = await slf.parseSLFCurrentStationData("WIND_MEAN");
+
+    const stations = metadata.map(
+      (station): Feature => ({
+        ...slf.mapSLFStationToFeature(station, HS, TA, TSS, VW),
+        $smet: smet(station.code),
+      }),
+    );
+    return stations;
   }
 
   const json = await response.json();
