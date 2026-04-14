@@ -74,28 +74,6 @@ export abstract class AbstractExportModal {
                 <span class="export-close" onclick="this.closest('.export-modal').style.display='none'">&times;</span>
                 <h2>${i18n.message("linea:controls:label:exportchart")}</h2>
 
-                <div class="export-options">
-                    <div class="export-option" id="btnExportIframe">
-                        <h4>${i18n.message("linea:controls:button:iframe")}</h4>
-                        <p>${i18n.message("linea:controls:button:iframe:sub")}</p>
-                    </div>
-
-                    <div class="export-option" id="btnExportPNG">
-                        <h4>${i18n.message("linea:controls:button:pngimage")}</h4>
-                        <p>${i18n.message("linea:controls:button:pngimage:sub")}</p>
-                    </div>
-
-                    <div class="export-option" id="btnExportInteractiveBlog" style="display: none;">
-                        <h4>${i18n.message("linea:controls:button:interactiveblog")}</h4>
-                        <p>${i18n.message("linea:controls:button:interactiveblog:sub")}</p>
-                    </div>
-
-                    <div class="export-option" id="btnExportSmet">
-                        <h4>${i18n.message("linea:controls:button:smet")}</h4>
-                        <p>${i18n.message("linea:controls:button:smet:sub")}</p>
-                    </div>
-                </div>
-
                 <div class="export-settings" id="exportSettings" style="display:none;">
                     <div style="display: grid; gap: 15px;">
                         <fieldset
@@ -129,6 +107,28 @@ export abstract class AbstractExportModal {
                             <div class="exportDiagrams" id="exportDiagrams" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
                             </div>
                         </fieldset>
+                    </div>
+                </div>
+
+                <div class="export-options">
+                    <div class="export-option" id="btnExportIframe">
+                        <h4>${i18n.message("linea:controls:button:iframe")}</h4>
+                        <p>${i18n.message("linea:controls:button:iframe:sub")}</p>
+                    </div>
+
+                    <div class="export-option" id="btnExportPNG">
+                        <h4>${i18n.message("linea:controls:button:pngimage")}</h4>
+                        <p>${i18n.message("linea:controls:button:pngimage:sub")}</p>
+                    </div>
+
+                    <div class="export-option" id="btnExportInteractiveBlog" style="display: none;">
+                        <h4>${i18n.message("linea:controls:button:interactiveblog")}</h4>
+                        <p>${i18n.message("linea:controls:button:interactiveblog:sub")}</p>
+                    </div>
+
+                    <div class="export-option" id="btnExportSmet">
+                        <h4>${i18n.message("linea:controls:button:smet")}</h4>
+                        <p>${i18n.message("linea:controls:button:smet:sub")}</p>
                     </div>
                 </div>
 
