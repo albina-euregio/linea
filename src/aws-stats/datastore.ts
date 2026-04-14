@@ -11,7 +11,7 @@ import type {
   EAWSMatrixInformation,
 } from "../schema/danger-source-data";
 import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
-import type { StressData } from "../schema/stress";
+import type { StressLevelData } from "../schema/stress-level";
 
 export class Observations {
   public observations: Observation[];
@@ -1006,7 +1006,7 @@ export class DangerSourceVariantService {
 }
 
 export class StressService {
-  static getStressPerPersonPerDay(stressData: StressData): {
+  static getStressPerPersonPerDay(stressData: StressLevelData): {
     timestamps: number[];
     stressPerPerson: Record<string, number[]>;
   } {
