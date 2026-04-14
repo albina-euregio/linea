@@ -138,17 +138,11 @@ export async function fetchSource(
       }),
     );
   } else if (geojson.toString() === "https://measurement-api.slf.ch/public/api/imis/stations") {
-    const metadata = slf.SLFStationMetadataSchema.array().parse(await response.json());
-
-    const HS = await slf.parseSLFCurrentStationData("SNOW_HEIGHT");
-    const TA = await slf.parseSLFCurrentStationData("TEMPERATURE_AIR");
-    const TSS = await slf.parseSLFCurrentStationData("TEMPERATURE_SNOW_SURFACE");
-    const VW = await slf.parseSLFCurrentStationData("WIND_MEAN");
-
-    const stations = metadata.map(
-      (station): Feature => ({
-        ...slf.mapSLFStationToFeature(station, HS, TA, TSS, VW),
-        $smet: smet(station.code),
+    const features = await slf.mapAndFetchCurrentStationData(await response.json());
+    const stations = features.map(
+      (f): Feature => ({
+        ...f,
+        $smet: smet(f.id),
       }),
     );
     return stations;

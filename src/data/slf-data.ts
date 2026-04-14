@@ -212,3 +212,12 @@ export async function parseSLFCurrentStationData(
   }
   return data;
 }
+
+export async function mapAndFetchCurrentStationData(json: unknown) {
+  const metadata = SLFStationMetadataSchema.array().parse(json);
+  const HS = await parseSLFCurrentStationData("SNOW_HEIGHT");
+  const TA = await parseSLFCurrentStationData("TEMPERATURE_AIR");
+  const TSS = await parseSLFCurrentStationData("TEMPERATURE_SNOW_SURFACE");
+  const VW = await parseSLFCurrentStationData("WIND_MEAN");
+  return metadata.map((station) => mapSLFStationToFeature(station, HS, TA, TSS, VW));
+}
