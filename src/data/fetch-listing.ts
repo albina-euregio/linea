@@ -75,7 +75,9 @@ const config: Config[] = [
         start: start.toString(),
         end: end.toString(),
       });
-      return `https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min?${params}`;
+      return [
+        `https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min?${params}`,
+      ];
     },
     geojson: "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
   },
