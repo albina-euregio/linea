@@ -70,7 +70,11 @@ export class StationData {
 
     let key: ParameterType;
     for (key in this.values) {
-      filteredValues[key] = this.values[key].filter(
+      const series = this.values[key];
+      if (!series) {
+        continue;
+      }
+      filteredValues[key] = series.filter(
         (_, j) => this.timestamps[j] >= startTimestamp && this.timestamps[j] <= endTimestamp,
       );
     }
@@ -86,7 +90,11 @@ export class StationData {
       const forecastValues: Values = {};
       let forecastKey: ParameterType;
       for (forecastKey in this.forecast.values) {
-        forecastValues[forecastKey] = this.forecast.values[forecastKey].filter(
+        const series = this.forecast.values[forecastKey];
+        if (!series) {
+          continue;
+        }
+        forecastValues[forecastKey] = series.filter(
           (_, j) =>
             this.forecast &&
             this.forecast.timestamps[j] >= startTimestamp &&

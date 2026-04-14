@@ -231,10 +231,13 @@ export class StationView extends LineaView {
               mergedTimestamps,
             ),
           };
-          result.forecast.values.HS = this.createForecastSnowHeight(
+          const forecastHs = this.createForecastSnowHeight(
             result.values.HS,
             result.forecast.values.NS,
           );
+          if (forecastHs) {
+            result.forecast.values.HS = forecastHs;
+          }
           result.timestamps = mergedTimestamps;
         }
         this.forecastLoaded = true;
