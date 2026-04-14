@@ -19,13 +19,17 @@
     "./aws-stats": {
       "default": "./dist/aws-stats.mjs"
     },
+    "./fetch-listing": {
+      "default": "./dist/data/fetch-listing.mjs",
+      "types": "./dist/data/fetch-listing.d.ts"
+    },
     "./listing": {
-      "default": "./dist/listing.mjs",
-      "types": "./dist/listing.d.ts"
+      "default": "./dist/schema/listing.mjs",
+      "types": "./dist/schema/listing.d.ts"
     },
     "./listing-legacy": {
-      "default": "./dist/listing-legacy.mjs",
-      "types": "./dist/listing-legacy.d.ts"
+      "default": "./dist/schema/listing-legacy.mjs",
+      "types": "./dist/schema/listing-legacy.d.ts"
     }
   },
   "scripts": {
@@ -33,7 +37,7 @@
     "ci": "vp run lint && vp run test && vp run build",
     "test": "vp test run",
     "lint": "vp fmt --check && vp lint",
-    "build": "vp build && vp pack --dts --sourcemap --no-clean src/schema/listing.ts src/schema/listing-legacy.ts",
+    "build": "vp build && vp pack --dts --sourcemap --no-clean src/data/fetch-listing.ts src/schema/listing.ts src/schema/listing-legacy.ts",
     "dev": "vp dev"
   },
   "dependencies": {
