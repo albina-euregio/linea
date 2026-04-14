@@ -12,11 +12,26 @@ exports[`mapSLFStationToFeature 1`] = `
   },
   "id": "SLF1",
   "properties": {
-    "DW": 180,
-    "HS": undefined,
-    "TA": 283.15,
-    "TSS": undefined,
-    "VW": 5,
+    "DW": Scalar {
+      "unit": "°",
+      "value": 180,
+    },
+    "HS": Length {
+      "unit": "cm",
+      "value": undefined,
+    },
+    "TA": Temperature {
+      "unit": "℃",
+      "value": 10,
+    },
+    "TSS": Temperature {
+      "unit": "℃",
+      "value": undefined,
+    },
+    "VW": Speed {
+      "unit": "m/s",
+      "value": 18,
+    },
     "date": 2026-04-14T10:00:00.000Z,
     "name": "Schmirn",
     "operator": "SLF",
