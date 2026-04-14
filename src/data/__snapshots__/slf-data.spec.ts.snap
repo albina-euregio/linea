@@ -1,0 +1,84 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mapSLFStationToFeature 1`] = `
+{
+  "geometry": {
+    "coordinates": [
+      11.58,
+      47.08,
+      1464,
+    ],
+    "type": "Point",
+  },
+  "id": "SLF1",
+  "properties": {
+    "DW": 180,
+    "HS": undefined,
+    "TA": 283.15,
+    "TSS": undefined,
+    "VW": 5,
+    "date": 2026-04-14T10:00:00.000Z,
+    "name": "Schmirn",
+    "operator": "SLF",
+    "operatorLicense": "CC BY 4.0",
+    "operatorLicenseLink": "https://creativecommons.org/licenses/by/4.0/legalcode",
+    "operatorLink": "https://www.slf.ch/",
+  },
+  "type": "Feature",
+}
+`;
+
+exports[`parseSLFAPIData 1`] = `
+StationData {
+  "altitude": 1464,
+  "station": "SCHMIRN",
+  "timestamps": [
+    1776160800000,
+    1776161400000,
+  ],
+  "units": {
+    "DW": "°",
+    "HS": "cm",
+    "RH": "%",
+    "TA": "℃",
+    "TD": "℃",
+    "TSS": "℃",
+    "VW": "km/h",
+    "VW_MAX": "km/h",
+  },
+  "values": {
+    "DW": [
+      180,
+      190,
+    ],
+    "HS": [
+      120,
+      122,
+    ],
+    "RH": [
+      0.5,
+      0.55,
+    ],
+    "TA": [
+      273.15,
+      272.15,
+    ],
+    "TD": [
+      70.16324809760705,
+      72.01093419041926,
+    ],
+    "TSS": [
+      271.15,
+      270.15,
+    ],
+    "VW": [
+      3,
+      4,
+    ],
+    "VW_MAX": [
+      5,
+      6,
+    ],
+  },
+}
+`;
