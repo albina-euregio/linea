@@ -61,10 +61,34 @@ export class AwsStatsExportModal extends AbstractExportModal {
     super(modal, true);
     this.wrapper = wrapper;
 
+    const exportSizes = this.modal.querySelector("#exportSizes") as HTMLDivElement | null;
+    if (exportSizes && !this.modal.querySelector("#exportIncludePlotTitles")) {
+      exportSizes.insertAdjacentHTML(
+        "beforeend",
+        `<div>
+          <label style="display: flex; align-items: center; gap: 8px; margin-top: 24px;">
+            <input type="checkbox" id="exportIncludePlotTitles" checked style="width: auto; margin: 0;" />
+            ${i18n.message("linea:controls:label:showplottitles") || "Include plot titles"}
+          </label>
+        </div>`,
+      );
+    }
+
     (this.modal.querySelector("#btnExportSmet") as HTMLElement)!.style!.display = "none";
     const titleInput = this.modal.querySelector("#exportTitle") as HTMLInputElement | null;
     titleInput.style.display = "none";
     titleInput.labels.forEach((l) => (l.style.display = "none"));
+  }
+
+  protected override getExportSettings() {
+    const settings = super.getExportSettings();
+    const includePlotTitlesInput = this.modal.querySelector(
+      "#exportIncludePlotTitles",
+    ) as HTMLInputElement | null;
+    return {
+      ...settings,
+      includePlotTitles: includePlotTitlesInput?.checked ?? true,
+    };
   }
 
   /**
@@ -155,7 +179,12 @@ export class AwsStatsExportModal extends AbstractExportModal {
     const exports = this.getExportSettings();
     const { elements } = this.generateInteractivExportData();
     const dataUrl = await this.exportAllPlotsToPNG(
-      { width: 750, heightPerCanvas: 200, title: exports.title },
+      {
+        width: 750,
+        heightPerCanvas: 200,
+        title: exports.title,
+        includePlotTitles: exports.includePlotTitles,
+      },
       true,
     );
     if (!dataUrl) {
@@ -283,7 +312,17 @@ export class AwsStatsExportModal extends AbstractExportModal {
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
   protected async exportAllPlotsToPNG(
-    { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
+    {
+      width,
+      heightPerCanvas,
+      title,
+      includePlotTitles = true,
+    }: {
+      width: number;
+      heightPerCanvas: number;
+      title: string;
+      includePlotTitles?: boolean;
+    },
     noshow: boolean = false,
   ): Promise<string> {
     if (!noshow) {
@@ -346,7 +385,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
 
         const titleFromDom = plot.root.querySelector(".u-title")?.textContent?.trim() ?? "";
         const titleFromOpts = (plot as unknown as { opts?: { title?: string } }).opts?.title ?? "";
-        const chartTitle = titleFromDom || titleFromOpts || title || "";
+        const chartTitle = includePlotTitles ? titleFromDom || titleFromOpts || title || "" : "";
         const legendLines: Array<{
           items: Array<{ label: string; color: string; width: number }>;
         }> = [];
