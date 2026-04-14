@@ -1,99 +1,121 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`mapSLFStationToFeature 1`] = `
-{
-  "geometry": {
-    "coordinates": [
-      11.58,
-      47.08,
-      1464,
+exports[`SLF 1`] = `
+[
+  {
+    "$smet": [
+      "https://measurement-api.slf.ch/public/api/imis/station/KES2/measurements?period_in_days=7",
     ],
-    "type": "Point",
+    "geometry": {
+      "coordinates": [
+        9.8981393038,
+        46.6212841261,
+        2727,
+      ],
+      "type": "Point",
+    },
+    "id": "KES2",
+    "properties": {
+      "DW": Scalar {
+        "unit": "°",
+        "value": 337.3,
+      },
+      "HS": Length {
+        "unit": "cm",
+        "value": 130.504,
+      },
+      "HSD_24": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_48": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_6": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_72": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "ILWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "ISWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "OLWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "P": Pressure {
+        "unit": "Pa",
+        "value": undefined,
+      },
+      "PSUM_24": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_48": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_6": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_72": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "RH": Scalar {
+        "unit": "1",
+        "value": undefined,
+      },
+      "RSWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "TA": Temperature {
+        "unit": "℃",
+        "value": -1.295,
+      },
+      "TA_MAX": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TA_MIN": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TD": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TSS": Temperature {
+        "unit": "℃",
+        "value": -1.022,
+      },
+      "VW": Speed {
+        "unit": "m/s",
+        "value": 11.574,
+      },
+      "VW_MAX": Speed {
+        "unit": "m/s",
+        "value": undefined,
+      },
+      "date": 2026-04-14T16:30:00.000Z,
+      "name": "Porta d'Es-cha",
+      "operator": "SLF",
+      "operatorLicense": "CC BY 4.0",
+      "operatorLicenseLink": "https://www.slf.ch/de/services-und-produkte/slf-datenservice/",
+      "operatorLink": "https://www.slf.ch/",
+    },
+    "type": "Feature",
   },
-  "id": "SLF1",
-  "properties": {
-    "DW": Scalar {
-      "unit": "°",
-      "value": 180,
-    },
-    "HS": Length {
-      "unit": "cm",
-      "value": undefined,
-    },
-    "TA": Temperature {
-      "unit": "℃",
-      "value": 10,
-    },
-    "TSS": Temperature {
-      "unit": "℃",
-      "value": undefined,
-    },
-    "VW": Speed {
-      "unit": "m/s",
-      "value": 18,
-    },
-    "date": 2026-04-14T10:00:00.000Z,
-    "name": "Schmirn",
-    "operator": "SLF",
-    "operatorLicense": "CC BY 4.0",
-    "operatorLicenseLink": "https://creativecommons.org/licenses/by/4.0/legalcode",
-    "operatorLink": "https://www.slf.ch/",
-  },
-  "type": "Feature",
-}
-`;
-
-exports[`parseSLFAPIData 1`] = `
-StationData {
-  "altitude": 1464,
-  "station": "SCHMIRN",
-  "timestamps": [
-    1776160800000,
-    1776161400000,
-  ],
-  "units": {
-    "DW": "°",
-    "HS": "cm",
-    "RH": "%",
-    "TA": "℃",
-    "TD": "℃",
-    "TSS": "℃",
-    "VW": "km/h",
-    "VW_MAX": "km/h",
-  },
-  "values": {
-    "DW": [
-      180,
-      190,
-    ],
-    "HS": [
-      120,
-      122,
-    ],
-    "RH": [
-      0.5,
-      0.55,
-    ],
-    "TA": [
-      273.15,
-      272.15,
-    ],
-    "TD": [
-      70.16324809760705,
-      72.01093419041926,
-    ],
-    "TSS": [
-      271.15,
-      270.15,
-    ],
-    "VW": [
-      3,
-      4,
-    ],
-    "VW_MAX": [
-      5,
-      6,
-    ],
-  },
-}
+]
 `;
