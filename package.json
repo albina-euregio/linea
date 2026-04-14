@@ -19,6 +19,10 @@
     "./aws-stats": {
       "default": "./dist/aws-stats.mjs"
     },
+    "./fetch-listing": {
+      "default": "./dist/fetch-listing.mjs",
+      "types": "./dist/fetch-listing.d.ts"
+    },
     "./listing": {
       "default": "./dist/listing.mjs",
       "types": "./dist/listing.d.ts"
@@ -33,7 +37,7 @@
     "ci": "vp run lint && vp run test && vp run build",
     "test": "vp test run",
     "lint": "vp fmt --check && vp lint",
-    "build": "vp build && vp pack --dts --sourcemap --no-clean src/schema/listing.ts src/schema/listing-legacy.ts",
+    "build": "vp build && vp pack --dts --sourcemap --no-clean src/data/fetch-listing.ts && vp pack --dts --sourcemap --no-clean src/schema/listing.ts src/schema/listing-legacy.ts",
     "dev": "vp dev"
   },
   "dependencies": {
