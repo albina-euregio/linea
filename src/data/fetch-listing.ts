@@ -78,14 +78,23 @@ const config: Config[] = [
     smet: (id: string) => {
       const end = Temporal.Now.instant().round("minute");
       const start = end.subtract({ hours: 7 * 24 });
-      const params = new URLSearchParams({
+      const base = {
         station_ids: id,
         parameters: "TL,FF,FFX,DD,P,RF,SCHNEE,TP",
         output_format: "geojson",
+      };
+      const params = new URLSearchParams({
+        ...base,
         start: start.toString(),
         end: end.toString(),
       });
-      return [`${geosphere.URL}?${params}`];
+      const lazystart = end.subtract({ hours: 180 * 24 + 12 });
+      const lazyparams = new URLSearchParams({
+        ...base,
+        start: lazystart.toString(),
+        end: start.toString(),
+      });
+      return [`${geosphere.URL}?${params}`, `${geosphere.URL}?${lazyparams}`];
     },
     geojson: `${geosphere.URL}/metadata`,
   },
