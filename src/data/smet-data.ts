@@ -35,11 +35,8 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
 export async function fetchSMET(url: string): Promise<StationData> {
   let response = await fetchOrThrow(url);
 
-  if (url.startsWith("https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min")) {
-    // https://dataset.api.hub.geosphere.at/
-    const metadata0 = await fetchOrThrow(
-      "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
-    );
+  if (url.startsWith(geosphere.URL)) {
+    const metadata0 = await fetchOrThrow(`${geosphere.URL}/metadata`);
     const metadata = geosphere.MetadataSchema.parse(await metadata0.json());
     const collection = geosphere.FeatureCollectionSchema.parse(await response.json());
     return geosphere.parseGeosphereData(metadata, collection);

@@ -77,11 +77,9 @@ const config: Config[] = [
         start: start.toString(),
         end: end.toString(),
       });
-      return [
-        `https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min?${params}`,
-      ];
+      return [`${geosphere.URL}?${params}`];
     },
-    geojson: "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata",
+    geojson: `${geosphere.URL}/metadata`,
   },
   {
     regions: ["DE-BY"],
@@ -125,10 +123,7 @@ export async function fetchSource(
     console.warn(e);
     return [];
   }
-  if (
-    geojson.toString() ===
-    "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min/metadata"
-  ) {
+  if (geojson.toString().startsWith(geosphere.URL)) {
     const metadata = geosphere.MetadataSchema.parse(await response.json());
     return metadata.stations.map(
       (f): Feature => ({
