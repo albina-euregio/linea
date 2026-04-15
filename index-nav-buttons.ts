@@ -1,4 +1,4 @@
-import { fetchAll } from "./src/data/listing";
+import { fetchAll } from "./src/data/fetch-listing";
 
 const features = await fetchAll((c) => c.regions.includes("AT-07"));
 features.sort((f1, f2) => f1.properties.name.localeCompare(f2.properties.name));
