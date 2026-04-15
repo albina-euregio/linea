@@ -1,4 +1,3 @@
-import { FeatureCollectionSchema as LegacyFeatureCollectionSchema } from "../schema/listing-legacy";
 import { FeatureCollectionSchema, FeatureSchema } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
@@ -171,9 +170,7 @@ export async function fetchSource(
   }
 
   const json = await response.json();
-  const isLegacy = geojson.searchParams.get("v") === "legacy";
-  const schema = isLegacy ? LegacyFeatureCollectionSchema : FeatureCollectionSchema;
-  const collection = schema.parse(json, { reportInput: true });
+  const collection = FeatureCollectionSchema.parse(json, { reportInput: true });
   return collection.features.map(
     (f): Feature => ({
       ...f,

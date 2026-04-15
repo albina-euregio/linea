@@ -36,10 +36,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    zodToJsonSchemaPlugin("listing.schema.json"),
-    zodToJsonSchemaPlugin("listing-legacy.schema.json"),
-  ],
+  plugins: [zodToJsonSchemaPlugin("listing.schema.json")],
   fmt: {
     ignorePatterns: ["pnpm-lock.yaml", "pnpm-workspace.yaml"],
   },
@@ -54,10 +51,7 @@ function zodToJsonSchemaPlugin(fileName: string): Plugin {
     name: "zod-to-json-schema",
     apply: "build",
     async buildStart() {
-      const module =
-        fileName === "listing.schema.json"
-          ? await import("./src/schema/listing")
-          : await import("./src/schema/listing-legacy");
+      const module = await import("./src/schema/listing");
       const schema = module.FeatureCollectionSchema.toJSONSchema({
         unrepresentable: "any",
         override: ({ zodSchema, jsonSchema }) => {
