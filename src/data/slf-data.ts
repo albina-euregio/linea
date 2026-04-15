@@ -162,6 +162,7 @@ export async function mapAndFetchCurrentStationData(json: unknown) {
       },
       properties: {
         name: station.label,
+        microRegionID: station.country_code,
         operator: "SLF",
         operatorLink: "https://www.slf.ch/",
         operatorLicense: "CC BY 4.0",

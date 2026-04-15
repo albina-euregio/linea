@@ -109,6 +109,7 @@ exports[`SLF 1`] = `
         "value": undefined,
       },
       "date": 2026-04-14T16:30:00.000Z,
+      "microRegionID": "CH",
       "name": "Porta d'Es-cha",
       "operator": "SLF",
       "operatorLicense": "CC BY 4.0",
