@@ -67,7 +67,7 @@ export class LineaChart extends AbstractLineaChart {
       const forecastPsumAccum =
         forecastValues?.PSUM && measuredPsumAccum
           ? this.#sumupForecastPrecipitation(timestamps, forecastValues.PSUM, measuredPsumAccum)
-          : undefined;
+          : [];
 
       if (values.HS && values.PSUM) {
         this.updateData(
