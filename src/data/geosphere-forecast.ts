@@ -50,13 +50,6 @@ function accumulatedToIncrement(values: (number | null)[]): (number | null)[] {
   return out;
 }
 
-function wsPerSquareMeterToWPerSquareMeter(value: number | null): number | null {
-  if (value === null) {
-    return null;
-  }
-  return value / 3600;
-}
-
 export async function fetchGeosphereForecast(latlon: string): Promise<ForecastData> {
   const url =
     `${GEOSPHERE_FORECAST_BASE_URL}?lat_lon=${encodeURIComponent(latlon)}` +
@@ -99,7 +92,10 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
       DW: dw,
       PSUM: rrAcc ? accumulatedToIncrement(rrAcc) : undefined,
       NS: snowAcc,
-      ISWR: grad ? accumulatedToIncrement(grad).map(wsPerSquareMeterToWPerSquareMeter) : undefined,
+      // convert power to energy
+      ISWR: grad
+        ? accumulatedToIncrement(grad).map((value) => (value ? value / 3600 : null))
+        : undefined,
     },
   };
 }
