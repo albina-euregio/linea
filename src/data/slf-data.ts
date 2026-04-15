@@ -185,7 +185,7 @@ export async function mapAndFetchCurrentStationData(json: unknown) {
     );
     feature.properties.VW = new Speed(
       WIND_MEAN.features.get(feature.id)?.properties?.velocity ?? undefined,
-      "m/s",
+      "km/h",
     );
     feature.properties.DW = new Scalar(
       WIND_MEAN.features.get(feature.id)?.properties?.direction ?? undefined,

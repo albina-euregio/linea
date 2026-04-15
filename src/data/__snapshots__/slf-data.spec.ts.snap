@@ -101,7 +101,7 @@ exports[`SLF 1`] = `
         "value": -1.022,
       },
       "VW": Speed {
-        "unit": "m/s",
+        "unit": "km/h",
         "value": 11.574,
       },
       "VW_MAX": Speed {
