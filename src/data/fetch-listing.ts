@@ -66,7 +66,7 @@ const config: Config[] = [
     geojson: "https://lawinen.at/smet/vor/stations_vor.geojson",
   },
   {
-    regions: ["IT-36-UD"],
+    regions: ["IT-36"],
     smet: (id: string) => [
       `https://smet.hydrographie.info/${id}.smet`,
       `https://smet.hydrographie.info/${id}_6m.smet`,
