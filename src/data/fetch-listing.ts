@@ -114,7 +114,7 @@ const config: Config[] = [
   },
 ];
 
-type Feature = z.infer<typeof FeatureSchema> & { $smet: string[] };
+type Feature = z.infer<typeof FeatureSchema>;
 
 type ConfigPredicate = (c: (typeof config)[number]) => boolean;
 
@@ -142,20 +142,17 @@ export async function fetchSource(
       await import("temporal-polyfill/global");
     }
     const metadata = geosphere.MetadataSchema.parse(await response.json());
-    return metadata.stations.map(
-      (f): Feature => ({
-        ...geosphere.parseGeosphereFeature(f),
-        $smet: smet(f.id),
-      }),
-    );
+    return metadata.stations.map((f): Feature => {
+      const f0 = geosphere.parseGeosphereFeature(f);
+      f0.properties.dataURLs = smet(f.id);
+      return f0;
+    });
   } else if (geojson.toString() === slf.URL.STATIONS) {
     const features = await slf.mapAndFetchCurrentStationData(await response.json());
-    const stations = features.map(
-      (f): Feature => ({
-        ...f,
-        $smet: smet(f.id),
-      }),
-    );
+    const stations = features.map((f): Feature => {
+      f.properties.dataURLs = smet(f.id);
+      return f;
+    });
     return stations;
   }
 
@@ -171,11 +168,8 @@ export async function fetchSource(
 
   const json = await response.json();
   const collection = FeatureCollectionSchema.parse(json, { reportInput: true });
-  return collection.features.map(
-    (f): Feature => ({
-      ...f,
-      properties: f.properties!,
-      $smet: smet(f.properties.shortName || f.id),
-    }),
-  );
+  return collection.features.map((f): Feature => {
+    f.properties.dataURLs = smet(f.properties.shortName || f.id);
+    return f;
+  });
 }

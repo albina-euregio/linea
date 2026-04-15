@@ -47,6 +47,14 @@ export const FeaturePropertiesSchema = z
       .nullish()
       .describe("For legacy PNG plots: name of plot which includes this station"),
 
+    dataURLs: z
+      .url()
+      .array()
+      .describe(
+        "Data URLs for this station (typically SMET format is used, and three URLs are provided, short term, winter season, all winter seasons)",
+      )
+      .nullish(),
+
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
     ISWR: number
       .describe("Incoming Short Wave Radiation in W/m²")

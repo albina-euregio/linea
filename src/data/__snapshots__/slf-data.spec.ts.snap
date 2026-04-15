@@ -3,9 +3,6 @@
 exports[`SLF 1`] = `
 [
   {
-    "$smet": [
-      "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/station/KES2/measurements?period_in_days=7",
-    ],
     "geometry": {
       "coordinates": [
         9.8981393038,
@@ -39,6 +36,9 @@ exports[`SLF 1`] = `
       "TSS": 272.128,
       "VW": 3.215,
       "VW_MAX": undefined,
+      "dataURLs": [
+        "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/station/KES2/measurements?period_in_days=7",
+      ],
       "date": 2026-04-14T16:30:00.000Z,
       "microRegionID": "CH",
       "name": "Porta d'Es-cha",

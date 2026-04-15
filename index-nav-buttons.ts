@@ -9,8 +9,8 @@ features.forEach((feature) => {
   button.onclick = () => {
     Array.from(document.getElementsByTagName("linea-plot")).forEach((plot, i) => {
       if (i > 0) plot.remove();
-      plot.setAttribute("src", feature.$smet[0]);
-      plot.setAttribute("lazysrc", feature.$smet[1]);
+      plot.setAttribute("src", feature.properties.dataURLs![0]);
+      plot.setAttribute("lazysrc", feature.properties.dataURLs![1]);
     });
   };
   document.querySelector("nav")!.append(button);
