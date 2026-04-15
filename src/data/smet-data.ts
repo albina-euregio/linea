@@ -40,8 +40,8 @@ export async function fetchSMET(url: string): Promise<StationData> {
     const metadata = geosphere.MetadataSchema.parse(await metadata0.json());
     const collection = geosphere.FeatureCollectionSchema.parse(await response.json());
     return geosphere.parseGeosphereData(metadata, collection);
-  } else if (url.startsWith("https://measurement-api.slf.ch/public/api/imis/station/")) {
-    const metadata = await fetchOrThrow(slf.URL);
+  } else if (url.startsWith(slf.URL.STATION)) {
+    const metadata = await fetchOrThrow(slf.URL.STATIONS);
     return slf.parseSLFAPIData(await metadata.json(), await response.json());
   }
 
