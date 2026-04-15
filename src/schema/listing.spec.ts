@@ -2,7 +2,7 @@ import { z } from "zod";
 import { FeatureSchema } from "./listing";
 import { expect, test } from "vite-plus/test";
 
-test("parse legacy", () => {
+test("parse Feature", () => {
   const feature = FeatureSchema.parse({
     id: "6cb4697c-2e0a-7214-6f8c-9af46ee648f3",
     geometry: {
