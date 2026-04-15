@@ -66,6 +66,14 @@ const config: Config[] = [
     geojson: "https://lawinen.at/smet/vor/stations_vor.geojson",
   },
   {
+    regions: ["IT-36-UD"],
+    smet: (id: string) => [
+      `https://smet.hydrographie.info/${id}.smet`,
+      `https://smet.hydrographie.info/${id}_6m.smet`,
+    ],
+    geojson: "https://smet.hydrographie.info/stations_fvg_destiny.geojson",
+  },
+  {
     regions: ["AT-01", "AT-02", "AT-03", "AT-04", "AT-05", "AT-06", "AT-07", "AT-08", "AT-09"],
     smet: (id: string) => {
       const end = Temporal.Now.instant().round("minute");
