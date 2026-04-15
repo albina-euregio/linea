@@ -19,7 +19,7 @@ const config: Config[] = [
       `https://api.avalanche.report/lawine/grafiken/smet/winter/${id}.smet.gz`,
       `https://api.avalanche.report/lawine/grafiken/smet/all/${id}.smet.gz`,
     ],
-    geojson: "https://static.avalanche.report/weather_stations/linea.geojson",
+    geojson: "https://static.avalanche.report/weather_stations/linea.geojson.gz",
   },
   {
     regions: ["AT-02"],
@@ -139,6 +139,9 @@ export async function fetchSource(
     return [];
   }
   if (geojson.toString().startsWith(geosphere.URL)) {
+    if (!globalThis.Temporal) {
+      await import("temporal-polyfill/global");
+    }
     const metadata = geosphere.MetadataSchema.parse(await response.json());
     return metadata.stations.map(
       (f): Feature => ({
@@ -155,6 +158,16 @@ export async function fetchSource(
       }),
     );
     return stations;
+  }
+
+  if (
+    response.headers.get("Content-Encoding") === "gzip" ||
+    response.headers.get("Content-Type") === "application/gzip" ||
+    response.headers.get("Content-Type") === "application/x-gzip"
+  ) {
+    const blob = await response.blob();
+    const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
+    response = new Response(stream);
   }
 
   const json = await response.json();
