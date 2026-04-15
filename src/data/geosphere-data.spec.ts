@@ -1,8 +1,13 @@
 import { z } from "zod";
-import { expect, test } from "vite-plus/test";
-import { FeatureCollectionSchema, MetadataSchema, parseGeosphereData } from "./geosphere-data";
+import { describe, expect, test } from "vite-plus/test";
+import {
+  FeatureCollectionSchema,
+  MetadataSchema,
+  parseGeosphereData,
+  parseGeosphereFeature,
+} from "./geosphere-data";
 
-test("parseGeosphereData", async () => {
+describe("geosphere", () => {
   const metadata = MetadataSchema.parse({
     title: "TAWES",
     parameters: [],
@@ -102,5 +107,10 @@ test("parseGeosphereData", async () => {
       },
     ],
   } satisfies z.input<typeof FeatureCollectionSchema>);
-  expect(parseGeosphereData(metadata, collection)).toMatchSnapshot();
+  test("parseGeosphereData", () => {
+    expect(parseGeosphereData(metadata, collection)).toMatchSnapshot();
+  });
+  test("parseGeosphereFeature", () => {
+    expect(parseGeosphereFeature(metadata.stations[0])).toMatchSnapshot();
+  });
 });
