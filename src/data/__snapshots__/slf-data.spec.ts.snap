@@ -4,7 +4,7 @@ exports[`SLF 1`] = `
 [
   {
     "$smet": [
-      "https://measurement-api.slf.ch/public/api/imis/station/KES2/measurements?period_in_days=7",
+      "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/station/KES2/measurements?period_in_days=7",
     ],
     "geometry": {
       "coordinates": [
@@ -101,7 +101,7 @@ exports[`SLF 1`] = `
         "value": -1.022,
       },
       "VW": Speed {
-        "unit": "m/s",
+        "unit": "km/h",
         "value": 11.574,
       },
       "VW_MAX": Speed {

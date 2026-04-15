@@ -6,7 +6,19 @@ import * as listing from "../schema/listing";
 import { Length, Scalar, Speed, Temperature } from "./units";
 import { fetchOrThrow } from "./fetchOrThrow";
 
-export const URL = "https://measurement-api.slf.ch/public/api/imis/stations";
+export const URL = Object.freeze({
+  // proxy via https://api.avalanche.report/ for CORS headers
+  STATIONS: "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/stations",
+  STATION: "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/station/",
+  SNOW_HEIGHT:
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson",
+  TEMPERATURE_AIR:
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_AIR/current/geojson",
+  TEMPERATURE_SNOW_SURFACE:
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_SNOW_SURFACE/current/geojson",
+  WIND_MEAN:
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson",
+});
 
 export const SLFStationDataSchema = z.object({
   station_code: z.string(),
@@ -127,24 +139,16 @@ export function parseSLFAPIData(
 export async function mapAndFetchCurrentStationData(json: unknown) {
   const metadata = SLFStationMetadataSchema.array().parse(json);
 
-  const SNOW_HEIGHT = await fetchOrThrow(
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson",
-  )
+  const SNOW_HEIGHT = await fetchOrThrow(URL.SNOW_HEIGHT)
     .then((r) => r.json())
     .then((j) => SLFStationCollectionSchema.parseAsync(j));
-  const TEMPERATURE_AIR = await fetchOrThrow(
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_AIR/current/geojson",
-  )
+  const TEMPERATURE_AIR = await fetchOrThrow(URL.TEMPERATURE_AIR)
     .then((r) => r.json())
     .then((j) => SLFStationCollectionSchema.parseAsync(j));
-  const TEMPERATURE_SNOW_SURFACE = await fetchOrThrow(
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_SNOW_SURFACE/current/geojson",
-  )
+  const TEMPERATURE_SNOW_SURFACE = await fetchOrThrow(URL.TEMPERATURE_SNOW_SURFACE)
     .then((r) => r.json())
     .then((j) => SLFStationCollectionSchema.parseAsync(j));
-  const WIND_MEAN = await fetchOrThrow(
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson",
-  )
+  const WIND_MEAN = await fetchOrThrow(URL.WIND_MEAN)
     .then((r) => r.json())
     .then((j) => SLFStationCollectionSchema.parseAsync(j));
 
@@ -181,7 +185,7 @@ export async function mapAndFetchCurrentStationData(json: unknown) {
     );
     feature.properties.VW = new Speed(
       WIND_MEAN.features.get(feature.id)?.properties?.velocity ?? undefined,
-      "m/s",
+      "km/h",
     );
     feature.properties.DW = new Scalar(
       WIND_MEAN.features.get(feature.id)?.properties?.direction ?? undefined,

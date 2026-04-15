@@ -2,6 +2,8 @@ import { z } from "zod";
 import * as listing from "../schema/listing";
 import { StationData } from "./station-data";
 
+export const URL = "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min";
+
 export const GeometrySchema = z.object({
   type: z.enum(["Point"]),
   coordinates: z.number().array(),

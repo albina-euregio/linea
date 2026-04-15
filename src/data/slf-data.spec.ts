@@ -1,5 +1,6 @@
 import { expect, test, vi } from "vite-plus/test";
 import { fetchAll } from "./fetch-listing";
+import * as slf from "./slf-data";
 
 test("SLF", async () => {
   vi.stubGlobal(
@@ -7,7 +8,7 @@ test("SLF", async () => {
     vi.fn((url: URL) => {
       let json = {};
       switch (url.toString()) {
-        case "https://measurement-api.slf.ch/public/api/imis/stations":
+        case slf.URL.STATIONS:
           json = [
             {
               code: "KES2",
@@ -21,7 +22,7 @@ test("SLF", async () => {
             },
           ];
           break;
-        case "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson":
+        case slf.URL.SNOW_HEIGHT:
           json = {
             type: "FeatureCollection",
             features: [
@@ -43,7 +44,7 @@ test("SLF", async () => {
             ],
           };
           break;
-        case "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_AIR/current/geojson":
+        case slf.URL.TEMPERATURE_AIR:
           json = {
             type: "FeatureCollection",
             features: [
@@ -65,7 +66,7 @@ test("SLF", async () => {
             ],
           };
           break;
-        case "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_SNOW_SURFACE/current/geojson":
+        case slf.URL.TEMPERATURE_SNOW_SURFACE:
           json = {
             type: "FeatureCollection",
             features: [
@@ -87,7 +88,7 @@ test("SLF", async () => {
             ],
           };
           break;
-        case "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson":
+        case slf.URL.WIND_MEAN:
           json = {
             type: "FeatureCollection",
             features: [
