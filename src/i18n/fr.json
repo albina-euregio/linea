@@ -37,8 +37,9 @@
   "linea:controls:value:winterview:station": "vue de la gare",
   "linea:controls:label:exportsettings": "paramètres d'exportation",
   "linea:controls:label:heightpercanvas": "hauteur par toile",
+  "linea:controls:label:caption": "Caption",
   "linea:controls:label:width": "Width",
-  "linea:controls:label:title": "Title",
+  "linea:controls:label:title": "Titre",
   "linea:controls:label:exportchart": "graphique des exportations",
   "linea:controls:label:exportresult": "résultat de l'exportation",
   "linea:controls:datepicker:today": "Today",
@@ -58,6 +59,8 @@
   "linea:controls:button:download": "Télécharger",
   "linea:controls:button:open": "ouvert",
   "linea:controls:label:selectdiagrams": "sélectionner les diagrammes à exporter",
+  "linea:controls:label:showplottitles": "Show plot titles",
+  "linea:controls:label:datastalehint": "Settings changed\nClick update graphic",
   "linea:plotnames:temperature": "températures",
   "linea:plotnames:wind": "Vent",
   "linea:plotnames:precipitation": "précipitation",
@@ -144,5 +147,6 @@
   "linea:measurement-dates:usage:keybinding": "Keybinding",
   "linea:measurement-dates:usage:keybinding:press": "Press",
   "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings",
-  "linea:measurement-dates:usage:exit": "Close Analyzer"
+  "linea:measurement-dates:usage:exit": "Close Analyzer",
+  "linea:forecast:arome": "AROME Forecast (GeoSphere Austria)"
 }
