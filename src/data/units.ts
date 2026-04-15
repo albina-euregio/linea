@@ -36,12 +36,41 @@ class Quantity<U extends Unit> {
   }
 }
 
-export class Temperature extends Quantity<"K" | "℃"> {}
-export class Length extends Quantity<"m" | "cm" | "mm"> {}
-export class Scalar extends Quantity<"1" | "%" | "°"> {}
-export class Speed extends Quantity<"m/s" | "km/h"> {}
-export class Pressure extends Quantity<"hPa" | "Pa"> {}
-export class Intensity extends Quantity<"W/m²"> {}
+export class Temperature extends Quantity<"K" | "℃"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, "K");
+  }
+}
+export class Length extends Quantity<"m" | "cm" | "mm"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, "m");
+  }
+}
+export class Precipitation extends Length {
+  toJSON() {
+    return transformUnit(this.value, this.unit, "mm");
+  }
+}
+export class Scalar extends Quantity<"1" | "%" | "°"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, this.unit === "°" ? "°" : "1");
+  }
+}
+export class Speed extends Quantity<"m/s" | "km/h"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, "m/s");
+  }
+}
+export class Pressure extends Quantity<"hPa" | "Pa"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, "Pa");
+  }
+}
+export class Intensity extends Quantity<"W/m²"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, "W/m²");
+  }
+}
 
 export function unitTransformer(
   fromUnit: Unit,
