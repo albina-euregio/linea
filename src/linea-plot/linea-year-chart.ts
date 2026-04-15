@@ -22,7 +22,7 @@ import { opts_NS_year, opts_NS_year_series, opts_NS_year_snow_cover } from "./op
 import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year } from "./opts_datapoints_year";
 import { YearData } from "../data/year-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
-import type { StationData, Values } from "../data/station-data";
+import type { ForecastValues, StationData, Values } from "../data/station-data";
 import { TouchZoom } from "../shared/touch-zoom";
 import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 
@@ -73,7 +73,7 @@ export class LineaYearChart extends AbstractLineaChart {
     this.setData(this.result.timestamps, this.result.values);
   }
 
-  setData(timestamps: number[], values: Values) {
+  setData(timestamps: number[], values: Values, _forecast?: ForecastValues) {
     this.result.timestamps = timestamps;
     this.result.values = values;
     let i = 0;

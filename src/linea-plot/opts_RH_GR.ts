@@ -24,6 +24,7 @@ export const opts_RH_GR: uPlot.Options = {
           labelColor1,
           labelColor2,
         );
+        LineaOptsHelper.drawForecastInformation(u);
       },
     ],
   },
@@ -80,4 +81,16 @@ export const opts_ISWR: uPlot.Series = {
   scale: "y2",
   width: 1.5,
   value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
+};
+
+export const opts_RH_FORECAST: uPlot.Series = {
+  ...opts_RH,
+  label: "Forecast",
+  dash: [8, 6],
+};
+
+export const opts_ISWR_FORECAST: uPlot.Series = {
+  ...opts_ISWR,
+  label: "Forecast",
+  dash: [8, 6],
 };

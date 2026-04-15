@@ -29,21 +29,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         );
 
         // Draw reference line at 0℃
-        const width = 1;
-        const offset = (width % 2) / 2;
-        const x0 = u.bbox.left;
-        const y0 = u.valToPos(0, "y", true);
-        const x1 = u.bbox.left + u.bbox.width;
-
-        ctx.strokeStyle = "#000";
-        ctx.setLineDash([5, 5]);
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        ctx.moveTo(x0 + offset, y0 + offset);
-        ctx.lineTo(x1 + offset, y0 + offset);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
+        LineaOptsHelper.drawReferenceLine(u, 0, "#000");
+        LineaOptsHelper.drawForecastInformation(u);
         ctx.restore();
       },
     ],
@@ -123,11 +110,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   ],
 };
 
-const createSeries = (labelKey: any, color: string): uPlot.Series => ({
+const createSeries = (labelKey: any, color: string, dashed = false): uPlot.Series => ({
   label: i18n.message(labelKey),
   stroke: color,
   scale: "y",
   width: 1.5,
+  dash: dashed ? [8, 6] : undefined,
   spanGaps: false,
   value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
 });
@@ -135,6 +123,10 @@ const createSeries = (labelKey: any, color: string): uPlot.Series => ({
 export const opts_TA = createSeries("linea:parameter:TA", "#DE2D26");
 export const opts_TD = createSeries("linea:parameter:TD", "#6aafd5");
 export const opts_TSS = createSeries("linea:parameter:TSS", "#FC9272");
+export const opts_TA_FORECAST = createSeries("linea:parameter:TA", "#DE2D26", true);
+export const opts_TD_FORECAST = createSeries("linea:parameter:TD", "#6aafd5", true);
+opts_TA_FORECAST.label = "Forecast";
+opts_TD_FORECAST.label = "Forecast";
 
 export const opts_SurfaceHoar: uPlot.Series = {
   label: i18n.message("linea:parameter:SH:potential"),

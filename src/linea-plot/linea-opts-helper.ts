@@ -1,6 +1,7 @@
 import uPlot from "uplot";
 import { OptsHelper } from "../shared/opts-helper";
 import { cursorOpts } from "../shared/cursor-opts";
+import { i18n } from "../i18n";
 
 // Create a single sync instance for all charts
 const syncCursor = uPlot.sync("weather-charts");
@@ -25,6 +26,44 @@ export class LineaOptsHelper extends OptsHelper {
       rightFillStyle,
       false,
     );
+  }
+
+  static drawReferenceLine(u: uPlot, yValue: number, color: string, dash: number[] = [5, 5]) {
+    const width = 1;
+    const offset = (width % 2) / 2;
+    const x0 = u.bbox.left;
+    const y0 = u.valToPos(yValue, "y", true);
+    const x1 = u.bbox.left + u.bbox.width;
+    const ctx = u.ctx;
+    ctx.strokeStyle = color;
+    ctx.setLineDash(dash);
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x0 + offset, y0 + offset);
+    ctx.lineTo(x1 + offset, y0 + offset);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  static drawForecastInformation(u: uPlot) {
+    const ctx = u.ctx;
+    const width = 1;
+    const offset = (width % 2) / 2;
+    const now = new Date().getTime();
+    const lastData = u.data[0][u.data[0].length - 1];
+    if (lastData != null && lastData > now) {
+      const forecastX = u.valToPos(now, "x", true);
+      ctx.strokeStyle = "#00000056";
+      ctx.setLineDash([10, 5]);
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.moveTo(forecastX + offset, u.bbox.top);
+      ctx.lineTo(forecastX + offset, u.bbox.top + u.bbox.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#00000056";
+      ctx.fillText(i18n.message("linea:forecast:arome"), forecastX + 5, u.bbox.top - 10);
+    }
   }
 
   static getLineaOptions(): Omit<uPlot.Options, "series"> {

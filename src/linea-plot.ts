@@ -30,18 +30,31 @@ type LineaViewType = "station" | "winter";
  * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
  * - `showexport` - toggles if the export button is shown
  * - `showinteractiveblogexport` - toggles if the export for the interactive blog button is shown, just in combination with `showexport`
+ * - `forecast-latlon` {string} - Optional forecast coordinates. Supports two formats:
+ *    - Single value: `"lat,lon"` applies forecast to all stations
+ *    - Array format: `'["lat1,lon1", "lat2,lon2", ...]'` one coordinate per station. Use `null` or empty string to skip forecast for specific stations.
+ *    Forecast data loads lazily when navigating past the measured data range.
  *
  *
  * @example
  * ```html
- * <!-- Display all data with date picker -->
+ * <!-- Display all data with date picker and single forecast -->
  * <linea-plot
  *   src='["data/station1.smet", "data/station2.smet"]'
  *   backgroundcolors = '["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
+ *   forecast-latlon="48.5,11.3"
  *   showdatepicker
  *   showsurfacehoarseries
  *   showtitle
  *   showexport>
+ * </linea-plot>
+ *
+ * <!-- Multiple stations with individual forecasts -->
+ * <linea-plot
+ *   src='["data/station1.smet", "data/station2.smet"]'
+ *   forecast-latlon='["48.5,11.3", "47.2,10.8"]'
+ *   showdatepicker
+ *   showtitle>
  * </linea-plot>
  *
  * <!-- Fixed date view without picker -->
@@ -316,7 +329,18 @@ export class LineaPlot extends HTMLElement {
       this.nextBtn.classList.add("toggle-btn");
       this.nextBtn.classList.add("controls-dates-inputs");
       this.nextBtn.classList.add("linea-tooltip");
-      this.nextBtn.innerHTML = `&rarr;<span class='linea-tooltiptext'>${i18n.message("linea:controls:tooltips:next")}</span>`;
+      this.nextBtn.classList.add("loading-btn");
+
+      const nextLabel = document.createElement("span");
+      nextLabel.className = "loading-btn-label";
+      nextLabel.textContent = "\u2192";
+      this.nextBtn.appendChild(nextLabel);
+
+      const nextTooltip = document.createElement("span");
+      nextTooltip.className = "linea-tooltiptext";
+      nextTooltip.textContent = i18n.message("linea:controls:tooltips:next");
+      this.nextBtn.appendChild(nextTooltip);
+      this.nextBtn.appendChild(this.#createLoadingOverlay());
       this.addEventListener("keydown", (e) => {
         if (e.key === "ArrowRight") {
           this.nextBtn.click();

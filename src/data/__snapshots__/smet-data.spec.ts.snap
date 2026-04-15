@@ -3,6 +3,7 @@
 exports[`parse AT-02 (2025-12-09) 1`] = `
 StationData {
   "altitude": 2317,
+  "forecast": undefined,
   "station": "mallnitz_ankogel_hintere_lucke",
   "timestamps": [
     1764693000000,
@@ -51,6 +52,7 @@ StationData {
 exports[`parse AT-02 (assume tz = 0: UTC) 1`] = `
 StationData {
   "altitude": 2317,
+  "forecast": undefined,
   "station": "mallnitz_ankogel_hintere_lucke",
   "timestamps": [
     1764183000000,
@@ -91,6 +93,7 @@ StationData {
 exports[`parse AT-02 (with tz = 1: UTC+1) 1`] = `
 StationData {
   "altitude": 2317,
+  "forecast": undefined,
   "station": "mallnitz_ankogel_hintere_lucke",
   "timestamps": [
     1764179400000,
@@ -131,6 +134,7 @@ StationData {
 exports[`parse AT-07 1`] = `
 StationData {
   "altitude": 2180,
+  "forecast": undefined,
   "station": "Gallreideschrofen",
   "timestamps": [
     1764186000000,

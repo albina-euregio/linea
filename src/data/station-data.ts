@@ -41,6 +41,11 @@ export type Units = Partial<Record<ParameterType, string>>;
 
 export type Values = Partial<Record<ParameterType, (number | null)[]>>;
 
+export type ForecastValues = {
+  timestamps: number[];
+  values: Values;
+};
+
 export class StationData {
   constructor(
     public station: string,
@@ -48,6 +53,7 @@ export class StationData {
     public timestamps: number[],
     public units: Units,
     public values: Values,
+    public forecast?: ForecastValues,
   ) {}
 
   /**
@@ -64,7 +70,11 @@ export class StationData {
 
     let key: ParameterType;
     for (key in this.values) {
-      filteredValues[key] = this.values[key].filter(
+      const series = this.values[key];
+      if (!series) {
+        continue;
+      }
+      filteredValues[key] = series.filter(
         (_, j) => this.timestamps[j] >= startTimestamp && this.timestamps[j] <= endTimestamp,
       );
     }
@@ -72,12 +82,38 @@ export class StationData {
       (t) => t >= startTimestamp && t <= endTimestamp,
     );
 
+    let filteredForecast: ForecastValues | undefined = undefined;
+    if (this.forecast) {
+      const forecastTimestamps = this.forecast.timestamps.filter(
+        (t) => t >= startTimestamp && t <= endTimestamp,
+      );
+      const forecastValues: Values = {};
+      let forecastKey: ParameterType;
+      for (forecastKey in this.forecast.values) {
+        const series = this.forecast.values[forecastKey];
+        if (!series) {
+          continue;
+        }
+        forecastValues[forecastKey] = series.filter(
+          (_, j) =>
+            this.forecast &&
+            this.forecast.timestamps[j] >= startTimestamp &&
+            this.forecast.timestamps[j] <= endTimestamp,
+        );
+      }
+      filteredForecast = {
+        timestamps: forecastTimestamps,
+        values: forecastValues,
+      };
+    }
+
     return new StationData(
       this.station,
       this.altitude,
       filteredTimestamps,
       this.units,
       filteredValues,
+      filteredForecast,
     );
   }
 }

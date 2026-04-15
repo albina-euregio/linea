@@ -25,6 +25,7 @@ export const opts_HS_PSUM: uPlot.Options = {
           labelColor1,
           labelColor2,
         );
+        LineaOptsHelper.drawForecastInformation(u);
       },
     ],
     setSelect: [
@@ -106,6 +107,12 @@ export const opts_HS: uPlot.Series = {
   value: (_u, v) => i18n.number(v, {}, "cm"),
 };
 
+export const opts_HS_FORECAST: uPlot.Series = {
+  ...opts_HS,
+  label: "Forecast",
+  dash: [8, 6],
+};
+
 export const opts_PSUM: uPlot.Series = {
   label: i18n.message("linea:parameter:PSUM"),
   stroke: "#6aafd5",
@@ -113,4 +120,11 @@ export const opts_PSUM: uPlot.Series = {
   scale: "y2",
   width: 1.5,
   value: (_u, v) => i18n.number(v, {}, "mm"),
+};
+
+export const opts_PSUM_FORECAST: uPlot.Series = {
+  ...opts_PSUM,
+  label: "Forecast",
+  fill: undefined,
+  dash: [8, 6],
 };

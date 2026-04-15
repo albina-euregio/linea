@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FeatureSchema } from "./listing-legacy";
+import { FeatureSchema } from "./listing";
 import { expect, test } from "vite-plus/test";
 
 test("parse legacy", () => {
@@ -10,20 +10,20 @@ test("parse legacy", () => {
       type: "Point",
     },
     properties: {
-      Beobachtungsbeginn: "2008",
-      GS_O: 45.0,
-      HS: 41.6,
-      HSD24: -3.7,
-      HSD48: -1.38,
-      HSD72: -1.88,
-      LT: -4.1,
-      LT_MAX: -2.0,
-      LT_MIN: -4.4,
-      "LWD-Nummer": "GGAL2",
-      "LWD-Region": "AT-07-22 Stubaier Alpen Mitte",
-      OFT: -3.7,
-      RH: 98.2,
-      TD: -4.341,
+      startYear: "2008",
+      ISWR: 45.0,
+      HS: 41.6 / 100,
+      HSD_24: -3.7 / 100,
+      HSD_48: -1.38 / 100,
+      HSD_72: -1.88 / 100,
+      TA: 273.15 + -4.1,
+      TA_MAX: 273.15 + -2.0,
+      TA_MIN: 273.15 + -4.4,
+      shortName: "GGAL2",
+      microRegionID: "AT-07-22 Stubaier Alpen Mitte",
+      TSS: 273.15 + -3.7,
+      RH: 98.2 / 100,
+      TD: 273.15 + -4.341,
       date: "2026-01-25T09:20:00+01:00",
       name: "Gallreideschrofen",
       operator: "LWD Tirol",
