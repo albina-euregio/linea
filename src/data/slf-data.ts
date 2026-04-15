@@ -7,16 +7,17 @@ import { Length, Scalar, Speed, Temperature } from "./units";
 import { fetchOrThrow } from "./fetchOrThrow";
 
 export const URL = Object.freeze({
-  STATIONS: "https://measurement-api.slf.ch/public/api/imis/stations",
-  STATION: "https://measurement-api.slf.ch/public/api/imis/station/",
+  // proxy via https://api.avalanche.report/ for CORS headers
+  STATIONS: "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/stations",
+  STATION: "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/station/",
   SNOW_HEIGHT:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson",
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson",
   TEMPERATURE_AIR:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_AIR/current/geojson",
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_AIR/current/geojson",
   TEMPERATURE_SNOW_SURFACE:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_SNOW_SURFACE/current/geojson",
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_SNOW_SURFACE/current/geojson",
   WIND_MEAN:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson",
+    "https://api.avalanche.report/public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson",
 });
 
 export const SLFStationDataSchema = z.object({
