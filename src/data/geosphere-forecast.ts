@@ -1,6 +1,11 @@
 import type { Values } from "./station-data";
 import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
 
+// GeoSphere Austria
+// https://data.hub.geosphere.at/dataset/nwp-v1-1h-2500m
+// https://doi.org/10.60669/9zm8-s664
+// Lizenz: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/legalcode
+
 const GEOSPHERE_FORECAST_BASE_URL =
   "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m";
 const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,snow_acc,grad";
