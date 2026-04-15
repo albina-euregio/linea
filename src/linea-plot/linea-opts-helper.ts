@@ -61,8 +61,14 @@ export class LineaOptsHelper extends OptsHelper {
       ctx.lineTo(forecastX + offset, u.bbox.top + u.bbox.height);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = "#00000056";
-      ctx.fillText(i18n.message("linea:forecast:arome"), forecastX + 5, u.bbox.top - 10);
+      ctx.fillStyle = "#00000025";
+
+      const labelForecast = i18n.message("linea:forecast:arome");
+      const indexOfG = labelForecast.indexOf("(G");
+      const labelArome = labelForecast.slice(0, indexOfG);
+      const labelGeosphere = labelForecast.slice(indexOfG);
+      ctx.fillText(labelArome, forecastX + 5, u.bbox.top - 10);
+      ctx.fillText(labelGeosphere, forecastX + 5, u.bbox.top + 10);
     }
   }
 
