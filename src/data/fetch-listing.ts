@@ -6,6 +6,7 @@ import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider } from "./provider";
 import { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
+import { SLFDataProvider } from "./slf-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
@@ -102,10 +103,7 @@ const PROVIDERS: LineaDataProvider[] = [
     `https://lawinen.at/smet/slo/woche/${id}.smet.gz`,
   ]),
 
-  // FIXME
-  new SmetDataProvider(["CH"], slf.URL.STATIONS, (id) => [
-    `${slf.URL.STATION}${id}/measurements?period_in_days=7`,
-  ]),
+  new SLFDataProvider(),
 
   // FIXME
   new SmetDataProvider(["IT-34"], belluno.URL, (id) => [
@@ -137,12 +135,7 @@ export async function fetchSource(
   if (geojson.toString().startsWith(geosphere.URL)) {
     throw new Error();
   } else if (geojson.toString() === slf.URL.STATIONS) {
-    const features = await slf.mapAndFetchCurrentStationData(await response.json());
-    const stations = features.map((f): Feature => {
-      f.properties.dataURLs = smet(f.id);
-      return f;
-    });
-    return stations;
+    throw new Error();
   } else if (geojson.toString() === belluno.URL) {
     const response = await fetch(belluno.URL);
     const xml = await response.text();

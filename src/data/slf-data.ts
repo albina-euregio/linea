@@ -5,6 +5,7 @@ import { z } from "zod";
 import * as listing from "../schema/listing";
 import { Length, Scalar, Speed, Temperature } from "./units";
 import { fetchOrThrow } from "./fetchOrThrow";
+import type { LineaDataProvider } from "./provider";
 
 export const URL = Object.freeze({
   // proxy via https://api.avalanche.report/ for CORS headers
@@ -78,121 +79,125 @@ export const SLFStationCollectionSchema = z.object({
     ),
 });
 
-export function parseSLFAPIData(
-  stationsMetadata: SLFStationMetadata[],
-  collection: SLFStationData[],
-): StationData {
-  if (collection.length === 0) {
-    throw new Error("No data");
-  }
-  const station = stationsMetadata.find((s) => s.code === collection[0].station_code);
-  const timestamps = collection.map((entry) => Date.parse(entry.measure_date));
+export class SLFDataProvider implements LineaDataProvider {
+  async fetchStationData(station: listing.Feature, dataURL: URL): Promise<StationData> {
+    const response = await fetchOrThrow(dataURL);
+    const collection: SLFStationData[] = await response.json();
 
-  const allSeries: Partial<Record<ParameterType, (number | null | undefined)[]>> = {
-    DW: collection.map((entry) => entry.DW_30MIN_MEAN),
-    HS: collection.map((entry) => entry.HS),
-    RH: collection.map((entry) => entry.RH_30MIN_MEAN),
-    TA: collection.map((entry) => entry.TA_30MIN_MEAN),
-    TD: collection.map((entry) =>
-      dewPoint(entry.TA_30MIN_MEAN ?? null, entry.RH_30MIN_MEAN ?? null),
-    ),
-    TSS: collection.map((entry) => entry.TSS_30MIN_MEAN),
-    VW_MAX: collection.map((entry) => entry.VW_30MIN_MAX),
-    VW: collection.map((entry) => entry.VW_30MIN_MEAN),
-  };
+    if (collection.length === 0) {
+      throw new Error("No data");
+    }
+    const timestamps = collection.map((entry) => Date.parse(entry.measure_date));
 
-  const unitsByParameter: Partial<Record<ParameterType, string>> = {
-    DW: "°",
-    HS: "cm",
-    RH: "%",
-    TA: "℃",
-    TD: "℃",
-    TSS: "℃",
-    VW_MAX: "km/h",
-    VW: "km/h",
-  };
+    const allSeries: Partial<Record<ParameterType, (number | null | undefined)[]>> = {
+      DW: collection.map((entry) => entry.DW_30MIN_MEAN),
+      HS: collection.map((entry) => entry.HS),
+      RH: collection.map((entry) => entry.RH_30MIN_MEAN),
+      TA: collection.map((entry) => entry.TA_30MIN_MEAN),
+      TD: collection.map((entry) =>
+        dewPoint(entry.TA_30MIN_MEAN ?? null, entry.RH_30MIN_MEAN ?? null),
+      ),
+      TSS: collection.map((entry) => entry.TSS_30MIN_MEAN),
+      VW_MAX: collection.map((entry) => entry.VW_30MIN_MAX),
+      VW: collection.map((entry) => entry.VW_30MIN_MEAN),
+    };
 
-  const values: Values = {};
-  const units: Units = {};
+    const unitsByParameter: Partial<Record<ParameterType, string>> = {
+      DW: "°",
+      HS: "cm",
+      RH: "%",
+      TA: "℃",
+      TD: "℃",
+      TSS: "℃",
+      VW_MAX: "km/h",
+      VW: "km/h",
+    };
 
-  for (const [parameter, series] of Object.entries(allSeries) as [
-    ParameterType,
-    (number | null | undefined)[],
-  ][]) {
-    if (!series?.some((value) => value != null)) {
-      continue;
+    const values: Values = {};
+    const units: Units = {};
+
+    for (const [parameter, series] of Object.entries(allSeries) as [
+      ParameterType,
+      (number | null | undefined)[],
+    ][]) {
+      if (!series?.some((value) => value != null)) {
+        continue;
+      }
+
+      values[parameter] = series.map((value) => (value == null ? null : value));
+      units[parameter] = unitsByParameter[parameter] ?? "";
     }
 
-    values[parameter] = series.map((value) => (value == null ? null : value));
-    units[parameter] = unitsByParameter[parameter] ?? "";
+    return new StationData(
+      station?.properties?.name,
+      station?.geometry?.coordinates?.[2] as number,
+      timestamps,
+      units,
+      values,
+    );
   }
 
-  return new StationData(
-    station?.label ?? collection[0].station_code,
-    station?.elevation ?? NaN,
-    timestamps,
-    units,
-    values,
-  );
-}
+  async fetchStationListing(): Promise<listing.FeatureCollection> {
+    const metadata = await fetchOrThrow(URL.STATIONS)
+      .then((r) => r.json())
+      .then((j) => SLFStationMetadataSchema.array().parseAsync(j));
+    const SNOW_HEIGHT = await fetchOrThrow(URL.SNOW_HEIGHT)
+      .then((r) => r.json())
+      .then((j) => SLFStationCollectionSchema.parseAsync(j));
+    const TEMPERATURE_AIR = await fetchOrThrow(URL.TEMPERATURE_AIR)
+      .then((r) => r.json())
+      .then((j) => SLFStationCollectionSchema.parseAsync(j));
+    const TEMPERATURE_SNOW_SURFACE = await fetchOrThrow(URL.TEMPERATURE_SNOW_SURFACE)
+      .then((r) => r.json())
+      .then((j) => SLFStationCollectionSchema.parseAsync(j));
+    const WIND_MEAN = await fetchOrThrow(URL.WIND_MEAN)
+      .then((r) => r.json())
+      .then((j) => SLFStationCollectionSchema.parseAsync(j));
 
-export async function mapAndFetchCurrentStationData(json: unknown) {
-  const metadata = SLFStationMetadataSchema.array().parse(json);
+    const features = metadata.map((station) => {
+      const feature = listing.FeatureSchema.parse({
+        type: "Feature",
+        id: station.code,
+        geometry: {
+          type: "Point",
+          coordinates: [station.lon, station.lat, station.elevation],
+        },
+        properties: {
+          name: station.label,
+          dataURLs: [`${URL.STATION}${station.code}/measurements?period_in_days=7`],
+          microRegionID: station.country_code,
+          operator: "SLF",
+          operatorLink: "https://www.slf.ch/",
+          operatorLicense: "CC BY 4.0",
+          operatorLicenseLink: "https://www.slf.ch/de/services-und-produkte/slf-datenservice/",
+        },
+      } satisfies z.infer<typeof listing.FeatureSchema>);
+      feature.properties.date =
+        TEMPERATURE_AIR.features.get(feature.id)?.properties?.timestamp ??
+        SNOW_HEIGHT.features.get(feature.id)?.properties?.timestamp;
+      feature.properties.HS = new Length(
+        SNOW_HEIGHT.features.get(feature.id)?.properties?.value ?? undefined,
+        "cm",
+      );
+      feature.properties.TA = new Temperature(
+        TEMPERATURE_AIR.features.get(feature.id)?.properties?.value ?? undefined,
+        "℃",
+      );
+      feature.properties.TSS = new Temperature(
+        TEMPERATURE_SNOW_SURFACE.features.get(feature.id)?.properties?.value ?? undefined,
+        "℃",
+      );
+      feature.properties.VW = new Speed(
+        WIND_MEAN.features.get(feature.id)?.properties?.velocity ?? undefined,
+        "km/h",
+      );
+      feature.properties.DW = new Scalar(
+        WIND_MEAN.features.get(feature.id)?.properties?.direction ?? undefined,
+        "°",
+      );
 
-  const SNOW_HEIGHT = await fetchOrThrow(URL.SNOW_HEIGHT)
-    .then((r) => r.json())
-    .then((j) => SLFStationCollectionSchema.parseAsync(j));
-  const TEMPERATURE_AIR = await fetchOrThrow(URL.TEMPERATURE_AIR)
-    .then((r) => r.json())
-    .then((j) => SLFStationCollectionSchema.parseAsync(j));
-  const TEMPERATURE_SNOW_SURFACE = await fetchOrThrow(URL.TEMPERATURE_SNOW_SURFACE)
-    .then((r) => r.json())
-    .then((j) => SLFStationCollectionSchema.parseAsync(j));
-  const WIND_MEAN = await fetchOrThrow(URL.WIND_MEAN)
-    .then((r) => r.json())
-    .then((j) => SLFStationCollectionSchema.parseAsync(j));
-
-  return metadata.map((station) => {
-    const feature = listing.FeatureSchema.parse({
-      type: "Feature",
-      id: station.code,
-      geometry: {
-        type: "Point",
-        coordinates: [station.lon, station.lat, station.elevation],
-      },
-      properties: {
-        name: station.label,
-        microRegionID: station.country_code,
-        operator: "SLF",
-        operatorLink: "https://www.slf.ch/",
-        operatorLicense: "CC BY 4.0",
-        operatorLicenseLink: "https://www.slf.ch/de/services-und-produkte/slf-datenservice/",
-      },
-    } satisfies z.infer<typeof listing.FeatureSchema>);
-    feature.properties.date =
-      TEMPERATURE_AIR.features.get(feature.id)?.properties?.timestamp ??
-      SNOW_HEIGHT.features.get(feature.id)?.properties?.timestamp;
-    feature.properties.HS = new Length(
-      SNOW_HEIGHT.features.get(feature.id)?.properties?.value ?? undefined,
-      "cm",
-    );
-    feature.properties.TA = new Temperature(
-      TEMPERATURE_AIR.features.get(feature.id)?.properties?.value ?? undefined,
-      "℃",
-    );
-    feature.properties.TSS = new Temperature(
-      TEMPERATURE_SNOW_SURFACE.features.get(feature.id)?.properties?.value ?? undefined,
-      "℃",
-    );
-    feature.properties.VW = new Speed(
-      WIND_MEAN.features.get(feature.id)?.properties?.velocity ?? undefined,
-      "km/h",
-    );
-    feature.properties.DW = new Scalar(
-      WIND_MEAN.features.get(feature.id)?.properties?.direction ?? undefined,
-      "°",
-    );
-
-    return feature;
-  });
+      return feature;
+    });
+    return { type: "FeatureCollection", features };
+  }
 }

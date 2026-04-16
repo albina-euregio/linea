@@ -118,6 +118,6 @@ test("SLF", async () => {
     }),
   );
 
-  const data = await fetchAll((c) => c.geojson.includes("measurement-api.slf.ch"));
+  const data = await fetchAll((c) => c instanceof slf.SLFDataProvider);
   expect(data).toMatchSnapshot();
 });

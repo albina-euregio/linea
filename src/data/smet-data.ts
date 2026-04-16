@@ -39,8 +39,7 @@ export async function fetchSMET(url: string): Promise<StationData> {
   if (url.startsWith(geosphere.URL)) {
     throw new Error();
   } else if (url.startsWith(slf.URL.STATION)) {
-    const metadata = await fetchOrThrow(slf.URL.STATIONS);
-    return slf.parseSLFAPIData(await metadata.json(), await response.json());
+    throw new Error();
   } else if (url.startsWith("https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/")) {
     return belluno.parseBellunoData(await response.text());
   }
