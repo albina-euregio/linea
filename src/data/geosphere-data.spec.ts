@@ -6,10 +6,10 @@ import { PROVIDERS } from "./providers";
 describe("geosphere", async () => {
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: URL) => {
+    vi.fn((url: string) => {
       let json;
 
-      if (url.toString().endsWith("/metadata")) {
+      if (url.endsWith("/metadata")) {
         json = {
           title: "TAWES",
           parameters: [],
@@ -37,7 +37,7 @@ describe("geosphere", async () => {
           ],
           id_type: "Synop",
         } satisfies z.input<typeof geosphere.MetadataSchema>;
-      } else if (url.toString().includes("station_ids=")) {
+      } else if (url.includes("station_ids=")) {
         json = {
           media_type: "application/json",
           type: "FeatureCollection",
@@ -124,7 +124,7 @@ describe("geosphere", async () => {
   test("parseGeosphereData", async () => {
     const { features } = await provider.fetchStationListing();
     const feature = features[0];
-    const data = await PROVIDERS.fetchStationData(feature, new URL(feature.properties.dataURLs[0]));
+    const data = await PROVIDERS.fetchStationData(feature, 0);
     expect(data).toMatchSnapshot();
   });
 

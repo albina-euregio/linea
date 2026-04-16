@@ -2,6 +2,7 @@ import { expect, test, vi } from "vite-plus/test";
 import "temporal-polyfill/global";
 import { PROVIDERS } from "./providers";
 import * as belluno from "./belluno-data";
+import type { Feature } from "../schema/listing";
 
 /**
  * @vitest-environment jsdom
@@ -57,11 +58,11 @@ test("Belluno station listing", async () => {
 
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: URL | string) => {
-      if (url.toString() === belluno.URL) {
+    vi.fn((url: string) => {
+      if (url === belluno.URL) {
         return Promise.resolve(new Response(stationsXml));
       }
-      throw new Error(`Unsupported URL ${url.toString()}`);
+      throw new Error(`Unsupported URL ${url}`);
     }),
   );
 
@@ -86,14 +87,17 @@ test("Belluno data parsing", async () => {
 
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: URL | string) => {
-      if (url.toString() === url0) {
+    vi.fn((url: string) => {
+      if (url === url0) {
         return Promise.resolve(new Response(csv));
       }
-      throw new Error(`Unsupported URL ${url.toString()}`);
+      throw new Error(`Unsupported URL ${url}`);
     }),
   );
 
-  const stationData = await new belluno.BellunoDataProvider().fetchStationData(null, new URL(url0));
+  const stationData = await new belluno.BellunoDataProvider().fetchStationData(
+    { properties: { dataURLs: [url0] } } as Feature,
+    0,
+  );
   expect(stationData).toMatchSnapshot();
 });

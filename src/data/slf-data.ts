@@ -83,7 +83,8 @@ export class SLFDataProvider implements LineaDataProvider {
   readonly dataProviderID = "SLF";
   readonly regions = ["CH", "LI"];
 
-  async fetchStationData(station: listing.Feature, dataURL: URL): Promise<StationData> {
+  async fetchStationData(station: listing.Feature, dataURLsIndex: number): Promise<StationData> {
+    const dataURL = station.properties.dataURLs[dataURLsIndex];
     const response = await fetchOrThrow(dataURL);
     const collection: SLFStationData[] = await response.json();
 

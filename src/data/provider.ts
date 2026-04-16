@@ -9,5 +9,5 @@ export interface LineaDataProvider {
   readonly dataProviderID: ProviderIdentifier;
   readonly regions: string[];
   fetchStationListing(): Promise<FeatureCollection>;
-  fetchStationData(feature: Feature, dataURL: URL): Promise<StationData>;
+  fetchStationData(feature: Feature, dataURLsIndex: number): Promise<StationData>;
 }

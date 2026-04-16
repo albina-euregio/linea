@@ -40,8 +40,9 @@ export class SmetDataProvider implements LineaDataProvider {
     return collection;
   }
 
-  fetchStationData(_: Feature, dataURL: URL): Promise<StationData> {
-    return fetchSMET(dataURL.toString());
+  fetchStationData(f: Feature, dataURLsIndex: number): Promise<StationData> {
+    const dataURL = f.properties.dataURLs[dataURLsIndex];
+    return fetchSMET(dataURL);
   }
 }
 
@@ -67,13 +68,13 @@ export class MultiDataProvider implements LineaDataProvider {
     return { type: "FeatureCollection", features };
   }
 
-  fetchStationData(feature: Feature, dataURL: URL): Promise<StationData> {
+  fetchStationData(feature: Feature, dataURLsIndex: number): Promise<StationData> {
     const dataProviderID = feature.properties.dataProviderID;
     const provider = this.providers.find((p) => p.dataProviderID === dataProviderID);
     if (!provider) {
       throw new Error("No provider known for dataProviderID=" + dataProviderID);
     }
-    return provider.fetchStationData(feature, dataURL);
+    return provider.fetchStationData(feature, dataURLsIndex);
   }
 }
 

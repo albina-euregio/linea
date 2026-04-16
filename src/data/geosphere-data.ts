@@ -95,7 +95,8 @@ export class GeoSphereDataProvider implements LineaDataProvider {
     "AT-09",
   ];
 
-  async fetchStationData(station: listing.Feature, dataURL: URL): Promise<StationData> {
+  async fetchStationData(station: listing.Feature, dataURLsIndex: number): Promise<StationData> {
+    const dataURL = station.properties.dataURLs[dataURLsIndex];
     const response = await fetchOrThrow(dataURL);
     const collection = FeatureCollectionSchema.parse(await response.json());
     if (collection?.features?.length !== 1) throw new Error();

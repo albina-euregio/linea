@@ -148,7 +148,8 @@ export class BellunoDataProvider implements LineaDataProvider {
   /**
    * Parses CSV data from ARPAV Belluno meteorological service.
    */
-  async fetchStationData(_: listing.Feature, dataURL: URL): Promise<StationData> {
+  async fetchStationData(f: listing.Feature, dataURLsIndex: number): Promise<StationData> {
+    const dataURL = f.properties.dataURLs[dataURLsIndex];
     const response = await fetchOrThrow(dataURL);
     const csv = await response.text();
     const lines = csv

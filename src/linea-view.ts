@@ -68,7 +68,7 @@ export abstract class LineaView {
     }
 
     const results = new StationDataArray();
-    const data$ = this.#features.map((f, i) => PROVIDERS.fetchStationData(f, new URL(dataURLs[i])));
+    const data$ = this.#features.map((f, i) => PROVIDERS.fetchStationData(f, i));
     const data = await Promise.all(data$);
     results.push(...data);
     this.results.mergeWith(results);

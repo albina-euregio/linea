@@ -5,9 +5,9 @@ import * as slf from "./slf-data";
 test("SLF", async () => {
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: URL) => {
+    vi.fn((url: string) => {
       let json = {};
-      switch (url.toString()) {
+      switch (url) {
         case slf.URL.STATIONS:
           json = [
             {
