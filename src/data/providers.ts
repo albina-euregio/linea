@@ -8,7 +8,7 @@ import { BellunoDataProvider } from "./belluno-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
-    public readonly id: ProviderIdentifier,
+    public readonly dataProviderID: ProviderIdentifier,
     public readonly regions: string[],
     public geojsonURL: string,
     public smetURLs: (id: string) => string[],
@@ -42,14 +42,17 @@ export class SmetDataProvider implements LineaDataProvider {
 export class MultiDataProvider implements LineaDataProvider {
   readonly regions: string[];
   constructor(
-    readonly id: string,
+    readonly dataProviderID: string,
     readonly providers: LineaDataProvider[],
   ) {
     this.regions = providers.flatMap((p) => p.regions);
   }
 
-  filtered(id: string, predicate: (p: LineaDataProvider) => boolean): MultiDataProvider {
-    return new MultiDataProvider(id, this.providers.filter(predicate));
+  filtered(
+    dataProviderID: string,
+    predicate: (p: LineaDataProvider) => boolean,
+  ): MultiDataProvider {
+    return new MultiDataProvider(dataProviderID, this.providers.filter(predicate));
   }
 
   async fetchStationListing(): Promise<FeatureCollection> {
@@ -61,7 +64,7 @@ export class MultiDataProvider implements LineaDataProvider {
 
   fetchStationData(feature: Feature, dataURL: URL): Promise<StationData> {
     const dataProviderID = feature.properties.dataProviderID;
-    const provider = this.providers.find((p) => p.id === dataProviderID);
+    const provider = this.providers.find((p) => p.dataProviderID === dataProviderID);
     if (!provider) {
       throw new Error("No provider known for dataProviderID=" + dataProviderID);
     }

@@ -6,7 +6,7 @@ export const ProviderIdentifierSchema = z.string().brand();
 export type ProviderIdentifier = z.infer<typeof ProviderIdentifierSchema>;
 
 export interface LineaDataProvider {
-  readonly id: ProviderIdentifier;
+  readonly dataProviderID: ProviderIdentifier;
   readonly regions: string[];
   fetchStationListing(): Promise<FeatureCollection>;
   fetchStationData(feature: Feature, dataURL: URL): Promise<StationData>;

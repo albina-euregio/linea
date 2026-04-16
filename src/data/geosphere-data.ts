@@ -82,7 +82,7 @@ export const MetadataSchema = z.object({
 export type Metadata = z.infer<typeof MetadataSchema>;
 
 export class GeoSphereDataProvider implements LineaDataProvider {
-  readonly id = "GEOSPHERE";
+  readonly dataProviderID = "GEOSPHERE";
   readonly regions = [
     "AT-01",
     "AT-02",
@@ -161,7 +161,7 @@ export class GeoSphereDataProvider implements LineaDataProvider {
             operatorLink: "https://www.geosphere.at/",
             operatorLicense: "CC BY 4.0",
             operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/legalcode",
-            dataProviderID: this.id,
+            dataProviderID: this.dataProviderID,
             dataURLs: this.#dataURLs(s.id),
           },
         } satisfies listing.Feature),

@@ -80,7 +80,7 @@ export const SLFStationCollectionSchema = z.object({
 });
 
 export class SLFDataProvider implements LineaDataProvider {
-  readonly id = "SLF";
+  readonly dataProviderID = "SLF";
   readonly regions = ["CH", "LI"];
 
   async fetchStationData(station: listing.Feature, dataURL: URL): Promise<StationData> {
@@ -167,7 +167,7 @@ export class SLFDataProvider implements LineaDataProvider {
         },
         properties: {
           name: station.label,
-          dataProviderID: this.id,
+          dataProviderID: this.dataProviderID,
           dataURLs: [`${URL.STATION}${station.code}/measurements?period_in_days=7`],
           microRegionID: station.country_code,
           operator: "SLF",

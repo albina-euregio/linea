@@ -102,7 +102,7 @@ function textContent(parent: Element, tagName: string): string {
 }
 
 export class BellunoDataProvider implements LineaDataProvider {
-  readonly id = "IT-34";
+  readonly dataProviderID = "IT-34";
   readonly regions = ["IT-34"];
 
   async fetchStationListing(): Promise<listing.FeatureCollection> {
@@ -133,7 +133,7 @@ export class BellunoDataProvider implements LineaDataProvider {
         },
         properties: {
           name: name,
-          dataProviderID: this.id,
+          dataProviderID: this.dataProviderID,
           dataURLs: [`https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/${id}.csv`],
           operator: "ARPAV",
           operatorLink: "https://www.arpa.veneto.it/",
