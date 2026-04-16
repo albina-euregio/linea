@@ -4,7 +4,7 @@ exports[`geosphere > parseGeosphereData 1`] = `
 StationData {
   "altitude": 1464,
   "forecast": undefined,
-  "station": "SCHMIRN",
+  "station": "Schmirn",
   "timestamps": [
     1775557200000,
     1775557800000,
@@ -24,8 +24,8 @@ StationData {
     "HS": "cm",
     "P": "hPa",
     "RH": "%",
-    "TA": "°C",
-    "TD": "°C",
+    "TA": "℃",
+    "TD": "℃",
     "VW": "km/h",
     "VW_MAX": "km/h",
   },

@@ -73,31 +73,6 @@ const config: Config[] = [
     geojson: "https://smet.hydrographie.info/stations_fvg_destiny.geojson",
   },
   {
-    regions: ["AT-01", "AT-02", "AT-03", "AT-04", "AT-05", "AT-06", "AT-07", "AT-08", "AT-09"],
-    smet: (id: string) => {
-      const end = Temporal.Now.instant().round("minute");
-      const start = end.subtract({ hours: 7 * 24 });
-      const base = {
-        station_ids: id,
-        parameters: "TL,FF,FFX,DD,P,RF,SCHNEE,TP",
-        output_format: "geojson",
-      };
-      const params = new URLSearchParams({
-        ...base,
-        start: start.toString(),
-        end: end.toString(),
-      });
-      const lazystart = end.subtract({ hours: 180 * 24 + 12 });
-      const lazyparams = new URLSearchParams({
-        ...base,
-        start: lazystart.toString(),
-        end: start.toString(),
-      });
-      return [`${geosphere.URL}?${params}`, `${geosphere.URL}?${lazyparams}`];
-    },
-    geojson: `${geosphere.URL}/metadata`,
-  },
-  {
     regions: ["DE-BY"],
     smet: (id: string) => [`https://lawinen.at/smet/bay/woche/${id}.smet.gz`],
     geojson: "https://lawinen.at/smet/bay/stations_bay.geojson",
@@ -143,15 +118,7 @@ export async function fetchSource(
     return [];
   }
   if (geojson.toString().startsWith(geosphere.URL)) {
-    if (!globalThis.Temporal) {
-      await import("temporal-polyfill/global");
-    }
-    const metadata = geosphere.MetadataSchema.parse(await response.json());
-    return metadata.stations.map((f): Feature => {
-      const f0 = geosphere.parseGeosphereFeature(f);
-      f0.properties.dataURLs = smet(f.id);
-      return f0;
-    });
+    throw new Error();
   } else if (geojson.toString() === slf.URL.STATIONS) {
     const features = await slf.mapAndFetchCurrentStationData(await response.json());
     const stations = features.map((f): Feature => {

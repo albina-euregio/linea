@@ -176,7 +176,7 @@ export const FeatureCollectionSchema = z
   .object({
     type: z.enum(["FeatureCollection"]),
     features: z.array(FeatureSchema),
-    properties: z.any(),
+    properties: z.any().nullish(),
   })
   .describe("A GeoJSON FeatureCollection of weather stations");
 
