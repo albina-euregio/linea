@@ -9,6 +9,7 @@ export default defineConfig({
   },
   pack: {
     entry: ["src/data/fetch-listing.ts", "src/schema/listing.ts"],
+    clean: false,
     dts: true,
     sourcemap: true,
   },
