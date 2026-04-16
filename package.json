@@ -37,7 +37,7 @@
     "test": "vp test run",
     "lint": "vp fmt --check && vp lint",
     "build": "vp build && vp pack --dts --sourcemap --no-clean src/data/fetch-listing.ts src/schema/listing.ts",
-    "build:cli": "vp pack --exe --no-clean src/cli.ts",
+    "build:cli": "vp pack --no-config --no-clean src/cli.ts",
     "dev": "vp dev"
   },
   "dependencies": {
