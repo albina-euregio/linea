@@ -20,6 +20,7 @@ build:cli:
   image: node:25-alpine
   stage: build
   script:
+    - rm vite.config.ts
     - npx pnpm@10.33.0 install --frozen-lockfile --ignore-scripts
     - npx pnpm@10.33.0 run build:cli
   artifacts:
