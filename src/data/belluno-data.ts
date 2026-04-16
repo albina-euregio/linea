@@ -3,6 +3,7 @@ import type { Feature } from "../schema/listing";
 import { StationData, ParameterType, type Units, type Values } from "./station-data";
 
 export const URL = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml";
+const BELLUNO_TIMEZONE = "Europe/Rome";
 
 type BellunoFeature = Feature;
 
@@ -94,28 +95,16 @@ function parseTimestamp(timestamp: string): number {
   const itMatch = timestamp.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
   if (itMatch) {
     const [, day, month, year, hour, minute] = itMatch;
-    return Date.UTC(
-      Number.parseInt(year, 10),
-      Number.parseInt(month, 10) - 1,
-      Number.parseInt(day, 10),
-      Number.parseInt(hour, 10),
-      Number.parseInt(minute, 10),
-    );
+    return Temporal.PlainDateTime.from({
+      year: Number.parseInt(year, 10),
+      month: Number.parseInt(month, 10),
+      day: Number.parseInt(day, 10),
+      hour: Number.parseInt(hour, 10),
+      minute: Number.parseInt(minute, 10),
+    })
+      .toZonedDateTime(BELLUNO_TIMEZONE)
+      .toInstant().epochMilliseconds;
   }
-
-  // Fallback: YYYYMMDDHHmm
-  const arpavMatch = timestamp.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/);
-  if (arpavMatch) {
-    const [, year, month, day, hour, minute] = arpavMatch;
-    return Date.UTC(
-      Number.parseInt(year, 10),
-      Number.parseInt(month, 10) - 1,
-      Number.parseInt(day, 10),
-      Number.parseInt(hour, 10),
-      Number.parseInt(minute, 10),
-    );
-  }
-
   throw new Error(`Unable to parse timestamp: ${timestamp}`);
 }
 
