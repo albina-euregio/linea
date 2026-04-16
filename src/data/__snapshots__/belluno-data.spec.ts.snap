@@ -1,0 +1,234 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Belluno station listing 1`] = `
+[
+  {
+    "$smet": [
+      "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0047.csv",
+    ],
+    "geometry": {
+      "coordinates": [
+        12.17508664,
+        46.52744551,
+        2235,
+      ],
+      "type": "Point",
+    },
+    "id": "0047",
+    "properties": {
+      "DW": Scalar {
+        "unit": "°",
+        "value": undefined,
+      },
+      "HS": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_24": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_48": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_6": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_72": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "ILWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "ISWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "OLWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "P": Pressure {
+        "unit": "Pa",
+        "value": undefined,
+      },
+      "PSUM_24": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_48": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_6": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_72": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "RH": Scalar {
+        "unit": "1",
+        "value": undefined,
+      },
+      "RSWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "TA": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TA_MAX": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TA_MIN": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TD": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TSS": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "VW": Speed {
+        "unit": "m/s",
+        "value": undefined,
+      },
+      "VW_MAX": Speed {
+        "unit": "m/s",
+        "value": undefined,
+      },
+      "name": "Faloria",
+      "operator": "ARPAV",
+      "operatorLicense": "CC BY 4.0",
+      "operatorLicenseLink": "https://creativecommons.org/licenses/by/4.0/deed.it",
+      "operatorLink": "https://www.arpa.veneto.it/",
+    },
+    "type": "Feature",
+  },
+  {
+    "$smet": [
+      "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0009.csv",
+    ],
+    "geometry": {
+      "coordinates": [
+        11.924,
+        46.433,
+        1007,
+      ],
+      "type": "Point",
+    },
+    "id": "0009",
+    "properties": {
+      "DW": Scalar {
+        "unit": "°",
+        "value": undefined,
+      },
+      "HS": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_24": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_48": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_6": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "HSD_72": Length {
+        "unit": "m",
+        "value": undefined,
+      },
+      "ILWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "ISWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "OLWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "P": Pressure {
+        "unit": "Pa",
+        "value": undefined,
+      },
+      "PSUM_24": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_48": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_6": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "PSUM_72": Length {
+        "unit": "mm",
+        "value": undefined,
+      },
+      "RH": Scalar {
+        "unit": "1",
+        "value": undefined,
+      },
+      "RSWR": Intensity {
+        "unit": "W/m²",
+        "value": undefined,
+      },
+      "TA": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TA_MAX": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TA_MIN": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TD": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "TSS": Temperature {
+        "unit": "K",
+        "value": undefined,
+      },
+      "VW": Speed {
+        "unit": "m/s",
+        "value": undefined,
+      },
+      "VW_MAX": Speed {
+        "unit": "m/s",
+        "value": undefined,
+      },
+      "name": "Caprile",
+      "operator": "ARPAV",
+      "operatorLicense": "CC BY 4.0",
+      "operatorLicenseLink": "https://creativecommons.org/licenses/by/4.0/deed.it",
+      "operatorLink": "https://www.arpa.veneto.it/",
+    },
+    "type": "Feature",
+  },
+]
+`;
