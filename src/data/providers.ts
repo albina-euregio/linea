@@ -5,6 +5,7 @@ import { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
 import { SLFDataProvider } from "./slf-data";
 import { BellunoDataProvider } from "./belluno-data";
+import { GeoSphereDataProvider } from "./geosphere-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
@@ -162,6 +163,8 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
   new SmetDataProvider("SI", ["SI"], "https://lawinen.at/smet/slo/stations_slo.geojson", (id) => [
     `https://lawinen.at/smet/slo/woche/${id}.smet.gz`,
   ]),
+
+  new GeoSphereDataProvider(),
 
   new SLFDataProvider(),
 

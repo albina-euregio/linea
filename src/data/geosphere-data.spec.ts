@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { describe, expect, test, vi } from "vite-plus/test";
 import * as geosphere from "./geosphere-data";
+import { PROVIDERS } from "./providers";
 
 describe("geosphere", async () => {
   vi.stubGlobal(
@@ -118,18 +119,17 @@ describe("geosphere", async () => {
     }),
   );
 
+  const provider = PROVIDERS.filtered("", (p) => p.dataProviderID === "GEOSPHERE");
+
   test("parseGeosphereData", async () => {
-    const { features } = await new geosphere.GeoSphereDataProvider().fetchStationListing();
+    const { features } = await provider.fetchStationListing();
     const feature = features[0];
-    const data = await new geosphere.GeoSphereDataProvider().fetchStationData(
-      feature,
-      new URL(feature.properties.dataURLs[0]),
-    );
+    const data = await PROVIDERS.fetchStationData(feature, new URL(feature.properties.dataURLs[0]));
     expect(data).toMatchSnapshot();
   });
 
   test("parseGeosphereFeature", async () => {
-    const { features } = await new geosphere.GeoSphereDataProvider().fetchStationListing();
+    const { features } = await provider.fetchStationListing();
     const feature = features[0];
     delete feature.properties.dataURLs;
     expect(feature).toMatchSnapshot();
