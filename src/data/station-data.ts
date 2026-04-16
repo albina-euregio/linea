@@ -1,3 +1,5 @@
+import type { Unit } from "./units";
+
 /**
  * Parameter type following the [SMET specification](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf)
  */
@@ -37,7 +39,7 @@ export enum ParameterType {
   "NS" = "NS",
 }
 
-export type Units = Partial<Record<ParameterType, string>>;
+export type Units = Partial<Record<ParameterType, Unit>>;
 
 export type Values = Partial<Record<ParameterType, (number | null)[]>>;
 
