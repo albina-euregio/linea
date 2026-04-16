@@ -69,8 +69,6 @@ test("Belluno station listing", async () => {
   expect(data).toHaveLength(2);
   expect(data[0].id).toBe("0047");
   expect(data[1].id).toBe("0009");
-  expect(data[0].$smet[0]).toContain("/0047.csv");
-  expect(data[1].$smet[0]).toContain("/0009.csv");
   expect(data).toMatchSnapshot();
 });
 

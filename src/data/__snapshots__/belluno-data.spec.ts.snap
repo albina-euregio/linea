@@ -76,9 +76,6 @@ StationData {
 exports[`Belluno station listing 1`] = `
 [
   {
-    "$smet": [
-      "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0047.csv",
-    ],
     "geometry": {
       "coordinates": [
         12.17508664,
@@ -112,6 +109,9 @@ exports[`Belluno station listing 1`] = `
       "TSS": undefined,
       "VW": undefined,
       "VW_MAX": undefined,
+      "dataURLs": [
+        "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0047.csv",
+      ],
       "name": "Faloria",
       "operator": "ARPAV",
       "operatorLicense": "CC BY 4.0",
@@ -121,9 +121,6 @@ exports[`Belluno station listing 1`] = `
     "type": "Feature",
   },
   {
-    "$smet": [
-      "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0009.csv",
-    ],
     "geometry": {
       "coordinates": [
         11.924,
@@ -157,6 +154,9 @@ exports[`Belluno station listing 1`] = `
       "TSS": undefined,
       "VW": undefined,
       "VW_MAX": undefined,
+      "dataURLs": [
+        "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0009.csv",
+      ],
       "name": "Caprile",
       "operator": "ARPAV",
       "operatorLicense": "CC BY 4.0",

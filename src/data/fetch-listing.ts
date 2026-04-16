@@ -167,12 +167,10 @@ export async function fetchSource(
       throw new Error("Failed to parse ARPAV Belluno XML");
     }
     const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
-    return stations.map(belluno.parseBellunoStation).map(
-      (f): Feature => ({
-        ...f,
-        $smet: smet(f.id),
-      }),
-    );
+    return stations.map(belluno.parseBellunoStation).map((f): Feature => {
+      f.properties.dataURLs = smet(f.id);
+      return f;
+    });
   }
   if (
     response.headers.get("Content-Encoding") === "gzip" ||
