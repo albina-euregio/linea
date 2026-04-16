@@ -6,6 +6,9 @@ import type { StationData } from "./station-data";
 import { SLFDataProvider } from "./slf-data";
 import { BellunoDataProvider } from "./belluno-data";
 import { GeoSphereDataProvider } from "./geosphere-data";
+export { SLFDataProvider } from "./slf-data";
+export { BellunoDataProvider } from "./belluno-data";
+export { GeoSphereDataProvider } from "./geosphere-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
