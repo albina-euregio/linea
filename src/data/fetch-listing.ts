@@ -7,6 +7,7 @@ import type { LineaDataProvider } from "./provider";
 import { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
 import { SLFDataProvider } from "./slf-data";
+import { BellunoDataProvider } from "./belluno-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
@@ -105,10 +106,7 @@ const PROVIDERS: LineaDataProvider[] = [
 
   new SLFDataProvider(),
 
-  // FIXME
-  new SmetDataProvider(["IT-34"], belluno.URL, (id) => [
-    `https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/${id}.csv`,
-  ]),
+  new BellunoDataProvider(),
 ];
 
 export async function fetchAll(
@@ -137,17 +135,7 @@ export async function fetchSource(
   } else if (geojson.toString() === slf.URL.STATIONS) {
     throw new Error();
   } else if (geojson.toString() === belluno.URL) {
-    const response = await fetch(belluno.URL);
-    const xml = await response.text();
-    const doc = new DOMParser().parseFromString(xml, "text/xml");
-    if (doc.getElementsByTagName("parsererror").length > 0) {
-      throw new Error("Failed to parse ARPAV Belluno XML");
-    }
-    const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
-    return stations.map(belluno.parseBellunoStation).map((f): Feature => {
-      f.properties.dataURLs = smet(f.id);
-      return f;
-    });
+    throw new Error();
   }
 
   const json = await response.json();

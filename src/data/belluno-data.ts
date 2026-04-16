@@ -1,6 +1,9 @@
 import { dewPoint } from "../linea-plot/dew-point";
 import * as listing from "../schema/listing";
 import { StationData, ParameterType, type Units, type Values } from "./station-data";
+import type { LineaDataProvider } from "./provider";
+import { fetchOrThrow } from "./fetchOrThrow";
+import type { Unit } from "./units";
 
 export const URL = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml";
 const BELLUNO_TIMEZONE = "Europe/Rome";
@@ -50,7 +53,7 @@ function parseNumeric(value: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function unitForParameter(parameter: ParameterType): string {
+function unitForParameter(parameter: ParameterType): Unit {
   switch (parameter) {
     case ParameterType.TA:
       return "℃";
@@ -69,7 +72,7 @@ function unitForParameter(parameter: ParameterType): string {
     case ParameterType.ISWR:
       return "W/m²";
     default:
-      return "";
+      return "1";
   }
 }
 
@@ -98,116 +101,132 @@ function textContent(parent: Element, tagName: string): string {
   return parent.getElementsByTagName(tagName)[0]?.textContent?.trim() ?? "";
 }
 
-export function parseBellunoStation(element: Element) {
-  const rawId = textContent(element, "IDSTAZ");
-  const name = textContent(element, "NOME");
-  const longitude = Number.parseFloat(textContent(element, "X"));
-  const latitude = Number.parseFloat(textContent(element, "Y"));
-  const altitude = Number.parseFloat(textContent(element, "QUOTA"));
-
-  if (!rawId || !name || !Number.isFinite(longitude) || !Number.isFinite(latitude)) {
-    throw new Error("Invalid Belluno station entry");
-  }
-  return listing.FeatureSchema.parse({
-    type: "Feature",
-    id: rawId.trim().padStart(4, "0"),
-    geometry: {
-      type: "Point",
-      coordinates: [longitude, latitude, Number.isFinite(altitude) ? altitude : null],
-    },
-    properties: {
-      name: name,
-      operator: "ARPAV",
-      operatorLink: "https://www.arpa.veneto.it/",
-      operatorLicense: "CC BY 4.0",
-      operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/deed.it",
-    },
-  });
-}
-
-/**
- * Parses CSV data from ARPAV Belluno meteorological service.
- */
-export function parseBellunoData(csv: string): StationData {
-  const lines = csv
-    .trim()
-    .split(/\r?\n/)
-    .filter((line) => line.trim().length > 0);
-
-  if (lines.length < 2) {
-    throw new Error("CSV must have at least a header row and one data row");
-  }
-
-  const headers = parseCsvRow(lines[0]);
-  const normalizedHeaders = headers.map(normalizeHeader);
-
-  const timestampColumnIndex = normalizedHeaders.findIndex((h) => h === "dataora");
-  const stationNameColumn = normalizedHeaders.findIndex((h) => h === "nome");
-
-  if (timestampColumnIndex === -1) {
-    throw new Error("Could not find timestamp column DATAORA");
-  }
-
-  const columnMap = new Map<number, ParameterType>();
-  for (let i = 0; i < headers.length; i++) {
-    const parameter = mapParameterType(headers[i]);
-    if (parameter) columnMap.set(i, parameter);
-  }
-
-  const seriesByParameter = new Map<ParameterType, (number | null)[]>();
-  for (const parameter of columnMap.values()) {
-    if (!seriesByParameter.has(parameter)) seriesByParameter.set(parameter, []);
-  }
-
-  const timestamps: number[] = [];
-  let stationName = "Unknown";
-
-  for (let lineIndex = 1; lineIndex < lines.length; lineIndex++) {
-    const cells = parseCsvRow(lines[lineIndex]);
-    const timestampCell = cells[timestampColumnIndex];
-    if (!timestampCell) continue;
-
-    try {
-      timestamps.push(parseTimestamp(timestampCell));
-      if (stationNameColumn >= 0 && cells[stationNameColumn]) {
-        stationName = cells[stationNameColumn];
-      }
-
-      for (const [columnIndex, parameter] of columnMap.entries()) {
-        const value = parseNumeric(cells[columnIndex] ?? "");
-        seriesByParameter.get(parameter)?.push(value);
-      }
-    } catch {
-      continue;
+export class BellunoDataProvider implements LineaDataProvider {
+  async fetchStationListing(): Promise<listing.FeatureCollection> {
+    const response = await fetchOrThrow(URL);
+    const xml = await response.text();
+    const doc = new DOMParser().parseFromString(xml, "text/xml");
+    if (doc.getElementsByTagName("parsererror").length > 0) {
+      throw new Error("Failed to parse ARPAV Belluno XML");
     }
-  }
+    const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
+    const features = stations.map((element) => {
+      const rawId = textContent(element, "IDSTAZ");
+      const name = textContent(element, "NOME");
+      const longitude = Number.parseFloat(textContent(element, "X"));
+      const latitude = Number.parseFloat(textContent(element, "Y"));
+      const altitude = Number.parseFloat(textContent(element, "QUOTA"));
 
-  if (timestamps.length === 0) {
-    throw new Error("No valid rows found in Belluno CSV");
-  }
-
-  const values: Values = {};
-  const units: Units = {};
-
-  for (const [parameter, series] of seriesByParameter.entries()) {
-    if (!series.some((v) => v != null)) continue;
-    values[parameter] = series;
-    units[parameter] = unitForParameter(parameter);
-  }
-
-  if (values.TA && values.RH && !values.TD) {
-    values.TD = values.TA.map((t, i) => {
-      const rh = values.RH?.[i];
-      return t == null || rh == null ? null : dewPoint(t, rh);
+      if (!rawId || !name || !Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+        throw new Error("Invalid Belluno station entry");
+      }
+      const id = rawId.trim().padStart(4, "0");
+      return listing.FeatureSchema.parse({
+        type: "Feature",
+        id,
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude, Number.isFinite(altitude) ? altitude : null],
+        },
+        properties: {
+          name: name,
+          dataURLs: [`https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/${id}.csv`],
+          operator: "ARPAV",
+          operatorLink: "https://www.arpa.veneto.it/",
+          operatorLicense: "CC BY 4.0",
+          operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/deed.it",
+        },
+      } satisfies listing.Feature);
     });
+    return { type: "FeatureCollection", features };
   }
 
-  const isDescending = timestamps.length > 1 && timestamps[0] > timestamps[timestamps.length - 1];
-  if (isDescending) {
-    timestamps.reverse();
-    for (const key of Object.keys(values) as ParameterType[]) {
-      values[key] = [...(values[key] ?? [])].reverse();
+  /**
+   * Parses CSV data from ARPAV Belluno meteorological service.
+   */
+  async fetchStationData(_: listing.Feature, dataURL: URL): Promise<StationData> {
+    const response = await fetchOrThrow(dataURL);
+    const csv = await response.text();
+    const lines = csv
+      .trim()
+      .split(/\r?\n/)
+      .filter((line) => line.trim().length > 0);
+
+    if (lines.length < 2) {
+      throw new Error("CSV must have at least a header row and one data row");
     }
+
+    const headers = parseCsvRow(lines[0]);
+    const normalizedHeaders = headers.map(normalizeHeader);
+
+    const timestampColumnIndex = normalizedHeaders.findIndex((h) => h === "dataora");
+    const stationNameColumn = normalizedHeaders.findIndex((h) => h === "nome");
+
+    if (timestampColumnIndex === -1) {
+      throw new Error("Could not find timestamp column DATAORA");
+    }
+
+    const columnMap = new Map<number, ParameterType>();
+    for (let i = 0; i < headers.length; i++) {
+      const parameter = mapParameterType(headers[i]);
+      if (parameter) columnMap.set(i, parameter);
+    }
+
+    const seriesByParameter = new Map<ParameterType, (number | null)[]>();
+    for (const parameter of columnMap.values()) {
+      if (!seriesByParameter.has(parameter)) seriesByParameter.set(parameter, []);
+    }
+
+    const timestamps: number[] = [];
+    let stationName = "Unknown";
+
+    for (let lineIndex = 1; lineIndex < lines.length; lineIndex++) {
+      const cells = parseCsvRow(lines[lineIndex]);
+      const timestampCell = cells[timestampColumnIndex];
+      if (!timestampCell) continue;
+
+      try {
+        timestamps.push(parseTimestamp(timestampCell));
+        if (stationNameColumn >= 0 && cells[stationNameColumn]) {
+          stationName = cells[stationNameColumn];
+        }
+
+        for (const [columnIndex, parameter] of columnMap.entries()) {
+          const value = parseNumeric(cells[columnIndex] ?? "");
+          seriesByParameter.get(parameter)?.push(value);
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    if (timestamps.length === 0) {
+      throw new Error("No valid rows found in Belluno CSV");
+    }
+
+    const values: Values = {};
+    const units: Units = {};
+
+    for (const [parameter, series] of seriesByParameter.entries()) {
+      if (!series.some((v) => v != null)) continue;
+      values[parameter] = series;
+      units[parameter] = unitForParameter(parameter);
+    }
+
+    if (values.TA && values.RH && !values.TD) {
+      values.TD = values.TA.map((t, i) => {
+        const rh = values.RH?.[i];
+        return t == null || rh == null ? null : dewPoint(t, rh);
+      });
+    }
+
+    const isDescending = timestamps.length > 1 && timestamps[0] > timestamps[timestamps.length - 1];
+    if (isDescending) {
+      timestamps.reverse();
+      for (const key of Object.keys(values) as ParameterType[]) {
+        values[key] = [...(values[key] ?? [])].reverse();
+      }
+    }
+    return new StationData(stationName, null, timestamps, units, values);
   }
-  return new StationData(stationName, null, timestamps, units, values);
 }
