@@ -11,7 +11,7 @@ build:
     paths:
       - demo.html
       - dist/
-      - package.tgz
+      - albina-euregio-linea*tgz
       - README.md
 
 publish-npm:
