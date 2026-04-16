@@ -1,5 +1,22 @@
 import { dewPoint } from "../linea-plot/dew-point";
+import type { Feature } from "../schema/listing";
 import { StationData, ParameterType, type Units, type Values } from "./station-data";
+
+export const URL = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml";
+
+type BellunoFeature = Feature;
+
+type BellunoStation = {
+  id: string;
+  name: string;
+  longitude: number;
+  latitude: number;
+  altitude: number;
+  province?: string;
+  municipality?: string;
+  type?: string;
+  link?: string;
+};
 
 /**
  * Maps ARPAV parameter column names to SMET ParameterType.
@@ -102,6 +119,69 @@ function parseTimestamp(timestamp: string): number {
   throw new Error(`Unable to parse timestamp: ${timestamp}`);
 }
 
+function parseXml(text: string): Document {
+  const doc = new DOMParser().parseFromString(text, "text/xml");
+  if (doc.getElementsByTagName("parsererror").length > 0) {
+    throw new Error("Failed to parse ARPAV Belluno XML");
+  }
+  return doc;
+}
+
+function textContent(parent: Element, tagName: string): string {
+  return parent.getElementsByTagName(tagName)[0]?.textContent?.trim() ?? "";
+}
+
+function parseStationId(rawId: string): string {
+  return rawId.trim().padStart(4, "0");
+}
+
+function parseBellunoStation(element: Element): BellunoStation {
+  const rawId = textContent(element, "IDSTAZ");
+  const name = textContent(element, "NOME");
+  const longitude = Number.parseFloat(textContent(element, "X"));
+  const latitude = Number.parseFloat(textContent(element, "Y"));
+  const altitude = Number.parseFloat(textContent(element, "QUOTA"));
+
+  if (!rawId || !name || !Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+    throw new Error("Invalid Belluno station entry");
+  }
+
+  return {
+    id: parseStationId(rawId),
+    name,
+    longitude,
+    latitude,
+    altitude: Number.isFinite(altitude) ? altitude : 0,
+    province: textContent(element, "PROVINCIA") || undefined,
+    municipality: textContent(element, "COMUNE") || undefined,
+    type: textContent(element, "TIPOSTAZ") || undefined,
+    link: textContent(element, "LINKSTAZ") || undefined,
+  };
+}
+
+function parseBellunoFeature(station: BellunoStation): BellunoFeature {
+  return {
+    type: "Feature",
+    id: station.id,
+    geometry: {
+      type: "Point",
+      coordinates: [station.longitude, station.latitude, station.altitude],
+    },
+    properties: {
+      name: station.name,
+      shortName: station.id,
+      altitude: station.altitude,
+      stationCharacteristics: [station.type, station.municipality, station.province]
+        .filter(Boolean)
+        .join(" - "),
+      operator: "ARPAV",
+      operatorLink: "https://www.arpa.veneto.it/",
+      operatorLicense: "CC BY 4.0",
+      operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/deed.it",
+    },
+  };
+}
+
 /**
  * Parses CSV data from ARPAV Belluno meteorological service.
  */
@@ -186,5 +266,17 @@ export function parseBellunoData(csv: string): StationData {
       values[key] = [...(values[key] ?? [])].reverse();
     }
   }
-  return new StationData(stationName, undefined, timestamps, units, values);
+  return new StationData(stationName, 0, timestamps, units, values);
+}
+
+export async function loadBellunoStations(): Promise<BellunoFeature[]> {
+  const response = await fetch(URL);
+  const xml = await response.text();
+  const doc = parseXml(xml);
+  const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
+
+  return stations
+    .map(parseBellunoStation)
+    .map(parseBellunoFeature)
+    .sort((a, b) => String(a.id).localeCompare(String(b.id), "en", { numeric: true }));
 }
