@@ -30,6 +30,7 @@ export class SmetDataProvider implements LineaDataProvider {
 
     const collection = FeatureCollectionSchema.parse(json);
     collection.features.forEach((f) => {
+      f.properties.dataProviderID = this.dataProviderID;
       f.properties.dataURLs = this.smetURLs(f.properties.shortName || f.id);
     });
     return collection;
