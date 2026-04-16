@@ -161,6 +161,7 @@ export class GeoSphereDataProvider implements LineaDataProvider {
             operatorLink: "https://www.geosphere.at/",
             operatorLicense: "CC BY 4.0",
             operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/legalcode",
+            dataProviderID: this.id,
             dataURLs: this.#dataURLs(s.id),
           },
         } satisfies listing.Feature),

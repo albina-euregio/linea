@@ -8,6 +8,7 @@ import {
   Temperature,
   Precipitation,
 } from "../data/units";
+import { ProviderIdentifierSchema } from "../data/provider";
 
 const number = z
   .number()
@@ -47,6 +48,7 @@ export const FeaturePropertiesSchema = z
       .nullish()
       .describe("For legacy PNG plots: name of plot which includes this station"),
 
+    dataProviderID: ProviderIdentifierSchema.nullish(),
     dataURLs: z
       .url()
       .array()

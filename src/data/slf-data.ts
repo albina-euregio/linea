@@ -167,6 +167,7 @@ export class SLFDataProvider implements LineaDataProvider {
         },
         properties: {
           name: station.label,
+          dataProviderID: this.id,
           dataURLs: [`${URL.STATION}${station.code}/measurements?period_in_days=7`],
           microRegionID: station.country_code,
           operator: "SLF",

@@ -133,6 +133,7 @@ export class BellunoDataProvider implements LineaDataProvider {
         },
         properties: {
           name: name,
+          dataProviderID: this.id,
           dataURLs: [`https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/${id}.csv`],
           operator: "ARPAV",
           operatorLink: "https://www.arpa.veneto.it/",
