@@ -1,6 +1,7 @@
 import { FeatureCollectionSchema, type Feature, type FeatureCollection } from "../schema/listing";
 import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider, ProviderIdentifier } from "./provider";
+export type { LineaDataProvider, ProviderIdentifier } from "./provider";
 import { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
 import { SLFDataProvider } from "./slf-data";
