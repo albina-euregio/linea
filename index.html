@@ -13,8 +13,11 @@
     </style>
   </head>
   <body>
+    <nav></nav>
     <linea-plot
-      src='["https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0218.csv"]'
+      src='["https://api.avalanche.report/lawine/grafiken/smet/woche/AXLIZ1.smet.gz"]'
+      lazysrc='["https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"]'
+      wintersrc='["https://api.avalanche.report/lawine/grafiken/smet/all/AXLIZ1.smet.gz"]'
       showsurfacehoarseries
       showtitle
       showexport
@@ -24,5 +27,6 @@
     </linea-plot>
     <script type="module" src="./src/aws-stats/main.ts"></script>
     <script type="module" src="./src/main.ts"></script>
+    <script type="module" src="./index-nav-buttons.ts"></script>
   </body>
 </html>
