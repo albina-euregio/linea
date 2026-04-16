@@ -102,6 +102,9 @@ function textContent(parent: Element, tagName: string): string {
 }
 
 export class BellunoDataProvider implements LineaDataProvider {
+  readonly id = "IT-34";
+  readonly regions = ["IT-34"];
+
   async fetchStationListing(): Promise<listing.FeatureCollection> {
     const response = await fetchOrThrow(URL);
     const xml = await response.text();

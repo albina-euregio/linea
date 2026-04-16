@@ -8,7 +8,8 @@ import { BellunoDataProvider } from "./belluno-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
-    public regions: string[],
+    public readonly id: string,
+    public readonly regions: string[],
     public geojsonURL: string,
     public smetURLs: (id: string) => string[],
   ) {}
@@ -40,6 +41,7 @@ export class SmetDataProvider implements LineaDataProvider {
 
 const PROVIDERS: LineaDataProvider[] = [
   new SmetDataProvider(
+    "ALBINA",
     ["AT-07", "IT-32-BZ", "IT-32-TN"],
     "https://static.avalanche.report/weather_stations/linea.geojson.gz",
     (id) => [
@@ -50,6 +52,7 @@ const PROVIDERS: LineaDataProvider[] = [
   ),
 
   new SmetDataProvider(
+    "AT-02",
     ["AT-02"],
     "https://smet.hydrographie.info/stations_ktn_destiny.geojson",
     (id) => [
@@ -58,33 +61,56 @@ const PROVIDERS: LineaDataProvider[] = [
     ],
   ),
 
-  new SmetDataProvider(["AT-05"], "https://www.salzburg.gv.at/lawine/smet/linea.geojson", (id) => [
-    `https://www.salzburg.gv.at/lawine/smet/woche/${id}.smet.gz`,
-    `https://www.salzburg.gv.at/lawine/smet/winter/${id}.smet.gz`,
-  ]),
-
-  new SmetDataProvider(["OEBB"], "https://oebb.infra.tbbm.at/smet/linea.geojson", (id) => [
-    `https://oebb.infra.tbbm.at/smet/woche/${id}.smet.gz`,
-    `https://oebb.infra.tbbm.at/smet/winter/${id}.smet.gz`,
-  ]),
-
-  new SmetDataProvider(["AT-06"], "https://lawinen.at/smet/stm/stations_stm.geojson", (id) => [
-    `https://lawinen.at/smet/stm/woche/${id}.smet.gz`,
-  ]),
-
-  new SmetDataProvider(["AT-03"], "https://lawinen.at/smet/noe/stations_noe.geojson", (id) => [
-    `https://lawinen.at/smet/noe/woche/${id}.smet.gz`,
-  ]),
-
-  new SmetDataProvider(["AT-04"], "https://lawinen.at/smet/ooe/stations_ooe.geojson", (id) => [
-    `https://lawinen.at/smet/ooe/woche/${id}.smet.gz`,
-  ]),
-
-  new SmetDataProvider(["AT-08"], "https://lawinen.at/smet/vor/stations_vor.geojson", (id) => [
-    `https://lawinen.at/smet/vor/woche/${id}.smet.gz`,
-  ]),
+  new SmetDataProvider(
+    "AT-05",
+    ["AT-05"],
+    "https://www.salzburg.gv.at/lawine/smet/linea.geojson",
+    (id) => [
+      `https://www.salzburg.gv.at/lawine/smet/woche/${id}.smet.gz`,
+      `https://www.salzburg.gv.at/lawine/smet/winter/${id}.smet.gz`,
+    ],
+  ),
 
   new SmetDataProvider(
+    "OEBB",
+    ["AT-02','AT-03' ,'AT-04' ,'AT-05' ,'AT-06' ,'AT-07' ,'AT-08"],
+    "https://oebb.infra.tbbm.at/smet/linea.geojson",
+    (id) => [
+      `https://oebb.infra.tbbm.at/smet/woche/${id}.smet.gz`,
+      `https://oebb.infra.tbbm.at/smet/winter/${id}.smet.gz`,
+    ],
+  ),
+
+  new SmetDataProvider(
+    "AT-06",
+    ["AT-06"],
+    "https://lawinen.at/smet/stm/stations_stm.geojson",
+    (id) => [`https://lawinen.at/smet/stm/woche/${id}.smet.gz`],
+  ),
+
+  new SmetDataProvider(
+    "AT-03",
+    ["AT-03"],
+    "https://lawinen.at/smet/noe/stations_noe.geojson",
+    (id) => [`https://lawinen.at/smet/noe/woche/${id}.smet.gz`],
+  ),
+
+  new SmetDataProvider(
+    "AT-04",
+    ["AT-04"],
+    "https://lawinen.at/smet/ooe/stations_ooe.geojson",
+    (id) => [`https://lawinen.at/smet/ooe/woche/${id}.smet.gz`],
+  ),
+
+  new SmetDataProvider(
+    "AT-08",
+    ["AT-08"],
+    "https://lawinen.at/smet/vor/stations_vor.geojson",
+    (id) => [`https://lawinen.at/smet/vor/woche/${id}.smet.gz`],
+  ),
+
+  new SmetDataProvider(
+    "IT-36",
     ["IT-36"],
     "https://smet.hydrographie.info/stations_fvg_destiny.geojson",
     (id) => [
@@ -93,11 +119,14 @@ const PROVIDERS: LineaDataProvider[] = [
     ],
   ),
 
-  new SmetDataProvider(["DE-BY"], "https://lawinen.at/smet/bay/stations_bay.geojson", (id) => [
-    `https://lawinen.at/smet/bay/woche/${id}.smet.gz`,
-  ]),
+  new SmetDataProvider(
+    "DE-BY",
+    ["DE-BY"],
+    "https://lawinen.at/smet/bay/stations_bay.geojson",
+    (id) => [`https://lawinen.at/smet/bay/woche/${id}.smet.gz`],
+  ),
 
-  new SmetDataProvider(["SI"], "https://lawinen.at/smet/slo/stations_slo.geojson", (id) => [
+  new SmetDataProvider("SI", ["SI"], "https://lawinen.at/smet/slo/stations_slo.geojson", (id) => [
     `https://lawinen.at/smet/slo/woche/${id}.smet.gz`,
   ]),
 

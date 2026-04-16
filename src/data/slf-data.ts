@@ -80,6 +80,9 @@ export const SLFStationCollectionSchema = z.object({
 });
 
 export class SLFDataProvider implements LineaDataProvider {
+  readonly id = "SLF";
+  readonly regions = ["CH", "LI"];
+
   async fetchStationData(station: listing.Feature, dataURL: URL): Promise<StationData> {
     const response = await fetchOrThrow(dataURL);
     const collection: SLFStationData[] = await response.json();

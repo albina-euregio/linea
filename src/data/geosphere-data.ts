@@ -82,6 +82,19 @@ export const MetadataSchema = z.object({
 export type Metadata = z.infer<typeof MetadataSchema>;
 
 export class GeoSphereDataProvider implements LineaDataProvider {
+  readonly id = "GEOSPHERE";
+  readonly regions = [
+    "AT-01",
+    "AT-02",
+    "AT-03",
+    "AT-04",
+    "AT-05",
+    "AT-06",
+    "AT-07",
+    "AT-08",
+    "AT-09",
+  ];
+
   async fetchStationData(station: listing.Feature, dataURL: URL): Promise<StationData> {
     const response = await fetchOrThrow(dataURL);
     const collection = FeatureCollectionSchema.parse(await response.json());
