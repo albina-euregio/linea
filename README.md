@@ -29,6 +29,15 @@ LINEA is featuring weather station visualization on:
 
 Examples: https://static.avalanche.report/weather_stations/linea.geojson, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz
 
+## Usage: CLI
+
+```sh
+> node dist/cli.mjs
+Writing 1302 features to linea.geojson
+> bun dist/cli.mjs
+Writing 1302 features to linea.geojson
+```
+
 ## Contributing
 
 1. Install [NodeJS](https://nodejs.org/en/) and [pnpm](https://pnpm.io/)

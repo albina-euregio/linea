@@ -16,98 +16,29 @@ exports[`SLF 1`] = `
     },
     "id": "KES2",
     "properties": {
-      "DW": Scalar {
-        "unit": "°",
-        "value": 337.3,
-      },
-      "HS": Length {
-        "unit": "cm",
-        "value": 130.504,
-      },
-      "HSD_24": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_48": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_6": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_72": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "ILWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "ISWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "OLWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "P": Pressure {
-        "unit": "Pa",
-        "value": undefined,
-      },
-      "PSUM_24": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_48": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_6": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_72": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "RH": Scalar {
-        "unit": "1",
-        "value": undefined,
-      },
-      "RSWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "TA": Temperature {
-        "unit": "℃",
-        "value": -1.295,
-      },
-      "TA_MAX": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TA_MIN": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TD": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TSS": Temperature {
-        "unit": "℃",
-        "value": -1.022,
-      },
-      "VW": Speed {
-        "unit": "km/h",
-        "value": 11.574,
-      },
-      "VW_MAX": Speed {
-        "unit": "m/s",
-        "value": undefined,
-      },
+      "DW": 337.3,
+      "HS": 1.30504,
+      "HSD_24": undefined,
+      "HSD_48": undefined,
+      "HSD_6": undefined,
+      "HSD_72": undefined,
+      "ILWR": undefined,
+      "ISWR": undefined,
+      "OLWR": undefined,
+      "P": undefined,
+      "PSUM_24": undefined,
+      "PSUM_48": undefined,
+      "PSUM_6": undefined,
+      "PSUM_72": undefined,
+      "RH": undefined,
+      "RSWR": undefined,
+      "TA": 271.85499999999996,
+      "TA_MAX": undefined,
+      "TA_MIN": undefined,
+      "TD": undefined,
+      "TSS": 272.128,
+      "VW": 3.215,
+      "VW_MAX": undefined,
       "date": 2026-04-14T16:30:00.000Z,
       "microRegionID": "CH",
       "name": "Porta d'Es-cha",

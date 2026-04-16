@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { Intensity, Length, Pressure, Scalar, Speed, Temperature } from "../data/units";
+import {
+  Intensity,
+  Length,
+  Pressure,
+  Scalar,
+  Speed,
+  Temperature,
+  Precipitation,
+} from "../data/units";
 
 const number = z
   .number()
@@ -94,19 +102,19 @@ export const FeaturePropertiesSchema = z
       .meta({ unit: "K" }),
     PSUM_6: number
       .describe("Precipitation summed over the last 6h in mm")
-      .transform((v) => new Length(v, "mm"))
+      .transform((v) => new Precipitation(v, "mm"))
       .meta({ unit: "mm" }),
     PSUM_24: number
       .describe("Precipitation summed over the last 24h in mm")
-      .transform((v) => new Length(v, "mm"))
+      .transform((v) => new Precipitation(v, "mm"))
       .meta({ unit: "mm" }),
     PSUM_48: number
       .describe("Precipitation summed over the last 48h in mm")
-      .transform((v) => new Length(v, "mm"))
+      .transform((v) => new Precipitation(v, "mm"))
       .meta({ unit: "mm" }),
     PSUM_72: number
       .describe("Precipitation summed over the last 72h in mm")
-      .transform((v) => new Length(v, "mm"))
+      .transform((v) => new Precipitation(v, "mm"))
       .meta({ unit: "mm" }),
     TSS: number
       .describe("Temperature Snow Surface in Kelvin")

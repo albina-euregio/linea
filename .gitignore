@@ -4,5 +4,6 @@
 /*.log
 /dist
 /node_modules
-/package.tgz
+/albina-euregio-linea*tgz
 .yarn/install-state.gz
+linea.geojson*

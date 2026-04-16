@@ -7,6 +7,11 @@ export default defineConfig({
     // see https://github.com/t1m0n/air-datepicker/issues/704
     inconsistentCjsInterop: true,
   },
+  pack: {
+    entry: ["src/data/fetch-listing.ts", "src/schema/listing.ts"],
+    dts: true,
+    sourcemap: true,
+  },
   build: {
     chunkSizeWarningLimit: 190,
     license: { fileName: "license.json" },

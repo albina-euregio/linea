@@ -1,3 +1,5 @@
+import * as smet from "./smet-data";
+
 declare module "zod" {
   interface GlobalMeta {
     unit: Unit;
@@ -36,12 +38,45 @@ class Quantity<U extends Unit> {
   }
 }
 
-export class Temperature extends Quantity<"K" | "℃"> {}
-export class Length extends Quantity<"m" | "cm" | "mm"> {}
-export class Scalar extends Quantity<"1" | "%" | "°"> {}
-export class Speed extends Quantity<"m/s" | "km/h"> {}
-export class Pressure extends Quantity<"hPa" | "Pa"> {}
-export class Intensity extends Quantity<"W/m²"> {}
+export class Temperature extends Quantity<"K" | "℃"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, smet.DEFAULT_UNITS.TA);
+  }
+}
+export class Length extends Quantity<"m" | "cm" | "mm"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, smet.DEFAULT_UNITS.HS);
+  }
+}
+export class Precipitation extends Length {
+  toJSON() {
+    return transformUnit(this.value, this.unit, smet.DEFAULT_UNITS.PSUM);
+  }
+}
+export class Scalar extends Quantity<"1" | "%" | "°"> {
+  toJSON() {
+    return transformUnit(
+      this.value,
+      this.unit,
+      this.unit === "°" ? smet.DEFAULT_UNITS.DW : smet.DEFAULT_UNITS.RH,
+    );
+  }
+}
+export class Speed extends Quantity<"m/s" | "km/h"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, smet.DEFAULT_UNITS.VW);
+  }
+}
+export class Pressure extends Quantity<"hPa" | "Pa"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, smet.DEFAULT_UNITS.P);
+  }
+}
+export class Intensity extends Quantity<"W/m²"> {
+  toJSON() {
+    return transformUnit(this.value, this.unit, smet.DEFAULT_UNITS.ISWR);
+  }
+}
 
 export function unitTransformer(
   fromUnit: Unit,

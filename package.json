@@ -2,6 +2,9 @@
   "name": "@albina-euregio/linea",
   "version": "0.0.0",
   "license": "LGPL-3.0-or-later",
+  "bin": {
+    "linea": "./dist/cli.mjs"
+  },
   "files": [
     "demo.html",
     "dist/",
@@ -33,7 +36,8 @@
     "ci": "vp run lint && vp run test && vp run build",
     "test": "vp test run",
     "lint": "vp fmt --check && vp lint",
-    "build": "vp build && vp pack --dts --sourcemap --no-clean src/data/fetch-listing.ts src/schema/listing.ts",
+    "build": "vp build && vp pack",
+    "build:cli": "cd src/cli/ && vp pack",
     "dev": "vp dev"
   },
   "dependencies": {
@@ -42,6 +46,7 @@
     "uplot": "^1.6.32"
   },
   "devDependencies": {
+    "@types/node": "^24.0.0",
     "typescript": "^6.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",

@@ -4,7 +4,7 @@ import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 
-const DEFAULT_UNITS: Units = {
+export const DEFAULT_UNITS: Units = {
   P: "Pa",
   TA: "K",
   TD: "K",
@@ -13,7 +13,7 @@ const DEFAULT_UNITS: Units = {
   RH: "1",
   VW_MAX: "m/s",
   VW: "m/s",
-  DW: "degree",
+  DW: "°",
   ISWR: "W/m²",
   // RSWR: "W/m²",
   // ILWR: "W/m²",
