@@ -364,10 +364,14 @@ export class StationView extends LineaView {
 
   private lazySrcLoaded = false;
   async fetchLazySrc() {
-    if (this.lineaplot.hasAttribute("lazysrc") && !this.lazySrcLoaded) {
+    if (this.lazySrcLoaded) return;
+    try {
       await this.fetchData("lazysrc");
-      this.lazySrcLoaded = true;
+    } catch (e) {
+      if (e === "Empty src array!") return;
+      throw e;
     }
+    this.lazySrcLoaded = true;
   }
 
   previous(previous: HTMLButtonElement, next: HTMLButtonElement): void {

@@ -91,7 +91,7 @@ export class LineaExportModal extends AbstractExportModal {
    * Downloads all available SMET files
    */
   protected exportAsSMET() {
-    this.#downloadSMETS(this.lineaPlot.view.srcs);
+    this.#downloadSMETS(this.lineaPlot.view.getDataURLs("src"));
   }
 
   async #downloadSMETS(srcs: string[]) {

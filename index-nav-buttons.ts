@@ -1,3 +1,4 @@
+import { LineaPlot } from "./src/linea-plot";
 import { PROVIDERS } from "./src/data/providers";
 
 const { features } = await PROVIDERS.filtered("", (c) =>
@@ -8,11 +9,15 @@ features.forEach((feature) => {
   const button = document.createElement("button");
   button.innerText = feature.properties.shortName ?? feature.properties.name.slice(0, 8);
   button.title = feature.properties.name;
-  button.onclick = () => {
+  button.onclick = (e) => {
     Array.from(document.getElementsByTagName("linea-plot")).forEach((plot, i) => {
       if (i > 0) plot.remove();
-      plot.setAttribute("src", feature.properties.dataURLs![0]);
-      plot.setAttribute("lazysrc", feature.properties.dataURLs![1]);
+      const features = [];
+      if (e.ctrlKey) {
+        features.push(...JSON.parse(plot.getAttribute(LineaPlot.FEATURES) || "[]"));
+      }
+      features.push(feature);
+      plot.setAttribute(LineaPlot.FEATURES, JSON.stringify(features));
     });
   };
   document.querySelector("nav")!.append(button);

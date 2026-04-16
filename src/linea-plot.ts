@@ -77,7 +77,8 @@ type LineaViewType = "station" | "winter";
  * - Showing a overview over the winter
  */
 export class LineaPlot extends HTMLElement {
-  static observedAttributes = ["src"];
+  static FEATURES = "features" as const;
+  static observedAttributes = [LineaPlot.FEATURES];
   private isLoaded: boolean = false;
 
   private exportModal!: LineaExportModal;
@@ -153,7 +154,7 @@ export class LineaPlot extends HTMLElement {
     if (!this.isLoaded) {
       return;
     }
-    if (name === "src" || (name === "wintersrc" && this.hasAttribute("showonlywinter"))) {
+    if (name === LineaPlot.FEATURES) {
       this.#loadViews().then(() => {
         this.#updateWinterViewButton();
       });
@@ -613,10 +614,11 @@ export class LineaPlot extends HTMLElement {
    * @returns true if wintersrc is empty or invalid, false otherwise
    */
   #isWinterSrcsEmpty() {
-    const src = this.getAttribute("wintersrc") ?? "";
-    return src.startsWith("[") || src.startsWith("'")
-      ? (JSON.parse(src) as string[]).length == 0
-      : src == "";
+    const stationView = this.lineaViews?.get("station");
+    if (stationView instanceof StationView) {
+      return !stationView.getDataURLs("wintersrc").some(Boolean);
+    }
+    return false;
   }
 }
 
