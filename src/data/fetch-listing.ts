@@ -1,6 +1,7 @@
 import { FeatureCollectionSchema, type Feature } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
+import * as belluno from "./belluno-data";
 import { fetchOrThrow } from "./fetchOrThrow";
 
 type Config = {
@@ -111,6 +112,13 @@ const config: Config[] = [
     smet: (id: string) => [`${slf.URL.STATION}${id}/measurements?period_in_days=7`],
     geojson: slf.URL.STATIONS,
   },
+  {
+    regions: ["IT-34"],
+    smet: (id: string) => {
+      return [`https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/${id}.csv`];
+    },
+    geojson: belluno.URL,
+  },
 ];
 
 type ConfigPredicate = (c: (typeof config)[number]) => boolean;
@@ -151,8 +159,19 @@ export async function fetchSource(
       return f;
     });
     return stations;
+  } else if (geojson.toString() === belluno.URL) {
+    const response = await fetch(belluno.URL);
+    const xml = await response.text();
+    const doc = new DOMParser().parseFromString(xml, "text/xml");
+    if (doc.getElementsByTagName("parsererror").length > 0) {
+      throw new Error("Failed to parse ARPAV Belluno XML");
+    }
+    const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
+    return stations.map(belluno.parseBellunoStation).map((f): Feature => {
+      f.properties.dataURLs = smet(f.id);
+      return f;
+    });
   }
-
   if (
     response.headers.get("Content-Encoding") === "gzip" ||
     response.headers.get("Content-Type") === "application/gzip" ||
