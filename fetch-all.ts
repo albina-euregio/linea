@@ -18,10 +18,6 @@ async function main() {
   FeatureCollectionSchema.parse(JSON.parse(json));
   const output = "linea.geojson";
   await writeFile(output, json, { encoding: "utf8" });
-  const result = spawnSync("zstd", ["--force", "-19", output], {
-    stdio: "inherit",
-  });
-  if (result.status !== 0) {
-    throw new Error(`zstd failed with status ${result.status}`);
-  }
+  spawnSync("gzip", ["--force", "--best", "--keep", output]);
+  spawnSync("zstd", ["--force", "-19", output]);
 }
