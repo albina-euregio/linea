@@ -1,6 +1,6 @@
 import { FeatureCollectionSchema, type Feature, type FeatureCollection } from "../schema/listing";
 import { fetchOrThrow } from "./fetchOrThrow";
-import type { LineaDataProvider } from "./provider";
+import type { LineaDataProvider, ProviderIdentifier } from "./provider";
 import { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
 import { SLFDataProvider } from "./slf-data";
@@ -8,7 +8,7 @@ import { BellunoDataProvider } from "./belluno-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
-    public readonly id: string,
+    public readonly id: ProviderIdentifier,
     public readonly regions: string[],
     public geojsonURL: string,
     public smetURLs: (id: string) => string[],
