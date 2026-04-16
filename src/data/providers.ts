@@ -76,17 +76,19 @@ export class MultiDataProvider implements LineaDataProvider {
   }
 }
 
+export const ALBINA = new SmetDataProvider(
+  "ALBINA",
+  ["AT-07", "IT-32-BZ", "IT-32-TN"],
+  "https://static.avalanche.report/weather_stations/linea.geojson.gz",
+  (id) => [
+    `https://api.avalanche.report/lawine/grafiken/smet/woche/${id}.smet.gz`,
+    `https://api.avalanche.report/lawine/grafiken/smet/winter/${id}.smet.gz`,
+    `https://api.avalanche.report/lawine/grafiken/smet/all/${id}.smet.gz`,
+  ],
+);
+
 export const PROVIDERS = new MultiDataProvider("LINEA", [
-  new SmetDataProvider(
-    "ALBINA",
-    ["AT-07", "IT-32-BZ", "IT-32-TN"],
-    "https://static.avalanche.report/weather_stations/linea.geojson.gz",
-    (id) => [
-      `https://api.avalanche.report/lawine/grafiken/smet/woche/${id}.smet.gz`,
-      `https://api.avalanche.report/lawine/grafiken/smet/winter/${id}.smet.gz`,
-      `https://api.avalanche.report/lawine/grafiken/smet/all/${id}.smet.gz`,
-    ],
-  ),
+  ALBINA,
 
   new SmetDataProvider(
     "AT-02",
