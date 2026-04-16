@@ -6,3 +6,4 @@
 /node_modules
 /package.tgz
 .yarn/install-state.gz
+linea.geojson*
