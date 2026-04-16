@@ -12,6 +12,8 @@ build:
       - demo.html
       - dist/
       - albina-euregio-linea*tgz
+      - LICENSE
+      - package.json
       - README.md
 
 publish-npm:
