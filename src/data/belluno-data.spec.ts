@@ -1,4 +1,5 @@
 import { expect, test, vi } from "vite-plus/test";
+import "temporal-polyfill/global";
 import { fetchAll } from "./fetch-listing";
 import * as belluno from "./belluno-data";
 
@@ -71,4 +72,15 @@ test("Belluno station listing", async () => {
   expect(data[0].$smet[0]).toContain("/0047.csv");
   expect(data[1].$smet[0]).toContain("/0009.csv");
   expect(data).toMatchSnapshot();
+});
+
+test("Belluno data parsing", () => {
+  const csv = `CODSTAZ;NOME;DATAORA;"Temperatura aria a 2m";"Umidità relativa a 2m";"Precipitazione";"Radiazione solare globale";"Velocità vento a 10m";"Direzione vento a 10m";"Pressione atmosferica ridotta a livello del mare";"Altezza neve"\n
+218;"Asiago - aeroporto";16/04/2026 11:30;15.8;67;0.0;538;2.3;80;1017.0;>>\n
+218;"Asiago - aeroporto";16/04/2026 11:00;15.4;67;0.0;830;2.2;52;1017.2;>>\n
+218;"Asiago - aeroporto";16/04/2026 10:30;15.0;69;0.0;724;1.1;160;1017.3;>>\n
+218;"Asiago - aeroporto";16/04/2026 10:00;14.2;67;0.0;536;1.1;72;1017.7;>>
+`;
+  const stationData = belluno.parseBellunoData(csv);
+  expect(stationData).toMatchSnapshot();
 });

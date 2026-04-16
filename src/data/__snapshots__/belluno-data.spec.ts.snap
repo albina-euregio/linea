@@ -1,5 +1,78 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Belluno data parsing 1`] = `
+StationData {
+  "altitude": null,
+  "forecast": undefined,
+  "station": "Asiago - aeroporto",
+  "timestamps": [
+    1776326400000,
+    1776328200000,
+    1776330000000,
+    1776331800000,
+  ],
+  "units": {
+    "DW": "°",
+    "ISWR": "W/m²",
+    "P": "Pa",
+    "PSUM": "mm",
+    "RH": "%",
+    "TA": "℃",
+    "VW": "m/s",
+  },
+  "values": {
+    "DW": [
+      72,
+      160,
+      52,
+      80,
+    ],
+    "ISWR": [
+      536,
+      724,
+      830,
+      538,
+    ],
+    "P": [
+      1017.7,
+      1017.3,
+      1017.2,
+      1017,
+    ],
+    "PSUM": [
+      0,
+      0,
+      0,
+      0,
+    ],
+    "RH": [
+      67,
+      69,
+      67,
+      67,
+    ],
+    "TA": [
+      14.2,
+      15,
+      15.4,
+      15.8,
+    ],
+    "TD": [
+      8.158156625412689,
+      9.356755013170355,
+      9.301152159553316,
+      9.682092635901176,
+    ],
+    "VW": [
+      1.1,
+      1.1,
+      2.2,
+      2.3,
+    ],
+  },
+}
+`;
+
 exports[`Belluno station listing 1`] = `
 [
   {
