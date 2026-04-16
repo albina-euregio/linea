@@ -1,7 +1,6 @@
-import { FeatureCollectionSchema, FeatureSchema } from "../schema/listing";
+import { FeatureCollectionSchema, type Feature } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
-import { type z } from "zod";
 import { fetchOrThrow } from "./fetchOrThrow";
 
 type Config = {
@@ -113,8 +112,6 @@ const config: Config[] = [
     geojson: slf.URL.STATIONS,
   },
 ];
-
-type Feature = z.infer<typeof FeatureSchema>;
 
 type ConfigPredicate = (c: (typeof config)[number]) => boolean;
 

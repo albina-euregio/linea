@@ -179,3 +179,6 @@ export const FeatureCollectionSchema = z
     properties: z.any(),
   })
   .describe("A GeoJSON FeatureCollection of weather stations");
+
+export type Feature = z.infer<typeof FeatureSchema>;
+export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
