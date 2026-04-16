@@ -66,7 +66,6 @@ test("Belluno station listing", async () => {
   );
 
   const { features } = await PROVIDERS.filtered(
-    "",
     (c) => c instanceof belluno.BellunoDataProvider,
   ).fetchStationListing();
   expect(features).toHaveLength(2);

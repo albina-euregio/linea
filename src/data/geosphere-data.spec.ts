@@ -119,7 +119,7 @@ describe("geosphere", async () => {
     }),
   );
 
-  const provider = PROVIDERS.filtered("", (p) => p.dataProviderID === "GEOSPHERE");
+  const provider = PROVIDERS.filtered((p) => p.dataProviderID === "GEOSPHERE");
 
   test("parseGeosphereData", async () => {
     const { features } = await provider.fetchStationListing();

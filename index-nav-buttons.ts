@@ -1,7 +1,7 @@
 import { LineaPlot } from "./src/linea-plot";
 import { PROVIDERS } from "./src/data/providers";
 
-const { features } = await PROVIDERS.filtered("", (c) =>
+const { features } = await PROVIDERS.filtered((c) =>
   c.regions.includes("AT-07"),
 ).fetchStationListing();
 features.sort((f1, f2) => f1.properties.name.localeCompare(f2.properties.name));

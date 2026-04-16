@@ -53,11 +53,10 @@ export class MultiDataProvider implements LineaDataProvider {
     this.regions = providers.flatMap((p) => p.regions);
   }
 
-  filtered(
-    dataProviderID: string,
-    predicate: (p: LineaDataProvider) => boolean,
-  ): MultiDataProvider {
-    return new MultiDataProvider(dataProviderID, this.providers.filter(predicate));
+  filtered(predicate: (p: LineaDataProvider) => boolean): MultiDataProvider {
+    const providers = this.providers.filter(predicate);
+    const dataProviderID = providers.map((p) => p.dataProviderID).join();
+    return new MultiDataProvider(dataProviderID, providers);
   }
 
   async fetchStationListing(): Promise<FeatureCollection> {

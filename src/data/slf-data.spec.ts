@@ -119,7 +119,6 @@ test("SLF", async () => {
   );
 
   const { features } = await PROVIDERS.filtered(
-    "",
     (c) => c instanceof slf.SLFDataProvider,
   ).fetchStationListing();
   expect(features).toMatchSnapshot();
