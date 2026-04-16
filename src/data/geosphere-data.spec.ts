@@ -122,14 +122,14 @@ describe("geosphere", async () => {
 
   test("parseGeosphereData", async () => {
     const features = await fetchAll((c) => c.geojson.includes("dataset.api.hub.geosphere.at"));
-    const data = await fetchSMET(features[0].$smet[0]);
+    const data = await fetchSMET(features[0].properties.dataURLs[0]);
     expect(data).toMatchSnapshot();
   });
 
   test("parseGeosphereFeature", async () => {
     const features = await fetchAll((c) => c.geojson.includes("dataset.api.hub.geosphere.at"));
     const feature = features[0];
-    delete feature.$smet;
+    delete feature.properties.dataURLs;
     expect(feature).toMatchSnapshot();
   });
 });
