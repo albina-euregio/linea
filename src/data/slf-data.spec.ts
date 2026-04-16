@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vite-plus/test";
-import { fetchAll } from "./providers";
+import { PROVIDERS } from "./providers";
 import * as slf from "./slf-data";
 
 test("SLF", async () => {
@@ -118,6 +118,9 @@ test("SLF", async () => {
     }),
   );
 
-  const data = await fetchAll((c) => c instanceof slf.SLFDataProvider);
-  expect(data).toMatchSnapshot();
+  const { features } = await PROVIDERS.filtered(
+    "",
+    (c) => c instanceof slf.SLFDataProvider,
+  ).fetchStationListing();
+  expect(features).toMatchSnapshot();
 });

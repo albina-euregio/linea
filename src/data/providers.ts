@@ -39,7 +39,37 @@ export class SmetDataProvider implements LineaDataProvider {
   }
 }
 
-const PROVIDERS: LineaDataProvider[] = [
+export class MultiDataProvider implements LineaDataProvider {
+  readonly regions: string[];
+  constructor(
+    readonly id: string,
+    readonly providers: LineaDataProvider[],
+  ) {
+    this.regions = providers.flatMap((p) => p.regions);
+  }
+
+  filtered(id: string, predicate: (p: LineaDataProvider) => boolean): MultiDataProvider {
+    return new MultiDataProvider(id, this.providers.filter(predicate));
+  }
+
+  async fetchStationListing(): Promise<FeatureCollection> {
+    const collections$ = this.providers.flatMap((c) => c.fetchStationListing());
+    const collections = await Promise.all(collections$);
+    const features = collections.flatMap((f) => f.features);
+    return { type: "FeatureCollection", features };
+  }
+
+  fetchStationData(feature: Feature, dataURL: URL): Promise<StationData> {
+    const dataProviderID = feature.properties.dataProviderID;
+    const provider = this.providers.find((p) => p.id === dataProviderID);
+    if (!provider) {
+      throw new Error("No provider known for dataProviderID=" + dataProviderID);
+    }
+    return provider.fetchStationData(feature, dataURL);
+  }
+}
+
+export const PROVIDERS = new MultiDataProvider("LINEA", [
   new SmetDataProvider(
     "ALBINA",
     ["AT-07", "IT-32-BZ", "IT-32-TN"],
@@ -133,14 +163,4 @@ const PROVIDERS: LineaDataProvider[] = [
   new SLFDataProvider(),
 
   new BellunoDataProvider(),
-];
-
-export async function fetchAll(
-  configPredicate: (c: LineaDataProvider) => boolean = () => true,
-): Promise<Feature[]> {
-  const collections$ = PROVIDERS.filter((c) => configPredicate(c)).flatMap((c) =>
-    c.fetchStationListing(),
-  );
-  const collections = await Promise.all(collections$);
-  return collections.flatMap((f) => f.features);
-}
+]);

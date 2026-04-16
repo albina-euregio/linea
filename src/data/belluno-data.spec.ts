@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vite-plus/test";
 import "temporal-polyfill/global";
-import { fetchAll } from "./providers";
+import { PROVIDERS } from "./providers";
 import * as belluno from "./belluno-data";
 
 /**
@@ -65,11 +65,14 @@ test("Belluno station listing", async () => {
     }),
   );
 
-  const data = await fetchAll((c) => c instanceof belluno.BellunoDataProvider);
-  expect(data).toHaveLength(2);
-  expect(data[0].id).toBe("0047");
-  expect(data[1].id).toBe("0009");
-  expect(data).toMatchSnapshot();
+  const { features } = await PROVIDERS.filtered(
+    "",
+    (c) => c instanceof belluno.BellunoDataProvider,
+  ).fetchStationListing();
+  expect(features).toHaveLength(2);
+  expect(features[0].id).toBe("0047");
+  expect(features[1].id).toBe("0009");
+  expect(features).toMatchSnapshot();
 });
 
 test("Belluno data parsing", async () => {
