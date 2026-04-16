@@ -37,7 +37,7 @@
     "test": "vp test run",
     "lint": "vp fmt --check && vp lint",
     "build": "vp build && vp pack",
-    "build:cli": "vp pack --no-config --exe src/cli.ts",
+    "build:cli": "cd src/cli/ && vp pack",
     "dev": "vp dev"
   },
   "dependencies": {
