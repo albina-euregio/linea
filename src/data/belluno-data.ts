@@ -1,11 +1,10 @@
 import { dewPoint } from "../linea-plot/dew-point";
 import type { Feature } from "../schema/listing";
+import * as listing from "../schema/listing";
 import { StationData, ParameterType, type Units, type Values } from "./station-data";
 
 export const URL = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml";
 const BELLUNO_TIMEZONE = "Europe/Rome";
-
-type BellunoFeature = Feature;
 
 type BellunoStation = {
   id: string;
@@ -136,8 +135,8 @@ function parseBellunoStation(element: Element): BellunoStation {
   };
 }
 
-function parseBellunoFeature(station: BellunoStation): BellunoFeature {
-  return {
+function parseBellunoFeature(station: BellunoStation): Feature {
+  return listing.FeatureSchema.parse({
     type: "Feature",
     id: station.id,
     geometry: {
@@ -151,7 +150,7 @@ function parseBellunoFeature(station: BellunoStation): BellunoFeature {
       operatorLicense: "CC BY 4.0",
       operatorLicenseLink: "https://creativecommons.org/licenses/by/4.0/deed.it",
     },
-  };
+  });
 }
 
 /**
@@ -241,7 +240,7 @@ export function parseBellunoData(csv: string): StationData {
   return new StationData(stationName, null, timestamps, units, values);
 }
 
-export async function loadBellunoStations(): Promise<BellunoFeature[]> {
+export async function loadBellunoStations(): Promise<Feature[]> {
   const response = await fetch(URL);
   const xml = await response.text();
   const doc = new DOMParser().parseFromString(xml, "text/xml");
