@@ -160,8 +160,14 @@ export async function fetchSource(
     });
     return stations;
   } else if (geojson.toString() === belluno.URL) {
-    const stations = await belluno.loadBellunoStations();
-    return stations.map(
+    const response = await fetch(belluno.URL);
+    const xml = await response.text();
+    const doc = new DOMParser().parseFromString(xml, "text/xml");
+    if (doc.getElementsByTagName("parsererror").length > 0) {
+      throw new Error("Failed to parse ARPAV Belluno XML");
+    }
+    const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
+    return stations.map(belluno.parseBellunoStation).map(
       (f): Feature => ({
         ...f,
         $smet: smet(f.id),

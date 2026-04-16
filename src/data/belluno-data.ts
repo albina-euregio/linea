@@ -1,22 +1,9 @@
 import { dewPoint } from "../linea-plot/dew-point";
-import type { Feature } from "../schema/listing";
 import * as listing from "../schema/listing";
 import { StationData, ParameterType, type Units, type Values } from "./station-data";
 
 export const URL = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml";
 const BELLUNO_TIMEZONE = "Europe/Rome";
-
-type BellunoStation = {
-  id: string;
-  name: string;
-  longitude: number;
-  latitude: number;
-  altitude: number;
-  province?: string;
-  municipality?: string;
-  type?: string;
-  link?: string;
-};
 
 /**
  * Maps ARPAV parameter column names to SMET ParameterType.
@@ -111,7 +98,7 @@ function textContent(parent: Element, tagName: string): string {
   return parent.getElementsByTagName(tagName)[0]?.textContent?.trim() ?? "";
 }
 
-function parseBellunoStation(element: Element): BellunoStation {
+export function parseBellunoStation(element: Element) {
   const rawId = textContent(element, "IDSTAZ");
   const name = textContent(element, "NOME");
   const longitude = Number.parseFloat(textContent(element, "X"));
@@ -121,30 +108,15 @@ function parseBellunoStation(element: Element): BellunoStation {
   if (!rawId || !name || !Number.isFinite(longitude) || !Number.isFinite(latitude)) {
     throw new Error("Invalid Belluno station entry");
   }
-
-  return {
-    id: rawId.trim().padStart(4, "0"),
-    name,
-    longitude,
-    latitude,
-    altitude: Number.isFinite(altitude) ? altitude : null,
-    province: textContent(element, "PROVINCIA") || undefined,
-    municipality: textContent(element, "COMUNE") || undefined,
-    type: textContent(element, "TIPOSTAZ") || undefined,
-    link: textContent(element, "LINKSTAZ") || undefined,
-  };
-}
-
-function parseBellunoFeature(station: BellunoStation): Feature {
   return listing.FeatureSchema.parse({
     type: "Feature",
-    id: station.id,
+    id: rawId.trim().padStart(4, "0"),
     geometry: {
       type: "Point",
-      coordinates: [station.longitude, station.latitude, station.altitude],
+      coordinates: [longitude, latitude, Number.isFinite(altitude) ? altitude : null],
     },
     properties: {
-      name: station.name,
+      name: name,
       operator: "ARPAV",
       operatorLink: "https://www.arpa.veneto.it/",
       operatorLicense: "CC BY 4.0",
@@ -238,19 +210,4 @@ export function parseBellunoData(csv: string): StationData {
     }
   }
   return new StationData(stationName, null, timestamps, units, values);
-}
-
-export async function loadBellunoStations(): Promise<Feature[]> {
-  const response = await fetch(URL);
-  const xml = await response.text();
-  const doc = new DOMParser().parseFromString(xml, "text/xml");
-  if (doc.getElementsByTagName("parsererror").length > 0) {
-    throw new Error("Failed to parse ARPAV Belluno XML");
-  }
-  const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
-
-  return stations
-    .map(parseBellunoStation)
-    .map(parseBellunoFeature)
-    .sort((a, b) => String(a.id).localeCompare(String(b.id), "en", { numeric: true }));
 }
