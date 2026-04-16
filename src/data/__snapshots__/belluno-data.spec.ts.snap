@@ -89,98 +89,29 @@ exports[`Belluno station listing 1`] = `
     },
     "id": "0047",
     "properties": {
-      "DW": Scalar {
-        "unit": "°",
-        "value": undefined,
-      },
-      "HS": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_24": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_48": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_6": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_72": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "ILWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "ISWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "OLWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "P": Pressure {
-        "unit": "Pa",
-        "value": undefined,
-      },
-      "PSUM_24": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_48": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_6": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_72": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "RH": Scalar {
-        "unit": "1",
-        "value": undefined,
-      },
-      "RSWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "TA": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TA_MAX": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TA_MIN": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TD": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TSS": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "VW": Speed {
-        "unit": "m/s",
-        "value": undefined,
-      },
-      "VW_MAX": Speed {
-        "unit": "m/s",
-        "value": undefined,
-      },
+      "DW": undefined,
+      "HS": undefined,
+      "HSD_24": undefined,
+      "HSD_48": undefined,
+      "HSD_6": undefined,
+      "HSD_72": undefined,
+      "ILWR": undefined,
+      "ISWR": undefined,
+      "OLWR": undefined,
+      "P": undefined,
+      "PSUM_24": undefined,
+      "PSUM_48": undefined,
+      "PSUM_6": undefined,
+      "PSUM_72": undefined,
+      "RH": undefined,
+      "RSWR": undefined,
+      "TA": undefined,
+      "TA_MAX": undefined,
+      "TA_MIN": undefined,
+      "TD": undefined,
+      "TSS": undefined,
+      "VW": undefined,
+      "VW_MAX": undefined,
       "name": "Faloria",
       "operator": "ARPAV",
       "operatorLicense": "CC BY 4.0",
@@ -203,98 +134,29 @@ exports[`Belluno station listing 1`] = `
     },
     "id": "0009",
     "properties": {
-      "DW": Scalar {
-        "unit": "°",
-        "value": undefined,
-      },
-      "HS": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_24": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_48": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_6": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "HSD_72": Length {
-        "unit": "m",
-        "value": undefined,
-      },
-      "ILWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "ISWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "OLWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "P": Pressure {
-        "unit": "Pa",
-        "value": undefined,
-      },
-      "PSUM_24": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_48": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_6": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "PSUM_72": Length {
-        "unit": "mm",
-        "value": undefined,
-      },
-      "RH": Scalar {
-        "unit": "1",
-        "value": undefined,
-      },
-      "RSWR": Intensity {
-        "unit": "W/m²",
-        "value": undefined,
-      },
-      "TA": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TA_MAX": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TA_MIN": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TD": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "TSS": Temperature {
-        "unit": "K",
-        "value": undefined,
-      },
-      "VW": Speed {
-        "unit": "m/s",
-        "value": undefined,
-      },
-      "VW_MAX": Speed {
-        "unit": "m/s",
-        "value": undefined,
-      },
+      "DW": undefined,
+      "HS": undefined,
+      "HSD_24": undefined,
+      "HSD_48": undefined,
+      "HSD_6": undefined,
+      "HSD_72": undefined,
+      "ILWR": undefined,
+      "ISWR": undefined,
+      "OLWR": undefined,
+      "P": undefined,
+      "PSUM_24": undefined,
+      "PSUM_48": undefined,
+      "PSUM_6": undefined,
+      "PSUM_72": undefined,
+      "RH": undefined,
+      "RSWR": undefined,
+      "TA": undefined,
+      "TA_MAX": undefined,
+      "TA_MIN": undefined,
+      "TD": undefined,
+      "TSS": undefined,
+      "VW": undefined,
+      "VW_MAX": undefined,
       "name": "Caprile",
       "operator": "ARPAV",
       "operatorLicense": "CC BY 4.0",
