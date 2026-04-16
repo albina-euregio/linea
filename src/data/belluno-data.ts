@@ -128,7 +128,7 @@ function parseBellunoStation(element: Element): BellunoStation {
     name,
     longitude,
     latitude,
-    altitude: Number.isFinite(altitude) ? altitude : 0,
+    altitude: Number.isFinite(altitude) ? altitude : null,
     province: textContent(element, "PROVINCIA") || undefined,
     municipality: textContent(element, "COMUNE") || undefined,
     type: textContent(element, "TIPOSTAZ") || undefined,
@@ -238,7 +238,7 @@ export function parseBellunoData(csv: string): StationData {
       values[key] = [...(values[key] ?? [])].reverse();
     }
   }
-  return new StationData(stationName, 0, timestamps, units, values);
+  return new StationData(stationName, null, timestamps, units, values);
 }
 
 export async function loadBellunoStations(): Promise<BellunoFeature[]> {
