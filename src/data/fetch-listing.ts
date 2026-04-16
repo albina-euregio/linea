@@ -1,109 +1,126 @@
-import { FeatureCollectionSchema, type Feature } from "../schema/listing";
+import { FeatureCollectionSchema, type Feature, type FeatureCollection } from "../schema/listing";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
 import * as belluno from "./belluno-data";
 import { fetchOrThrow } from "./fetchOrThrow";
+import type { LineaDataProvider } from "./provider";
+import { fetchSMET } from "./smet-data";
+import type { StationData } from "./station-data";
 
-type Config = {
-  regions: string[];
-  smet: (id: string) => string[];
-  geojson: string;
-};
+export class SmetDataProvider implements LineaDataProvider {
+  constructor(
+    public regions: string[],
+    public geojsonURL: string,
+    public smetURLs: (id: string) => string[],
+  ) {}
 
-const config: Config[] = [
-  {
-    regions: ["AT-07", "IT-32-BZ", "IT-32-TN"],
-    smet: (id: string) => [
+  async fetchStationListing(): Promise<FeatureCollection> {
+    let response = await fetchOrThrow(this.geojsonURL);
+    if (
+      response.headers.get("Content-Encoding") === "gzip" ||
+      response.headers.get("Content-Type") === "application/gzip" ||
+      response.headers.get("Content-Type") === "application/x-gzip"
+    ) {
+      const blob = await response.blob();
+      const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
+      response = new Response(stream);
+    }
+    const json = await response.json();
+
+    const collection = FeatureCollectionSchema.parse(json);
+    collection.features.forEach((f) => {
+      f.properties.dataURLs = this.smetURLs(f.properties.shortName || f.id);
+    });
+    return collection;
+  }
+
+  fetchStationData(_: Feature, dataURL: URL): Promise<StationData> {
+    return fetchSMET(dataURL.toString());
+  }
+}
+
+const PROVIDERS: LineaDataProvider[] = [
+  new SmetDataProvider(
+    ["AT-07", "IT-32-BZ", "IT-32-TN"],
+    "https://static.avalanche.report/weather_stations/linea.geojson.gz",
+    (id) => [
       `https://api.avalanche.report/lawine/grafiken/smet/woche/${id}.smet.gz`,
       `https://api.avalanche.report/lawine/grafiken/smet/winter/${id}.smet.gz`,
       `https://api.avalanche.report/lawine/grafiken/smet/all/${id}.smet.gz`,
     ],
-    geojson: "https://static.avalanche.report/weather_stations/linea.geojson.gz",
-  },
-  {
-    regions: ["AT-02"],
-    smet: (id: string) => [
+  ),
+
+  new SmetDataProvider(
+    ["AT-02"],
+    "https://smet.hydrographie.info/stations_ktn_destiny.geojson",
+    (id) => [
       `https://smet.hydrographie.info/${id}.smet`,
       `https://smet.hydrographie.info/${id}_6m.smet`,
     ],
-    geojson: "https://smet.hydrographie.info/stations_ktn_destiny.geojson",
-  },
-  {
-    regions: ["AT-05"],
-    smet: (id: string) => [
-      `https://www.salzburg.gv.at/lawine/smet/woche/${id}.smet.gz`,
-      `https://www.salzburg.gv.at/lawine/smet/winter/${id}.smet.gz`,
-    ],
-    geojson: "https://www.salzburg.gv.at/lawine/smet/linea.geojson",
-  },
-  {
-    regions: ["OEBB"],
-    smet: (id: string) => [
-      `https://oebb.infra.tbbm.at/smet/woche/${id}.smet.gz`,
-      `https://oebb.infra.tbbm.at/smet/winter/${id}.smet.gz`,
-    ],
-    geojson: "https://oebb.infra.tbbm.at/smet/linea.geojson",
-  },
-  {
-    regions: ["AT-06"],
-    smet: (id: string) => [`https://lawinen.at/smet/stm/woche/${id}.smet.gz`],
-    geojson: "https://lawinen.at/smet/stm/stations_stm.geojson",
-  },
-  {
-    regions: ["AT-03"],
-    smet: (id: string) => [`https://lawinen.at/smet/noe/woche/${id}.smet.gz`],
-    geojson: "https://lawinen.at/smet/noe/stations_noe.geojson",
-  },
-  {
-    regions: ["AT-04"],
-    smet: (id: string) => [`https://lawinen.at/smet/ooe/woche/${id}.smet.gz`],
-    geojson: "https://lawinen.at/smet/ooe/stations_ooe.geojson",
-  },
-  {
-    regions: ["AT-08"],
-    smet: (id: string) => [`https://lawinen.at/smet/vor/woche/${id}.smet.gz`],
-    geojson: "https://lawinen.at/smet/vor/stations_vor.geojson",
-  },
-  {
-    regions: ["IT-36"],
-    smet: (id: string) => [
+  ),
+
+  new SmetDataProvider(["AT-05"], "https://www.salzburg.gv.at/lawine/smet/linea.geojson", (id) => [
+    `https://www.salzburg.gv.at/lawine/smet/woche/${id}.smet.gz`,
+    `https://www.salzburg.gv.at/lawine/smet/winter/${id}.smet.gz`,
+  ]),
+
+  new SmetDataProvider(["OEBB"], "https://oebb.infra.tbbm.at/smet/linea.geojson", (id) => [
+    `https://oebb.infra.tbbm.at/smet/woche/${id}.smet.gz`,
+    `https://oebb.infra.tbbm.at/smet/winter/${id}.smet.gz`,
+  ]),
+
+  new SmetDataProvider(["AT-06"], "https://lawinen.at/smet/stm/stations_stm.geojson", (id) => [
+    `https://lawinen.at/smet/stm/woche/${id}.smet.gz`,
+  ]),
+
+  new SmetDataProvider(["AT-03"], "https://lawinen.at/smet/noe/stations_noe.geojson", (id) => [
+    `https://lawinen.at/smet/noe/woche/${id}.smet.gz`,
+  ]),
+
+  new SmetDataProvider(["AT-04"], "https://lawinen.at/smet/ooe/stations_ooe.geojson", (id) => [
+    `https://lawinen.at/smet/ooe/woche/${id}.smet.gz`,
+  ]),
+
+  new SmetDataProvider(["AT-08"], "https://lawinen.at/smet/vor/stations_vor.geojson", (id) => [
+    `https://lawinen.at/smet/vor/woche/${id}.smet.gz`,
+  ]),
+
+  new SmetDataProvider(
+    ["IT-36"],
+    "https://smet.hydrographie.info/stations_fvg_destiny.geojson",
+    (id) => [
       `https://smet.hydrographie.info/${id}.smet`,
       `https://smet.hydrographie.info/${id}_6m.smet`,
     ],
-    geojson: "https://smet.hydrographie.info/stations_fvg_destiny.geojson",
-  },
-  {
-    regions: ["DE-BY"],
-    smet: (id: string) => [`https://lawinen.at/smet/bay/woche/${id}.smet.gz`],
-    geojson: "https://lawinen.at/smet/bay/stations_bay.geojson",
-  },
-  {
-    regions: ["SI"],
-    smet: (id: string) => [`https://lawinen.at/smet/slo/woche/${id}.smet.gz`],
-    geojson: "https://lawinen.at/smet/slo/stations_slo.geojson",
-  },
-  {
-    regions: ["CH"],
-    smet: (id: string) => [`${slf.URL.STATION}${id}/measurements?period_in_days=7`],
-    geojson: slf.URL.STATIONS,
-  },
-  {
-    regions: ["IT-34"],
-    smet: (id: string) => {
-      return [`https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/${id}.csv`];
-    },
-    geojson: belluno.URL,
-  },
+  ),
+
+  new SmetDataProvider(["DE-BY"], "https://lawinen.at/smet/bay/stations_bay.geojson", (id) => [
+    `https://lawinen.at/smet/bay/woche/${id}.smet.gz`,
+  ]),
+
+  new SmetDataProvider(["SI"], "https://lawinen.at/smet/slo/stations_slo.geojson", (id) => [
+    `https://lawinen.at/smet/slo/woche/${id}.smet.gz`,
+  ]),
+
+  // FIXME
+  new SmetDataProvider(["CH"], slf.URL.STATIONS, (id) => [
+    `${slf.URL.STATION}${id}/measurements?period_in_days=7`,
+  ]),
+
+  // FIXME
+  new SmetDataProvider(["IT-34"], belluno.URL, (id) => [
+    `https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/${id}.csv`,
+  ]),
 ];
 
-type ConfigPredicate = (c: (typeof config)[number]) => boolean;
-
-export async function fetchAll(configPredicate: ConfigPredicate = () => true): Promise<Feature[]> {
-  const features$ = config
-    .filter((c) => configPredicate(c))
-    .flatMap((c) => fetchSource(new URL(c.geojson), c.smet));
-  const features = await Promise.all(features$);
-  return features.flat();
+export async function fetchAll(
+  configPredicate: (c: LineaDataProvider) => boolean = () => true,
+): Promise<Feature[]> {
+  const collections$ = PROVIDERS.filter((c) => configPredicate(c)).flatMap((c) =>
+    c.fetchStationListing(),
+  );
+  const collections = await Promise.all(collections$);
+  return collections.flatMap((f) => f.features);
 }
 
 export async function fetchSource(
@@ -138,15 +155,6 @@ export async function fetchSource(
       f.properties.dataURLs = smet(f.id);
       return f;
     });
-  }
-  if (
-    response.headers.get("Content-Encoding") === "gzip" ||
-    response.headers.get("Content-Type") === "application/gzip" ||
-    response.headers.get("Content-Type") === "application/x-gzip"
-  ) {
-    const blob = await response.blob();
-    const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
-    response = new Response(stream);
   }
 
   const json = await response.json();
