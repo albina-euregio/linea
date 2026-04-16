@@ -119,20 +119,8 @@ function parseTimestamp(timestamp: string): number {
   throw new Error(`Unable to parse timestamp: ${timestamp}`);
 }
 
-function parseXml(text: string): Document {
-  const doc = new DOMParser().parseFromString(text, "text/xml");
-  if (doc.getElementsByTagName("parsererror").length > 0) {
-    throw new Error("Failed to parse ARPAV Belluno XML");
-  }
-  return doc;
-}
-
 function textContent(parent: Element, tagName: string): string {
   return parent.getElementsByTagName(tagName)[0]?.textContent?.trim() ?? "";
-}
-
-function parseStationId(rawId: string): string {
-  return rawId.trim().padStart(4, "0");
 }
 
 function parseBellunoStation(element: Element): BellunoStation {
@@ -147,7 +135,7 @@ function parseBellunoStation(element: Element): BellunoStation {
   }
 
   return {
-    id: parseStationId(rawId),
+    id: rawId.trim().padStart(4, "0"),
     name,
     longitude,
     latitude,
@@ -169,11 +157,6 @@ function parseBellunoFeature(station: BellunoStation): BellunoFeature {
     },
     properties: {
       name: station.name,
-      shortName: station.id,
-      altitude: station.altitude,
-      stationCharacteristics: [station.type, station.municipality, station.province]
-        .filter(Boolean)
-        .join(" - "),
       operator: "ARPAV",
       operatorLink: "https://www.arpa.veneto.it/",
       operatorLicense: "CC BY 4.0",
@@ -272,7 +255,10 @@ export function parseBellunoData(csv: string): StationData {
 export async function loadBellunoStations(): Promise<BellunoFeature[]> {
   const response = await fetch(URL);
   const xml = await response.text();
-  const doc = parseXml(xml);
+  const doc = new DOMParser().parseFromString(xml, "text/xml");
+  if (doc.getElementsByTagName("parsererror").length > 0) {
+    throw new Error("Failed to parse ARPAV Belluno XML");
+  }
   const stations = Array.from(doc.getElementsByTagName("STAZIONE"));
 
   return stations

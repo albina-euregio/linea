@@ -164,7 +164,7 @@ export async function fetchSource(
     return stations.map(
       (f): Feature => ({
         ...f,
-        $smet: smet(f.properties.shortName || f.id),
+        $smet: smet(f.id),
       }),
     );
   }
