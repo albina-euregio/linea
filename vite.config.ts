@@ -8,7 +8,7 @@ export default defineConfig({
     inconsistentCjsInterop: true,
   },
   pack: {
-    entry: ["src/data/fetch-listing.ts", "src/schema/listing.ts"],
+    entry: ["src/data/providers.ts", "src/schema/listing.ts"],
     clean: false,
     dts: true,
     sourcemap: true,

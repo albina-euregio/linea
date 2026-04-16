@@ -1,4 +1,4 @@
-import { fetchAll } from "../data/fetch-listing";
+import { fetchAll } from "../data/providers";
 import { writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { FeatureCollectionSchema } from "../schema/listing";

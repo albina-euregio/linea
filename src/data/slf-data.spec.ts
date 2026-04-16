@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vite-plus/test";
-import { fetchAll } from "./fetch-listing";
+import { fetchAll } from "./providers";
 import * as slf from "./slf-data";
 
 test("SLF", async () => {

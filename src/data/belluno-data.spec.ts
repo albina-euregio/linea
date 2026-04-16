@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vite-plus/test";
 import "temporal-polyfill/global";
-import { fetchAll } from "./fetch-listing";
+import { fetchAll } from "./providers";
 import * as belluno from "./belluno-data";
 
 /**
