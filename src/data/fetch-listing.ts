@@ -1,7 +1,4 @@
 import { FeatureCollectionSchema, type Feature, type FeatureCollection } from "../schema/listing";
-import * as geosphere from "./geosphere-data";
-import * as slf from "./slf-data";
-import * as belluno from "./belluno-data";
 import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider } from "./provider";
 import { fetchSMET } from "./smet-data";
@@ -117,31 +114,4 @@ export async function fetchAll(
   );
   const collections = await Promise.all(collections$);
   return collections.flatMap((f) => f.features);
-}
-
-export async function fetchSource(
-  geojson: URL,
-  smet: (id: string) => string[],
-): Promise<Feature[]> {
-  let response;
-  try {
-    response = await fetchOrThrow(geojson, { cache: "no-cache" });
-  } catch (e) {
-    console.warn(e);
-    return [];
-  }
-  if (geojson.toString().startsWith(geosphere.URL)) {
-    throw new Error();
-  } else if (geojson.toString() === slf.URL.STATIONS) {
-    throw new Error();
-  } else if (geojson.toString() === belluno.URL) {
-    throw new Error();
-  }
-
-  const json = await response.json();
-  const collection = FeatureCollectionSchema.parse(json, { reportInput: true });
-  return collection.features.map((f): Feature => {
-    f.properties.dataURLs = smet(f.properties.shortName || f.id);
-    return f;
-  });
 }
