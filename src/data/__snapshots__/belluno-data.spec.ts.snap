@@ -113,6 +113,7 @@ exports[`Belluno station listing 1`] = `
       "dataURLs": [
         "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0047.csv",
       ],
+      "microRegionID": "IT-34",
       "name": "Faloria",
       "operator": "ARPAV",
       "operatorLicense": "CC BY 4.0",
@@ -159,6 +160,7 @@ exports[`Belluno station listing 1`] = `
       "dataURLs": [
         "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0009.csv",
       ],
+      "microRegionID": "IT-34",
       "name": "Caprile",
       "operator": "ARPAV",
       "operatorLicense": "CC BY 4.0",
