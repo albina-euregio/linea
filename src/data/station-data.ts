@@ -1,43 +1,45 @@
+import { z } from "zod";
 import type { Unit } from "./units";
 
 /**
  * Parameter type following the [SMET specification](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf)
  */
-export enum ParameterType {
+export const ParameterTypeSchema = z.enum([
   /** P Air pressure, in Pa */
-  "P" = "P",
+  "P",
   /** TA Temperature Air, in Kelvin */
-  "TA" = "TA",
+  "TA",
   /** TD Temperature Dew Point, in Kelvin */
-  "TD" = "TD",
+  "TD",
   /** TSS Temperature Snow Surface, in Kelvin */
-  "TSS" = "TSS",
+  "TSS",
   /** TSG Temperature Surface Ground, in Kelvin */
-  // "TSG" = "TSG",
+  "TSG",
   /** RH Relative Humidity, between 0 and 1 */
-  "RH" = "RH",
+  "RH",
   /** VW_MAX Maximum wind velocity, in m/s */
-  "VW_MAX" = "VW_MAX",
+  "VW_MAX",
   /** VW Velocity Wind, in m/s */
-  "VW" = "VW",
+  "VW",
   /** DW Direction Wind, in degrees, clockwise and north being zero degrees */
-  "DW" = "DW",
+  "DW",
   /** ISWR Incoming Short Wave Radiation, in W/m2 */
-  "ISWR" = "ISWR",
+  "ISWR",
   /** RSWR Reflected Short Wave Radiation, in W/m2 (previously OSWR) */
-  // "RSWR" = "RSWR",
+  "RSWR",
   /** ILWR Incoming Long Wave Radiation, in W/m2 */
-  // "ILWR" = "ILWR",
+  "ILWR",
   /** OLWR Outgoing Long Wave Radiation, in W/m2 */
-  // "OLWR" = "OLWR",
+  "OLWR",
   /** PINT Precipitation Intensity, in mm/h, as an average over the timestep */
-  // "PINT" = "PINT",
+  "PINT",
   /** PSUM Precipitation accumulation, in mm, summed over the last timestep */
-  "PSUM" = "PSUM",
+  "PSUM",
   /** HS Height Snow, in m */
-  "HS" = "HS",
-  "NS" = "NS",
-}
+  "HS",
+  "NS",
+]);
+export type ParameterType = z.infer<typeof ParameterTypeSchema>;
 
 export type Units = Partial<Record<ParameterType, Unit>>;
 

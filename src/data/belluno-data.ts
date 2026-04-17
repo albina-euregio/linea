@@ -1,6 +1,6 @@
 import { dewPoint } from "../linea-plot/dew-point";
 import * as listing from "../schema/listing";
-import { StationData, ParameterType, type Units, type Values } from "./station-data";
+import { StationData, type ParameterType, type Units, type Values } from "./station-data";
 import type { LineaDataProvider } from "./provider";
 import { fetchOrThrow } from "./fetchOrThrow";
 import type { Unit } from "./units";
@@ -14,15 +14,14 @@ const BELLUNO_TIMEZONE = "Europe/Rome";
 function mapParameterType(columnName: string): ParameterType | null {
   const normalized = normalizeHeader(columnName);
 
-  if (normalized.includes("temperatura aria")) return ParameterType.TA;
-  if (normalized.includes("umidita relativa")) return ParameterType.RH;
-  if (normalized.includes("velocita vento")) return ParameterType.VW;
-  if (normalized.includes("direzione vento")) return ParameterType.DW;
-  if (normalized.includes("precipitazione")) return ParameterType.PSUM;
-  if (normalized.includes("altezza neve")) return ParameterType.HS;
-  if (normalized.includes("pressione atmosferica ridotta a livello del mare"))
-    return ParameterType.P;
-  if (normalized.includes("radiazione solare globale")) return ParameterType.ISWR;
+  if (normalized.includes("temperatura aria")) return "TA";
+  if (normalized.includes("umidita relativa")) return "RH";
+  if (normalized.includes("velocita vento")) return "VW";
+  if (normalized.includes("direzione vento")) return "DW";
+  if (normalized.includes("precipitazione")) return "PSUM";
+  if (normalized.includes("altezza neve")) return "HS";
+  if (normalized.includes("pressione atmosferica ridotta a livello del mare")) return "P";
+  if (normalized.includes("radiazione solare globale")) return "ISWR";
 
   return null;
 }
@@ -55,21 +54,21 @@ function parseNumeric(value: string): number | null {
 
 function unitForParameter(parameter: ParameterType): Unit {
   switch (parameter) {
-    case ParameterType.TA:
+    case "TA":
       return "℃";
-    case ParameterType.RH:
+    case "RH":
       return "%";
-    case ParameterType.PSUM:
+    case "PSUM":
       return "mm";
-    case ParameterType.VW:
+    case "VW":
       return "m/s";
-    case ParameterType.DW:
+    case "DW":
       return "°";
-    case ParameterType.HS:
+    case "HS":
       return "cm";
-    case ParameterType.P:
+    case "P":
       return "Pa";
-    case ParameterType.ISWR:
+    case "ISWR":
       return "W/m²";
     default:
       return "1";
