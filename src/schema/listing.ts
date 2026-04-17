@@ -9,6 +9,8 @@ import {
   Precipitation,
 } from "../data/units";
 import { ProviderIdentifierSchema } from "../data/provider";
+export { ParameterTypeSchema, type ParameterType } from "../data/station-data";
+export { UnitSchema, type Unit } from "../data/units";
 
 const number = z
   .number()
