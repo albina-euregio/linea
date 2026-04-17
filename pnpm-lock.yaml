@@ -49,6 +49,9 @@ importers:
       vitest:
         specifier: npm:@voidzero-dev/vite-plus-test@latest
         version: '@voidzero-dev/vite-plus-test@0.1.15(@types/node@24.12.2)(@voidzero-dev/vite-plus-core@0.1.15(@types/node@24.12.2)(esbuild@0.27.2)(typescript@6.0.2)(yaml@2.8.3))(esbuild@0.27.2)(jsdom@29.0.2)(typescript@6.0.2)(yaml@2.8.3)'
+      xmldom:
+        specifier: ^0.6.0
+        version: 0.6.0
 
 packages:
 
@@ -1140,6 +1143,10 @@ packages:
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
+  xmldom@0.6.0:
+    resolution: {integrity: sha512-iAcin401y58LckRZ0TkI4k0VSM1Qg0KGSc3i8rU+xrxe19A/BN1zHyVSJY7uoutVlaTSzYyk/v5AmkewAP7jtg==}
+    engines: {node: '>=10.0.0'}
+
   yaml@2.8.3:
     resolution: {integrity: sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==}
     engines: {node: '>= 14.6'}
@@ -1941,6 +1948,8 @@ snapshots:
   xml-name-validator@5.0.0: {}
 
   xmlchars@2.2.0: {}
+
+  xmldom@0.6.0: {}
 
   yaml@2.8.3:
     optional: true

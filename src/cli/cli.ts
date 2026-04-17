@@ -7,8 +7,8 @@ main();
 
 async function main() {
   // @ts-ignore// @ts-ignore
-  const { JSDOM } = await import("jsdom");
-  global.DOMParser = new JSDOM().window.DOMParser;
+  const { DOMParser } = await import("xmldom");
+  global.DOMParser = DOMParser;
 
   const collection = await PROVIDERS.fetchStationListing();
   const json = JSON.stringify(collection, undefined, 2);
