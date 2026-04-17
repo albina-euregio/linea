@@ -1,4 +1,4 @@
-import { fetchAll } from "../data/providers";
+import { PROVIDERS } from "../data/providers";
 import { writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { FeatureCollectionSchema } from "../schema/listing";
@@ -6,11 +6,7 @@ import { FeatureCollectionSchema } from "../schema/listing";
 main();
 
 async function main() {
-  const features = await fetchAll();
-  const collection = {
-    type: "FeatureCollection",
-    features,
-  };
+  const collection = await PROVIDERS.fetchStationListing();
   const json = JSON.stringify(collection, undefined, 2);
   FeatureCollectionSchema.parse(JSON.parse(json));
   const output = "linea.geojson";
