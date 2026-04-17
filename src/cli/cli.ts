@@ -6,6 +6,10 @@ import { FeatureCollectionSchema } from "../schema/listing";
 main();
 
 async function main() {
+  // @ts-ignore// @ts-ignore
+  const { JSDOM } = await import("jsdom");
+  global.DOMParser = new JSDOM().window.DOMParser;
+
   const collection = await PROVIDERS.fetchStationListing();
   const json = JSON.stringify(collection, undefined, 2);
   FeatureCollectionSchema.parse(JSON.parse(json));

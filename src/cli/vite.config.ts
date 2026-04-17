@@ -4,7 +4,8 @@ export default defineConfig({
   pack: {
     entry: ["./cli.ts"],
     deps: {
-      alwaysBundle: ["temporal-polyfill/global", "zod"],
+      alwaysBundle: ["jsdom", "temporal-polyfill/global", "zod"],
+      onlyBundle: false,
     },
     dts: false,
     sourcemap: false,
