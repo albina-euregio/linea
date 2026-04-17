@@ -109,6 +109,7 @@ exports[`Belluno station listing 1`] = `
       "TSS": undefined,
       "VW": undefined,
       "VW_MAX": undefined,
+      "dataProviderID": "IT-34",
       "dataURLs": [
         "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0047.csv",
       ],
@@ -154,6 +155,7 @@ exports[`Belluno station listing 1`] = `
       "TSS": undefined,
       "VW": undefined,
       "VW_MAX": undefined,
+      "dataProviderID": "IT-34",
       "dataURLs": [
         "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/0009.csv",
       ],

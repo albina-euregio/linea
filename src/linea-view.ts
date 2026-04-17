@@ -1,9 +1,10 @@
 import { type StationData, StationDataArray, type Units, type Values } from "./data/station-data";
-import { fetchSMET } from "./data/smet-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
-import type { LineaPlot } from "./linea-plot";
+import { LineaPlot } from "./linea-plot";
 import { i18n } from "./i18n";
+import { FeatureSchema, type Feature } from "./schema/listing";
+import { PROVIDERS } from "./data/providers";
 
 /**
  * Abstract base class for view implementations (Station view and Winter view)
@@ -17,14 +18,17 @@ export abstract class LineaView {
   minTime: number = +Infinity;
   maxTime: number = -Infinity;
   results = new StationDataArray();
-  srcs: string[] = [];
   protected lineaplot: LineaPlot;
+  #features: Feature[] = [];
 
   constructor(backgroundColors: string[], lineaplot: LineaPlot) {
     this.backgroundColors = backgroundColors;
     this.lineaplot = lineaplot;
     this.dp = lineaplot.dp;
     this.showTitle = lineaplot.hasAttribute("showtitle");
+    this.#features = FeatureSchema.array().parse(
+      JSON.parse(this.lineaplot.getAttribute(LineaPlot.FEATURES)),
+    );
   }
 
   /**
@@ -46,22 +50,26 @@ export abstract class LineaView {
     return this.charts;
   }
 
+  getDataURLs(attribute: "src" | "lazysrc" | "wintersrc"): (string | undefined)[] {
+    const index = ["src", "lazysrc", "wintersrc"].indexOf(attribute);
+    return this.#features.map((f) => f.properties.dataURLs[index]);
+  }
+
   /**
    * Fetch data from sources and stores it into the results.
    * Also updates the min and max time of the data and generalizes the data so that all results have the same timestamps with null values for missing data.
    * Finally, it updates the valid date inputs in the LineaPlot.
    * @param attribute the attribute from which to fetch the data (e.g. "src" or "wintersrc")
    */
-  async fetchData(attribute: string) {
-    const src = this.lineaplot.getAttribute(attribute) ?? "";
-    this.srcs = src.startsWith("[") || src.startsWith("'") ? (JSON.parse(src) as string[]) : [src];
-
-    if (this.srcs.length == 0) {
+  async fetchData(attribute: "src" | "lazysrc" | "wintersrc") {
+    const dataURLs = this.getDataURLs(attribute);
+    if (dataURLs.filter(Boolean).length == 0) {
       throw "Empty src array!";
     }
 
     const results = new StationDataArray();
-    const data = await Promise.all(this.srcs.map((src) => fetchSMET(src)));
+    const data$ = this.#features.map((f, i) => PROVIDERS.fetchStationData(f, i));
+    const data = await Promise.all(data$);
     results.push(...data);
     this.results.mergeWith(results);
     this.results.generalize();

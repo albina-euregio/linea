@@ -8,6 +8,25 @@ import {
   Temperature,
   Precipitation,
 } from "../data/units";
+import { ProviderIdentifierSchema } from "../data/provider";
+import { ParameterTypeSchema } from "../data/station-data";
+export { ParameterTypeSchema, type ParameterType } from "../data/station-data";
+export { UnitSchema, type Unit } from "../data/units";
+
+export const ListingParameterTypeSchema = z.enum([
+  ...ParameterTypeSchema.options,
+  "HSD_6",
+  "HSD_24",
+  "HSD_48",
+  "HSD_72",
+  "TA_MAX",
+  "TA_MIN",
+  "PSUM_6",
+  "PSUM_24",
+  "PSUM_48",
+  "PSUM_72",
+]);
+export type ListingParameterType = z.infer<typeof ListingParameterTypeSchema>;
 
 const number = z
   .number()
@@ -47,6 +66,7 @@ export const FeaturePropertiesSchema = z
       .nullish()
       .describe("For legacy PNG plots: name of plot which includes this station"),
 
+    dataProviderID: ProviderIdentifierSchema.nullish(),
     dataURLs: z
       .url()
       .array()
@@ -176,7 +196,7 @@ export const FeatureCollectionSchema = z
   .object({
     type: z.enum(["FeatureCollection"]),
     features: z.array(FeatureSchema),
-    properties: z.any(),
+    properties: z.any().nullish(),
   })
   .describe("A GeoJSON FeatureCollection of weather stations");
 

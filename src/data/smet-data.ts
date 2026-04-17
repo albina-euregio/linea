@@ -1,7 +1,6 @@
 import { fetchOrThrow } from "./fetchOrThrow";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
-import * as belluno from "./belluno-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 
@@ -37,15 +36,11 @@ export async function fetchSMET(url: string): Promise<StationData> {
   let response = await fetchOrThrow(url);
 
   if (url.startsWith(geosphere.URL)) {
-    const metadata0 = await fetchOrThrow(`${geosphere.URL}/metadata`);
-    const metadata = geosphere.MetadataSchema.parse(await metadata0.json());
-    const collection = geosphere.FeatureCollectionSchema.parse(await response.json());
-    return geosphere.parseGeosphereData(metadata, collection);
+    throw new Error();
   } else if (url.startsWith(slf.URL.STATION)) {
-    const metadata = await fetchOrThrow(slf.URL.STATIONS);
-    return slf.parseSLFAPIData(await metadata.json(), await response.json());
+    throw new Error();
   } else if (url.startsWith("https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/")) {
-    return belluno.parseBellunoData(await response.text());
+    throw new Error();
   }
 
   let stream = response.body;

@@ -22,9 +22,9 @@
     "./aws-stats": {
       "default": "./dist/aws-stats.mjs"
     },
-    "./fetch-listing": {
-      "default": "./dist/data/fetch-listing.mjs",
-      "types": "./dist/data/fetch-listing.d.ts"
+    "./providers": {
+      "default": "./dist/data/providers.mjs",
+      "types": "./dist/data/providers.d.ts"
     },
     "./listing": {
       "default": "./dist/schema/listing.mjs",

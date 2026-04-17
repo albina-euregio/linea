@@ -1,7 +1,8 @@
 import { expect, test, vi } from "vite-plus/test";
 import "temporal-polyfill/global";
-import { fetchAll } from "./fetch-listing";
+import { PROVIDERS } from "./providers";
 import * as belluno from "./belluno-data";
+import type { Feature } from "../schema/listing";
 
 /**
  * @vitest-environment jsdom
@@ -57,28 +58,46 @@ test("Belluno station listing", async () => {
 
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: URL | string) => {
-      if (url.toString() === belluno.URL) {
+    vi.fn((url: string) => {
+      if (url === belluno.URL) {
         return Promise.resolve(new Response(stationsXml));
       }
-      throw new Error(`Unsupported URL ${url.toString()}`);
+      throw new Error(`Unsupported URL ${url}`);
     }),
   );
 
-  const data = await fetchAll((c) => c.geojson === belluno.URL);
-  expect(data).toHaveLength(2);
-  expect(data[0].id).toBe("0047");
-  expect(data[1].id).toBe("0009");
-  expect(data).toMatchSnapshot();
+  const { features } = await PROVIDERS.filtered(
+    (c) => c instanceof belluno.BellunoDataProvider,
+  ).fetchStationListing();
+  expect(features).toHaveLength(2);
+  expect(features[0].id).toBe("0047");
+  expect(features[1].id).toBe("0009");
+  expect(features).toMatchSnapshot();
 });
 
-test("Belluno data parsing", () => {
+test("Belluno data parsing", async () => {
   const csv = `CODSTAZ;NOME;DATAORA;"Temperatura aria a 2m";"Umidità relativa a 2m";"Precipitazione";"Radiazione solare globale";"Velocità vento a 10m";"Direzione vento a 10m";"Pressione atmosferica ridotta a livello del mare";"Altezza neve"\n
 218;"Asiago - aeroporto";16/04/2026 11:30;15.8;67;0.0;538;2.3;80;1017.0;>>\n
 218;"Asiago - aeroporto";16/04/2026 11:00;15.4;67;0.0;830;2.2;52;1017.2;>>\n
 218;"Asiago - aeroporto";16/04/2026 10:30;15.0;69;0.0;724;1.1;160;1017.3;>>\n
 218;"Asiago - aeroporto";16/04/2026 10:00;14.2;67;0.0;536;1.1;72;1017.7;>>
 `;
-  const stationData = belluno.parseBellunoData(csv);
+
+  const url0 = "https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/218.csv";
+
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url: string) => {
+      if (url === url0) {
+        return Promise.resolve(new Response(csv));
+      }
+      throw new Error(`Unsupported URL ${url}`);
+    }),
+  );
+
+  const stationData = await new belluno.BellunoDataProvider().fetchStationData(
+    { properties: { dataURLs: [url0] } } as Feature,
+    0,
+  );
   expect(stationData).toMatchSnapshot();
 });

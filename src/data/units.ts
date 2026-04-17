@@ -1,3 +1,4 @@
+import z from "zod";
 import * as smet from "./smet-data";
 
 declare module "zod" {
@@ -6,26 +7,29 @@ declare module "zod" {
   }
 }
 
-export type Unit =
+export const UnitSchema = z.enum([
   // temperature
-  | "K"
-  | "℃"
+  "K",
+  "℃",
   // length
-  | "m"
-  | "cm"
-  | "mm"
+  "m",
+  "cm",
+  "mm",
   // 1
-  | "1"
-  | "%"
-  | "°"
+  "1",
+  "%",
+  "°",
   // speed
-  | "m/s"
-  | "km/h"
+  "m/s",
+  "km/h",
   // pressure
-  | "hPa"
-  | "Pa"
+  "hPa",
+  "Pa",
   // intensity (power per area)
-  | "W/m²";
+  "W/m²",
+]);
+
+export type Unit = z.infer<typeof UnitSchema>;
 
 class Quantity<U extends Unit> {
   constructor(

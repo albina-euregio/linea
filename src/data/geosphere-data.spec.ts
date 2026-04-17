@@ -1,16 +1,15 @@
 import { z } from "zod";
 import { describe, expect, test, vi } from "vite-plus/test";
 import * as geosphere from "./geosphere-data";
-import { fetchAll } from "./fetch-listing";
-import { fetchSMET } from "./smet-data";
+import { PROVIDERS } from "./providers";
 
 describe("geosphere", async () => {
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: URL) => {
+    vi.fn((url: string) => {
       let json;
 
-      if (url.toString().endsWith("/metadata")) {
+      if (url.endsWith("/metadata")) {
         json = {
           title: "TAWES",
           parameters: [],
@@ -38,7 +37,7 @@ describe("geosphere", async () => {
           ],
           id_type: "Synop",
         } satisfies z.input<typeof geosphere.MetadataSchema>;
-      } else if (url.toString().includes("station_ids=")) {
+      } else if (url.includes("station_ids=")) {
         json = {
           media_type: "application/json",
           type: "FeatureCollection",
@@ -120,14 +119,17 @@ describe("geosphere", async () => {
     }),
   );
 
+  const provider = PROVIDERS.filtered((p) => p.dataProviderID === "GEOSPHERE");
+
   test("parseGeosphereData", async () => {
-    const features = await fetchAll((c) => c.geojson.includes("dataset.api.hub.geosphere.at"));
-    const data = await fetchSMET(features[0].properties.dataURLs[0]);
+    const { features } = await provider.fetchStationListing();
+    const feature = features[0];
+    const data = await PROVIDERS.fetchStationData(feature, 0);
     expect(data).toMatchSnapshot();
   });
 
   test("parseGeosphereFeature", async () => {
-    const features = await fetchAll((c) => c.geojson.includes("dataset.api.hub.geosphere.at"));
+    const { features } = await provider.fetchStationListing();
     const feature = features[0];
     delete feature.properties.dataURLs;
     expect(feature).toMatchSnapshot();

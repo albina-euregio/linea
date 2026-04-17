@@ -4,7 +4,7 @@ exports[`geosphere > parseGeosphereData 1`] = `
 StationData {
   "altitude": 1464,
   "forecast": undefined,
-  "station": "SCHMIRN",
+  "station": "Schmirn",
   "timestamps": [
     1775557200000,
     1775557800000,
@@ -24,8 +24,8 @@ StationData {
     "HS": "cm",
     "P": "hPa",
     "RH": "%",
-    "TA": "°C",
-    "TD": "°C",
+    "TA": "℃",
+    "TD": "℃",
     "VW": "km/h",
     "VW_MAX": "km/h",
   },
@@ -181,6 +181,8 @@ exports[`geosphere > parseGeosphereFeature 1`] = `
     "TSS": undefined,
     "VW": undefined,
     "VW_MAX": undefined,
+    "dataProviderID": "GEOSPHERE",
+    "date": 2026-04-14T10:20:00.000Z,
     "name": "Schmirn",
     "operator": "GeoSphere Austria",
     "operatorLicense": "CC BY 4.0",

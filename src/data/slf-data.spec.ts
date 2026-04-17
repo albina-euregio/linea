@@ -1,13 +1,13 @@
 import { expect, test, vi } from "vite-plus/test";
-import { fetchAll } from "./fetch-listing";
+import { PROVIDERS } from "./providers";
 import * as slf from "./slf-data";
 
 test("SLF", async () => {
   vi.stubGlobal(
     "fetch",
-    vi.fn((url: URL) => {
+    vi.fn((url: string) => {
       let json = {};
-      switch (url.toString()) {
+      switch (url) {
         case slf.URL.STATIONS:
           json = [
             {
@@ -118,6 +118,8 @@ test("SLF", async () => {
     }),
   );
 
-  const data = await fetchAll((c) => c.geojson.includes("measurement-api.slf.ch"));
-  expect(data).toMatchSnapshot();
+  const { features } = await PROVIDERS.filtered(
+    (c) => c instanceof slf.SLFDataProvider,
+  ).fetchStationListing();
+  expect(features).toMatchSnapshot();
 });
