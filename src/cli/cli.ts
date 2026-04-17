@@ -22,7 +22,7 @@ async function main() {
     .replace(":", "-");
   const today = now.slice(0, "2006-01-02".length);
 
-  mkdir(today);
+  mkdir(today, { recursive: true });
   for (const output of ["linea.geojson", `${today}/${now}_linea.geojson`]) {
     console.info(`Writing ${collection.features.length} features to ${output}`);
     await writeFile(output, json, { encoding: "utf8" });
