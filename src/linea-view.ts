@@ -50,9 +50,13 @@ export abstract class LineaView {
     return this.charts;
   }
 
+  getDataURLsIndex(attribute: "src" | "lazysrc" | "wintersrc"): number {
+    return ["src", "lazysrc", "wintersrc"].indexOf(attribute);
+  }
+
   getDataURLs(attribute: "src" | "lazysrc" | "wintersrc"): (string | undefined)[] {
-    const index = ["src", "lazysrc", "wintersrc"].indexOf(attribute);
-    return this.#features.map((f) => f.properties.dataURLs[index]);
+    const dataURLsIndex = this.getDataURLsIndex(attribute);
+    return this.#features.map((f) => f.properties.dataURLs[dataURLsIndex]);
   }
 
   /**
@@ -62,13 +66,13 @@ export abstract class LineaView {
    * @param attribute the attribute from which to fetch the data (e.g. "src" or "wintersrc")
    */
   async fetchData(attribute: "src" | "lazysrc" | "wintersrc") {
-    const dataURLs = this.getDataURLs(attribute);
-    if (dataURLs.filter(Boolean).length == 0) {
+    const dataURLsIndex = this.getDataURLsIndex(attribute);
+    if (this.getDataURLs(attribute).filter(Boolean).length == 0) {
       throw "Empty src array!";
     }
 
     const results = new StationDataArray();
-    const data$ = this.#features.map((f, i) => PROVIDERS.fetchStationData(f, i));
+    const data$ = this.#features.map((f) => PROVIDERS.fetchStationData(f, dataURLsIndex));
     const data = await Promise.all(data$);
     results.push(...data);
     this.results.mergeWith(results);
