@@ -38,7 +38,7 @@ exports[`SLF 1`] = `
       "VW_MAX": undefined,
       "dataProviderID": "SLF",
       "dataURLs": [
-        "https://api.avalanche.report/measurement-api.slf.ch/public/api/imis/station/KES2/measurements?period_in_days=7",
+        "https://measurement-api.slf.ch/public/api/imis/station/KES2/measurements?period_in_days=7",
       ],
       "date": 2026-04-14T16:30:00.000Z,
       "microRegionID": "CH",
