@@ -182,6 +182,7 @@ exports[`geosphere > parseGeosphereFeature 1`] = `
     "VW": undefined,
     "VW_MAX": undefined,
     "dataProviderID": "GEOSPHERE",
+    "date": 2026-04-14T10:20:00.000Z,
     "name": "Schmirn",
     "operator": "GeoSphere Austria",
     "operatorLicense": "CC BY 4.0",

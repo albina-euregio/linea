@@ -74,8 +74,8 @@ export const MetadataSchema = z.object({
   type: z.string(),
   mode: z.string(),
   response_formats: z.string().array(),
-  start_time: z.string(),
-  end_time: z.string(),
+  start_time: z.coerce.date(),
+  end_time: z.coerce.date(),
   stations: StationSchema.array(),
   id_type: z.string(),
 });
@@ -154,6 +154,7 @@ export class GeoSphereDataProvider implements LineaDataProvider {
             coordinates: [s.lon, s.lat, s.altitude],
           },
           properties: {
+            date: metadata.end_time,
             name: s.name
               .toLocaleLowerCase("de")
               // capitalize "ACHENKIRCH CAMPINGPLATZ"
