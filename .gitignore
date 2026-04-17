@@ -6,4 +6,4 @@
 /node_modules
 /albina-euregio-linea*tgz
 .yarn/install-state.gz
-linea.geojson*
+*linea.geojson*
