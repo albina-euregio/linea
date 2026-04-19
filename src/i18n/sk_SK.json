@@ -37,6 +37,7 @@
   "linea:controls:value:winterview:station": "Stationview",
   "linea:controls:label:exportsettings": "Export Settings",
   "linea:controls:label:heightpercanvas": "Height per canvas",
+  "linea:controls:label:caption": "Caption",
   "linea:controls:label:width": "Width",
   "linea:controls:label:title": "Title",
   "linea:controls:label:exportchart": "Export Chart",
@@ -58,6 +59,8 @@
   "linea:controls:button:download": "Stiahnuť",
   "linea:controls:button:open": "Open",
   "linea:controls:label:selectdiagrams": "Select Diagrams to Export",
+  "linea:controls:label:showplottitles": "Show plot titles",
+  "linea:controls:label:datastalehint": "Settings changed\nClick update graphic",
   "linea:plotnames:temperature": "Temperatures",
   "linea:plotnames:wind": "Vietor",
   "linea:plotnames:precipitation": "Precipitation",
@@ -144,5 +147,6 @@
   "linea:measurement-dates:usage:keybinding": "Keybinding",
   "linea:measurement-dates:usage:keybinding:press": "Press",
   "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings",
-  "linea:measurement-dates:usage:exit": "Close Analyzer"
+  "linea:measurement-dates:usage:exit": "Close Analyzer",
+  "linea:forecast:arome": "AROME Forecast (GeoSphere Austria)"
 }

@@ -118,7 +118,7 @@
   "linea:yearly:avalancheproblemmicroregions:series:cornices": "Congères",
   "linea:yearly:avalancheproblemmicroregions:series:no_distinct_avalanche_problem": "No Distinct Avalanche Problem",
   "linea:yearly:avalancheproblemmicroregions:series:favourable_situation": "Favourable Situation",
-  "linea:wrapper:loading": "Loading data...",
+  "linea:wrapper:loading": "Chargement des données...",
   "linea:dangersourcevariants:title": "Danger Source Variants",
   "linea:dangersourcevariants:yaxis:frequencyvalue": "Frequency Value",
   "linea:dangersourcevariants:yaxis:avalanchesizevalue": "Avalanche Size Value",
