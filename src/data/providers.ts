@@ -62,7 +62,15 @@ export class MultiDataProvider implements LineaDataProvider {
   }
 
   async fetchStationListing(): Promise<FeatureCollection> {
-    const collections$ = this.providers.flatMap((c) => c.fetchStationListing());
+    const collections$ = this.providers.flatMap(async (c): Promise<FeatureCollection> => {
+      try {
+        console.log("Fetching station listing from " + c.dataProviderID);
+        return await c.fetchStationListing();
+      } catch (e) {
+        console.warn("Failed fetching station listing from " + c.dataProviderID, e);
+        return { type: "FeatureCollection", features: [] };
+      }
+    });
     const collections = await Promise.all(collections$);
     const features = collections.flatMap((f) => f.features);
     return { type: "FeatureCollection", features };
