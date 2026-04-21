@@ -3,6 +3,7 @@ import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider, ProviderIdentifier } from "./provider";
 export type { LineaDataProvider, ProviderIdentifier } from "./provider";
 import { fetchSMET } from "./smet-data";
+export { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
 import { SLFDataProvider } from "./slf-data";
 import { BellunoDataProvider } from "./belluno-data";
