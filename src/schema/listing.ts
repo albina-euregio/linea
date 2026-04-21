@@ -7,6 +7,7 @@ import {
   Speed,
   Temperature,
   Precipitation,
+  UnitSchema,
 } from "../data/units";
 import { ProviderIdentifierSchema } from "../data/provider";
 import { ParameterTypeSchema } from "../data/station-data";
@@ -34,7 +35,7 @@ const number = z
   .check(z.overwrite((v) => (v === -777 ? undefined : v)));
 
 export const StatisticsSchema = z.object({
-  unit: z.string().nullish(),
+  unit: UnitSchema.nullish(),
   count: number,
   min: number,
   average: number,
