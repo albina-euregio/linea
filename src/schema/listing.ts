@@ -33,6 +33,17 @@ const number = z
   .nullish()
   .check(z.overwrite((v) => (v === -777 ? undefined : v)));
 
+const StatisticsSchema = z.object({
+  unit: z.string().nullish(),
+  count: number,
+  min: number,
+  average: number,
+  median: number,
+  max: number,
+  sum: number,
+  delta: number,
+});
+
 export const FeaturePropertiesSchema = z
   .object({
     name: z.string().describe("Station name"),
@@ -74,6 +85,8 @@ export const FeaturePropertiesSchema = z
         "Data URLs for this station (typically SMET format is used, and three URLs are provided, short term, winter season, all winter seasons)",
       )
       .nullish(),
+
+    statistics: z.record(ParameterTypeSchema, StatisticsSchema).nullish(),
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
     ISWR: number
