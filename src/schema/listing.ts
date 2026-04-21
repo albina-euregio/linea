@@ -33,7 +33,7 @@ const number = z
   .nullish()
   .check(z.overwrite((v) => (v === -777 ? undefined : v)));
 
-const StatisticsSchema = z.object({
+export const StatisticsSchema = z.object({
   unit: z.string().nullish(),
   count: number,
   min: number,
@@ -86,7 +86,7 @@ export const FeaturePropertiesSchema = z
       )
       .nullish(),
 
-    statistics: z.record(ParameterTypeSchema, StatisticsSchema).nullish(),
+    statistics: z.partialRecord(ParameterTypeSchema, StatisticsSchema).nullish(),
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
     ISWR: number
@@ -213,5 +213,6 @@ export const FeatureCollectionSchema = z
   })
   .describe("A GeoJSON FeatureCollection of weather stations");
 
+export type Statistics = z.infer<typeof StatisticsSchema>;
 export type Feature = z.infer<typeof FeatureSchema>;
 export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;

@@ -38,6 +38,7 @@ export const ParameterTypeSchema = z.enum([
   /** HS Height Snow, in m */
   "HS",
   "NS",
+  "DrySnowfallLevel",
 ]);
 export type ParameterType = z.infer<typeof ParameterTypeSchema>;
 
