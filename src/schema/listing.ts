@@ -7,6 +7,7 @@ import {
   Speed,
   Temperature,
   Precipitation,
+  UnitSchema,
 } from "../data/units";
 import { ProviderIdentifierSchema } from "../data/provider";
 import { ParameterTypeSchema } from "../data/station-data";
@@ -32,6 +33,17 @@ const number = z
   .number()
   .nullish()
   .check(z.overwrite((v) => (v === -777 ? undefined : v)));
+
+export const StatisticsSchema = z.object({
+  unit: UnitSchema.nullish(),
+  count: number,
+  min: number,
+  average: number,
+  median: number,
+  max: number,
+  sum: number,
+  delta: number,
+});
 
 export const FeaturePropertiesSchema = z
   .object({
@@ -74,6 +86,8 @@ export const FeaturePropertiesSchema = z
         "Data URLs for this station (typically SMET format is used, and three URLs are provided, short term, winter season, all winter seasons)",
       )
       .nullish(),
+
+    statistics: z.partialRecord(ParameterTypeSchema, StatisticsSchema).nullish(),
 
     date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
     ISWR: number
@@ -200,5 +214,6 @@ export const FeatureCollectionSchema = z
   })
   .describe("A GeoJSON FeatureCollection of weather stations");
 
+export type Statistics = z.infer<typeof StatisticsSchema>;
 export type Feature = z.infer<typeof FeatureSchema>;
 export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
