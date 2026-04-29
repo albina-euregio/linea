@@ -152,7 +152,7 @@ export const CONFIGURED_PLOTS: {
       id: "aws-danger-rating-distribution",
       parameters: ["bulletins", "danger-rating-reference"],
       describtion:
-        "Counts all danger ratings of each bulletin of and shows the distribution as bar chart. So if there is an altitude dependend danger rating, it counts each seperate. It's NOT using only the highest danger rating.",
+        "Counts the maximum danger rating of each bulletin and shows the distribution as bar chart.",
       regions: "all",
       microRegionCountRange: [0, 0],
       supportsFilteringBy: "region",
