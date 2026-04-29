@@ -3,11 +3,13 @@ import type { Bulletin } from "../schema/caaml";
 import uPlot from "uplot";
 import { opts_danger_rating_altitude } from "./series-options/danger-rating-altitude-opts";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
+import { BulletinData } from "./datastore";
 
 interface DangerRatingAltitudePlotInformation extends PlotInformation {
   minX: number;
   maxX: number;
   maxY: number;
+  microRegionName: string;
 }
 
 export class DangerRatingAltitudeChart extends AbstractChart {
@@ -51,8 +53,11 @@ export class DangerRatingAltitudeChart extends AbstractChart {
       return;
     }
 
+    const bulletinData = new BulletinData(this.bulletins);
+    const filteredBulletins = bulletinData.filterForMicroRegions(this.filterMicroRegions).bulletins;
+
     const byDay = new Map<string, Bulletin>();
-    for (const bulletin of this.bulletins) {
+    for (const bulletin of filteredBulletins) {
       const dateSource = bulletin.validTime?.endTime;
       if (!dateSource) {
         continue;
@@ -121,6 +126,8 @@ export class DangerRatingAltitudeChart extends AbstractChart {
       minX: Math.min(...xValues),
       maxX: Math.max(...xValues) + 12 * 60 * 60 * 1000,
       maxY: Math.max(...layers.map((l) => l.upperBound)),
+      microRegionName:
+        bulletinData.regionIdToName(this.filterMicroRegions[0] ?? "") || "Unknown Region",
     } as DangerRatingAltitudePlotInformation;
     this.plotData(this.plotInformation as DangerRatingAltitudePlotInformation);
   }
@@ -128,6 +135,7 @@ export class DangerRatingAltitudeChart extends AbstractChart {
   plotData(plotInformation: DangerRatingAltitudePlotInformation): void {
     const optsWithRange: uPlot.Options = {
       ...opts_danger_rating_altitude,
+      title: `${opts_danger_rating_altitude.title} – ${plotInformation.microRegionName}`,
       scales: {
         x: { time: true, auto: false, range: [plotInformation.minX, plotInformation.maxX] },
         y: { auto: false, range: [0, plotInformation.maxY] },
