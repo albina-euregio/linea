@@ -17,7 +17,6 @@ export class DangerRatingDangerSourceVariantsChart extends AbstractChart {
   private dangerSourceVariants: DangerSourceVariant[] = [];
 
   async onConnected(): Promise<void> {
-    this.parseBulletins(this.getAttribute("bulletins"));
     this.dangerSourceVariants = this.parseDangerSourceVariants(
       this.getAttribute("danger-source-variants"),
     );
