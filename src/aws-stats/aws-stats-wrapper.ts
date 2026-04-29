@@ -209,6 +209,14 @@ export class AwsStats extends HTMLElement {
             chart.setAttribute("filter-micro-region", this.getAttribute("filter-micro-region")!);
           }
         }
+        if (this.hasAttribute("danger-rating-reference")) {
+          for (const chart of charts) {
+            chart.setAttribute(
+              "danger-rating-reference",
+              this.getAttribute("danger-rating-reference")!,
+            );
+          }
+        }
       })(),
     );
     await Promise.all(loadPromises);
