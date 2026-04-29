@@ -12,7 +12,7 @@ export const opts_stress: uPlot.Options = {
     drawAxes: [
       (u) => {
         var labely1 = `${i18n.message("linea:dangerrating:yaxis:dangerrating")}`;
-        var labely2 = `${i18n.message("linea:stress:yaxis:stress")}`;
+        var labely2 = `${i18n.message("linea:yearly:stresslevel:yaxis:stresslevel")}`;
         AwsStatsOptsHelper.UpdateAxisLabels(
           u,
           labely1,
