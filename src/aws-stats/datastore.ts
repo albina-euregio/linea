@@ -801,10 +801,10 @@ export class BulletinData {
     };
     this.bulletins.forEach((bulletin) => {
       if (bulletin.dangerRatings) {
-        bulletin.dangerRatings.forEach((r) => {
-          const ratingValue = conversion[r.mainValue?.toLowerCase() ?? ""] ?? 0;
-          distribution[ratingValue] = (distribution[ratingValue] ?? 0) + 1;
-        });
+        const maxRating = Math.max(
+          ...bulletin.dangerRatings.map((r) => conversion[r.mainValue?.toLowerCase()] ?? null),
+        );
+        distribution[maxRating] = (distribution[maxRating] ?? 0) + 1;
       }
     });
     return Object.entries(distribution).map(([rating, count]) => ({
