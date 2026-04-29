@@ -22,7 +22,7 @@ export class ProductsChart extends AbstractChart {
 
   async render() {
     const bulletinData = new BulletinData(this.bulletins);
-    const bulletins = bulletinData.filterRegionCode("all").bulletinsPerDay;
+    const bulletins = bulletinData.filterRegionCode(this.regionCode).bulletinsPerDay;
 
     const fieldTrainings = this.getAttribute("field-trainings")
       ? JSON.parse(this.getAttribute("field-trainings")!)
@@ -37,8 +37,10 @@ export class ProductsChart extends AbstractChart {
     const blogData: { timestamps: number[]; data: number[] }[] = [];
 
     for (const blog of blogs) {
-      const data = BlogService.getBlogsPerDay(blog);
-      blogData.push(data);
+      if (blog.regionCode === this.regionCode || this.regionCode === "all") {
+        const data = BlogService.getBlogsPerDay(blog);
+        blogData.push(data);
+      }
     }
 
     const { timestamps, seriesData } = Observations.mergeAndFillData([

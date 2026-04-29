@@ -10,9 +10,7 @@ export class DangerRatingMicroRegionsChart extends AbstractChart {
 
   async render(): Promise<void> {
     const bulletinData = new BulletinData(this.bulletins);
-    const distribution = bulletinData.affectedMicroRegionsPerDangerRatingPerDay(
-      this.getAttribute("region-code") ?? "all",
-    );
+    const distribution = bulletinData.affectedMicroRegionsPerDangerRatingPerDay(this.regionCode);
     this.plotInformation = {
       data: [
         distribution.timestamps,
