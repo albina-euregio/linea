@@ -38,7 +38,6 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
 
     const bulletinData = new BulletinData(this.bulletins);
     const avalancheProblems = bulletinData.affectedMicroRegionsPerAvalancheProblemPerDay();
-    console.log(avalancheProblems);
 
     const data: number[][] = [];
     const splits: number[] = [];
@@ -55,11 +54,6 @@ export class AvalancheProblemMicroRegionsChart extends AbstractChart {
       );
       splits.push(++counter);
       data.push(avalancheProblems.ratings[problemType]);
-    });
-    console.log("AvalancheProblemMicroRegionsChart - data prepared for plotting", {
-      splits,
-      values,
-      data,
     });
     const pi = {
       range: [0.5, splits[splits.length - 1] + 0.5],
