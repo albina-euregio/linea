@@ -1,19 +1,28 @@
 # LINEA
 
-This project features visualization of different data in context of avalanche warning, but can also used in other context. On the basis of [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) several graphic representations are implemented. The project divides into two submodules:
+LINEA provides web components for weather-station plots and avalanche-warning statistics. The visualization is done using the [uPlot](https://github.com/leeoniya/uPlot) library.
 
-1. Visualizations of meteorological data, such as automated weather stations. The visualization is defined by the [LAWIS](https://https://www.lawis.at/) work group.
-   The data has to be available as SMET file, see the [specification of the SMET format](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf).
+The project is split into two main modules:
 
-The package offers one complex web component to show:
+1. Weather station visualization (`linea.mjs`)
 
-- `<linea-plot src="...smet">` is rendering weather station data using [uPlot](https://github.com/leeoniya/uPlot), see **Usage** for its usage.
+- Main component: `<linea-plot>`
+- Data format: SMET ([specification](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf))
+- Integrates AROME forecasts from the Geosphere Austria
+- Visualize the mesured data and yearly overview
+- Support lazy loading of greater timespans
 
-2. Visualization of different statistics in context:
+2. Avalanche statistics visualization (`aws-stats.mjs`)
 
-- `<aws-observations smet="...smet" observations="...geojson">` is rendering counts of observations and avalanches with precipitation data from a weather station
-- `<aws-danger-rating bulletins="[...]">` is rendering the highest danger rating for different micro regions over a timespan
-- `<aws-danger-rating-altitude bulletins="[]">` is rendering the danger rating in dependency of the altitude as heatmap
+- Wrapper component: `<aws-stats-wrapper>`
+- Multiple chart components for observations, danger ratings, products, patterns, activity, stress level, and danger-source-variant analytics
+- `<aws-stats-wrapper>` fetches input data and mounts one or more `aws-*` chart components.
+
+3. Fetching of weather station listings (`cli.mjs`)
+
+![Screenshot_2026-04-15_at_18-36-08_linea](https://gitlab.com/-/project/70517866/uploads/8267516a09e03edc1a87b03f54749618/Screenshot_2026-04-15_at_18-36-08_linea.png)
+
+![Aws-stats](https://gitlab.com/-/project/70517866/uploads/d6c0330c9e2d61fdcb54ae2f7c3c3ade/grafik.png)
 
 ## Featuring
 
@@ -25,16 +34,17 @@ LINEA is featuring weather station visualization on:
 ## Usage: integrating weather stations in albina-website
 
 1. Provide a weather station listing in the GeoJSON format specified in https://albina-euregio.gitlab.io/linea/listing.schema.json (`src/schema/listing.ts`)
-2. For each weather station, provide two SMET files containing the data of the last ≈7 days, ≈6 months, respectively.
+2. For each weather station, provide SMET files for short-range and winter views (optionally also full-range data for lazy loading).
 
 Examples: https://static.avalanche.report/weather_stations/linea.geojson, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz
+
+![Test](https://gitlab.com/-/project/70517866/uploads/3602e37b19ce37112b0bfc2bd2e7d048/Weather_Stations_Avalanche.report.jpg)
 
 ## Usage: CLI
 
 ```sh
-> node dist/cli.mjs
-Writing 1302 features to linea.geojson
-> bun dist/cli.mjs
+> pnpm build:cli
+> node src/cli/dist/cli.mjs
 Writing 1302 features to linea.geojson
 ```
 
@@ -60,10 +70,25 @@ To interact with Transifex, install the official [transifex-client](https://gith
 
 ## Usage
 
-Install the @albina-euregio/linea package via https://gitlab.com/albina-euregio/linea/-/packages, or include the latest version via https://albina-euregio.gitlab.io/linea/linea.mjs
-`<script type="module" src="https://albina-euregio.gitlab.io/linea/linea.mjs"></script>`
-or for awsstats: https://albina-euregio.gitlab.io/linea/aws-stats.mjs
-`<script type="module" src="https://albina-euregio.gitlab.io/linea/aws-stats.mjs"></script>`
+Install `@albina-euregio/linea` from the GitLab package registry,
+or use the prebuilt browser bundles:
+
+- https://albina-euregio.gitlab.io/linea/linea.mjs
+- https://albina-euregio.gitlab.io/linea/aws-stats.mjs
+
+```html
+<script type="module" src="https://albina-euregio.gitlab.io/linea/linea.mjs"></script>
+<script type="module" src="https://albina-euregio.gitlab.io/linea/aws-stats.mjs"></script>
+```
+
+Package exports:
+
+- `@albina-euregio/linea`
+- `@albina-euregio/linea/linea`
+- `@albina-euregio/linea/aws-stats`
+- `@albina-euregio/linea/providers`
+- `@albina-euregio/linea/listing`
+- `@albina-euregio/linea/aws-stats-plot-config`
 
 ### `<linea-plot>`
 
@@ -83,7 +108,11 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
 - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
 - `showexport` - toggles if the export button is shown
 - `showinteractiveblogexport` - in combination with `showexport` it shows a button to export a wordpress shortcode, which can be used together with the `linea-plot-blog.php` plugin for Wordpress. See Export options for more details.
-- `forecast-latlon` - JSON-encoded array of strings in the format lat,lon, e.g. `'["47.180105,11.288011"]'`. Must lie in the bbox [ 42.96974998874999, 5.486749988749989, 51.83025001125035, 22.113250011249765 ] fro mthe geosphere AROME data
+- `forecast-latlon` {string} - forecast coordinates in `lat,lon` format.
+  Supported formats:
+  - single value, e.g. `"47.180105,11.288011"` (applies to all stations)
+  - JSON array, e.g. `'["47.180105,11.288011", "46.90,10.90"]'` (one per station)
+    Use `null` or empty entries in array mode to skip forecast for a station.
 
 If the data from `src` is not a subset from `lazysrc`, the inital view for the user is not changed after loading and replacing the data from `src` with data from `lazysrc` element. Available dates for the date picker are updated to timespan of data of `lazysrc` element. Clicking the previous/next week button for the first time lead to a zoom to the whole available timespan of the data of `lazysrc` element.
 
@@ -94,7 +123,14 @@ For png export it is possible to adjust the width, height and title of the plot.
 
 An exported `Embed Code (iframe)` is useable in a website. To use in wordpress, place a _individual HTML_ block in a _group_ block. The _group_ block aligns the iframe correctly centered.
 
-The export option `Embed Code (blog)` is useable in a wordpress blog, where the `linea-plot-blog.php` plugin is installed. Therefore, per default it should not be shown.
+The export option `Embed Code (blog)` is useable in a wordpress blog, where the `linea-plot-blog.php` plugin is installed. Therefore, per default it should not be shown. Also the embedding site needs to provide this `css` code:
+
+```css
+/* ── LINEA Blog export overlay ──────────────────────────────────── */
+[data-lineaplot-wrapper]:has(.linea-custom-element) > img {
+  display: none;
+}
+```
 
 #### Measurements
 
@@ -154,63 +190,69 @@ For yearly overviews, use the `<linea-plot>` component like this:
 
 ### aws-statistics
 
-Each visualization chart is doing it's own data aggregation, but not fetching. All charts have standardized attributes to receive data of one of the following types:
+Each chart handles its own aggregation and visualization.
+Data can be provided directly to a chart component via the `data` attribute, but must match the `PlotInformation` interface of each chart, or fetched and distributed by `<aws-stats-wrapper>`.
 
-- `weather` attribute requires a JSON encoded Result object which is found in `/data/smet-data` and features data from one station.
-- `bulletins` requires a JSON encoded [CAAML V6 JSON](http://caaml.org/Schemas/BulletinEAWS/v6.0/json/CAAMLv6_BulletinEAWS.json) array
-- `observations` requires the content of a `observations.geojson` as it is produced by the ALBINA Admin GUI
-- `dangersources` is not implemented due to lack of json format for now
+Common input attributes used by charts:
 
-#### Visualization
+- `weather` - JSON encoded station weather data
+- `bulletins` - JSON encoded [CAAML V6 JSON](http://caaml.org/Schemas/BulletinEAWS/v6.0/json/CAAMLv6_BulletinEAWS.json) array
+- `observations` - content of `observations.geojson`
+- `danger-source-variants` - JSON encoded danger source variant records
+- `filter-micro-region` - JSON encoded micro-region ID array
+- `region-code` - region selector used by micro-region charts
 
-##### `<aws-observations>`
+#### Implemented chart components
 
-Attributes:
+- `<aws-observations>`
+- `<aws-danger-rating>`
+- `<aws-danger-rating-altitude>`
+- `<aws-danger-rating-distribution>`
+- `<aws-avalanche-activity-index>`
+- `<aws-danger-rating-micro-regions>`
+- `<aws-danger-rating-micro-regions-bars>`
+- `<aws-products>`
+- `<aws-danger-pattern-micro-regions>`
+- `<aws-avalanche-problem-micro-regions>`
+- `<aws-danger-rating-danger-source-variants>`
+- `<aws-danger-source-variants-matrix-parameter-avalanche-size>`
+- `<aws-danger-source-variants-matrix-parameter-frequency>`
+- `<aws-danger-source-variants-matrix-parameter-stability>`
+- `<aws-stress-level>`
 
-- `observations`, required
-- `weather`, optional: data from a weather station containing a PSUM value
+#### `<aws-stats-wrapper>`
 
-Visualization:
-Observations are counted per day and shown as bar plot. They are filtered for avalanche observations and this is shown as a separate series too.
-If weather data with a PSUM value is present the precipitation is summed up for each day and shown as light background series to have a reference to precipitation events.
+Helper web component which does data fetching/forwarding and appends the requested chart elements.
 
-##### `<aws-danger-rating>`
+Supported attributes:
 
-Attributes:
+- `chart-type` (required): comma-separated chart tags to render
+- `observations`: URL to observations GeoJSON
+- `stationsrc`: URL to one SMET station source
+- `bulletins`: JSON string with bulletins
+- `danger-source-variants`: JSON string with danger source variants
+- `stress-level`: JSON string with stress-level records
+- `region-code`: region selector
+- `filter-micro-region`: JSON array of micro-region IDs
+- `start-date`: date boundary (`YYYY-MM-DD`)
+- `end-date`: date boundary (`YYYY-MM-DD`)
+- `virtual-trainings`, `field-trainings`, `blogs`: JSON strings used by products charts
 
-- `bulletins`, required
-- `bulletins-filter-micro-region`, optional: JSON encoded string array with micro region ids, e.g. `'["AT-07-14-01", "AT-07-01]'`
+Example:
 
-Visualization:
-Displayed is the highest danger rating of the latest bulletin from each day per day. If the filter micro regions are set, this is done separately for each micro region and plotted.
-
-##### `<aws-danger-rating-altitude>`
-
-Attributes:
-
-- `bulletins`, required: To make sense, this has to be an array of bulletins from one specific micro region
-
-Visualization:
-Displays the altitude dependency of the danger rating for each day.
-
-#### `<aws-stats-wrapper`>
-
-Helper web component which does data fetching and filtering. Supports the following attributes and converts them into the standardized attributes for the visualization.
-
-Attributes:
-`html
+```html
 <aws-stats-wrapper
-chart-type="aws-observations,aws-danger-rating,aws-danger-rating-altitude"
-observations="./observations.geojson"
-stationsrc="https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
-bulletin-start-date="2026-01-01"
-bulletin-end-date="2026-03-18"
-bulletin-filter-micro-region='["AT-07-14-01", "AT-07-01", "AT-07-27", "AT-07-14-02", "AT-07-15", "AT-07-17-01"]'
+  chart-type="aws-observations,aws-danger-rating,aws-danger-rating-altitude"
+  observations="./observations.geojson"
+  stationsrc="https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
+  bulletins="[<JSON-string array of JSON_V6 Caaml bulletins>]"
+  start-date="2026-01-01"
+  end-date="2026-03-18"
+  filter-micro-region='["AT-07-14-01", "AT-07-01", "AT-07-27", "AT-07-14-02", "AT-07-15", "AT-07-17-01"]'
+></aws-stats-wrapper>
+```
 
-> </aws-stats-wrapper>
-> `
-
-The charts in `chart-type` are appended after data fetching into the wrapper component. The other ones are self-explanatory.
+The chart tags listed in `chart-type` are appended after data has been loaded and mapped to chart attributes.
 
 ## Installing the Wordpress plugin
 
