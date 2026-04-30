@@ -118,6 +118,7 @@
   "linea:yearly:avalancheproblemmicroregions:series:cornices": "Cornises",
   "linea:yearly:avalancheproblemmicroregions:series:no_distinct_avalanche_problem": "No Distinct Avalanche Problem",
   "linea:yearly:avalancheproblemmicroregions:series:favourable_situation": "Favourable Situation",
+  "linea:yearly:stresslevel:yaxis:stresslevel": "Nivell d'estrès",
   "linea:wrapper:loading": "Loading data...",
   "linea:dangersourcevariants:title": "Danger Source Variants",
   "linea:dangersourcevariants:yaxis:frequencyvalue": "Frequency Value",

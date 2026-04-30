@@ -118,6 +118,7 @@
   "linea:yearly:avalancheproblemmicroregions:series:cornices": "Wechten",
   "linea:yearly:avalancheproblemmicroregions:series:no_distinct_avalanche_problem": " Kein ausgeprägtes Lawinenproblem",
   "linea:yearly:avalancheproblemmicroregions:series:favourable_situation": "Günstige Situation",
+  "linea:yearly:stresslevel:yaxis:stresslevel": "Stresslevel",
   "linea:wrapper:loading": "Daten werden geladen...",
   "linea:dangersourcevariants:title": "Varianten der Gefahrenquellen",
   "linea:dangersourcevariants:yaxis:frequencyvalue": "Häufigkeit",
