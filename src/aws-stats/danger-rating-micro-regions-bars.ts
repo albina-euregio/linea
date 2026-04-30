@@ -20,9 +20,7 @@ export class DangerRatingMicroRegionsBarsChart extends AbstractChart {
     }
 
     const bulletinData = new BulletinData(this.bulletins);
-    const distribution = bulletinData.affectedMicroRegionsPerDangerRatingPerDay(
-      this.getAttribute("region-code") ?? "all",
-    );
+    const distribution = bulletinData.affectedMicroRegionsPerDangerRatingPerDay(this.regionCode);
 
     const dataSeries: number[][] = [distribution.timestamps];
     for (let i = 1; i <= 5; i++) {

@@ -133,7 +133,7 @@ function drawValuesToBars(
   const textArea = ctx.measureText(label);
 
   ctx.fillStyle = "#838383ce";
-  const padding: [top: number, right: number, left: number, bottom: number] = [3, 2, 2, 2];
+  const padding: [top: number, right: number, left: number, bottom: number] = [5, 2, 2, 1];
   ctx.fillRect(
     left + width / 2 - textArea.actualBoundingBoxLeft - padding[2],
     top - textArea.ideographicBaseline + padding[3],

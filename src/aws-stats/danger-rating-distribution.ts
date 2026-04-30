@@ -16,9 +16,7 @@ export class DangerRatingDistributionChart extends AbstractChart {
 
   async render(): Promise<void> {
     const bulletinData = new BulletinData(this.bulletins);
-    const distribution = bulletinData.filterRegionCode(
-      this.getAttribute("regionCode") ?? "all",
-    ).dangerRatingDistribution;
+    const distribution = bulletinData.filterRegionCode(this.regionCode).dangerRatingDistribution;
 
     const indexByRating: Record<string, number> = {
       low: 0,

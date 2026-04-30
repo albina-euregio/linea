@@ -8,7 +8,11 @@ export default defineConfig({
     inconsistentCjsInterop: true,
   },
   pack: {
-    entry: ["src/data/providers.ts", "src/schema/listing.ts"],
+    entry: [
+      "src/data/providers.ts",
+      "src/schema/listing.ts",
+      "src/aws-stats/aws-stats-plot-config.ts",
+    ],
     clean: false,
     dts: true,
     sourcemap: true,

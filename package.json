@@ -26,6 +26,10 @@
     "./listing": {
       "default": "./dist/schema/listing.mjs",
       "types": "./dist/schema/listing.d.ts"
+    },
+    "./aws-stats-plot-config": {
+      "default": "./dist/aws-stats/aws-stats-plot-config.mjs",
+      "types": "./dist/aws-stats/aws-stats-plot-config.d.ts"
     }
   },
   "scripts": {

@@ -21,6 +21,7 @@ export abstract class AbstractChart extends HTMLElement {
   public plotInformation: PlotInformation;
 
   protected filterMicroRegions: string[] = [];
+  protected regionCode: string = "all";
 
   constructor() {
     super();
@@ -34,6 +35,9 @@ export abstract class AbstractChart extends HTMLElement {
   connectedCallback() {
     if (this.hasAttribute("filter-micro-region")) {
       this.filterMicroRegions = JSON.parse(this.getAttribute("filter-micro-region")) as string[];
+    }
+    if (this.hasAttribute("region-code")) {
+      this.regionCode = this.getAttribute("region-code")!;
     }
     this.onConnected()
       .then(() => {

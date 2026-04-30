@@ -1,3 +1,4 @@
+import type { StressLevelData } from "../schema/stress-level";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
 import { BulletinData, Observations, StressService } from "./datastore";
 import { COLORS } from "./series-options/colorizer";
@@ -24,7 +25,7 @@ export class StressLevelChart extends AbstractChart {
     "Landau",
   ];
 
-  private stressData: StressData = {};
+  private stressData: StressLevelData = {};
 
   async onConnected(): Promise<void> {
     this.parseBulletins(this.getAttribute("bulletins"));
