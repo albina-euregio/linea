@@ -58,5 +58,5 @@
   "peerDependencies": {
     "zod": "^4.3.0"
   },
-  "packageManager": "pnpm@11.0.0-rc.5"
+  "packageManager": "pnpm@11.5.0"
 }
