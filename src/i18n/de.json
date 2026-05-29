@@ -139,7 +139,7 @@
   "linea:dangersourcevariants:frequency:many": "Viele",
   "linea:measurement-dates:timerange": "Zeitbereich",
   "linea:measurement-dates:median": "Median",
-  "linea:measurement-dates:mean": "Mittel Anfang/Ende",
+  "linea:measurement-dates:mean": "Mittelwert",
   "linea:measurement-dates:delta": "Gesamtdifferenz",
   "linea:measurement-dates:integral": "Integral",
   "linea:measurement-dates:min": "Minimum",
