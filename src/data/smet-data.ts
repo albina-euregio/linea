@@ -46,6 +46,7 @@ export async function fetchSMET(url: string): Promise<StationData> {
   let stream = response.body;
   if (
     response.headers.get("Content-Encoding") === "gzip" ||
+    response.headers.get("Content-Type") === "application/gzip" ||
     response.headers.get("Content-Type") === "application/x-gzip"
   ) {
     stream = stream.pipeThrough(new DecompressionStream("gzip"));
