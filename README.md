@@ -34,7 +34,10 @@ LINEA is featuring weather station visualization on:
 ## Usage: integrating weather stations in albina-website
 
 1. Provide a weather station listing in the GeoJSON format specified in https://albina-euregio.gitlab.io/linea/listing.schema.json (`src/schema/listing.ts`)
-2. For each weather station, provide SMET files for short-range and winter views (optionally also full-range data for lazy loading).
+2. For each weather station, provide the following SMET files
+   - last week for short-range view
+   - last half year for winter view (for lazy loading)
+   - full-range data as daily average (for winter statistics): the timestamp 1991-12-31T23:00:00Z (1992-01-01T00:00:00+01:00) shall contain all measured values of the calendar day 1992-01-01, i.e., 1992-01-01T00:00:00+01:00..1992-01-02T23:59:59+01:00
 
 Examples: https://static.avalanche.report/weather_stations/linea.geojson, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz
 
