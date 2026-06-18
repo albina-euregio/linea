@@ -55,7 +55,7 @@ class I18n {
   }
 
   timezone(): string {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Vienna";
   }
 }
 
