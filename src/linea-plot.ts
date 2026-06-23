@@ -1,4 +1,3 @@
-import "temporal-polyfill/global";
 import { i18n } from "./i18n";
 import type { LineaExportModal } from "./linea-plot/linea-export-modal";
 import { AirDatepicker, localizeDatePicker, cssAirDatepicker } from "./datepicker";
