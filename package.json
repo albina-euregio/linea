@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "air-datepicker": "^3.6.0",
-    "temporal-polyfill": "^0.3.0",
+    "temporal-polyfill": "^1.0.1",
     "uplot": "^1.6.32"
   },
   "devDependencies": {
