@@ -94,7 +94,12 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   const timestamps = [] as number[];
   let dataIndex = 0;
 
-  for await (const line0 of lines) {
+  const reader = lines.getReader();
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    const line0 = value;
+
     function parseHeader(prefix: string) {
       let line = line0;
       if (!line.startsWith(prefix)) return "";
