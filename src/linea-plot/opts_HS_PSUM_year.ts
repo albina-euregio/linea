@@ -2,8 +2,8 @@ import uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
-import type { SplitOptions } from "../shared/opts-helper.ts";
-import type { ParameterType } from "../data/station-data.ts";
+import type { SplitOptions } from "../shared/opts-helper";
+import type { ParameterType } from "../data/station-data";
 
 /**
  * uPlot options for snow-height/year [cm]

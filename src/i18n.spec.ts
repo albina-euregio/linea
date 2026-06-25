@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vite-plus/test";
 
-import { i18n } from "./i18n.ts";
+import { i18n } from "./i18n";
 
 const documentElement = { lang: "en" };
 

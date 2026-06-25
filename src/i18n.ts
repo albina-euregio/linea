@@ -1,8 +1,8 @@
 /// <reference types="vite-plus/client" />
 
 import messagesEN from "./i18n/en.json";
-import type { Unit } from "./data/units.ts";
-import type { AnalyzerIntegratedUnit, AnalyzerUnit } from "./shared/measurement-dates.ts";
+import type { Unit } from "./data/units";
+import type { AnalyzerIntegratedUnit, AnalyzerUnit } from "./shared/measurement-dates";
 const messages = import.meta.glob("./i18n/*.json", {
   import: "default",
   eager: true,
