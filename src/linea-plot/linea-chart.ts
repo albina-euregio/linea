@@ -4,7 +4,8 @@ import * as opts_VW_VWG_DW from "./opts_VW_VWG_DW";
 import * as opts_HS_PSUM from "./opts_HS_PSUM";
 import * as opts_RH_GR from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
-import type { ForecastValues, StationData, Values } from "../data/station-data";
+import { StationData } from "../data/station-data";
+import type { ForecastValues, Values } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { TouchZoom } from "../shared/touch-zoom";
@@ -94,7 +95,7 @@ export class LineaChart extends AbstractLineaChart {
                 ? this.#calculateDewPointSeries(values.TA, values.RH)
                 : undefined),
             values.TSS,
-            this.#generateSurfaceHoarData(timestamps, values.TD, values.TSS),
+            StationData.generateSurfaceHoarData(timestamps, values.TD, values.TSS),
             values.TA,
           ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
         );
@@ -200,7 +201,7 @@ export class LineaChart extends AbstractLineaChart {
       if (this.result.values.TSS) {
         this.addSeries(p, opts_TA_TD_TSS.TSS.series, this.result.values.TSS);
         if (this.showSurfaceHoarSeries) {
-          const surfacehoar = this.#generateSurfaceHoarData(
+          const surfacehoar = StationData.generateSurfaceHoarData(
             this.result.timestamps,
             this.result.values.TD,
             this.result.values.TSS,
@@ -242,46 +243,6 @@ export class LineaChart extends AbstractLineaChart {
     let density = Math.ceil(values.length / 7500);
     let out = values.map((o, i) => (i % density == 0 ? o : null));
     return out;
-  }
-
-  /**
-   * Uses the objects data to calculate the surface hoar series data.
-   * Filters for surface hoar potential which is longer than 1 hour
-   *
-   * @returns The surface hoar data for the charts data
-   */
-  #generateSurfaceHoarData(
-    timestamps: number[],
-    TD: (number | null)[],
-    TSS: (number | null)[],
-  ): number[] {
-    const result: number[] = [];
-    const len = TD.length;
-
-    let i = 0;
-    while (i < len) {
-      if (TD[i] < 0 && TSS[i] < TD[i]) {
-        const startIdx = i;
-        let endIdx = i;
-
-        while (endIdx + 1 < len && TD[endIdx + 1] < 0 && TSS[endIdx + 1] < TD[endIdx + 1]) {
-          endIdx++;
-        }
-
-        const duration = timestamps[endIdx] - timestamps[startIdx];
-        const mark = duration >= 3600_000 ? 1000 : -100;
-
-        for (let j = startIdx; j <= endIdx; j++) {
-          result[j] = mark;
-        }
-
-        i = endIdx + 1;
-      } else {
-        result[i] = -100;
-        i++;
-      }
-    }
-    return result;
   }
 
   /**
