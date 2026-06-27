@@ -123,16 +123,16 @@ export class StationData {
   }
 
   /**
-   * Calculates the surface hoar series data from the given timestamps and
-   * temperature series. Filters for surface hoar potential which is longer than 1 hour.
+   * Calculates the surface hoar series data from this station's dew point and
+   * snow surface temperature series. Filters for surface hoar potential which is
+   * longer than 1 hour.
    *
    * @returns The surface hoar data for the charts data
    */
-  static generateSurfaceHoarData(
-    timestamps: number[],
-    TD: (number | null)[],
-    TSS: (number | null)[],
-  ): number[] {
+  generateSurfaceHoarData(): number[] {
+    const timestamps = this.timestamps;
+    const TD = this.values.TD ?? [];
+    const TSS = this.values.TSS ?? [];
     const result: number[] = [];
     const len = TD.length;
 

@@ -4,8 +4,7 @@ import * as opts_VW_VWG_DW from "./opts_VW_VWG_DW";
 import * as opts_HS_PSUM from "./opts_HS_PSUM";
 import * as opts_RH_GR from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
-import { StationData } from "../data/station-data";
-import type { ForecastValues, Values } from "../data/station-data";
+import type { StationData } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { TouchZoom } from "../shared/touch-zoom";
@@ -35,7 +34,8 @@ export class LineaChart extends AbstractLineaChart {
     this.createPlots().catch((e) => console.error(e));
   }
 
-  setData(timestamps: number[], values: Values, forecast?: ForecastValues) {
+  setData(data: StationData) {
+    const { timestamps, values, forecast } = data;
     let i = 0;
     const forecastValues = forecast?.values;
 
@@ -95,7 +95,7 @@ export class LineaChart extends AbstractLineaChart {
                 ? this.#calculateDewPointSeries(values.TA, values.RH)
                 : undefined),
             values.TSS,
-            StationData.generateSurfaceHoarData(timestamps, values.TD, values.TSS),
+            data.generateSurfaceHoarData(),
             values.TA,
           ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
         );
@@ -201,11 +201,7 @@ export class LineaChart extends AbstractLineaChart {
       if (this.result.values.TSS) {
         this.addSeries(p, opts_TA_TD_TSS.TSS.series, this.result.values.TSS);
         if (this.showSurfaceHoarSeries) {
-          const surfacehoar = StationData.generateSurfaceHoarData(
-            this.result.timestamps,
-            this.result.values.TD,
-            this.result.values.TSS,
-          );
+          const surfacehoar = this.result.generateSurfaceHoarData();
           this.addSeries(p, opts_TA_TD_TSS.SurfaceHoar.series, surfacehoar);
         }
       } else {

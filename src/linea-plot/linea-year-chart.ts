@@ -6,7 +6,7 @@ import * as opts_NS_year from "./opts_NS_year";
 import * as opts_datapoints_year from "./opts_datapoints_year";
 import { YearData } from "../data/year-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
-import type { ForecastValues, StationData, Values } from "../data/station-data";
+import type { StationData } from "../data/station-data";
 import { TouchZoom } from "../shared/touch-zoom";
 import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 
@@ -54,10 +54,11 @@ export class LineaYearChart extends AbstractLineaChart {
   updateStartEndDate(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime) {
     this.startDate = startDate.toPlainDate();
     this.endDate = endDate.toPlainDate();
-    this.setData(this.result.timestamps, this.result.values);
+    this.setData(this.result);
   }
 
-  setData(timestamps: number[], values: Values, _forecast?: ForecastValues) {
+  setData(data: StationData) {
+    const { timestamps, values } = data;
     this.result.timestamps = timestamps;
     this.result.values = values;
     let i = 0;
