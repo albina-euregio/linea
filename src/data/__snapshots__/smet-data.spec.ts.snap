@@ -49,6 +49,8 @@ StationData {
 }
 `;
 
+exports[`parse AT-02 (2025-12-09) 2`] = `[]`;
+
 exports[`parse AT-02 (assume tz = 0: UTC) 1`] = `
 StationData {
   "altitude": 2317,
@@ -90,6 +92,8 @@ StationData {
 }
 `;
 
+exports[`parse AT-02 (assume tz = 0: UTC) 2`] = `[]`;
+
 exports[`parse AT-02 (with tz = 1: UTC+1) 1`] = `
 StationData {
   "altitude": 2317,
@@ -130,6 +134,8 @@ StationData {
   },
 }
 `;
+
+exports[`parse AT-02 (with tz = 1: UTC+1) 2`] = `[]`;
 
 exports[`parse AT-07 1`] = `
 StationData {
@@ -219,4 +225,13 @@ StationData {
     "timestamp": [],
   },
 }
+`;
+
+exports[`parse AT-07 2`] = `
+[
+  -100,
+  -100,
+  -100,
+  -100,
+]
 `;
