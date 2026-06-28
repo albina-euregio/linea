@@ -38,6 +38,7 @@ export const ParameterTypeSchema = z.enum([
   /** HS Height Snow, in m */
   "HS",
   "NS",
+  "SurfaceHoar",
   "DrySnowfallLevel",
 ]);
 export type ParameterType = z.infer<typeof ParameterTypeSchema>;
@@ -130,19 +131,22 @@ export class StationData {
    * @returns The surface hoar data for the charts data
    */
   generateSurfaceHoarData(): number[] {
+    if (this.values.SurfaceHoar) {
+      return this.values.SurfaceHoar;
+    }
+    this.values.SurfaceHoar = [];
+
     const timestamps = this.timestamps;
     const TD = this.values.TD ?? [];
     const TSS = this.values.TSS ?? [];
-    const result: number[] = [];
-    const len = TD.length;
 
     let i = 0;
-    while (i < len) {
+    while (i < TD.length) {
       if (TD[i] < 0 && TSS[i] < TD[i]) {
         const startIdx = i;
         let endIdx = i;
 
-        while (endIdx + 1 < len && TD[endIdx + 1] < 0 && TSS[endIdx + 1] < TD[endIdx + 1]) {
+        while (endIdx + 1 < TD.length && TD[endIdx + 1] < 0 && TSS[endIdx + 1] < TD[endIdx + 1]) {
           endIdx++;
         }
 
@@ -150,16 +154,16 @@ export class StationData {
         const mark = duration >= 3600_000 ? 1000 : -100;
 
         for (let j = startIdx; j <= endIdx; j++) {
-          result[j] = mark;
+          this.values.SurfaceHoar[j] = mark;
         }
 
         i = endIdx + 1;
       } else {
-        result[i] = -100;
+        this.values.SurfaceHoar[i] = -100;
         i++;
       }
     }
-    return result;
+    return this.values.SurfaceHoar;
   }
 }
 
