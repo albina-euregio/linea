@@ -64,8 +64,8 @@ export const opts_TEMP_year: uPlot.Options = {
 
   scales: {
     x: timeScale,
-    y: TA.scale!,
-    y2: TSS.scale!,
+    [TA.axis.scale]: TA.scale!,
+    [TSS.axis.scale]: TSS.scale!,
   },
 
   axes: [timeAxis, TA.axis, TSS.axis],

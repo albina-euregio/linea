@@ -62,8 +62,8 @@ export const opts_RH_GR: uPlot.Options = {
 
   scales: {
     x: timeScale,
-    y: RH.scale!,
-    y2: ISWR.scale!,
+    [RH.axis.scale]: RH.scale!,
+    [ISWR.axis.scale]: ISWR.scale!,
   },
   axes: [timeAxis, RH.axis, ISWR.axis],
 

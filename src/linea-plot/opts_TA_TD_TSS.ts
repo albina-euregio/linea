@@ -87,8 +87,8 @@ export const opts_TA_TD_TSS: uPlot.Options = {
 
   scales: {
     x: timeScale,
-    y: TA.scale!,
-    yhidden: SurfaceHoar.scale!,
+    [TA.axis.scale]: TA.scale!,
+    [SurfaceHoar.axis.scale]: SurfaceHoar.scale!,
   },
 
   axes: [timeAxis, TA.axis, TD.axis, SurfaceHoar.axis],

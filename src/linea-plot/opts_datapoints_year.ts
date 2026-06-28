@@ -64,7 +64,7 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
 
   scales: {
     x: timeScale,
-    y: DATAPOINTS.scale!,
+    [DATAPOINTS.axis.scale]: DATAPOINTS.scale!,
   },
 
   axes: [timeAxis, DATAPOINTS.axis],

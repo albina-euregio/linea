@@ -46,7 +46,7 @@ export const opts_NS_year: uPlot.Options = {
 
   scales: {
     x: timeScale,
-    y: NS.scale!,
+    [NS.axis.scale]: NS.scale!,
   },
 
   axes: [timeAxis, NS.axis],

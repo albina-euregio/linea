@@ -86,8 +86,8 @@ export const opts_HS_year: uPlot.Options = {
 
   scales: {
     x: timeScale,
-    y: HS.scale!,
-    y2: PSUM.scale!,
+    [HS.axis.scale]: HS.scale!,
+    [PSUM.axis.scale]: PSUM.scale!,
   },
 
   axes: [timeAxis, HS.axis, PSUM.axis],

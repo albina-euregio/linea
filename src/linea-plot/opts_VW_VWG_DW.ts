@@ -107,8 +107,8 @@ export const opts_VW_VWG_DW: uPlot.Options = {
   },
   scales: {
     x: timeScale,
-    y: VW.scale!,
-    y2: DW.scale!,
+    [VW.axis.scale]: VW.scale!,
+    [DW.axis.scale]: DW.scale!,
   },
   axes: [timeAxis, VW.axis, DW.axis],
   series: [
