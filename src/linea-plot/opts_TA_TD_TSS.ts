@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import { timeAxis, timeScale } from "./opts_time_axis";
+import { time } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
@@ -115,17 +115,12 @@ export const opts_TA_TD_TSS: uPlot.Options = {
   },
 
   scales: {
-    x: timeScale,
+    x: time.scale!,
     [TA.axis.scale]: TA.scale!,
     [SurfaceHoar.axis.scale]: SurfaceHoar.scale!,
   },
 
-  axes: [timeAxis, TA.axis, TD.axis, SurfaceHoar.axis],
+  axes: [time.axis!, TA.axis, TD.axis, SurfaceHoar.axis],
 
-  series: [
-    {
-      label: i18n.message("linea:unit:time"),
-      value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
-    },
-  ],
+  series: [time.series!],
 };

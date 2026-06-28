@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import { timeAxis, timeScale } from "./opts_time_axis";
+import { time } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
@@ -81,16 +81,11 @@ export const opts_HS_PSUM: uPlot.Options = {
   },
 
   scales: {
-    x: timeScale,
+    x: time.scale!,
     [HS.axis.scale]: HS.scale!,
     [PSUM.axis.scale]: PSUM.scale!,
   },
-  axes: [timeAxis, HS.axis, PSUM.axis],
+  axes: [time.axis!, HS.axis, PSUM.axis],
 
-  series: [
-    {
-      label: i18n.message("linea:unit:time"),
-      value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
-    },
-  ],
+  series: [time.series!],
 };

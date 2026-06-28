@@ -1,5 +1,5 @@
 import uPlot from "uplot";
-import { timeAxis, timeScale } from "./opts_time_axis";
+import { time } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
@@ -45,18 +45,13 @@ export const opts_NS_year: uPlot.Options = {
   },
 
   scales: {
-    x: timeScale,
+    x: time.scale!,
     [NS.axis.scale]: NS.scale!,
   },
 
-  axes: [timeAxis, NS.axis],
+  axes: [time.axis!, NS.axis],
 
-  series: [
-    {
-      label: i18n.message("linea:unit:time"),
-      value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
-    },
-  ],
+  series: [time.series!],
 };
 
 export const opts_NS_year_snow_cover: uPlot.Series = {

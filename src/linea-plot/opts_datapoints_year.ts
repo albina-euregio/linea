@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import { timeAxis, timeScale } from "./opts_time_axis";
+import { time } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
@@ -63,16 +63,11 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
   },
 
   scales: {
-    x: timeScale,
+    x: time.scale!,
     [DATAPOINTS.axis.scale]: DATAPOINTS.scale!,
   },
 
-  axes: [timeAxis, DATAPOINTS.axis],
+  axes: [time.axis!, DATAPOINTS.axis],
 
-  series: [
-    {
-      label: i18n.message("linea:unit:time"),
-      value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
-    },
-  ],
+  series: [time.series!],
 };
