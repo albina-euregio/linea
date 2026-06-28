@@ -2,6 +2,7 @@ import uPlot from "uplot";
 import { OptsHelper } from "../shared/opts-helper";
 import { cursorOpts } from "../shared/cursor-opts";
 import { i18n } from "../i18n";
+import type { LineaChartParameter } from "./linea-chart-parameter";
 
 // Create a single sync instance for all charts
 const syncCursor = uPlot.sync("weather-charts");
@@ -25,6 +26,23 @@ export class LineaOptsHelper extends OptsHelper {
       leftFillStyle,
       rightFillStyle,
       false,
+    );
+  }
+
+  /** Draw the top axis labels for a two-parameter chart (left and right). */
+  static UpdateAxisLabelsForParameters(
+    u: uPlot,
+    left: LineaChartParameter,
+    right: LineaChartParameter,
+  ): CanvasRenderingContext2D {
+    return this.UpdateAxisLabels(
+      u,
+      left.label ?? "",
+      right.label ?? "",
+      u.bbox.left,
+      u.bbox.width,
+      left.labelColor ?? "#000",
+      right.labelColor ?? "#000",
     );
   }
 
