@@ -39,6 +39,12 @@ export const ParameterTypeSchema = z.enum([
   "HS",
   "NS",
   "SurfaceHoar",
+  /**
+   * DrySnowfallLevel Dry snowfall level (DSL), in m: the elevation above which
+   * 100% of the precipitation falls as dry snow, i.e. the elevation above which
+   * there is no relevant moisture entry into the snowpack and hence no
+   * melt-freeze crusts will develop from this specific precipitation event.
+   */
   "DrySnowfallLevel",
 ]);
 export type ParameterType = z.infer<typeof ParameterTypeSchema>;
@@ -164,6 +170,51 @@ export class StationData {
       }
     }
     return this.values.SurfaceHoar;
+  }
+
+  /**
+   * Calculates the dry snowfall level series for this station from its air
+   * temperature and relative humidity series. For each timestamp the wet-bulb
+   * temperature is derived from air temperature and relative humidity, and the
+   * dry snowfall level (in m) is the altitude at which the wet-bulb temperature
+   * crosses the rain/snow threshold, anchored at the station altitude.
+   *
+   * @param tpsyThreshold The wet-bulb temperature threshold (°C) separating
+   * rain from snow (precipitation is assumed to be snow below it). Default: 0.3
+   * @returns The dry snowfall level data for the charts data
+   */
+  generateDrySnowfallLevelData(tpsyThreshold = 0.3): number[] {
+    if (this.values.DrySnowfallLevel) {
+      return this.values.DrySnowfallLevel;
+    }
+
+    this.values.DrySnowfallLevel = this.timestamps.map((_, i) => {
+      const ta = this.values.TA?.[i];
+      const rh = this.values.RH?.[i];
+      if (ta == null || rh == null || !isFinite(ta) || !isFinite(rh)) {
+        return null;
+      }
+      const tpsy = calculateWetBulb(ta, rh);
+      return Math.round((tpsy - tpsyThreshold) / 0.006 + this.altitude);
+    });
+
+    /**
+     * Calculates the wet-bulb temperature from air temperature and relative humidity.
+     *
+     * @param ta Air temperature in °C
+     * @param rh Relative humidity in %
+     * @returns Wet-bulb temperature in °C
+     */
+    function calculateWetBulb(ta: number, rh: number): number {
+      return (
+        -5.806 +
+        0.672 * ta -
+        0.006 * ta ** 2 +
+        (0.061 + 0.004 * ta + 0.000099 * ta ** 2) * rh +
+        (-0.000033 - 0.000005 * ta - 0.0000001 * ta ** 2) * rh ** 2
+      );
+    }
+    return this.values.DrySnowfallLevel;
   }
 }
 
