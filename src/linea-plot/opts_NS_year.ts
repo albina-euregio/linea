@@ -2,49 +2,54 @@ import uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
-import type { SplitOptions } from "../shared/opts-helper.ts";
+import { LineaChartParameter } from "./linea-chart-parameter";
+
+const NS = new LineaChartParameter({
+  label: `${i18n.message("linea:parameter:newsnow")} (cm)`,
+  labelColor: "#DE2D26",
+  scale: { range: [0, 70] },
+  axis: {
+    scale: "y",
+    stroke: "#DE2D26",
+    splits: LineaChartParameter.splits("y", {
+      mins: [0],
+      maxs: [70],
+      splits: [[0, 20, 40, 60]],
+      splitcount: 9,
+    }),
+  },
+  series: {
+    label: i18n.message("linea:parameter:newsnow"),
+    paths: uPlot.paths.bars(),
+    points: { show: false },
+    stroke: "#DE2D26",
+    fill: "#DE2D26",
+    scale: "y",
+    value: (_u, v) =>
+      v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "cm"),
+  },
+});
 
 /**
  * uPlot options for new snow/year [cm]
  */
-
 export const opts_NS_year: uPlot.Options = {
   ...LineaOptsHelper.getLineaOptions(),
   padding: [20, 52, 0, -10],
   hooks: {
     drawAxes: [
       (u) => {
-        var labely1 = `${i18n.message("linea:parameter:newsnow")} (cm)`;
-        LineaOptsHelper.UpdateAxisLabels(u, labely1, "", u.bbox.left, u.bbox.width, "#DE2D26", "");
+        LineaOptsHelper.UpdateAxisLabelsForParameters(u, NS);
       },
     ],
   },
 
   scales: {
     x: timeScale,
-    y: {
-      range: (_u, _dataMin, _dataMax) => {
-        return [0, 70];
-      },
-    },
+    y: NS.scale!,
   },
 
-  axes: [
-    timeAxis,
-    {
-      scale: "y",
-      stroke: "#DE2D26",
-      splits: (u) => {
-        return LineaOptsHelper.getSplits({
-          uplot: u,
-          mins: [0],
-          maxs: [70],
-          splits: [[0, 20, 40, 60]],
-          splitcount: 9,
-        } as SplitOptions);
-      },
-    },
-  ],
+  axes: [timeAxis, NS.axis],
 
   series: [
     {
@@ -54,16 +59,7 @@ export const opts_NS_year: uPlot.Options = {
   ],
 };
 
-export const opts_NS_year_series: uPlot.Series = {
-  label: i18n.message("linea:parameter:newsnow"),
-  paths: uPlot.paths.bars(),
-  points: { show: false },
-  stroke: "#DE2D26",
-  fill: "#DE2D26",
-  scale: "y",
-  value: (_u, v) =>
-    v == null || Number.isNaN(v) ? "-" : i18n.number(Math.round(v * 10) / 10, {}, "cm"),
-};
+export const opts_NS_year_series = NS.series!;
 
 export const opts_NS_year_snow_cover: uPlot.Series = {
   label: i18n.message("linea:parameter:snowcover"),

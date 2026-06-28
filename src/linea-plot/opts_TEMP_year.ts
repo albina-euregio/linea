@@ -1,30 +1,58 @@
-import uPlot from "uplot";
 import { timeAxis, timeScale } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
-import type { SplitOptions } from "../shared/opts-helper.ts";
+import { LineaChartParameter } from "./linea-chart-parameter";
 import type { ParameterType } from "../data/station-data.ts";
+
+const TA = new LineaChartParameter({
+  label: `${i18n.message("linea:parameter:TA")} (℃)`,
+  labelColor: "#DE2D26",
+  scale: { range: (_u, _dataMin, dataMax) => (dataMax > 20 ? [-30, 30] : [-30, 20]) },
+  axis: {
+    scale: "y",
+    stroke: "#DE2D26",
+    splits: LineaChartParameter.splits("y", {
+      mins: [-30, -30],
+      maxs: [10, 30],
+      splits: [
+        [-30, -20, -10, 0, 10],
+        [-30, -20, -10, 0, 10, 20, 30],
+      ],
+      splitcount: 9,
+    }),
+  },
+});
+
+const TSS = new LineaChartParameter({
+  label: `${i18n.message("linea:parameter:TSS")} (℃)`,
+  labelColor: "#FC9272",
+  scale: { range: (_u, _dataMin, dataMax) => (dataMax > 20 ? [-30, 30] : [-30, 20]) },
+  axis: {
+    scale: "y2",
+    stroke: "#FC9272",
+    side: 1,
+    splits: LineaChartParameter.splits("y2", {
+      mins: [-30, -30],
+      maxs: [10, 30],
+      splits: [
+        [-30, -20, -10, 0, 10],
+        [-30, -20, -10, 0, 10, 20, 30],
+      ],
+      splitcount: 9,
+    }),
+    grid: { show: false },
+  },
+});
 
 /**
  * uPlot options for temperature/year [cm]
  */
-
 export const opts_TEMP_year: uPlot.Options = {
   ...LineaOptsHelper.getLineaOptions(),
   hooks: {
     drawAxes: [
       (u) => {
-        var labely1 = `${i18n.message("linea:parameter:TA")} (℃)`;
-        var labely2 = `${i18n.message("linea:parameter:TSS")} (℃)`;
-        LineaOptsHelper.UpdateAxisLabels(
-          u,
-          labely1,
-          labely2,
-          u.bbox.left,
-          u.bbox.width,
-          "#DE2D26",
-          "#FC9272",
-        );
+        LineaOptsHelper.UpdateAxisLabelsForParameters(u, TA, TSS);
       },
     ],
     setSelect: [
@@ -36,60 +64,11 @@ export const opts_TEMP_year: uPlot.Options = {
 
   scales: {
     x: timeScale,
-    y: {
-      range: (_u, _dataMin, dataMax) => {
-        return dataMax > 20 ? [-30, 30] : [-30, 20];
-      },
-    },
-    y2: {
-      range: (_u, _dataMin, dataMax) => {
-        return dataMax > 20 ? [-30, 30] : [-30, 20];
-      },
-    },
+    y: TA.scale!,
+    y2: TSS.scale!,
   },
 
-  axes: [
-    timeAxis,
-    {
-      scale: "y",
-      stroke: "#DE2D26",
-      splits: (u) => {
-        return LineaOptsHelper.getSplits({
-          uplot: u,
-          mins: [-30, -30],
-          maxs: [10, 30],
-          splits: [
-            [-30, -20, -10, 0, 10],
-            [-30, -20, -10, 0, 10, 20, 30],
-          ],
-          splitcount: 9,
-        } as SplitOptions);
-      },
-    },
-    {
-      scale: "y2",
-      stroke: "#FC9272",
-      side: 1,
-      splits: (u) => {
-        return LineaOptsHelper.getSplits(
-          {
-            uplot: u,
-            mins: [-30, -30],
-            maxs: [10, 30],
-            splits: [
-              [-30, -20, -10, 0, 10],
-              [-30, -20, -10, 0, 10, 20, 30],
-            ],
-            splitcount: 9,
-          } as SplitOptions,
-          "y2",
-        );
-      },
-      grid: {
-        show: false,
-      },
-    },
-  ],
+  axes: [timeAxis, TA.axis, TSS.axis],
 
   series: [
     {

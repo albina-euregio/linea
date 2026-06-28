@@ -9,7 +9,7 @@ export type LineaSplitSpec = Omit<SplitOptions, "uplot">;
  * its axis (incl. tick `values` formatting) and its series (incl. point
  * `value` formatting). Reuses uPlot's own types verbatim — no new vocabulary.
  *
- * The scale name is taken from `axis.scale` (which must equal `series.scale`).
+ * The scale name is taken from `axis.scale` (which must equal `series?.scale`).
  * The adaptive {@link splits} helper lives here so the `opts_*` modules no
  * longer reach into `LineaOptsHelper` for it. Chart-level helpers
  * (getLineaOptions, the drawAxes labels/forecast/reference-line, setSelect
@@ -21,8 +21,11 @@ export class LineaChartParameter {
   scale?: uPlot.Scale;
   /** the y-axis: `stroke`, `side`, `grid`, `splits`, tick `values`. */
   axis!: uPlot.Axis;
-  /** the data series: `label`, `stroke`, `width`, `fill`, point `value`. */
-  series!: uPlot.Series;
+  /**
+   * the primary data series: `label`, `stroke`, `width`, `fill`, point `value`.
+   * Optional: a mirror axis or a multi-series scale may carry no single series.
+   */
+  series?: uPlot.Series;
   /** optional dashed forecast twin of `series`. */
   forecast?: uPlot.Series;
   /** axis label drawn at the top of the chart, incl. unit, e.g. `"HS (cm)"`. */

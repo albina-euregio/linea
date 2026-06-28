@@ -29,20 +29,20 @@ export class LineaOptsHelper extends OptsHelper {
     );
   }
 
-  /** Draw the top axis labels for a two-parameter chart (left and right). */
+  /** Draw the top axis labels for a chart; `right` is optional for single-axis charts. */
   static UpdateAxisLabelsForParameters(
     u: uPlot,
     left: LineaChartParameter,
-    right: LineaChartParameter,
+    right?: LineaChartParameter,
   ): CanvasRenderingContext2D {
     return this.UpdateAxisLabels(
       u,
       left.label ?? "",
-      right.label ?? "",
+      right?.label ?? "",
       u.bbox.left,
       u.bbox.width,
       left.labelColor ?? "#000",
-      right.labelColor ?? "#000",
+      right?.labelColor ?? "",
     );
   }
 
