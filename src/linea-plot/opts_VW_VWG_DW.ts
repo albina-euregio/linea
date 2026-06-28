@@ -4,7 +4,7 @@ import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
 
-const VW = new LineaChartParameter({
+export const VW = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:VW")} (km∕h)`,
   labelColor: "#00E2B6",
   scale: {
@@ -44,7 +44,7 @@ const VW = new LineaChartParameter({
 });
 VW.forecast = { ...VW.series, label: "Forecast", dash: [8, 6] };
 
-const DW = new LineaChartParameter({
+export const DW = new LineaChartParameter({
   label: i18n.message("linea:parameter:DW"),
   labelColor: "#084D40",
   scale: { range: [0, 360] },
@@ -118,12 +118,6 @@ export const opts_VW_VWG_DW: uPlot.Options = {
     },
   ],
 };
-
-export const opts_VW = VW.series!;
-export const opts_VW_FORECAST = VW.forecast;
-
-export const opts_DW = DW.series!;
-export const opts_DW_FORECAST = DW.forecast;
 
 export const opts_VW_MAX: uPlot.Series = {
   label: i18n.message("linea:parameter:VW_MAX"),

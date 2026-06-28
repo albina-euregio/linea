@@ -42,7 +42,7 @@ const TD = new LineaChartParameter({
   },
 });
 
-const SurfaceHoar = new LineaChartParameter({
+export const SurfaceHoar = new LineaChartParameter({
   scale: { range: [0, 1] },
   axis: { scale: "yhidden", show: false },
   series: {
@@ -118,5 +118,3 @@ export const opts_TA_FORECAST = createSeries("linea:parameter:TA", "#DE2D26", tr
 export const opts_TD_FORECAST = createSeries("linea:parameter:TD", "#6aafd5", true);
 opts_TA_FORECAST.label = "Forecast";
 opts_TD_FORECAST.label = "Forecast";
-
-export const opts_SurfaceHoar = SurfaceHoar.series!;

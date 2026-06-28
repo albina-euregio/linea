@@ -4,7 +4,7 @@ import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
 
-const NS = new LineaChartParameter({
+export const NS = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:newsnow")} (cm)`,
   labelColor: "#DE2D26",
   scale: { range: [0, 70] },
@@ -58,8 +58,6 @@ export const opts_NS_year: uPlot.Options = {
     },
   ],
 };
-
-export const opts_NS_year_series = NS.series!;
 
 export const opts_NS_year_snow_cover: uPlot.Series = {
   label: i18n.message("linea:parameter:snowcover"),

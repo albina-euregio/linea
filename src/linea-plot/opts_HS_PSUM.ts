@@ -4,7 +4,7 @@ import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
 
-const HS = new LineaChartParameter({
+export const HS = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:HS")} (cm)`,
   labelColor: "#08519C",
   scale: { range: (_u, _dataMin, dataMax) => (dataMax > 200 ? [0, 400] : [0, 200]) },
@@ -31,7 +31,7 @@ const HS = new LineaChartParameter({
 });
 HS.forecast = { ...HS.series, label: "Forecast", dash: [8, 6] };
 
-const PSUM = new LineaChartParameter({
+export const PSUM = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:PSUM")} (mm)`,
   labelColor: "#6aafd5",
   scale: { range: (_u, _dataMin, dataMax) => (dataMax > 60 ? [0, 120] : [0, 60]) },
@@ -94,9 +94,3 @@ export const opts_HS_PSUM: uPlot.Options = {
     },
   ],
 };
-
-export const opts_HS = HS.series;
-export const opts_HS_FORECAST = HS.forecast;
-
-export const opts_PSUM = PSUM.series;
-export const opts_PSUM_FORECAST = PSUM.forecast;

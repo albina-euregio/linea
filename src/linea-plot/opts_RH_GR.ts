@@ -4,7 +4,7 @@ import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
 
-const RH = new LineaChartParameter({
+export const RH = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:RH")} (%)`,
   labelColor: "#8a7474",
   scale: { range: [0, 100] },
@@ -24,7 +24,7 @@ const RH = new LineaChartParameter({
 });
 RH.forecast = { ...RH.series, label: "Forecast", dash: [8, 6] };
 
-const ISWR = new LineaChartParameter({
+export const ISWR = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:ISWR")} (W/m²)`,
   labelColor: "#DE2D26",
   scale: { range: [0, 1200] },
@@ -74,9 +74,3 @@ export const opts_RH_GR: uPlot.Options = {
     },
   ],
 };
-
-export const opts_RH = RH.series;
-export const opts_ISWR = ISWR.series;
-
-export const opts_RH_FORECAST = RH.forecast;
-export const opts_ISWR_FORECAST = ISWR.forecast;

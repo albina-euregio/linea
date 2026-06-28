@@ -4,7 +4,7 @@ import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
 
-const DATAPOINTS = new LineaChartParameter({
+export const DATAPOINTS = new LineaChartParameter({
   label: i18n.message("linea:parameter:DATAPOINTS:amount"),
   labelColor: "#00ff55ff",
   scale: {
@@ -76,5 +76,3 @@ export const opts_DATAPOINTS_year: uPlot.Options = {
     },
   ],
 };
-
-export const opts_DATAPOINTS_amount_year = DATAPOINTS.series!;

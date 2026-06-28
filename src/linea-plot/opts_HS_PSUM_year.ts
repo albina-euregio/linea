@@ -35,7 +35,7 @@ const HS = new LineaChartParameter({
   },
 });
 
-const PSUM = new LineaChartParameter({
+export const PSUM = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:PSUM")} (mm)`,
   labelColor: "#6aafd5",
   scale: { range: (_u, _dataMin, dataMax) => (dataMax > 100 ? [0, 150] : [0, 100]) },
@@ -126,5 +126,3 @@ export const opts_HS_year_min = baseHsSeries("HS_min", "#d9dcdc");
 export const opts_HS_year_max = baseHsSeries("HS_max", "#d9dcdc");
 export const opts_HS_year_median = baseHsSeries("HS_median", "#878787");
 export const opts_HS_year_current = baseHsSeries("HS", "#08519C");
-
-export const opts_HS_year_PSUM = PSUM.series!;

@@ -1,25 +1,9 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
-import {
-  opts_HS_year_current,
-  opts_HS_year_max,
-  opts_HS_year_median,
-  opts_HS_year_min,
-  opts_HS_year_PSUM,
-  opts_HS_year,
-} from "./opts_HS_PSUM_year";
-import {
-  opts_TEMP_year,
-  opts_DEW_year_current,
-  opts_TEMP_year_current,
-  opts_TEMP_year_max,
-  opts_TEMP_year_median,
-  opts_TEMP_year_min,
-} from "./opts_TEMP_year";
-
-import { opts_NS_year, opts_NS_year_series, opts_NS_year_snow_cover } from "./opts_NS_year";
-
-import { opts_DATAPOINTS_year, opts_DATAPOINTS_amount_year } from "./opts_datapoints_year";
+import * as opts_HS_PSUM_year from "./opts_HS_PSUM_year";
+import * as opts_TEMP_year from "./opts_TEMP_year";
+import * as opts_NS_year from "./opts_NS_year";
+import * as opts_datapoints_year from "./opts_datapoints_year";
 import { YearData } from "../data/year-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import type { ForecastValues, StationData, Values } from "../data/station-data";
@@ -198,17 +182,17 @@ export class LineaYearChart extends AbstractLineaChart {
       );
       const p = new uPlot(
         this.withFreshPlugins({
-          ...opts_HS_year,
+          ...opts_HS_PSUM_year.opts_HS_year,
           ...this.getStationTitle(),
         }),
         [yearDataHS.timestamps],
         plot_HS_year,
       );
       this.drawedTitle = true;
-      this.addSeries(p, opts_HS_year_min, yearDataHS.minValues);
-      this.addSeries(p, opts_HS_year_max, yearDataHS.maxValues);
-      this.addSeries(p, opts_HS_year_median, yearDataHS.medianValues);
-      this.addSeries(p, opts_HS_year_current, yearDataHS.values);
+      this.addSeries(p, opts_HS_PSUM_year.opts_HS_year_min, yearDataHS.minValues);
+      this.addSeries(p, opts_HS_PSUM_year.opts_HS_year_max, yearDataHS.maxValues);
+      this.addSeries(p, opts_HS_PSUM_year.opts_HS_year_median, yearDataHS.medianValues);
+      this.addSeries(p, opts_HS_PSUM_year.opts_HS_year_current, yearDataHS.values);
       if (values.PSUM) {
         const yearDataPSUM = YearData.from(
           timeZone,
@@ -217,21 +201,21 @@ export class LineaYearChart extends AbstractLineaChart {
           timestamps,
           values.PSUM.map((v) => (v == 0 ? null : v)),
         );
-        this.addSeries(p, opts_HS_year_PSUM, yearDataPSUM.values);
+        this.addSeries(p, opts_HS_PSUM_year.PSUM.series, yearDataPSUM.values);
       }
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
 
       const pDatapoints = new uPlot(
         this.withFreshPlugins({
-          ...opts_DATAPOINTS_year,
+          ...opts_datapoints_year.opts_DATAPOINTS_year,
           ...this.getStationTitle(),
         }),
         [yearDataHS.timestamps],
         plot_DATAPOINTS_year,
       );
       this.drawedTitle = true;
-      this.addSeries(pDatapoints, opts_DATAPOINTS_amount_year, yearDataHS.amount);
+      this.addSeries(pDatapoints, opts_datapoints_year.DATAPOINTS.series, yearDataHS.amount);
       this.modifyDrawHook(pDatapoints, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:datapoints"));
     }
@@ -246,7 +230,7 @@ export class LineaYearChart extends AbstractLineaChart {
       );
       let pNewSnow = new uPlot(
         this.withFreshPlugins({
-          ...opts_NS_year,
+          ...opts_NS_year.opts_NS_year,
           ...this.getStationTitle(),
         }),
         [yearDataNS.timestamps],
@@ -263,13 +247,13 @@ export class LineaYearChart extends AbstractLineaChart {
         );
         this.addSeries(
           pNewSnow,
-          opts_NS_year_snow_cover,
+          opts_NS_year.opts_NS_year_snow_cover,
           yearDataHS.values.map((v) => (v && v > 0 ? 1000 : -1000)),
         );
       }
       this.addSeries(
         pNewSnow,
-        opts_NS_year_series,
+        opts_NS_year.NS.series,
         yearDataNS.values.map((v) => (v == 0 ? null : v)),
       );
       this.modifyDrawHook(pNewSnow, this.backgroundColor);
@@ -286,17 +270,17 @@ export class LineaYearChart extends AbstractLineaChart {
       );
       const pTemp = new uPlot(
         this.withFreshPlugins({
-          ...opts_TEMP_year,
+          ...opts_TEMP_year.opts_TEMP_year,
           ...this.getStationTitle(),
         }),
         [yearDataTA.timestamps],
         plot_TEMP_year,
       );
       this.drawedTitle = true;
-      this.addSeries(pTemp, opts_TEMP_year_min, yearDataTA.minValues);
-      this.addSeries(pTemp, opts_TEMP_year_max, yearDataTA.maxValues);
-      this.addSeries(pTemp, opts_TEMP_year_median, yearDataTA.medianValues);
-      this.addSeries(pTemp, opts_TEMP_year_current, yearDataTA.values);
+      this.addSeries(pTemp, opts_TEMP_year.opts_TEMP_year_min, yearDataTA.minValues);
+      this.addSeries(pTemp, opts_TEMP_year.opts_TEMP_year_max, yearDataTA.maxValues);
+      this.addSeries(pTemp, opts_TEMP_year.opts_TEMP_year_median, yearDataTA.medianValues);
+      this.addSeries(pTemp, opts_TEMP_year.opts_TEMP_year_current, yearDataTA.values);
       if (values.TSS) {
         const yearDataTSS = YearData.from(
           timeZone,
@@ -305,7 +289,7 @@ export class LineaYearChart extends AbstractLineaChart {
           timestamps,
           values.TSS,
         );
-        this.addSeries(pTemp, opts_DEW_year_current, yearDataTSS.values);
+        this.addSeries(pTemp, opts_TEMP_year.opts_DEW_year_current, yearDataTSS.values);
       }
       this.modifyDrawHook(pTemp, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
