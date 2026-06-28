@@ -194,11 +194,11 @@ export class LineaChart extends AbstractLineaChart {
 
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
-      this.addSeries(p, opts_TA_TD_TSS.opts_TD, TD);
+      this.addSeries(p, opts_TA_TD_TSS.TD.series, TD);
 
       // show snow surface temperature and therefore surface hoar only if available
       if (this.result.values.TSS) {
-        this.addSeries(p, opts_TA_TD_TSS.opts_TSS, this.result.values.TSS);
+        this.addSeries(p, opts_TA_TD_TSS.TSS.series, this.result.values.TSS);
         if (this.showSurfaceHoarSeries) {
           const surfacehoar = this.#generateSurfaceHoarData(
             this.result.timestamps,
@@ -208,9 +208,9 @@ export class LineaChart extends AbstractLineaChart {
           this.addSeries(p, opts_TA_TD_TSS.SurfaceHoar.series, surfacehoar);
         }
       } else {
-        this.addSeries(p, opts_TA_TD_TSS.opts_TSS, []);
+        this.addSeries(p, opts_TA_TD_TSS.TSS.series, []);
       }
-      this.addSeries(p, opts_TA_TD_TSS.opts_TA, this.result.values.TA);
+      this.addSeries(p, opts_TA_TD_TSS.TA.series, this.result.values.TA);
       // Forecast series will be added after forecast data is loaded
     }
 
@@ -454,10 +454,10 @@ export class LineaChart extends AbstractLineaChart {
         this.result.forecast.values.RH,
       );
       if (forecastTd) {
-        this.addSeries(plot, opts_TA_TD_TSS.opts_TD_FORECAST, forecastTd);
+        this.addSeries(plot, opts_TA_TD_TSS.TD.forecast, forecastTd);
       }
       if (this.result.forecast.values.TA) {
-        this.addSeries(plot, opts_TA_TD_TSS.opts_TA_FORECAST, this.result.forecast.values.TA);
+        this.addSeries(plot, opts_TA_TD_TSS.TA.forecast, this.result.forecast.values.TA);
       }
       plotIdx += 1;
     }

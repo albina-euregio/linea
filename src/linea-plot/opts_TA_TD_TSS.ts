@@ -15,7 +15,7 @@ const TEMP_SPLITS = LineaChartParameter.splits("y", {
 });
 
 // Left and right axis share the same "y" scale; the right one only mirrors it.
-const TA = new LineaChartParameter({
+export const TA = new LineaChartParameter({
   label: `${i18n.message("linea:unit:temperature")} (℃)`,
   labelColor: "#DE2D26",
   scale: { range: (_u, _dataMin, dataMax) => (dataMax > 10 ? [-30, 30] : [-30, 10]) },
@@ -27,9 +27,18 @@ const TA = new LineaChartParameter({
     splits: TEMP_SPLITS,
     values: (_u, vals) => vals.map((v) => v.toString()),
   },
+  series: {
+    label: i18n.message("linea:parameter:TA"),
+    stroke: "#DE2D26",
+    scale: "y",
+    width: 1.5,
+    spanGaps: false,
+    value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
+  },
 });
+TA.forecast = { ...TA.series, label: "Forecast", dash: [8, 6] };
 
-const TD = new LineaChartParameter({
+export const TD = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:TD")} (℃)`,
   labelColor: "#6aafd5",
   axis: {
@@ -40,7 +49,27 @@ const TD = new LineaChartParameter({
     splits: TEMP_SPLITS,
     values: (_u, vals) => vals.map((v) => v.toString()),
   },
+  series: {
+    label: i18n.message("linea:parameter:TD"),
+    stroke: "#6aafd5",
+    scale: "y",
+    width: 1.5,
+    spanGaps: false,
+    value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
+  },
 });
+TD.forecast = { ...TD.series, label: "Forecast", dash: [8, 6] };
+
+export const TSS: { series: uPlot.Series } = {
+  series: {
+    label: i18n.message("linea:parameter:TSS"),
+    stroke: "#FC9272",
+    scale: "y",
+    width: 1.5,
+    spanGaps: false,
+    value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
+  },
+};
 
 export const SurfaceHoar = new LineaChartParameter({
   scale: { range: [0, 1] },
@@ -100,21 +129,3 @@ export const opts_TA_TD_TSS: uPlot.Options = {
     },
   ],
 };
-
-const createSeries = (labelKey: any, color: string, dashed = false): uPlot.Series => ({
-  label: i18n.message(labelKey),
-  stroke: color,
-  scale: "y",
-  width: 1.5,
-  dash: dashed ? [8, 6] : undefined,
-  spanGaps: false,
-  value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
-});
-
-export const opts_TA = createSeries("linea:parameter:TA", "#DE2D26");
-export const opts_TD = createSeries("linea:parameter:TD", "#6aafd5");
-export const opts_TSS = createSeries("linea:parameter:TSS", "#FC9272");
-export const opts_TA_FORECAST = createSeries("linea:parameter:TA", "#DE2D26", true);
-export const opts_TD_FORECAST = createSeries("linea:parameter:TD", "#6aafd5", true);
-opts_TA_FORECAST.label = "Forecast";
-opts_TD_FORECAST.label = "Forecast";
