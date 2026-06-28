@@ -1,6 +1,12 @@
 import { expect, test, vi } from "vite-plus/test";
 import { fetchSMET } from "./smet-data";
 
+// Round numbers to 3 decimals in snapshots to avoid noisy floating-point artifacts.
+expect.addSnapshotSerializer({
+  test: (val) => typeof val === "number" && Number.isFinite(val) && !Number.isInteger(val),
+  serialize: (val) => String(Math.round(val * 1000) / 1000),
+});
+
 function mockFetch(text: string): string {
   vi.stubGlobal(
     "fetch",
