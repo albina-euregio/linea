@@ -121,6 +121,46 @@ export class StationData {
       filteredForecast,
     );
   }
+
+  /**
+   * Calculates the surface hoar series data from this station's dew point and
+   * snow surface temperature series. Filters for surface hoar potential which is
+   * longer than 1 hour.
+   *
+   * @returns The surface hoar data for the charts data
+   */
+  generateSurfaceHoarData(): number[] {
+    const timestamps = this.timestamps;
+    const TD = this.values.TD ?? [];
+    const TSS = this.values.TSS ?? [];
+    const result: number[] = [];
+    const len = TD.length;
+
+    let i = 0;
+    while (i < len) {
+      if (TD[i] < 0 && TSS[i] < TD[i]) {
+        const startIdx = i;
+        let endIdx = i;
+
+        while (endIdx + 1 < len && TD[endIdx + 1] < 0 && TSS[endIdx + 1] < TD[endIdx + 1]) {
+          endIdx++;
+        }
+
+        const duration = timestamps[endIdx] - timestamps[startIdx];
+        const mark = duration >= 3600_000 ? 1000 : -100;
+
+        for (let j = startIdx; j <= endIdx; j++) {
+          result[j] = mark;
+        }
+
+        i = endIdx + 1;
+      } else {
+        result[i] = -100;
+        i++;
+      }
+    }
+    return result;
+  }
 }
 
 export class StationDataArray extends Array<StationData> {
