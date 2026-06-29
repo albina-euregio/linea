@@ -207,6 +207,7 @@ fields = timestamp ISWR HS RH TA PSUM TD TSS VW VW_MAX DW
   const data = await fetchSMET(url);
   expect(data).toMatchSnapshot();
   expect(data.generateSurfaceHoarData()).toMatchSnapshot();
+  expect(data.generateDrySnowfallLevelData()).toMatchSnapshot();
 });
 
 test("parse AT-02 (with tz = 1: UTC+1)", async () => {

@@ -38,6 +38,18 @@ export const ParameterTypeSchema = z.enum([
   /** HS Height Snow, in m */
   "HS",
   "NS",
+  "SurfaceHoar",
+  /**
+   * DrySnowfallLevel Dry snowfall level (DSL), in m: the elevation above which
+   * 100% of the precipitation falls as dry snow, i.e. the elevation above which
+   * there is no relevant moisture entry into the snowpack and hence no
+   * melt-freeze crusts will develop from this specific precipitation event.
+   *
+   * @see Hofmann, Lehnert, Mitterer (2024): Automated dry-snowfall level
+   * calculation for improved assessment of melt-freeze crusts and associated
+   * faceted weak layers. Proceedings ISSW 2024, Tromsø.
+   * https://arc.lib.montana.edu/snow-science/objects/ISSW2024_P1.7.pdf
+   */
   "DrySnowfallLevel",
 ]);
 export type ParameterType = z.infer<typeof ParameterTypeSchema>;
@@ -130,19 +142,22 @@ export class StationData {
    * @returns The surface hoar data for the charts data
    */
   generateSurfaceHoarData(): number[] {
+    if (this.values.SurfaceHoar) {
+      return this.values.SurfaceHoar;
+    }
+    this.values.SurfaceHoar = [];
+
     const timestamps = this.timestamps;
     const TD = this.values.TD ?? [];
     const TSS = this.values.TSS ?? [];
-    const result: number[] = [];
-    const len = TD.length;
 
     let i = 0;
-    while (i < len) {
+    while (i < TD.length) {
       if (TD[i] < 0 && TSS[i] < TD[i]) {
         const startIdx = i;
         let endIdx = i;
 
-        while (endIdx + 1 < len && TD[endIdx + 1] < 0 && TSS[endIdx + 1] < TD[endIdx + 1]) {
+        while (endIdx + 1 < TD.length && TD[endIdx + 1] < 0 && TSS[endIdx + 1] < TD[endIdx + 1]) {
           endIdx++;
         }
 
@@ -150,16 +165,74 @@ export class StationData {
         const mark = duration >= 3600_000 ? 1000 : -100;
 
         for (let j = startIdx; j <= endIdx; j++) {
-          result[j] = mark;
+          this.values.SurfaceHoar[j] = mark;
         }
 
         i = endIdx + 1;
       } else {
-        result[i] = -100;
+        this.values.SurfaceHoar[i] = -100;
         i++;
       }
     }
-    return result;
+    return this.values.SurfaceHoar;
+  }
+
+  /**
+   * Calculates the dry snowfall level series for this station from its air
+   * temperature and relative humidity series. For each timestamp the wet-bulb
+   * temperature is derived from air temperature and relative humidity, and the
+   * dry snowfall level (in m) is the altitude at which the wet-bulb temperature
+   * crosses the rain/snow threshold, anchored at the station altitude.
+   *
+   * @param tpsyThreshold The wet-bulb temperature threshold (°C) separating
+   * rain from snow (precipitation is assumed to be snow below it). Default: 0.3
+   * @returns The dry snowfall level data for the charts data
+   *
+   * @see Hofmann, Lehnert, Mitterer (2024): Automated dry-snowfall level
+   * calculation for improved assessment of melt-freeze crusts and associated
+   * faceted weak layers. Proceedings ISSW 2024, Tromsø.
+   * https://arc.lib.montana.edu/snow-science/objects/ISSW2024_P1.7.pdf
+   * @see Threshold wet-bulb temperature ~0.3 °C for the rain/snow transition:
+   * Nature Communications 9, 1148 (2018), https://doi.org/10.1038/s41467-018-03629-7
+   */
+  generateDrySnowfallLevelData(tpsyThreshold = 0.3): number[] {
+    if (this.values.DrySnowfallLevel) {
+      return this.values.DrySnowfallLevel;
+    }
+
+    this.values.DrySnowfallLevel = this.timestamps.map((_, i) => {
+      const ta = this.values.TA?.[i];
+      const rh = this.values.RH?.[i];
+      if (ta == null || rh == null || !isFinite(ta) || !isFinite(rh)) {
+        return null;
+      }
+      const tpsy = calculateWetBulb(ta, rh);
+      return Math.round((tpsy - tpsyThreshold) / 0.006 + this.altitude);
+    });
+
+    /**
+     * Calculates the wet-bulb temperature from air temperature and relative
+     * humidity using an empirical second-order polynomial fit (RH in %).
+     *
+     * @param ta Air temperature in °C
+     * @param rh Relative humidity in %
+     * @returns Wet-bulb temperature in °C
+     *
+     * @see Hofmann, Lehnert, Mitterer (2024), Proceedings ISSW 2024, Tromsø.
+     * https://arc.lib.montana.edu/snow-science/objects/ISSW2024_P1.7.pdf
+     * Compare the arctan-based approximation in Stull (2011), J. Appl. Meteor.
+     * Climatol. 50, https://doi.org/10.1175/JAMC-D-11-0143.1
+     */
+    function calculateWetBulb(ta: number, rh: number): number {
+      return (
+        -5.806 +
+        0.672 * ta -
+        0.006 * ta ** 2 +
+        (0.061 + 0.004 * ta + 0.000099 * ta ** 2) * rh +
+        (-0.000033 - 0.000005 * ta - 0.0000001 * ta ** 2) * rh ** 2
+      );
+    }
+    return this.values.DrySnowfallLevel;
   }
 }
 
