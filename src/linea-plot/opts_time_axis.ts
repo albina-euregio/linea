@@ -1,5 +1,6 @@
 import { i18n } from "../i18n";
 import { MIN_VISIBLE_DATAPOINTS } from "../shared/touch-zoom";
+import { LineaChartParameter } from "./linea-chart-parameter";
 
 const ms = 1,
   s = ms * 1e3,
@@ -67,6 +68,16 @@ export const timeScale: uPlot.Scale = {
     return [xData[newStartIdx], xData[newEndIdx]];
   },
 };
+
+/** The shared x dimension for linea charts: time scale, axis and series. */
+export const time = new LineaChartParameter({
+  scale: timeScale,
+  axis: timeAxis,
+  series: {
+    label: i18n.message("linea:unit:time"),
+    value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
+  },
+});
 
 export const dailyBarChartTimeAxis: uPlot.Axis = {
   splits(_self, _axisIdx, scaleMin, scaleMax, foundIncr, _foundSpace) {

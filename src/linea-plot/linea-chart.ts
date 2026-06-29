@@ -1,30 +1,8 @@
 import uPlot from "uplot";
-import {
-  opts_TA,
-  opts_TA_FORECAST,
-  opts_TA_TD_TSS,
-  opts_TD,
-  opts_TD_FORECAST,
-  opts_TSS,
-  opts_SurfaceHoar,
-} from "./opts_TA_TD_TSS";
-import {
-  opts_DW,
-  opts_DW_FORECAST,
-  opts_VW,
-  opts_VW_FORECAST,
-  opts_VW_MAX,
-  opts_VW_MAX_FORECAST,
-  opts_VW_VWG_DW,
-} from "./opts_VW_VWG_DW";
-import {
-  opts_HS,
-  opts_HS_FORECAST,
-  opts_HS_PSUM,
-  opts_PSUM,
-  opts_PSUM_FORECAST,
-} from "./opts_HS_PSUM";
-import { opts_ISWR, opts_ISWR_FORECAST, opts_RH, opts_RH_FORECAST, opts_RH_GR } from "./opts_RH_GR";
+import * as opts_TA_TD_TSS from "./opts_TA_TD_TSS";
+import * as opts_VW_VWG_DW from "./opts_VW_VWG_DW";
+import * as opts_HS_PSUM from "./opts_HS_PSUM";
+import * as opts_RH_GR from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
 import type { ForecastValues, StationData, Values } from "../data/station-data";
 import { i18n } from "../i18n";
@@ -158,7 +136,7 @@ export class LineaChart extends AbstractLineaChart {
     if (this.result.values.HS || this.result.values.PSUM) {
       const p = new uPlot(
         this.withFreshPlugins({
-          ...opts_HS_PSUM,
+          ...opts_HS_PSUM.opts_HS_PSUM,
           ...this.getStationTitle(),
         }),
         [this.result.timestamps],
@@ -168,12 +146,12 @@ export class LineaChart extends AbstractLineaChart {
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
       if (this.result.values.HS) {
-        this.addSeries(p, opts_HS, this.result.values.HS);
+        this.addSeries(p, opts_HS_PSUM.HS.series, this.result.values.HS);
       }
       if (this.result.values.PSUM) {
         this.addSeries(
           p,
-          opts_PSUM,
+          opts_HS_PSUM.PSUM.series,
           this.#sumupPrecipitation(this.result.timestamps, this.result.values.PSUM),
         );
       }
@@ -183,7 +161,7 @@ export class LineaChart extends AbstractLineaChart {
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
       const p = new uPlot(
         this.withFreshPlugins({
-          ...opts_VW_VWG_DW,
+          ...opts_VW_VWG_DW.opts_VW_VWG_DW,
           ...this.getStationTitle(),
         }),
         [this.result.timestamps],
@@ -192,9 +170,9 @@ export class LineaChart extends AbstractLineaChart {
       this.drawedTitle = true;
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:wind"));
-      this.addSeries(p, opts_VW, this.result.values.VW);
-      this.addSeries(p, opts_VW_MAX, this.result.values.VW_MAX);
-      this.addSeries(p, opts_DW, this.#filterDWData(this.result.values.DW));
+      this.addSeries(p, opts_VW_VWG_DW.VW.series, this.result.values.VW);
+      this.addSeries(p, opts_VW_VWG_DW.opts_VW_MAX, this.result.values.VW_MAX);
+      this.addSeries(p, opts_VW_VWG_DW.DW.series, this.#filterDWData(this.result.values.DW));
       // Forecast series will be added after forecast data is loaded
     }
 
@@ -206,7 +184,7 @@ export class LineaChart extends AbstractLineaChart {
           : undefined);
       const p = new uPlot(
         this.withFreshPlugins({
-          ...opts_TA_TD_TSS,
+          ...opts_TA_TD_TSS.opts_TA_TD_TSS,
           ...this.getStationTitle(),
         }),
         [this.result.timestamps],
@@ -216,30 +194,30 @@ export class LineaChart extends AbstractLineaChart {
 
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
-      this.addSeries(p, opts_TD, TD);
+      this.addSeries(p, opts_TA_TD_TSS.TD.series, TD);
 
       // show snow surface temperature and therefore surface hoar only if available
       if (this.result.values.TSS) {
-        this.addSeries(p, opts_TSS, this.result.values.TSS);
+        this.addSeries(p, opts_TA_TD_TSS.TSS.series, this.result.values.TSS);
         if (this.showSurfaceHoarSeries) {
           const surfacehoar = this.#generateSurfaceHoarData(
             this.result.timestamps,
             this.result.values.TD,
             this.result.values.TSS,
           );
-          this.addSeries(p, opts_SurfaceHoar, surfacehoar);
+          this.addSeries(p, opts_TA_TD_TSS.SurfaceHoar.series, surfacehoar);
         }
       } else {
-        this.addSeries(p, opts_TSS, []);
+        this.addSeries(p, opts_TA_TD_TSS.TSS.series, []);
       }
-      this.addSeries(p, opts_TA, this.result.values.TA);
+      this.addSeries(p, opts_TA_TD_TSS.TA.series, this.result.values.TA);
       // Forecast series will be added after forecast data is loaded
     }
 
     if (this.result.values.RH || this.result.values.ISWR) {
       const p = new uPlot(
         this.withFreshPlugins({
-          ...opts_RH_GR,
+          ...opts_RH_GR.opts_RH_GR,
           ...this.getStationTitle(),
         }),
         [this.result.timestamps],
@@ -248,8 +226,8 @@ export class LineaChart extends AbstractLineaChart {
       this.drawedTitle = true;
       this.modifyDrawHook(p, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:humidity_gr"));
-      this.addSeries(p, opts_RH, this.result.values.RH);
-      this.addSeries(p, opts_ISWR, this.result.values.ISWR);
+      this.addSeries(p, opts_RH_GR.RH.series, this.result.values.RH);
+      this.addSeries(p, opts_RH_GR.ISWR.series, this.result.values.ISWR);
       // Forecast series will be added after forecast data is loaded
     }
 
@@ -424,12 +402,12 @@ export class LineaChart extends AbstractLineaChart {
     if (this.result.values.HS || this.result.values.PSUM) {
       const plot = this.plots[plotIdx];
       if (this.result.forecast.values.HS) {
-        this.addSeries(plot, opts_HS_FORECAST, this.result.forecast.values.HS);
+        this.addSeries(plot, opts_HS_PSUM.HS.forecast, this.result.forecast.values.HS);
       }
       if (this.result.forecast.values.PSUM) {
         this.addSeries(
           plot,
-          opts_PSUM_FORECAST,
+          opts_HS_PSUM.PSUM.forecast,
           this.result.values.PSUM
             ? this.#sumupForecastPrecipitation(
                 this.result.forecast.timestamps,
@@ -449,13 +427,21 @@ export class LineaChart extends AbstractLineaChart {
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
       const plot = this.plots[plotIdx];
       if (this.result.forecast.values.VW) {
-        this.addSeries(plot, opts_VW_FORECAST, this.result.forecast.values.VW);
+        this.addSeries(plot, opts_VW_VWG_DW.VW.forecast, this.result.forecast.values.VW);
       }
       if (this.result.forecast.values.VW_MAX) {
-        this.addSeries(plot, opts_VW_MAX_FORECAST, this.result.forecast.values.VW_MAX);
+        this.addSeries(
+          plot,
+          opts_VW_VWG_DW.opts_VW_MAX_FORECAST,
+          this.result.forecast.values.VW_MAX,
+        );
       }
       if (this.result.forecast.values.DW) {
-        this.addSeries(plot, opts_DW_FORECAST, this.#filterDWData(this.result.forecast.values.DW));
+        this.addSeries(
+          plot,
+          opts_VW_VWG_DW.DW.forecast,
+          this.#filterDWData(this.result.forecast.values.DW),
+        );
       }
       plotIdx += 1;
     }
@@ -468,10 +454,10 @@ export class LineaChart extends AbstractLineaChart {
         this.result.forecast.values.RH,
       );
       if (forecastTd) {
-        this.addSeries(plot, opts_TD_FORECAST, forecastTd);
+        this.addSeries(plot, opts_TA_TD_TSS.TD.forecast, forecastTd);
       }
       if (this.result.forecast.values.TA) {
-        this.addSeries(plot, opts_TA_FORECAST, this.result.forecast.values.TA);
+        this.addSeries(plot, opts_TA_TD_TSS.TA.forecast, this.result.forecast.values.TA);
       }
       plotIdx += 1;
     }
@@ -480,10 +466,10 @@ export class LineaChart extends AbstractLineaChart {
     if (this.result.values.RH || this.result.values.ISWR) {
       const plot = this.plots[plotIdx];
       if (this.result.forecast.values.RH) {
-        this.addSeries(plot, opts_RH_FORECAST, this.result.forecast.values.RH);
+        this.addSeries(plot, opts_RH_GR.RH.forecast, this.result.forecast.values.RH);
       }
       if (this.result.forecast.values.ISWR) {
-        this.addSeries(plot, opts_ISWR_FORECAST, this.result.forecast.values.ISWR);
+        this.addSeries(plot, opts_RH_GR.ISWR.forecast, this.result.forecast.values.ISWR);
       }
     }
   }
