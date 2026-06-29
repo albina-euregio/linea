@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import type { SplitOptions } from "../shared/opts-helper.ts";
+import type { SplitOptions } from "../shared/opts-helper";
 
 /** Adaptive split config (reuses {@link SplitOptions}, minus the runtime `uplot`). */
 export type LineaSplitSpec = Omit<SplitOptions, "uplot">;

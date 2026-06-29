@@ -1,5 +1,5 @@
 import { i18n } from "../i18n";
-import { MIN_VISIBLE_DATAPOINTS } from "../shared/touch-zoom.ts";
+import { MIN_VISIBLE_DATAPOINTS } from "../shared/touch-zoom";
 import { LineaChartParameter } from "./linea-chart-parameter";
 
 const ms = 1,

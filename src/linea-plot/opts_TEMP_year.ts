@@ -2,7 +2,7 @@ import { time } from "./opts_time_axis";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
-import type { ParameterType } from "../data/station-data.ts";
+import type { ParameterType } from "../data/station-data";
 
 const TA = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:TA")} (℃)`,
