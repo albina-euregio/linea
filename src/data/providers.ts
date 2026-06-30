@@ -114,11 +114,8 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
   new SmetDataProvider(
     "AT-05",
     ["AT-05"],
-    "https://www.salzburg.gv.at/lawine/smet/linea.geojson",
-    (id) => [
-      `https://www.salzburg.gv.at/lawine/smet/woche/${id}.smet.gz`,
-      `https://www.salzburg.gv.at/lawine/smet/winter/${id}.smet.gz`,
-    ],
+    "https://lawinen.at/smet/sbg/stations_sbg.geojson",
+    (id) => [`https://lawinen.at/smet/sbg/woche/${id}.smet.gz`],
   ),
 
   new SmetDataProvider(
