@@ -1,10 +1,24 @@
----
-build:
-  image: node:24
+stages:
+  - build
+  - deploy
+
+.build:
+  image: node:26.4.0
   stage: build
-  script:
-    - corepack enable
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+  before_script:
+    - command -v pnpm || npm install --global pnpm@11.9.0
+    - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
+
+build:
+  extends: .build
+  script:
     - pnpm run ci
     - pnpm pack
   artifacts:
@@ -17,11 +31,8 @@ build:
       - README.md
 
 build:cli:
-  image: node:24
-  stage: build
+  extends: .build
   script:
-    - corepack enable
-    - pnpm install --frozen-lockfile
     - pnpm run build:cli
   artifacts:
     name: ${CI_PROJECT_NAME}-${CI_JOB_NAME_SLUG}-${CI_COMMIT_SHORT_SHA}
@@ -32,13 +43,11 @@ build:cli:
       - README.md
 
 publish-npm:
+  extends: .build
   stage: deploy
-  image: node:24
   needs:
     - build
   script:
-    - corepack enable
-    - pnpm install --frozen-lockfile
     - npm config set -- "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/"
     - npm config set -- "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=\${CI_JOB_TOKEN}"
     - npm config set -- "${CI_API_V4_URL#https?}/groups/${CI_PROJECT_ROOT_NAMESPACE}/-/packages/npm/:_authToken=\${CI_JOB_TOKEN}"
