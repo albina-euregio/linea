@@ -39,7 +39,7 @@ LINEA is featuring weather station visualization on:
    - last half year for winter view (for lazy loading)
    - full-range data as daily average (for winter statistics): the timestamp 1991-12-31T23:00:00Z (1992-01-01T00:00:00+01:00) shall contain all measured values of the calendar day 1992-01-01, i.e., 1992-01-01T00:00:00+01:00..1992-01-02T23:59:59+01:00
 
-Examples: https://static.avalanche.report/weather_stations/linea.geojson, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL1.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/woche/GGAL2.smet.gz, https://api.avalanche.report/lawine/grafiken/smet/winter/GGAL2.smet.gz
+Examples: https://static.avalanche.report/weather_stations/linea.geojson, https://wiski.tirol.gv.at/lawine/grafiken/smet/woche/GGAL1.smet.gz, https://wiski.tirol.gv.at/lawine/grafiken/smet/winter/GGAL1.smet.gz, https://wiski.tirol.gv.at/lawine/grafiken/smet/woche/GGAL2.smet.gz, https://wiski.tirol.gv.at/lawine/grafiken/smet/winter/GGAL2.smet.gz
 
 ![Test](https://gitlab.com/-/project/70517866/uploads/3602e37b19ce37112b0bfc2bd2e7d048/Weather_Stations_Avalanche.report.jpg)
 
@@ -247,7 +247,7 @@ Example:
 <aws-stats-wrapper
   chart-type="aws-observations,aws-danger-rating,aws-danger-rating-altitude"
   observations="./observations.geojson"
-  stationsrc="https://api.avalanche.report/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
+  stationsrc="https://wiski.tirol.gv.at/lawine/grafiken/smet/winter/AXLIZ1.smet.gz"
   bulletins="[<JSON-string array of JSON_V6 Caaml bulletins>]"
   start-date="2026-01-01"
   end-date="2026-03-18"
