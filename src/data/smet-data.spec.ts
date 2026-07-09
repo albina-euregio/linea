@@ -284,3 +284,57 @@ fields           = timestamp HS RH TA
   expect(data).toMatchSnapshot();
   expect(data.generateSurfaceHoarData()).toMatchSnapshot();
 });
+
+test("parse IT-32-BZ 91180SF", async () => {
+  const smet = `
+SMET 1.1 ASCII
+[HEADER]
+station_id       = 91180SF
+station_name     = Rotwandwiesen
+latitude         = 46.663753
+longitude        = 12.370639
+altitude         = 1907.0
+nodata           = -999
+tz               = +1
+fields           = timestamp TA RH VW_MAX VW DW HS
+[DATA]
+2026-07-05T09:30:00 14.9 39.1 4.0 1.3 263.3 16.5
+2026-07-05T09:40:00 15.1 38.8 4.4 1.4 255.9 16.7
+2026-07-05T09:50:00 14.6 37.6 6.3 1.5 264.6 16.4
+2026-07-05T10:00:00 15.1 37.3 4.3 1.1 268.4 16.5
+2026-07-05T10:10:00 15.4 36.8 4.5 1.2 274.2 18.3
+2026-07-05T10:20:00 15.6 37.1 5.0 1.0 285.2 17.1
+2026-07-05T10:30:00 15.7 35.6 3.9 1.0 302.9 19.0
+2026-07-05T10:40:00 15.9 36.4 4.7 1.2 261.2 19.1
+`;
+  const url = mockFetch(smet);
+  const data = await fetchSMET(url);
+  expect(data).toMatchSnapshot();
+});
+
+test("parse IT-32-BZ 91210WS", async () => {
+  const smet = `
+SMET 1.1 ASCII
+[HEADER]
+station_id       = 91210WS
+station_name     = Hochebenkofel
+latitude         = 46.68017256798525
+longitude        = 12.25725800440193
+altitude         = 2903.0
+nodata           = -999
+tz               = +1
+fields           = timestamp TA RH VW_MAX VW DW
+[DATA]
+2026-07-05T09:30:00 5.0 67.3 9.3 3.3 304.9
+2026-07-05T09:40:00 5.0 67.7 11.5 2.5 302.2
+2026-07-05T09:50:00 5.3 66.5 6.6 2.7 301.0
+2026-07-05T10:00:00 5.2 67.5 8.7 2.7 311.3
+2026-07-05T10:10:00 5.6 66.7 7.5 2.1 316.0
+2026-07-05T10:20:00 5.8 64.9 7.0 2.5 304.5
+2026-07-05T10:30:00 5.9 62.8 10.2 2.9 296.9
+2026-07-05T10:40:00 5.9 63.5 7.8 2.6 308.9
+`;
+  const url = mockFetch(smet);
+  const data = await fetchSMET(url);
+  expect(data).toMatchSnapshot();
+});
