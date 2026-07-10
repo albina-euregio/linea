@@ -18,7 +18,7 @@ const TEMP_SPLITS = LineaChartParameter.splits("y", {
 export const TA = new LineaChartParameter({
   label: `${i18n.message("linea:unit:temperature")} (℃)`,
   labelColor: "#DE2D26",
-  scale: { range: (_u, _dataMin, dataMax) => (dataMax > 10 ? [-30, 30] : [-30, 10]) },
+  scale: { range: (_u, dataMin, dataMax) => (dataMax > 10 ? [dataMin, dataMax] : [-30, 10]) },
   axis: {
     scale: "y",
     side: 3,
