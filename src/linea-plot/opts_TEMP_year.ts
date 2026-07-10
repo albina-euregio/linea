@@ -7,7 +7,7 @@ import type { ParameterType } from "../data/station-data";
 const TA = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:TA")} (℃)`,
   labelColor: "#DE2D26",
-  scale: { range: (_u, _dataMin, dataMax) => (dataMax > 20 ? [-30, 30] : [-30, 20]) },
+  scale: { range: (_u, dataMin, dataMax) => (dataMax > 20 ? [dataMin, dataMax] : [-30, 20]) },
   axis: {
     scale: "y",
     stroke: "#DE2D26",
@@ -26,7 +26,7 @@ const TA = new LineaChartParameter({
 const TSS = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:TSS")} (℃)`,
   labelColor: "#FC9272",
-  scale: { range: (_u, _dataMin, dataMax) => (dataMax > 20 ? [-30, 30] : [-30, 20]) },
+  scale: { range: (_u, dataMin, dataMax) => (dataMax > 20 ? [dataMin, dataMax] : [-30, 20]) },
   axis: {
     scale: "y2",
     stroke: "#FC9272",
