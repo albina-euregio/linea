@@ -1,10 +1,10 @@
-import { z } from "zod";
+import * as v from "valibot";
 import type { Unit } from "./units";
 
 /**
  * Parameter type following the [SMET specification](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf)
  */
-export const ParameterTypeSchema = z.enum([
+export const ParameterTypeSchema = v.picklist([
   /** P Air pressure, in Pa */
   "P",
   /** TA Temperature Air, in Kelvin */
@@ -52,7 +52,7 @@ export const ParameterTypeSchema = z.enum([
    */
   "DrySnowfallLevel",
 ]);
-export type ParameterType = z.infer<typeof ParameterTypeSchema>;
+export type ParameterType = v.InferOutput<typeof ParameterTypeSchema>;
 
 export type Units = Partial<Record<ParameterType, Unit>>;
 

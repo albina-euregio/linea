@@ -1,7 +1,7 @@
 import { StationData } from "./station-data";
 import { dewPoint } from "../linea-plot/dew-point";
 import type { ParameterType, Units, Values } from "./station-data";
-import { z } from "zod";
+import * as v from "valibot";
 import * as listing from "../schema/listing";
 import { Length, Scalar, Speed, Temperature } from "./units";
 import { fetchOrThrow } from "./fetchOrThrow";
@@ -20,62 +20,63 @@ export const URL = Object.freeze({
     "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson",
 });
 
-export const SLFStationDataSchema = z.object({
-  station_code: z.string(),
-  measure_date: z.string(),
-  HS: z.number().nullish(),
-  TA_30MIN_MEAN: z.number().nullish(),
-  RH_30MIN_MEAN: z.number().nullish(),
-  TSS_30MIN_MEAN: z.number().nullish(),
-  RSWR_30MIN_MEAN: z.number().nullish(),
-  VW_30MIN_MEAN: z.number().nullish(),
-  VW_30MIN_MAX: z.number().nullish(),
-  DW_30MIN_MEAN: z.number().nullish(),
+export const SLFStationDataSchema = v.object({
+  station_code: v.string(),
+  measure_date: v.string(),
+  HS: v.optional(v.nullable(v.number())),
+  TA_30MIN_MEAN: v.optional(v.nullable(v.number())),
+  RH_30MIN_MEAN: v.optional(v.nullable(v.number())),
+  TSS_30MIN_MEAN: v.optional(v.nullable(v.number())),
+  RSWR_30MIN_MEAN: v.optional(v.nullable(v.number())),
+  VW_30MIN_MEAN: v.optional(v.nullable(v.number())),
+  VW_30MIN_MAX: v.optional(v.nullable(v.number())),
+  DW_30MIN_MEAN: v.optional(v.nullable(v.number())),
 });
-export type SLFStationData = z.infer<typeof SLFStationDataSchema>;
+export type SLFStationData = v.InferOutput<typeof SLFStationDataSchema>;
 
-export const SLFStationMetadataSchema = z.object({
-  code: z.string(),
-  label: z.string(),
-  elevation: z.number(),
-  lon: z.number(),
-  lat: z.number(),
-  country_code: z.string().optional(),
-  canton_code: z.string().optional(),
-  type: z.string().optional(),
+export const SLFStationMetadataSchema = v.object({
+  code: v.string(),
+  label: v.string(),
+  elevation: v.number(),
+  lon: v.number(),
+  lat: v.number(),
+  country_code: v.optional(v.string()),
+  canton_code: v.optional(v.string()),
+  type: v.optional(v.string()),
 });
-export type SLFStationMetadata = z.infer<typeof SLFStationMetadataSchema>;
+export type SLFStationMetadata = v.InferOutput<typeof SLFStationMetadataSchema>;
 
-const SLFCurrentStationFeatureSchema = z.object({
-  type: z.enum(["Feature"]),
-  properties: z.object({
-    code: z.string(),
-    timestamp: z.coerce.date().nullish(),
-    value: z.number().nullish(),
-    velocity: z.number().nullish(),
-    direction: z.number().nullish(),
+const SLFCurrentStationFeatureSchema = v.object({
+  type: v.picklist(["Feature"]),
+  properties: v.object({
+    code: v.string(),
+    timestamp: v.optional(v.nullable(v.pipe(v.unknown(), v.toDate()))),
+    value: v.optional(v.nullable(v.number())),
+    velocity: v.optional(v.nullable(v.number())),
+    direction: v.optional(v.nullable(v.number())),
   }),
 });
-type Feature = z.infer<typeof SLFCurrentStationFeatureSchema>;
+type Feature = v.InferOutput<typeof SLFCurrentStationFeatureSchema>;
 
-export const SLFStationCollectionSchema = z.object({
-  type: z.enum(["FeatureCollection"]),
-  features: z
-    .array(SLFCurrentStationFeatureSchema)
-    .transform((features) =>
+export const SLFStationCollectionSchema = v.object({
+  type: v.picklist(["FeatureCollection"]),
+  features: v.pipe(
+    v.array(SLFCurrentStationFeatureSchema),
+    v.transform((features) =>
       features.filter(
         (f) =>
           typeof f.properties.value === "number" ||
           typeof f.properties.velocity === "number" ||
           typeof f.properties.direction === "number",
       ),
-    )
-    .transform((features) =>
+    ),
+    v.transform((features) =>
       features.reduce(
         (map, f) => map.set(f.properties.code, f),
         new Map<Feature["properties"]["code"], Feature>(),
       ),
     ),
+  ),
 });
 
 export class SLFDataProvider implements LineaDataProvider {
@@ -143,22 +144,22 @@ export class SLFDataProvider implements LineaDataProvider {
   async fetchStationListing(): Promise<listing.FeatureCollection> {
     const metadata = await fetchOrThrow(URL.STATIONS)
       .then((r) => r.json())
-      .then((j) => SLFStationMetadataSchema.array().parseAsync(j));
+      .then((j) => v.parseAsync(v.array(SLFStationMetadataSchema), j));
     const SNOW_HEIGHT = await fetchOrThrow(URL.SNOW_HEIGHT)
       .then((r) => r.json())
-      .then((j) => SLFStationCollectionSchema.parseAsync(j));
+      .then((j) => v.parseAsync(SLFStationCollectionSchema, j));
     const TEMPERATURE_AIR = await fetchOrThrow(URL.TEMPERATURE_AIR)
       .then((r) => r.json())
-      .then((j) => SLFStationCollectionSchema.parseAsync(j));
+      .then((j) => v.parseAsync(SLFStationCollectionSchema, j));
     const TEMPERATURE_SNOW_SURFACE = await fetchOrThrow(URL.TEMPERATURE_SNOW_SURFACE)
       .then((r) => r.json())
-      .then((j) => SLFStationCollectionSchema.parseAsync(j));
+      .then((j) => v.parseAsync(SLFStationCollectionSchema, j));
     const WIND_MEAN = await fetchOrThrow(URL.WIND_MEAN)
       .then((r) => r.json())
-      .then((j) => SLFStationCollectionSchema.parseAsync(j));
+      .then((j) => v.parseAsync(SLFStationCollectionSchema, j));
 
     const features = metadata.map((station) => {
-      const feature = listing.FeatureSchema.parse({
+      const feature = v.parse(listing.FeatureSchema, {
         type: "Feature",
         id: station.code,
         geometry: {
@@ -175,7 +176,7 @@ export class SLFDataProvider implements LineaDataProvider {
           operatorLicense: "CC BY 4.0",
           operatorLicenseLink: "https://www.slf.ch/de/services-und-produkte/slf-datenservice/",
         },
-      } satisfies z.infer<typeof listing.FeatureSchema>);
+      } satisfies v.InferOutput<typeof listing.FeatureSchema>);
       feature.properties.date =
         TEMPERATURE_AIR.features.get(feature.id)?.properties?.timestamp ??
         SNOW_HEIGHT.features.get(feature.id)?.properties?.timestamp;

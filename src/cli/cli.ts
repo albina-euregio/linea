@@ -1,3 +1,4 @@
+import * as v from "valibot";
 import { PROVIDERS } from "../data/providers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
@@ -12,7 +13,7 @@ async function main() {
 
   const collection = await PROVIDERS.fetchStationListing();
   const json = JSON.stringify(collection, undefined, 2);
-  FeatureCollectionSchema.parse(JSON.parse(json));
+  v.parse(FeatureCollectionSchema, JSON.parse(json));
 
   const now = Temporal.Now.instant()
     .round({ smallestUnit: "hour", roundingMode: "floor" })

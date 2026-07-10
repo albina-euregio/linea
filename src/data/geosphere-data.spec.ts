@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import { describe, expect, test, vi } from "vite-plus/test";
 import * as geosphere from "./geosphere-data";
 import { PROVIDERS } from "./providers";
@@ -36,7 +36,7 @@ describe("geosphere", async () => {
             },
           ],
           id_type: "Synop",
-        } satisfies z.input<typeof geosphere.MetadataSchema>;
+        } satisfies v.InferInput<typeof geosphere.MetadataSchema>;
       } else if (url.includes("station_ids=")) {
         json = {
           media_type: "application/json",
@@ -112,7 +112,7 @@ describe("geosphere", async () => {
               },
             },
           ],
-        } satisfies z.input<typeof geosphere.FeatureCollectionSchema>;
+        } satisfies v.InferInput<typeof geosphere.FeatureCollectionSchema>;
       }
 
       return Promise.resolve(new Response(JSON.stringify(json)));

@@ -1,4 +1,4 @@
-import z from "zod";
+import * as v from "valibot";
 import * as smet from "./smet-data";
 
 declare module "zod" {
@@ -7,7 +7,7 @@ declare module "zod" {
   }
 }
 
-export const UnitSchema = z.enum([
+export const UnitSchema = v.picklist([
   // temperature
   "K",
   "℃",
@@ -29,7 +29,7 @@ export const UnitSchema = z.enum([
   "W/m²",
 ]);
 
-export type Unit = z.infer<typeof UnitSchema>;
+export type Unit = v.InferOutput<typeof UnitSchema>;
 
 class Quantity<U extends Unit> {
   constructor(

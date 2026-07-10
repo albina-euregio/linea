@@ -1,3 +1,4 @@
+import * as v from "valibot";
 import { FeatureCollectionSchema, type Feature, type FeatureCollection } from "../schema/listing";
 import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider, ProviderIdentifier } from "./provider";
@@ -33,7 +34,7 @@ export class SmetDataProvider implements LineaDataProvider {
     }
     const json = await response.json();
 
-    const collection = FeatureCollectionSchema.parse(json);
+    const collection = v.parse(FeatureCollectionSchema, json);
     collection.features.forEach((f) => {
       f.properties.dataProviderID = this.dataProviderID;
       f.properties.dataURLs = this.smetURLs(f.properties.shortName || f.id);

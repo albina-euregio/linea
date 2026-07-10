@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import {
   Intensity,
   Length,
@@ -14,7 +14,7 @@ import { ParameterTypeSchema } from "../data/station-data";
 export { ParameterTypeSchema, type ParameterType } from "../data/station-data";
 export { UnitSchema, type Unit } from "../data/units";
 
-export const ListingParameterTypeSchema = z.enum([
+export const ListingParameterTypeSchema = v.picklist([
   ...ParameterTypeSchema.options,
   "HSD_6",
   "HSD_24",
@@ -27,14 +27,11 @@ export const ListingParameterTypeSchema = z.enum([
   "PSUM_48",
   "PSUM_72",
 ]);
-export type ListingParameterType = z.infer<typeof ListingParameterTypeSchema>;
+export type ListingParameterType = v.InferOutput<typeof ListingParameterTypeSchema>;
 
-const number = z
-  .number()
-  .nullish()
-  .check(z.overwrite((v) => (v === -777 ? undefined : v)));
+const number = v.optional(v.nullable(v.number()))(v.overwrite((v) => (v === -777 ? undefined : v)));
 
-export const StatisticsSchema = z.object({
+export const StatisticsSchema = v.object({
   unit: UnitSchema.nullish(),
   count: number,
   min: number,
@@ -45,41 +42,45 @@ export const StatisticsSchema = z.object({
   delta: number,
 });
 
-export const FeaturePropertiesSchema = z
-  .object({
-    name: z.string().describe("Station name"),
-    shortName: z
-      .string()
-      .regex(/^[A-Za-z0-9]+$/)
-      .nullish()
-      .describe("Station short name (such as ISEE2) consisting of [A-Za-z0-9] only"),
+export const FeaturePropertiesSchema = v.pipe(
+  v.object({
+    name: v.pipe(v.string(), v.description("Station name")),
+    shortName: v.pipe(
+      v.optional(v.nullable(v.pipe(v.string(), v.regex(/^[A-Za-z0-9]+$/)))),
+      v.description("Station short name (such as ISEE2) consisting of [A-Za-z0-9] only"),
+    ),
 
-    microRegionID: z
-      .string()
-      .nullish()
-      .describe("EAWS micro region ID, see https://gitlab.com/eaws/eaws-regions"),
-    stationCharacteristics: z
-      .string()
-      .nullish()
-      .describe("A few sentences describing the station characteristics/locality/history/..."),
-    altitude: z
-      .number()
-      .nullish()
-      .describe("Altitude above sea level (alternatively specify 3rd component in coordinates)"),
-    startYear: z.string().nullish().describe("Observation start year"),
+    microRegionID: v.pipe(
+      v.optional(v.nullable(v.string())),
+      v.description("EAWS micro region ID, see https://gitlab.com/eaws/eaws-regions"),
+    ),
+    stationCharacteristics: v.pipe(
+      v.optional(v.nullable(v.string())),
+      v.description("A few sentences describing the station characteristics/locality/history/..."),
+    ),
+    altitude: v.pipe(
+      v.optional(v.nullable(v.number())),
+      v.description(
+        "Altitude above sea level (alternatively specify 3rd component in coordinates)",
+      ),
+    ),
+    startYear: v.pipe(v.optional(v.nullable(v.string())), v.description("Observation start year")),
 
-    operator: z.string().nullish().describe("Station operator"),
-    operatorLink: z.url().nullish().describe("Link to website of station operator"),
-    operatorLicense: z.string().nullish().describe("License under which data is provided"),
-    operatorLicenseLink: z.url().nullish().describe("Link to license"),
+    operator: v.pipe(v.optional(v.nullable(v.string())), v.description("Station operator")),
+    operatorLink: v.url().nullish().describe("Link to website of station operator"),
+    operatorLicense: v.pipe(
+      v.optional(v.nullable(v.string())),
+      v.description("License under which data is provided"),
+    ),
+    operatorLicenseLink: v.url().nullish().describe("Link to license"),
 
-    plot: z
-      .string()
-      .nullish()
-      .describe("For legacy PNG plots: name of plot which includes this station"),
+    plot: v.pipe(
+      v.optional(v.nullable(v.string())),
+      v.description("For legacy PNG plots: name of plot which includes this station"),
+    ),
 
     dataProviderID: ProviderIdentifierSchema.nullish(),
-    dataURLs: z
+    dataURLs: v
       .url()
       .array()
       .describe(
@@ -87,9 +88,12 @@ export const FeaturePropertiesSchema = z
       )
       .nullish(),
 
-    statistics: z.partialRecord(ParameterTypeSchema, StatisticsSchema).nullish(),
+    statistics: v.partialRecord(ParameterTypeSchema, StatisticsSchema).nullish(),
 
-    date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
+    date: v.pipe(
+      v.optional(v.nullable(v.pipe(v.unknown(), v.toDate()))),
+      v.description("ISO 8601 timestamp"),
+    ),
     ISWR: number
       .describe("Incoming Short Wave Radiation in W/m²")
       .transform((v) => new Intensity(v, "W/m²"))
@@ -182,38 +186,44 @@ export const FeaturePropertiesSchema = z
       .describe("Wind direction (optionally average over the last 3h) in °")
       .transform((v) => new Scalar(v, "°"))
       .meta({ unit: "°" }),
-  })
-  .describe("The properties of a weather station including measured values");
+  }),
+  v.description("The properties of a weather station including measured values"),
+);
 
-export const GeometrySchema = z.object({
-  type: z.enum(["Point"]),
-  coordinates: z.union([
-    z.tuple([z.number().describe("Longitude"), z.number().describe("Latitude")]),
-    z.tuple([
-      z.number().describe("Longitude"),
-      z.number().describe("Latitude"),
-      z.number().describe("Altitude"),
+export const GeometrySchema = v.object({
+  type: v.picklist(["Point"]),
+  coordinates: v.union([
+    v.tuple([
+      v.pipe(v.number(), v.description("Longitude")),
+      v.pipe(v.number(), v.description("Latitude")),
+    ]),
+    v.tuple([
+      v.pipe(v.number(), v.description("Longitude")),
+      v.pipe(v.number(), v.description("Latitude")),
+      v.pipe(v.number(), v.description("Altitude")),
     ]),
   ]),
 });
 
-export const FeatureSchema = z
-  .object({
-    type: z.enum(["Feature"]),
+export const FeatureSchema = v.pipe(
+  v.object({
+    type: v.picklist(["Feature"]),
     geometry: GeometrySchema,
     properties: FeaturePropertiesSchema,
-    id: z.union([z.uuid(), z.string()]).describe("The ID/UUID of the station"),
-  })
-  .describe("A GeoJSON Feature corresponding to one weather station");
+    id: v.pipe(v.union([v.uuid(), v.string()]), v.description("The ID/UUID of the station")),
+  }),
+  v.description("A GeoJSON Feature corresponding to one weather station"),
+);
 
-export const FeatureCollectionSchema = z
-  .object({
-    type: z.enum(["FeatureCollection"]),
-    features: z.array(FeatureSchema),
-    properties: z.any().nullish(),
-  })
-  .describe("A GeoJSON FeatureCollection of weather stations");
+export const FeatureCollectionSchema = v.pipe(
+  v.object({
+    type: v.picklist(["FeatureCollection"]),
+    features: v.array(FeatureSchema),
+    properties: v.optional(v.nullable(v.any())),
+  }),
+  v.description("A GeoJSON FeatureCollection of weather stations"),
+);
 
-export type Statistics = z.infer<typeof StatisticsSchema>;
-export type Feature = z.infer<typeof FeatureSchema>;
-export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
+export type Statistics = v.InferOutput<typeof StatisticsSchema>;
+export type Feature = v.InferOutput<typeof FeatureSchema>;
+export type FeatureCollection = v.InferOutput<typeof FeatureCollectionSchema>;

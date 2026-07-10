@@ -1,21 +1,20 @@
-import { z } from "zod";
+import * as v from "valibot";
 
-const isoDateTime = z.string().refine((value) => !Number.isNaN(Date.parse(value)), {
-  message: "Expected ISO date-time string",
+const isoDateTime = v.pipe(
+  v.string(),
+  v.check((value) => !Number.isNaN(Date.parse(value)), "Expected ISO date-time string"),
+);
+
+const languageCodeSchema = v.pipe(v.string(), v.length(2));
+
+const validTimeSchema = v.strictObject({
+  startTime: v.optional(isoDateTime),
+  endTime: v.optional(isoDateTime),
 });
 
-const languageCodeSchema = z.string().length(2);
+const validTimePeriodSchema = v.picklist(["all_day", "earlier", "later"]);
 
-const validTimeSchema = z
-  .object({
-    startTime: isoDateTime.optional(),
-    endTime: isoDateTime.optional(),
-  })
-  .strict();
-
-const validTimePeriodSchema = z.enum(["all_day", "earlier", "later"]);
-
-const dangerRatingValueSchema = z.enum([
+const dangerRatingValueSchema = v.picklist([
   "low",
   "moderate",
   "considerable",
@@ -25,7 +24,7 @@ const dangerRatingValueSchema = z.enum([
   "no_rating",
 ]);
 
-const avalancheProblemTypeSchema = z.enum([
+const avalancheProblemTypeSchema = v.picklist([
   "new_snow",
   "wind_slab",
   "persistent_weak_layers",
@@ -35,177 +34,146 @@ const avalancheProblemTypeSchema = z.enum([
   "no_distinct_avalanche_problem",
   "favourable_situation",
 ]);
-export type AvalancheProblemType = z.infer<typeof avalancheProblemTypeSchema>;
+export type AvalancheProblemType = v.InferOutput<typeof avalancheProblemTypeSchema>;
 
-const snowpackStabilitySchema = z.enum(["good", "fair", "poor", "very_poor"]);
+const snowpackStabilitySchema = v.picklist(["good", "fair", "poor", "very_poor"]);
 
-const frequencySchema = z.enum(["none", "few", "some", "many"]);
+const frequencySchema = v.picklist(["none", "few", "some", "many"]);
 
-const aspectsSchema = z.array(z.enum(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "n/a"]));
+const aspectsSchema = v.array(v.picklist(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "n/a"]));
 
-const elevationSchema = z
-  .object({
-    lowerBound: z
-      .string()
-      .regex(/^(treeline|0|[1-9][0-9]*[0][0]+)$/)
-      .optional(),
-    upperBound: z
-      .string()
-      .regex(/^(treeline|0|[1-9][0-9]*[0][0]+)$/)
-      .optional(),
-  })
-  .strict();
-
-const extFileSchema = z
-  .object({
-    fileType: z.string().optional(),
-    description: z.string().optional(),
-    fileReferenceURI: z.string().url().optional(),
-  })
-  .strict();
-
-const metaDataSchema = z
-  .object({
-    extFiles: z.array(extFileSchema).optional(),
-    comment: z.string().optional(),
-  })
-  .strict();
-
-const customDataSchema = z.looseObject({
-  LWD_Tyrol: z
-    .object({
-      dangerPatterns: z.array(z.string()).optional(),
-    })
-    .optional(),
+const elevationSchema = v.strictObject({
+  lowerBound: v.optional(v.pipe(v.string(), v.regex(/^(treeline|0|[1-9][0-9]*[0][0]+)$/))),
+  upperBound: v.optional(v.pipe(v.string(), v.regex(/^(treeline|0|[1-9][0-9]*[0][0]+)$/))),
 });
 
-const personSchema = z
-  .object({
-    name: z.string().optional(),
-    website: z.string().url().optional(),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+const extFileSchema = v.strictObject({
+  fileType: v.optional(v.string()),
+  description: v.optional(v.string()),
+  fileReferenceURI: v.optional(v.pipe(v.string(), v.url())),
+});
 
-const providerSchema = z
-  .object({
-    name: z.string().optional(),
-    website: z.string().url().optional(),
-    contactPerson: personSchema.optional(),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+const metaDataSchema = v.strictObject({
+  extFiles: v.optional(v.array(extFileSchema)),
+  comment: v.optional(v.string()),
+});
 
-const sourceSchema = z
-  .object({
-    provider: providerSchema.optional(),
-    person: personSchema.optional(),
-  })
-  .strict()
-  .refine((value) => Boolean(value.provider || value.person), {
-    message: "source requires either provider or person",
-  });
+const customDataSchema = v.looseObject({
+  LWD_Tyrol: v.optional(
+    v.object({
+      dangerPatterns: v.optional(v.array(v.string())),
+    }),
+  ),
+});
 
-const regionSchema = z
-  .object({
-    regionID: z.string(),
-    name: z.string().optional(),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+const personSchema = v.strictObject({
+  name: v.optional(v.string()),
+  website: v.optional(v.pipe(v.string(), v.url())),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
 
-const textsSchema = z
-  .object({
-    highlights: z.string().optional(),
-    comment: z.string().optional(),
-  })
-  .strict();
+const providerSchema = v.strictObject({
+  name: v.optional(v.string()),
+  website: v.optional(v.pipe(v.string(), v.url())),
+  contactPerson: v.optional(personSchema),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
 
-const tendencySchema = z
-  .object({
-    tendencyType: z.enum(["decreasing", "steady", "increasing"]).optional(),
-    validTime: validTimeSchema.optional(),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+const sourceSchema = v.pipe(
+  v.strictObject({
+    provider: v.optional(providerSchema),
+    person: v.optional(personSchema),
+  }),
+  v.check(
+    (value) => Boolean(value.provider || value.person),
+    "source requires either provider or person",
+  ),
+);
 
-const tendencyEntrySchema = z.union([
+const regionSchema = v.strictObject({
+  regionID: v.string(),
+  name: v.optional(v.string()),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
+
+const textsSchema = v.strictObject({
+  highlights: v.optional(v.string()),
+  comment: v.optional(v.string()),
+});
+
+const tendencySchema = v.strictObject({
+  tendencyType: v.optional(v.picklist(["decreasing", "steady", "increasing"])),
+  validTime: v.optional(validTimeSchema),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
+
+const tendencyEntrySchema = v.union([
   textsSchema,
   tendencySchema,
-  z
-    .object({
-      highlights: z.string().optional(),
-      comment: z.string().optional(),
-      tendencyType: z.enum(["decreasing", "steady", "increasing"]).optional(),
-      validTime: validTimeSchema.optional(),
-      metaData: metaDataSchema.optional(),
-      customData: customDataSchema.optional(),
-    })
-    .strict(),
+  v.strictObject({
+    highlights: v.optional(v.string()),
+    comment: v.optional(v.string()),
+    tendencyType: v.optional(v.picklist(["decreasing", "steady", "increasing"])),
+    validTime: v.optional(validTimeSchema),
+    metaData: v.optional(metaDataSchema),
+    customData: customDataSchema.optional(),
+  }),
 ]);
 
-const dangerRatingSchema = z
-  .object({
-    mainValue: dangerRatingValueSchema,
-    elevation: elevationSchema.optional(),
-    aspects: aspectsSchema.optional(),
-    validTimePeriod: validTimePeriodSchema.optional(),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+const dangerRatingSchema = v.strictObject({
+  mainValue: dangerRatingValueSchema,
+  elevation: v.optional(elevationSchema),
+  aspects: v.optional(aspectsSchema),
+  validTimePeriod: v.optional(validTimePeriodSchema),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
 
-const avalancheProblemSchema = z
-  .object({
-    problemType: avalancheProblemTypeSchema,
-    comment: z.string().optional(),
-    avalancheSize: z.number().min(1).max(5).optional(),
-    snowpackStability: snowpackStabilitySchema.optional(),
-    frequency: frequencySchema.optional(),
-    dangerRatingValue: dangerRatingValueSchema.optional(),
-    elevation: elevationSchema.optional(),
-    aspects: aspectsSchema.optional(),
-    validTimePeriod: validTimePeriodSchema.optional(),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+const avalancheProblemSchema = v.strictObject({
+  problemType: avalancheProblemTypeSchema,
+  comment: v.optional(v.string()),
+  avalancheSize: v.optional(v.pipe(v.number(), v.minValue(1), v.maxValue(5))),
+  snowpackStability: v.optional(snowpackStabilitySchema),
+  frequency: v.optional(frequencySchema),
+  dangerRatingValue: v.optional(dangerRatingValueSchema),
+  elevation: v.optional(elevationSchema),
+  aspects: v.optional(aspectsSchema),
+  validTimePeriod: v.optional(validTimePeriodSchema),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
 
-export const bulletinSchema = z
-  .object({
-    bulletinID: z.string().optional(),
-    lang: languageCodeSchema.optional(),
-    publicationTime: isoDateTime.optional(),
-    validTime: validTimeSchema.optional(),
-    nextUpdate: isoDateTime.optional(),
-    unscheduled: z.boolean().optional(),
-    source: sourceSchema.optional(),
-    regions: z.array(regionSchema).optional(),
-    dangerRatings: z.array(dangerRatingSchema).optional(),
-    avalancheProblems: z.array(avalancheProblemSchema).optional(),
-    highlights: z.string().optional(),
-    weatherForecast: textsSchema.optional(),
-    weatherReview: textsSchema.optional(),
-    avalancheActivity: textsSchema.optional(),
-    snowpackStructure: textsSchema.optional(),
-    travelAdvisory: textsSchema.optional(),
-    tendency: z.array(tendencyEntrySchema).optional(),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+export const bulletinSchema = v.strictObject({
+  bulletinID: v.optional(v.string()),
+  lang: v.optional(languageCodeSchema),
+  publicationTime: v.optional(isoDateTime),
+  validTime: v.optional(validTimeSchema),
+  nextUpdate: v.optional(isoDateTime),
+  unscheduled: v.optional(v.boolean()),
+  source: v.optional(sourceSchema),
+  regions: v.optional(v.array(regionSchema)),
+  dangerRatings: v.optional(v.array(dangerRatingSchema)),
+  avalancheProblems: v.optional(v.array(avalancheProblemSchema)),
+  highlights: v.optional(v.string()),
+  weatherForecast: v.optional(textsSchema),
+  weatherReview: v.optional(textsSchema),
+  avalancheActivity: v.optional(textsSchema),
+  snowpackStructure: v.optional(textsSchema),
+  travelAdvisory: v.optional(textsSchema),
+  tendency: v.optional(v.array(tendencyEntrySchema)),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
 
-export const bulletinCollectionSchema = z
-  .object({
-    bulletins: z.array(bulletinSchema),
-    metaData: metaDataSchema.optional(),
-    customData: customDataSchema.optional(),
-  })
-  .strict();
+export const bulletinCollectionSchema = v.strictObject({
+  bulletins: v.array(bulletinSchema),
+  metaData: v.optional(metaDataSchema),
+  customData: customDataSchema.optional(),
+});
 
-export type Bulletin = z.infer<typeof bulletinSchema>;
-export type BulletinCollection = z.infer<typeof bulletinCollectionSchema>;
+export type Bulletin = v.InferOutput<typeof bulletinSchema>;
+export type BulletinCollection = v.InferOutput<typeof bulletinCollectionSchema>;

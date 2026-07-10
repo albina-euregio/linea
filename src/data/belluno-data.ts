@@ -1,3 +1,4 @@
+import * as v from "valibot";
 import { dewPoint } from "../linea-plot/dew-point";
 import * as listing from "../schema/listing";
 import { StationData, type ParameterType, type Units, type Values } from "./station-data";
@@ -123,7 +124,7 @@ export class BellunoDataProvider implements LineaDataProvider {
         throw new Error("Invalid Belluno station entry");
       }
       const id = rawId.trim().padStart(4, "0");
-      return listing.FeatureSchema.parse({
+      return v.parse(listing.FeatureSchema, {
         type: "Feature",
         id,
         geometry: {
