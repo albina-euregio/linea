@@ -25,7 +25,7 @@ export const ParameterValuesSchema = v.object({
 });
 
 export const PropertiesSchema = v.object({
-  parameters: v.looseRecord(ParameterTypeSchema, ParameterValuesSchema),
+  parameters: v.record(v.string(), ParameterValuesSchema),
   station: v.string(),
 });
 

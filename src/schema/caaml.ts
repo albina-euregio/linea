@@ -70,7 +70,7 @@ const personSchema = v.strictObject({
   name: v.optional(v.string()),
   website: v.optional(v.pipe(v.string(), v.url())),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 const providerSchema = v.strictObject({
@@ -78,7 +78,7 @@ const providerSchema = v.strictObject({
   website: v.optional(v.pipe(v.string(), v.url())),
   contactPerson: v.optional(personSchema),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 const sourceSchema = v.pipe(
@@ -96,7 +96,7 @@ const regionSchema = v.strictObject({
   regionID: v.string(),
   name: v.optional(v.string()),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 const textsSchema = v.strictObject({
@@ -108,7 +108,7 @@ const tendencySchema = v.strictObject({
   tendencyType: v.optional(v.picklist(["decreasing", "steady", "increasing"])),
   validTime: v.optional(validTimeSchema),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 const tendencyEntrySchema = v.union([
@@ -120,7 +120,7 @@ const tendencyEntrySchema = v.union([
     tendencyType: v.optional(v.picklist(["decreasing", "steady", "increasing"])),
     validTime: v.optional(validTimeSchema),
     metaData: v.optional(metaDataSchema),
-    customData: customDataSchema.optional(),
+    customData: v.optional(customDataSchema),
   }),
 ]);
 
@@ -130,7 +130,7 @@ const dangerRatingSchema = v.strictObject({
   aspects: v.optional(aspectsSchema),
   validTimePeriod: v.optional(validTimePeriodSchema),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 const avalancheProblemSchema = v.strictObject({
@@ -144,7 +144,7 @@ const avalancheProblemSchema = v.strictObject({
   aspects: v.optional(aspectsSchema),
   validTimePeriod: v.optional(validTimePeriodSchema),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 export const bulletinSchema = v.strictObject({
@@ -166,13 +166,13 @@ export const bulletinSchema = v.strictObject({
   travelAdvisory: v.optional(textsSchema),
   tendency: v.optional(v.array(tendencyEntrySchema)),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 export const bulletinCollectionSchema = v.strictObject({
   bulletins: v.array(bulletinSchema),
   metaData: v.optional(metaDataSchema),
-  customData: customDataSchema.optional(),
+  customData: v.optional(customDataSchema),
 });
 
 export type Bulletin = v.InferOutput<typeof bulletinSchema>;

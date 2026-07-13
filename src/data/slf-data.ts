@@ -3,7 +3,7 @@ import { dewPoint } from "../linea-plot/dew-point";
 import type { ParameterType, Units, Values } from "./station-data";
 import * as v from "valibot";
 import * as listing from "../schema/listing";
-import { Length, Scalar, Speed, Temperature } from "./units";
+import { Length, Scalar, Speed, Temperature, type Unit } from "./units";
 import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider } from "./provider";
 
@@ -106,7 +106,7 @@ export class SLFDataProvider implements LineaDataProvider {
       VW: collection.map((entry) => entry.VW_30MIN_MEAN),
     };
 
-    const unitsByParameter: Partial<Record<ParameterType, string>> = {
+    const unitsByParameter: Partial<Record<ParameterType, Unit>> = {
       DW: "°",
       HS: "cm",
       RH: "%",
@@ -129,7 +129,7 @@ export class SLFDataProvider implements LineaDataProvider {
       }
 
       values[parameter] = series.map((value) => (value == null ? null : value));
-      units[parameter] = unitsByParameter[parameter] ?? "";
+      units[parameter] = unitsByParameter[parameter];
     }
 
     return new StationData(

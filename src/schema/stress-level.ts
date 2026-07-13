@@ -17,7 +17,7 @@ const isoDateTimeSchema = v.pipe(
 
 export const stressItemSchema = v.strictObject({
   date: isoDateSchema,
-  stressLevel: v.int(),
+  stressLevel: v.pipe(v.number(), v.integer()),
   lastUpdated: isoDateTimeSchema,
 });
 

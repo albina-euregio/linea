@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from "vite-plus";
+import { toJsonSchema } from "@valibot/to-json-schema";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -46,7 +47,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [zodToJsonSchemaPlugin("listing.schema.json")],
+  plugins: [valibotToJsonSchemaPlugin("listing.schema.json")],
   fmt: {
     ignorePatterns: ["pnpm-lock.yaml", "pnpm-workspace.yaml"],
   },
@@ -56,20 +57,15 @@ export default defineConfig({
   },
 });
 
-function zodToJsonSchemaPlugin(fileName: string): Plugin {
+function valibotToJsonSchemaPlugin(fileName: string): Plugin {
   return {
-    name: "zod-to-json-schema",
+    name: "valibot-to-json-schema",
     apply: "build",
     async buildStart() {
       const module = await import("./src/schema/listing");
-      const schema = module.FeatureCollectionSchema.toJSONSchema({
-        unrepresentable: "any",
-        override: ({ zodSchema, jsonSchema }) => {
-          if (zodSchema._zod.def.type === "date") {
-            jsonSchema.type = "string";
-            jsonSchema.format = "date-time";
-          }
-        },
+      const schema = toJsonSchema(module.FeatureCollectionSchema, {
+        errorMode: "ignore",
+        typeMode: "input",
       });
       const schemaJson = JSON.stringify(schema, undefined, 2);
       this.emitFile({ type: "asset", fileName, source: schemaJson });

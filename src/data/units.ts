@@ -1,12 +1,6 @@
 import * as v from "valibot";
 import * as smet from "./smet-data";
 
-declare module "zod" {
-  interface GlobalMeta {
-    unit: Unit;
-  }
-}
-
 export const UnitSchema = v.picklist([
   // temperature
   "K",
