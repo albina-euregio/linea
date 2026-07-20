@@ -264,3 +264,7 @@ To install the wordpress `linea-plot-blog.php` plugin simply go to your wordpres
 For Apache `systemctl reload apache2` is enough to load it.
 
 The plugin is necessary, because wordpress disabled custom javascript for almost all users. For more details visit [the wordpress wp_kses documentation](https://developer.wordpress.org/reference/functions/wp_kses/).
+
+## License
+
+This procject is licensed under the GNU Lesser General Public License (see `LICENSE`).
