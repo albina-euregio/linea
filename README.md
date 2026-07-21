@@ -265,6 +265,12 @@ For Apache `systemctl reload apache2` is enough to load it.
 
 The plugin is necessary, because wordpress disabled custom javascript for almost all users. For more details visit [the wordpress wp_kses documentation](https://developer.wordpress.org/reference/functions/wp_kses/).
 
+## Functional Development & Contact
+
+The domain development and key decisions for this project were established by a working group of the German-speaking avalanche warning services (_Arbeitsgruppe der deutschsprachigen Lawinenwarndienste_).
+
+For technical or domain-related questions and discussions, please contact: [lawine@salzburg.gv.at](mailto:lawine@salzburg.gv.at)
+
 ## License
 
-This procject is licensed under the GNU Lesser General Public License (see `LICENSE`).
+This project is licensed under the GNU Lesser General Public License (see `LICENSE`).
