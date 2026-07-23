@@ -52,6 +52,25 @@ Examples: https://static.avalanche.report/weather_stations/linea.geojson, https:
 Writing 1302 features to linea.geojson
 ```
 
+## Weather station providers
+
+| Provider ID     | Region ID(s)              | GeoJSON URL                                                                                                                 |
+| --------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ALBINA          | AT-07, IT-32-BZ, IT-32-TN | https://static.avalanche.report/weather_stations/linea.geojson.gz                                                           |
+| AT-02           | AT-02                     | https://smet.hydrographie.info/stations_ktn_destiny.geojson                                                                 |
+| AT-03           | AT-03                     | https://lawinen.at/smet/noe/stations_noe.geojson                                                                            |
+| AT-04           | AT-04                     | https://lawinen.at/smet/ooe/stations_ooe.geojson                                                                            |
+| AT-05           | AT-05                     | https://lawinen.at/smet/sbg/stations_sbg.geojson                                                                            |
+| AT-06           | AT-06                     | https://lawinen.at/smet/stm/stations_stm.geojson                                                                            |
+| AT-08           | AT-08                     | https://lawinen.at/smet/vor/stations_vor.geojson                                                                            |
+| DE-BY           | DE-BY                     | https://lawinen.at/smet/bay/stations_bay.geojson                                                                            |
+| GEOSPHERE       | AT-01 … AT-09             | built dynamically from https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min (`output_format: geojson`) |
+| IT-34 (Belluno) | IT-34                     | no GeoJSON — XML source https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml                                      |
+| IT-36           | IT-36                     | https://smet.hydrographie.info/stations_fvg_destiny.geojson                                                                 |
+| OEBB            | AT                        | https://oebb.infra.tbbm.at/smet/linea.geojson                                                                               |
+| SI              | SI                        | https://lawinen.at/smet/slo/stations_slo.geojson                                                                            |
+| SLF             | CH, LI                    | multiple, e.g. https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson                 |
+
 ## Contributing
 
 1. Install [NodeJS](https://nodejs.org/en/) and [pnpm](https://pnpm.io/)
