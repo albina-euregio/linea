@@ -34,6 +34,7 @@
   },
   "scripts": {
     "prepare": "vp config",
+    "openapi": "openapi-ts && vp fmt -- src/api/",
     "ci": "vp run lint && vp run test && vp run build",
     "test": "vp test run",
     "lint": "vp check",
@@ -47,6 +48,7 @@
     "uplot": "^1.6.32"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.99.0",
     "@types/node": "^24.0.0",
     "@valibot/to-json-schema": "^1.7.1",
     "jsdom": "^29.0.2",
