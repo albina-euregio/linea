@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import * as listing from "../schema/listing";
 import { StationData } from "./station-data";
 import { fetchOrThrow } from "./fetchOrThrow";
@@ -7,79 +7,80 @@ import { UnitSchema } from "./units";
 
 export const URL = "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min";
 
-export const GeometrySchema = z.object({
-  type: z.enum(["Point"]),
-  coordinates: z.number().array(),
+export const GeometrySchema = v.object({
+  type: v.picklist(["Point"]),
+  coordinates: v.array(v.number()),
 });
 
-export const ParameterTypeSchema = z.enum(["TL", "FF", "FFX", "DD", "P", "RF", "SCHNEE", "TP"]);
+export const ParameterTypeSchema = v.picklist(["TL", "FF", "FFX", "DD", "P", "RF", "SCHNEE", "TP"]);
 
-export const ParameterValuesSchema = z.object({
-  name: z.string(),
-  unit: z
-    .string()
-    .transform((s) => (s === "°C" ? "℃" : s))
-    .transform((s) => UnitSchema.parse(s)),
-  data: z.number().nullable().array(),
+export const ParameterValuesSchema = v.object({
+  name: v.string(),
+  unit: v.pipe(
+    v.string(),
+    v.transform((s) => (s === "°C" ? "℃" : s)),
+    v.transform((s) => v.parse(UnitSchema, s)),
+  ),
+  data: v.array(v.nullable(v.number())),
 });
 
-export const PropertiesSchema = z.object({
-  parameters: z.looseRecord(ParameterTypeSchema, ParameterValuesSchema),
-  station: z.string(),
+export const PropertiesSchema = v.object({
+  parameters: v.record(v.string(), ParameterValuesSchema),
+  station: v.string(),
 });
 
-export const FeatureSchema = z.object({
-  type: z.enum(["Feature"]),
+export const FeatureSchema = v.object({
+  type: v.picklist(["Feature"]),
   geometry: GeometrySchema,
   properties: PropertiesSchema,
 });
 
-export const FeatureCollectionSchema = z.object({
-  media_type: z.string(),
-  type: z.enum(["FeatureCollection"]),
-  version: z.string(),
-  timestamps: z.string().array(),
-  features: FeatureSchema.array(),
+export const FeatureCollectionSchema = v.object({
+  media_type: v.string(),
+  type: v.picklist(["FeatureCollection"]),
+  version: v.string(),
+  timestamps: v.array(v.string()),
+  features: v.array(FeatureSchema),
 });
-export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
+export type FeatureCollection = v.InferOutput<typeof FeatureCollectionSchema>;
 
-export const ParameterSchema = z.object({
-  name: z.string(),
-  long_name: z.string(),
-  desc: z.string(),
-  unit: z.string(),
+export const ParameterSchema = v.object({
+  name: v.string(),
+  long_name: v.string(),
+  desc: v.string(),
+  unit: v.string(),
 });
-export type Parameter = z.infer<typeof ParameterSchema>;
+export type Parameter = v.InferOutput<typeof ParameterSchema>;
 
-export const StationSchema = z.object({
-  type: z.string(),
-  id: z.string(),
-  name: z.string(),
-  state: z.string(),
-  lat: z.number(),
-  lon: z.number(),
-  altitude: z.number(),
-  valid_from: z.coerce.date(),
-  valid_to: z.coerce.date(),
-  has_sunshine: z.boolean(),
-  has_global_radiation: z.boolean(),
-  is_active: z.boolean(),
+export const StationSchema = v.object({
+  type: v.string(),
+  id: v.string(),
+  name: v.string(),
+  state: v.string(),
+  lat: v.number(),
+  lon: v.number(),
+  altitude: v.number(),
+  valid_from: v.pipe(v.unknown(), v.toDate()),
+  valid_to: v.pipe(v.unknown(), v.toDate()),
+  has_sunshine: v.boolean(),
+  has_global_radiation: v.boolean(),
+  is_active: v.boolean(),
 });
-export type Station = z.infer<typeof StationSchema>;
+export type Station = v.InferOutput<typeof StationSchema>;
 
-export const MetadataSchema = z.object({
-  title: z.string(),
-  parameters: ParameterSchema.array(),
-  frequency: z.string(),
-  type: z.string(),
-  mode: z.string(),
-  response_formats: z.string().array(),
-  start_time: z.coerce.date(),
-  end_time: z.coerce.date(),
-  stations: StationSchema.array(),
-  id_type: z.string(),
+export const MetadataSchema = v.object({
+  title: v.string(),
+  parameters: v.array(ParameterSchema),
+  frequency: v.string(),
+  type: v.string(),
+  mode: v.string(),
+  response_formats: v.array(v.string()),
+  start_time: v.pipe(v.unknown(), v.toDate()),
+  end_time: v.pipe(v.unknown(), v.toDate()),
+  stations: v.array(StationSchema),
+  id_type: v.string(),
 });
-export type Metadata = z.infer<typeof MetadataSchema>;
+export type Metadata = v.InferOutput<typeof MetadataSchema>;
 
 export class GeoSphereDataProvider implements LineaDataProvider {
   readonly dataProviderID = "GEOSPHERE";
@@ -98,7 +99,7 @@ export class GeoSphereDataProvider implements LineaDataProvider {
   async fetchStationData(station: listing.Feature, dataURLsIndex: number): Promise<StationData> {
     const dataURL = station.properties.dataURLs[dataURLsIndex];
     const response = await fetchOrThrow(dataURL);
-    const collection = FeatureCollectionSchema.parse(await response.json());
+    const collection = v.parse(FeatureCollectionSchema, await response.json());
     if (collection?.features?.length !== 1) throw new Error();
 
     const feature = collection?.features?.[0];
@@ -142,11 +143,11 @@ export class GeoSphereDataProvider implements LineaDataProvider {
     }
 
     const metadata0 = await fetchOrThrow(`${URL}/metadata`);
-    const metadata = MetadataSchema.parse(await metadata0.json());
+    const metadata = v.parse(MetadataSchema, await metadata0.json());
     return {
       type: "FeatureCollection",
       features: metadata.stations.map((s) =>
-        listing.FeatureSchema.parse({
+        v.parse(listing.FeatureSchema, {
           type: "Feature",
           id: s.id,
           geometry: {

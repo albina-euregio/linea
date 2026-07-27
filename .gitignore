@@ -4,6 +4,7 @@
 /*.log
 /dist
 /node_modules
+/.gitlab-ci-local
 /albina-euregio-linea*tgz
 .yarn/install-state.gz
 *linea.geojson*

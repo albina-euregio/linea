@@ -1,3 +1,4 @@
+import * as v from "valibot";
 import { type StationData, StationDataArray, type Units, type Values } from "./data/station-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
@@ -26,7 +27,8 @@ export abstract class LineaView {
     this.lineaplot = lineaplot;
     this.dp = lineaplot.dp;
     this.showTitle = lineaplot.hasAttribute("showtitle");
-    this.#features = FeatureSchema.array().parse(
+    this.#features = v.parse(
+      v.array(FeatureSchema),
       JSON.parse(this.lineaplot.getAttribute(LineaPlot.FEATURES)),
     );
   }

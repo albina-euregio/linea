@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import {
   Intensity,
   Length,
@@ -14,7 +14,7 @@ import { ParameterTypeSchema } from "../data/station-data";
 export { ParameterTypeSchema, type ParameterType } from "../data/station-data";
 export { UnitSchema, type Unit } from "../data/units";
 
-export const ListingParameterTypeSchema = z.enum([
+export const ListingParameterTypeSchema = v.picklist([
   ...ParameterTypeSchema.options,
   "HSD_6",
   "HSD_24",
@@ -27,15 +27,15 @@ export const ListingParameterTypeSchema = z.enum([
   "PSUM_48",
   "PSUM_72",
 ]);
-export type ListingParameterType = z.infer<typeof ListingParameterTypeSchema>;
+export type ListingParameterType = v.InferOutput<typeof ListingParameterTypeSchema>;
 
-const number = z
-  .number()
-  .nullish()
-  .check(z.overwrite((v) => (v === -777 ? undefined : v)));
+const number = v.pipe(
+  v.nullish(v.number()),
+  v.transform((value) => (value === -777 ? undefined : value)),
+);
 
-export const StatisticsSchema = z.object({
-  unit: UnitSchema.nullish(),
+export const StatisticsSchema = v.object({
+  unit: v.nullish(UnitSchema),
   count: number,
   min: number,
   average: number,
@@ -45,175 +45,249 @@ export const StatisticsSchema = z.object({
   delta: number,
 });
 
-export const FeaturePropertiesSchema = z
-  .object({
-    name: z.string().describe("Station name"),
-    shortName: z
-      .string()
-      .regex(/^[A-Za-z0-9]+$/)
-      .nullish()
-      .describe("Station short name (such as ISEE2) consisting of [A-Za-z0-9] only"),
+export const FeaturePropertiesSchema = v.pipe(
+  v.object({
+    name: v.pipe(v.string(), v.description("Station name")),
+    shortName: v.nullish(
+      v.pipe(
+        v.string(),
+        v.regex(/^[A-Za-z0-9]+$/),
+        v.description("Station short name (such as ISEE2) consisting of [A-Za-z0-9] only"),
+      ),
+    ),
 
-    microRegionID: z
-      .string()
-      .nullish()
-      .describe("EAWS micro region ID, see https://gitlab.com/eaws/eaws-regions"),
-    stationCharacteristics: z
-      .string()
-      .nullish()
-      .describe("A few sentences describing the station characteristics/locality/history/..."),
-    altitude: z
-      .number()
-      .nullish()
-      .describe("Altitude above sea level (alternatively specify 3rd component in coordinates)"),
-    startYear: z.string().nullish().describe("Observation start year"),
+    microRegionID: v.nullish(
+      v.pipe(
+        v.string(),
+        v.description("EAWS micro region ID, see https://gitlab.com/eaws/eaws-regions"),
+      ),
+    ),
+    stationCharacteristics: v.nullish(
+      v.pipe(
+        v.string(),
+        v.description(
+          "A few sentences describing the station characteristics/locality/history/...",
+        ),
+      ),
+    ),
+    altitude: v.nullish(
+      v.pipe(
+        v.number(),
+        v.description(
+          "Altitude above sea level (alternatively specify 3rd component in coordinates)",
+        ),
+      ),
+    ),
+    startYear: v.nullish(v.pipe(v.string(), v.description("Observation start year"))),
 
-    operator: z.string().nullish().describe("Station operator"),
-    operatorLink: z.url().nullish().describe("Link to website of station operator"),
-    operatorLicense: z.string().nullish().describe("License under which data is provided"),
-    operatorLicenseLink: z.url().nullish().describe("Link to license"),
+    operator: v.nullish(v.pipe(v.string(), v.description("Station operator"))),
+    operatorLink: v.nullish(
+      v.pipe(v.string(), v.url(), v.description("Link to website of station operator")),
+    ),
+    operatorLicense: v.nullish(
+      v.pipe(v.string(), v.description("License under which data is provided")),
+    ),
+    operatorLicenseLink: v.nullish(v.pipe(v.string(), v.url(), v.description("Link to license"))),
 
-    plot: z
-      .string()
-      .nullish()
-      .describe("For legacy PNG plots: name of plot which includes this station"),
+    plot: v.nullish(
+      v.pipe(
+        v.string(),
+        v.description("For legacy PNG plots: name of plot which includes this station"),
+      ),
+    ),
 
-    dataProviderID: ProviderIdentifierSchema.nullish(),
-    dataURLs: z
-      .url()
-      .array()
-      .describe(
-        "Data URLs for this station (typically SMET format is used, and three URLs are provided, short term, winter season, all winter seasons)",
-      )
-      .nullish(),
+    dataProviderID: v.nullish(ProviderIdentifierSchema),
+    dataURLs: v.nullish(
+      v.pipe(
+        v.array(v.pipe(v.string(), v.url())),
+        v.description(
+          "Data URLs for this station (typically SMET format is used, and three URLs are provided, short term, winter season, all winter seasons)",
+        ),
+      ),
+    ),
 
-    statistics: z.partialRecord(ParameterTypeSchema, StatisticsSchema).nullish(),
+    statistics: v.nullish(v.record(ParameterTypeSchema, StatisticsSchema)),
 
-    date: z.coerce.date().nullish().describe("ISO 8601 timestamp"),
-    ISWR: number
-      .describe("Incoming Short Wave Radiation in W/m²")
-      .transform((v) => new Intensity(v, "W/m²"))
-      .meta({ unit: "W/m²" }),
-    RSWR: number
-      .describe("Reflected Short Wave Radiation in W/m²")
-      .transform((v) => new Intensity(v, "W/m²"))
-      .meta({ unit: "W/m²" }),
-    ILWR: number
-      .describe("Incoming Long Wave Radiation in W/m²")
-      .transform((v) => new Intensity(v, "W/m²"))
-      .meta({ unit: "W/m²" }),
-    OLWR: number
-      .describe("Outgoing Long Wave Radiation in W/m²")
-      .transform((v) => new Intensity(v, "W/m²"))
-      .meta({ unit: "W/m²" }),
-    HS: number
-      .describe("Snow height in m")
-      .transform((v) => new Length(v, "m"))
-      .meta({ unit: "m" }),
-    HSD_6: number
-      .describe("Difference in snow height over the last 6h in m")
-      .transform((v) => new Length(v, "m"))
-      .meta({ unit: "m" }),
-    HSD_24: number
-      .describe("Difference in snow height over the last 24h in m")
-      .transform((v) => new Length(v, "m"))
-      .meta({ unit: "m" }),
-    HSD_48: number
-      .describe("Difference in snow height over the last 48h in m")
-      .transform((v) => new Length(v, "m"))
-      .meta({ unit: "m" }),
-    HSD_72: number
-      .describe("Difference in snow height over the last 72h in m")
-      .transform((v) => new Length(v, "m"))
-      .meta({ unit: "m" }),
-    P: number
-      .describe("Air pressure in Pa")
-      .transform((v) => new Pressure(v, "Pa"))
-      .meta({ unit: "Pa" }),
-    TA_MAX: number
-      .describe("Max. air temperature over the last 24h in Kelvin")
-      .transform((v) => new Temperature(v, "K"))
-      .meta({ unit: "K" }),
-    TA_MIN: number
-      .describe("Min. air temperature over the last 24h in Kelvin")
-      .transform((v) => new Temperature(v, "K"))
-      .meta({ unit: "K" }),
-    TA: number
-      .describe("Air temperature in Kelvin")
-      .transform((v) => new Temperature(v, "K"))
-      .meta({ unit: "K" }),
-    PSUM_6: number
-      .describe("Precipitation summed over the last 6h in mm")
-      .transform((v) => new Precipitation(v, "mm"))
-      .meta({ unit: "mm" }),
-    PSUM_24: number
-      .describe("Precipitation summed over the last 24h in mm")
-      .transform((v) => new Precipitation(v, "mm"))
-      .meta({ unit: "mm" }),
-    PSUM_48: number
-      .describe("Precipitation summed over the last 48h in mm")
-      .transform((v) => new Precipitation(v, "mm"))
-      .meta({ unit: "mm" }),
-    PSUM_72: number
-      .describe("Precipitation summed over the last 72h in mm")
-      .transform((v) => new Precipitation(v, "mm"))
-      .meta({ unit: "mm" }),
-    TSS: number
-      .describe("Temperature Snow Surface in Kelvin")
-      .transform((v) => new Temperature(v, "K"))
-      .meta({ unit: "K" }),
-    RH: number
-      .describe("Relative humidity between 0 and 1")
-      .transform((v) => new Scalar(v, "1"))
-      .meta({ unit: "1" }),
-    TD: number
-      .describe("Dew point temperature in Kelvin")
-      .transform((v) => new Temperature(v, "K"))
-      .meta({ unit: "K" }),
-    VW_MAX: number
-      .describe("Max. wind velocity (optionally max over the last 3h) in m/s")
-      .transform((v) => new Speed(v, "m/s"))
-      .meta({ unit: "m/s" }),
-    VW: number
-      .describe("Wind velocity (optionally as average over the last 3h) in m/s")
-      .transform((v) => new Speed(v, "m/s"))
-      .meta({ unit: "m/s" }),
-    DW: number
-      .describe("Wind direction (optionally average over the last 3h) in °")
-      .transform((v) => new Scalar(v, "°"))
-      .meta({ unit: "°" }),
-  })
-  .describe("The properties of a weather station including measured values");
+    date: v.pipe(v.nullish(v.pipe(v.unknown(), v.toDate())), v.description("ISO 8601 timestamp")),
+    ISWR: v.pipe(
+      number,
+      v.description("Incoming Short Wave Radiation in W/m²"),
+      v.transform((value) => new Intensity(value, "W/m²")),
+      v.metadata({ unit: "W/m²" }),
+    ),
+    RSWR: v.pipe(
+      number,
+      v.description("Reflected Short Wave Radiation in W/m²"),
+      v.transform((value) => new Intensity(value, "W/m²")),
+      v.metadata({ unit: "W/m²" }),
+    ),
+    ILWR: v.pipe(
+      number,
+      v.description("Incoming Long Wave Radiation in W/m²"),
+      v.transform((value) => new Intensity(value, "W/m²")),
+      v.metadata({ unit: "W/m²" }),
+    ),
+    OLWR: v.pipe(
+      number,
+      v.description("Outgoing Long Wave Radiation in W/m²"),
+      v.transform((value) => new Intensity(value, "W/m²")),
+      v.metadata({ unit: "W/m²" }),
+    ),
+    HS: v.pipe(
+      number,
+      v.description("Snow height in m"),
+      v.transform((value) => new Length(value, "m")),
+      v.metadata({ unit: "m" }),
+    ),
+    HSD_6: v.pipe(
+      number,
+      v.description("Difference in snow height over the last 6h in m"),
+      v.transform((value) => new Length(value, "m")),
+      v.metadata({ unit: "m" }),
+    ),
+    HSD_24: v.pipe(
+      number,
+      v.description("Difference in snow height over the last 24h in m"),
+      v.transform((value) => new Length(value, "m")),
+      v.metadata({ unit: "m" }),
+    ),
+    HSD_48: v.pipe(
+      number,
+      v.description("Difference in snow height over the last 48h in m"),
+      v.transform((value) => new Length(value, "m")),
+      v.metadata({ unit: "m" }),
+    ),
+    HSD_72: v.pipe(
+      number,
+      v.description("Difference in snow height over the last 72h in m"),
+      v.transform((value) => new Length(value, "m")),
+      v.metadata({ unit: "m" }),
+    ),
+    P: v.pipe(
+      number,
+      v.description("Air pressure in Pa"),
+      v.transform((value) => new Pressure(value, "Pa")),
+      v.metadata({ unit: "Pa" }),
+    ),
+    TA_MAX: v.pipe(
+      number,
+      v.description("Max. air temperature over the last 24h in Kelvin"),
+      v.transform((value) => new Temperature(value, "K")),
+      v.metadata({ unit: "K" }),
+    ),
+    TA_MIN: v.pipe(
+      number,
+      v.description("Min. air temperature over the last 24h in Kelvin"),
+      v.transform((value) => new Temperature(value, "K")),
+      v.metadata({ unit: "K" }),
+    ),
+    TA: v.pipe(
+      number,
+      v.description("Air temperature in Kelvin"),
+      v.transform((value) => new Temperature(value, "K")),
+      v.metadata({ unit: "K" }),
+    ),
+    PSUM_6: v.pipe(
+      number,
+      v.description("Precipitation summed over the last 6h in mm"),
+      v.transform((value) => new Precipitation(value, "mm")),
+      v.metadata({ unit: "mm" }),
+    ),
+    PSUM_24: v.pipe(
+      number,
+      v.description("Precipitation summed over the last 24h in mm"),
+      v.transform((value) => new Precipitation(value, "mm")),
+      v.metadata({ unit: "mm" }),
+    ),
+    PSUM_48: v.pipe(
+      number,
+      v.description("Precipitation summed over the last 48h in mm"),
+      v.transform((value) => new Precipitation(value, "mm")),
+      v.metadata({ unit: "mm" }),
+    ),
+    PSUM_72: v.pipe(
+      number,
+      v.description("Precipitation summed over the last 72h in mm"),
+      v.transform((value) => new Precipitation(value, "mm")),
+      v.metadata({ unit: "mm" }),
+    ),
+    TSS: v.pipe(
+      number,
+      v.description("Temperature Snow Surface in Kelvin"),
+      v.transform((value) => new Temperature(value, "K")),
+      v.metadata({ unit: "K" }),
+    ),
+    RH: v.pipe(
+      number,
+      v.description("Relative humidity between 0 and 1"),
+      v.transform((value) => new Scalar(value, "1")),
+      v.metadata({ unit: "1" }),
+    ),
+    TD: v.pipe(
+      number,
+      v.description("Dew point temperature in Kelvin"),
+      v.transform((value) => new Temperature(value, "K")),
+      v.metadata({ unit: "K" }),
+    ),
+    VW_MAX: v.pipe(
+      number,
+      v.description("Max. wind velocity (optionally max over the last 3h) in m/s"),
+      v.transform((value) => new Speed(value, "m/s")),
+      v.metadata({ unit: "m/s" }),
+    ),
+    VW: v.pipe(
+      number,
+      v.description("Wind velocity (optionally as average over the last 3h) in m/s"),
+      v.transform((value) => new Speed(value, "m/s")),
+      v.metadata({ unit: "m/s" }),
+    ),
+    DW: v.pipe(
+      number,
+      v.description("Wind direction (optionally average over the last 3h) in °"),
+      v.transform((value) => new Scalar(value, "°")),
+      v.metadata({ unit: "°" }),
+    ),
+  }),
+  v.description("The properties of a weather station including measured values"),
+);
 
-export const GeometrySchema = z.object({
-  type: z.enum(["Point"]),
-  coordinates: z.union([
-    z.tuple([z.number().describe("Longitude"), z.number().describe("Latitude")]),
-    z.tuple([
-      z.number().describe("Longitude"),
-      z.number().describe("Latitude"),
-      z.number().describe("Altitude"),
+export const GeometrySchema = v.object({
+  type: v.picklist(["Point"]),
+  coordinates: v.union([
+    v.strictTuple([
+      v.pipe(v.number(), v.description("Longitude")),
+      v.pipe(v.number(), v.description("Latitude")),
+    ]),
+    v.strictTuple([
+      v.pipe(v.number(), v.description("Longitude")),
+      v.pipe(v.number(), v.description("Latitude")),
+      v.pipe(v.number(), v.description("Altitude")),
     ]),
   ]),
 });
 
-export const FeatureSchema = z
-  .object({
-    type: z.enum(["Feature"]),
+export const FeatureSchema = v.pipe(
+  v.object({
+    type: v.picklist(["Feature"]),
     geometry: GeometrySchema,
     properties: FeaturePropertiesSchema,
-    id: z.union([z.uuid(), z.string()]).describe("The ID/UUID of the station"),
-  })
-  .describe("A GeoJSON Feature corresponding to one weather station");
+    id: v.pipe(
+      v.union([v.pipe(v.string(), v.uuid()), v.string()]),
+      v.description("The ID/UUID of the station"),
+    ),
+  }),
+  v.description("A GeoJSON Feature corresponding to one weather station"),
+);
 
-export const FeatureCollectionSchema = z
-  .object({
-    type: z.enum(["FeatureCollection"]),
-    features: z.array(FeatureSchema),
-    properties: z.any().nullish(),
-  })
-  .describe("A GeoJSON FeatureCollection of weather stations");
+export const FeatureCollectionSchema = v.pipe(
+  v.object({
+    type: v.picklist(["FeatureCollection"]),
+    features: v.array(FeatureSchema),
+    properties: v.nullish(v.any()),
+  }),
+  v.description("A GeoJSON FeatureCollection of weather stations"),
+);
 
-export type Statistics = z.infer<typeof StatisticsSchema>;
-export type Feature = z.infer<typeof FeatureSchema>;
-export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
+export type Statistics = v.InferOutput<typeof StatisticsSchema>;
+export type Feature = v.InferOutput<typeof FeatureSchema>;
+export type FeatureCollection = v.InferOutput<typeof FeatureCollectionSchema>;

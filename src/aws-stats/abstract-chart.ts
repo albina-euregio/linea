@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
@@ -101,15 +101,15 @@ export abstract class AbstractChart extends HTMLElement {
     try {
       const parsed = JSON.parse(raw);
       const variantSchema = Array.isArray(parsed)
-        ? z.array(dangerSourceVariantSchema)
+        ? v.array(dangerSourceVariantSchema)
         : dangerSourceVariantSchema;
-      const validated = variantSchema.parse(Array.isArray(parsed) ? parsed : [parsed]);
+      const validated = v.parse(variantSchema, Array.isArray(parsed) ? parsed : [parsed]);
       return Array.isArray(validated) ? validated : [validated];
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error("Zod validation failed for DangerSourceVariant:");
+      if (error instanceof v.ValiError) {
+        console.error("Valibot validation failed for DangerSourceVariant:");
         error.issues.forEach((issue) => {
-          console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
+          console.error(`  - ${v.getDotPath(issue) ?? ""}: ${issue.message}`);
         });
       } else if (error instanceof SyntaxError) {
         console.error("JSON parse error:", error.message);

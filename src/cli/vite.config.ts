@@ -4,7 +4,7 @@ export default defineConfig({
   pack: {
     entry: ["./cli.ts"],
     deps: {
-      alwaysBundle: ["xmldom", "temporal-polyfill/global", "zod"],
+      alwaysBundle: ["xmldom", "temporal-polyfill/global", "valibot"],
       onlyBundle: false,
     },
     dts: false,

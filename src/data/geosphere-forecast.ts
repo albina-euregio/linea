@@ -1,3 +1,4 @@
+import * as v from "valibot";
 import type { Values } from "./station-data";
 import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
 
@@ -66,7 +67,7 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
     );
   }
 
-  const parsed = GeosphereForecastSchema.parse(await response.json(), { reportInput: true });
+  const parsed = v.parse(GeosphereForecastSchema, await response.json());
   const feature = parsed.features[0];
   const parameters = feature.properties.parameters;
 

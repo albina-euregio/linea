@@ -1,9 +1,9 @@
-import { z } from "zod";
+import * as v from "valibot";
 import { FeatureSchema } from "./listing";
 import { expect, test } from "vite-plus/test";
 
 test("parse Feature", () => {
-  const feature = FeatureSchema.parse({
+  const feature = v.parse(FeatureSchema, {
     id: "6cb4697c-2e0a-7214-6f8c-9af46ee648f3",
     geometry: {
       coordinates: [11.335489, 47.052267, 2180.0],
@@ -31,6 +31,6 @@ test("parse Feature", () => {
       plot: "gallreideschrofen",
     },
     type: "Feature",
-  } satisfies z.input<typeof FeatureSchema>);
+  } satisfies v.InferInput<typeof FeatureSchema>);
   expect(feature).toMatchSnapshot();
 });
