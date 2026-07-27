@@ -1,12 +1,15 @@
 import { i18n } from "../i18n";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import type { DangerSourceVariant } from "../schema/danger-source-data";
+import type * as v from "valibot";
+import type { vDangerSourceVariant } from "../api/valibot.gen";
 import { DangerSourceVariantService } from "./datastore";
 import { COLORS } from "./series-options/colorizer";
 import {
   opts_danger_rating,
   opts_danger_rating_series_base,
 } from "./series-options/danger-rating-opts";
+
+type DangerSourceVariant = v.InferOutput<typeof vDangerSourceVariant>;
 
 interface DangerRatingDangerSourceVariantPlotInformation extends PlotInformation {
   variants: string[];
