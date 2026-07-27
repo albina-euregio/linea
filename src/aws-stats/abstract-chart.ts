@@ -3,10 +3,12 @@ import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
-import type { Bulletin } from "../schema/caaml";
+import type { vCaamlAvalancheBulletin } from "../api/valibot.gen";
 import { dangerSourceVariantSchema, type DangerSourceVariant } from "../schema/danger-source-data";
 import type { BlogData } from "./datatypes";
 import type { StressLevelData } from "../schema/stress-level";
+
+type Bulletin = v.InferOutput<typeof vCaamlAvalancheBulletin>;
 
 export interface PlotInformation {
   data: uPlot.AlignedData;

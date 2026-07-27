@@ -10,9 +10,13 @@ import type {
   DangerSourceVariant,
   EAWSMatrixInformation,
 } from "../schema/danger-source-data";
-import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
+import type * as v from "valibot";
+import type { vCaamlAvalancheBulletin, vCaamlAvalancheProblemType } from "../api/valibot.gen";
 import type { StressLevelData } from "../schema/stress-level";
 import { fetchOrThrow } from "../data/fetchOrThrow";
+
+type Bulletin = v.InferOutput<typeof vCaamlAvalancheBulletin>;
+type AvalancheProblemType = v.InferOutput<typeof vCaamlAvalancheProblemType>;
 
 export class Observations {
   public observations: Observation[];

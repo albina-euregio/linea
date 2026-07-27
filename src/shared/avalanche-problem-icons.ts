@@ -5,7 +5,10 @@ import wet_snow from "../assets/Icon-Avalanche-Problem-Wet-Snow-EAWS.svg";
 import gliding_snow from "../assets/Icon-Avalanche-Problem-Gliding-Snow-EAWS.svg";
 import cornices from "../assets/Icon-Avalanche-Problem-Cornices.svg";
 import no_distinct_avalanche_problem from "../assets/Icon-Avalanche-Problem-No-Distinct-Avalanche-Problem-EAWS.svg";
-import { type AvalancheProblemType } from "../schema/caaml";
+import type * as v from "valibot";
+import type { vCaamlAvalancheProblemType } from "../api/valibot.gen";
+
+type AvalancheProblemType = v.InferOutput<typeof vCaamlAvalancheProblemType>;
 
 export const LOADED_AVALANCHE_PROBLEM_ICONS = new Map<AvalancheProblemType, HTMLImageElement>([
   ["persistent_weak_layers", img(persistent_weak_layers)],
