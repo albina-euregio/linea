@@ -1,6 +1,7 @@
 import type uPlot from "uplot";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import type { DangerSourceVariant, EAWSMatrixInformation } from "../schema/danger-source-data";
+import type * as v from "valibot";
+import type { vDangerSourceVariant, vEawsMatrixInformation } from "../api/valibot.gen";
 import { DangerSourceVariantService } from "./datastore";
 import { COLORS } from "./series-options/colorizer";
 import {
@@ -9,6 +10,9 @@ import {
   opts_danger_source_variants_matrix_parameter_frequency_value,
   opts_danger_source_variants_matrix_parameter_stability_class_value,
 } from "./series-options/danger-source-variants-matrix-parameter-opts";
+
+type DangerSourceVariant = v.InferOutput<typeof vDangerSourceVariant>;
+type EAWSMatrixInformation = v.InferOutput<typeof vEawsMatrixInformation>;
 
 interface DangerRatingDangerSourceVariantPlotInformation extends PlotInformation {
   variants: string[];

@@ -5,14 +5,22 @@ import {
   TriggeredAvalancheObservation,
   type BlogData,
 } from "./datatypes";
+import type * as v from "valibot";
 import type {
-  DangerRatingModificator,
-  DangerSourceVariant,
-  EAWSMatrixInformation,
-} from "../schema/danger-source-data";
-import { type AvalancheProblemType, type Bulletin } from "../schema/caaml";
+  vCaamlAvalancheBulletin,
+  vCaamlAvalancheProblemType,
+  vDangerRatingModificator,
+  vDangerSourceVariant,
+  vEawsMatrixInformation,
+} from "../api/valibot.gen";
 import type { StressLevelData } from "../schema/stress-level";
 import { fetchOrThrow } from "../data/fetchOrThrow";
+
+type Bulletin = v.InferOutput<typeof vCaamlAvalancheBulletin>;
+type AvalancheProblemType = v.InferOutput<typeof vCaamlAvalancheProblemType>;
+type DangerRatingModificator = v.InferOutput<typeof vDangerRatingModificator>;
+type DangerSourceVariant = v.InferOutput<typeof vDangerSourceVariant>;
+type EAWSMatrixInformation = v.InferOutput<typeof vEawsMatrixInformation>;
 
 export class Observations {
   public observations: Observation[];
@@ -905,7 +913,7 @@ export class DangerSourceVariantService {
     this.dangerSourceVariants
       .filter((variant) => variant.regions.includes(microRegion))
       .forEach((variant) => {
-        const day = new Date(variant.validUntil.toISOString().split("T")[0]).getTime();
+        const day = BulletinData.dayTimestamp(variant.validUntil);
         if (day === null) {
           return;
         }
@@ -947,7 +955,7 @@ export class DangerSourceVariantService {
     this.dangerSourceVariants
       .filter((variant) => variant.regions.includes(microRegion))
       .forEach((variant) => {
-        const day = new Date(variant.validUntil.toISOString().split("T")[0]).getTime();
+        const day = BulletinData.dayTimestamp(variant.validUntil);
         if (day === null) {
           return;
         }

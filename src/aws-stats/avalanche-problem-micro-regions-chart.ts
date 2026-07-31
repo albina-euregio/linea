@@ -4,7 +4,10 @@ import { BulletinData } from "./datastore";
 import { opts_avalanche_problem_micro_regions } from "./series-options/avalanche-problem-micro-regions-opts";
 import { i18n, type messagesEN_t } from "../i18n";
 import { colorForPercentage } from "./series-options/colorizer";
-import type { AvalancheProblemType } from "../schema/caaml";
+import type * as v from "valibot";
+import type { vCaamlAvalancheProblemType } from "../api/valibot.gen";
+
+type AvalancheProblemType = v.InferOutput<typeof vCaamlAvalancheProblemType>;
 
 interface AvalancheProblemPlotInformation extends PlotInformation {
   range: uPlot.Scale.Range;

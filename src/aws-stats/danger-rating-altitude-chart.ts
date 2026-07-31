@@ -1,9 +1,12 @@
+import type * as v from "valibot";
 import { AbstractChart, type PlotInformation } from "./abstract-chart";
-import type { Bulletin } from "../schema/caaml";
+import type { vCaamlAvalancheBulletin } from "../api/valibot.gen";
 import uPlot from "uplot";
 import { opts_danger_rating_altitude } from "./series-options/danger-rating-altitude-opts";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
 import { BulletinData } from "./datastore";
+
+type Bulletin = v.InferOutput<typeof vCaamlAvalancheBulletin>;
 
 interface DangerRatingAltitudePlotInformation extends PlotInformation {
   minX: number;

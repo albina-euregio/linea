@@ -3,10 +3,12 @@ import uPlot from "uplot";
 import cssComponent from "./abstract-chart.css?raw";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import type { AwsExportChartConfiguration } from "./aws-stats-export-modal";
-import type { Bulletin } from "../schema/caaml";
-import { dangerSourceVariantSchema, type DangerSourceVariant } from "../schema/danger-source-data";
+import { vDangerSourceVariant, type vCaamlAvalancheBulletin } from "../api/valibot.gen";
 import type { BlogData } from "./datatypes";
 import type { StressLevelData } from "../schema/stress-level";
+
+type Bulletin = v.InferOutput<typeof vCaamlAvalancheBulletin>;
+type DangerSourceVariant = v.InferOutput<typeof vDangerSourceVariant>;
 
 export interface PlotInformation {
   data: uPlot.AlignedData;
@@ -101,8 +103,8 @@ export abstract class AbstractChart extends HTMLElement {
     try {
       const parsed = JSON.parse(raw);
       const variantSchema = Array.isArray(parsed)
-        ? v.array(dangerSourceVariantSchema)
-        : dangerSourceVariantSchema;
+        ? v.array(vDangerSourceVariant)
+        : vDangerSourceVariant;
       const validated = v.parse(variantSchema, Array.isArray(parsed) ? parsed : [parsed]);
       return Array.isArray(validated) ? validated : [validated];
     } catch (error) {
