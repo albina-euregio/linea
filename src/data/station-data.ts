@@ -299,7 +299,7 @@ export class StationDataArray extends Array<StationData> {
         const oldIndex = oldIndexMap.get(timestamp);
         const newIndex = newIndexMap.get(timestamp);
 
-        for (key in oldResult.values) {
+        for (key in newResult.values) {
           if (oldIndex !== undefined) {
             mergedValues[key][t] = oldResult.values[key][oldIndex];
           } else if (newIndex !== undefined) {
