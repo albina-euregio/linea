@@ -40,6 +40,7 @@
     "lint": "vp check",
     "build": "vp build && vp pack",
     "build:cli": "cd src/cli/ && vp pack",
+    "preview": "vp preview",
     "dev": "vp dev"
   },
   "dependencies": {
