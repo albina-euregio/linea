@@ -12,7 +12,7 @@ stages:
     paths:
       - .pnpm-store
   before_script:
-    - command -v pnpm || npm install --global pnpm@11.17.0
+    - command -v pnpm || npm install --global pnpm@12.3.4
     - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
 
