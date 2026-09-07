@@ -108,7 +108,7 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
     "https://smet.hydrographie.info/stations_ktn_destiny.geojson",
     (id) => [
       `https://smet.hydrographie.info/${id}.smet`,
-      `https://smet.hydrographie.info/${id}_6m.smet`,
+      `https://smet.hydrographie.info/${id}_12m.smet`,
     ],
   ),
 
