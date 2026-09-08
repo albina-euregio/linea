@@ -68,6 +68,7 @@
   "linea:plotnames:datapoints": "Datenpunkte",
   "linea:plotnames:newsnow": "Neuschnee",
   "linea:plotnames:snowheightheatmap": "Schneehöhe (Heatmap)",
+  "linea:plotnames:temperatureheatmap": "Temperatur (Heatmap)",
   "linea:heatmap:day": "Tag",
   "linea:heatmap:season": "Winter",
   "linea:title:since": "seit",

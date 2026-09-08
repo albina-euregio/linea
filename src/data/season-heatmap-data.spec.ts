@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vite-plus/test";
-import { SeasonHeatmapData } from "./season-heatmap-data";
+import { dailyMean, SeasonHeatmapData } from "./season-heatmap-data";
 import "temporal-polyfill/global";
 
 const timeZone = "Europe/Vienna";
@@ -58,6 +58,14 @@ describe("SeasonHeatmapData", () => {
     expect(cellOf(heatmap, "2000-11-05", 2021)).toBe(null);
     expect(cellOf(heatmap, "2000-11-05", 2023)).toBe(9);
     expect(heatmap.values.filter((v) => v === 100)).toEqual([]);
+  });
+
+  test("reduces a day with the given reducer", () => {
+    const timestamps = ["2020-11-05", "2020-11-05", "2020-11-05"].map(timestamp);
+    const max = SeasonHeatmapData.from(timeZone, timestamps, [2, 4, 9]);
+    const mean = SeasonHeatmapData.from(timeZone, timestamps, [2, 4, 9], dailyMean);
+    expect(cellOf(max, "2000-11-05", 2020)).toBe(9);
+    expect(cellOf(mean, "2000-11-05", 2020)).toBe(5);
   });
 
   test("is empty without measurements", () => {

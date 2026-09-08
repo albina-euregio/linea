@@ -2,11 +2,12 @@ import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
+import type { Unit } from "../data/units";
 
 const DAY = 24 * 60 * 60 * 1000;
 
-export interface HSThreshold {
-  /** `[min, max)` of the class in cm; `null` means unbounded */
+export interface Threshold {
+  /** `[min, max)` of the class in the parameter's unit; `null` means unbounded */
   range: [number | null, number | null];
   color: string;
 }
@@ -17,7 +18,7 @@ export interface HSThreshold {
  *
  * @see https://wiski.tirol.gv.at/lawine/zamg_meteo/overlays/snow-height/config.json
  */
-export const HS_THRESHOLDS: HSThreshold[] = [
+export const HS_THRESHOLDS: Threshold[] = [
   { range: [null, 1], color: "#fffffe" },
   { range: [1, 10], color: "#ffffb3" },
   { range: [10, 25], color: "#b0ffbc" },
@@ -29,17 +30,39 @@ export const HS_THRESHOLDS: HSThreshold[] = [
   { range: [400, null], color: "#cc0ce8" },
 ];
 
-/** The index of the colour class the given snow height falls into. */
-export function thresholdIndex(value: number): number {
-  const index = HS_THRESHOLDS.findIndex(
+/**
+ * The air temperature colour classes, taken verbatim from the temperature
+ * overlay of the Tyrolean avalanche warning service.
+ *
+ * @see https://wiski.tirol.gv.at/lawine/zamg_meteo/overlays/temp/config.json
+ */
+export const TA_THRESHOLDS: Threshold[] = [
+  { range: [null, -25], color: "#9f80ff" },
+  { range: [-25, -20], color: "#784bff" },
+  { range: [-20, -15], color: "#035bbe" },
+  { range: [-15, -10], color: "#0481ff" },
+  { range: [-10, -5], color: "#03cdff" },
+  { range: [-5, 0], color: "#8cffff" },
+  { range: [0, 5], color: "#b0ffbc" },
+  { range: [5, 10], color: "#ffff67" },
+  { range: [10, 15], color: "#ffbe82" },
+  { range: [15, 20], color: "#ff9a35" },
+  { range: [20, 25], color: "#ff5536" },
+  { range: [25, 30], color: "#ff0505" },
+  { range: [30, null], color: "#fa3796" },
+];
+
+/** The index of the colour class the given value falls into. */
+function thresholdIndex(thresholds: Threshold[], value: number): number {
+  const index = thresholds.findIndex(
     ({ range: [min, max] }) => (min == null || value >= min) && (max == null || value < max),
   );
-  return index < 0 ? HS_THRESHOLDS.length - 1 : index;
+  return index < 0 ? thresholds.length - 1 : index;
 }
 
 /**
- * Draws one filled tile per (calendar day, season) cell, coloured by
- * {@link HS_THRESHOLDS}. Cells without a measurement are left blank.
+ * Draws one filled tile per (calendar day, season) cell, coloured by the given
+ * {@link Threshold}s. Cells without a measurement are left blank.
  *
  * The series data is a `mode: 2` facet triple `[xs, ys, values]` as built by
  * `SeasonHeatmapData`; the cells are ordered x-major, so the y bins
@@ -47,7 +70,7 @@ export function thresholdIndex(value: number): number {
  *
  * @see https://leeoniya.github.io/uPlot/demos/latency-heatmap.html
  */
-function heatmapPaths(): uPlot.Series.PathBuilder {
+function heatmapPaths(thresholds: Threshold[]): uPlot.Series.PathBuilder {
   return (u, seriesIdx) => {
     uPlot.orient(
       u,
@@ -93,7 +116,7 @@ function heatmapPaths(): uPlot.Series.PathBuilder {
           .slice(0, yBinQty)
           .map((y) => Math.round(valToPosY(y, scaleY, yDim, yOff) - ySize / 2));
 
-        const paths = HS_THRESHOLDS.map(() => new Path2D());
+        const paths = thresholds.map(() => new Path2D());
         for (let i = 0; i < len; i++) {
           const value = values[i];
           if (value == null) continue;
@@ -106,7 +129,8 @@ function heatmapPaths(): uPlot.Series.PathBuilder {
           ) {
             continue;
           }
-          rect(paths[thresholdIndex(value)], cxs[~~(i / yBinQty)], cys[i % yBinQty], xSize, ySize);
+          const path = paths[thresholdIndex(thresholds, value)];
+          rect(path, cxs[~~(i / yBinQty)], cys[i % yBinQty], xSize, ySize);
         }
 
         const ctx = u.ctx;
@@ -115,7 +139,7 @@ function heatmapPaths(): uPlot.Series.PathBuilder {
         ctx.rect(u.bbox.left, u.bbox.top, u.bbox.width, u.bbox.height);
         ctx.clip();
         paths.forEach((path, i) => {
-          ctx.fillStyle = HS_THRESHOLDS[i].color;
+          ctx.fillStyle = thresholds[i].color;
           ctx.fill(path);
         });
         ctx.restore();
@@ -164,11 +188,11 @@ function heatmapDataIdx(u: uPlot, seriesIdx: number): number | null {
 }
 
 /**
- * Draws the colour scale of {@link HS_THRESHOLDS} into the top padding of the
- * chart — right-aligned, below the axis label, with as many class boundaries
- * labelled as fit next to each other.
+ * Draws the colour scale into the top padding of the chart — right-aligned,
+ * below the axis label, with as many class boundaries labelled as fit next to
+ * each other.
  */
-function drawColorScale(u: uPlot) {
+function drawColorScale(u: uPlot, thresholds: Threshold[], unit: string) {
   const ctx = u.ctx;
   // uPlot has set the axis font, which is already scaled by the device pixel ratio
   const fontSize = parseFloat(ctx.font) || 12;
@@ -179,13 +203,12 @@ function drawColorScale(u: uPlot) {
 
   ctx.save();
 
-  const unit = " cm";
   const unitWidth = ctx.measureText(unit).width;
-  const boxWidth = Math.min(fontSize * 2.6, (u.bbox.width - unitWidth) / HS_THRESHOLDS.length);
-  const scaleWidth = boxWidth * HS_THRESHOLDS.length;
+  const boxWidth = Math.min(fontSize * 2.6, (u.bbox.width - unitWidth) / thresholds.length);
+  const scaleWidth = boxWidth * thresholds.length;
   const left = u.bbox.left + u.bbox.width - unitWidth - scaleWidth;
 
-  HS_THRESHOLDS.forEach(({ color }, i) => {
+  thresholds.forEach(({ color }, i) => {
     ctx.fillStyle = color;
     ctx.fillRect(left + i * boxWidth, boxTop, boxWidth, boxHeight);
   });
@@ -201,7 +224,7 @@ function drawColorScale(u: uPlot) {
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   let labelEnd = -Infinity;
-  HS_THRESHOLDS.forEach(({ range: [min] }, i) => {
+  thresholds.forEach(({ range: [min] }, i) => {
     if (min == null) return;
     const label = i18n.number(min);
     const width = ctx.measureText(label).width;
@@ -228,39 +251,6 @@ const seasonSplits: uPlot.Axis["splits"] = (u) => {
 };
 
 /**
- * The plotted quantity: the y axis carries the seasons, the colour of a tile
- * carries the snow height — hence the label and the colour scale in cm.
- *
- * A season spans two calendar years, so it is labelled twice: the left axis
- * shows the year it starts in, the {@link seasonEndAxis} on the right the year
- * it ends in.
- */
-const HS_HEATMAP = new LineaChartParameter({
-  label: `${i18n.message("linea:parameter:HS")} (cm)`,
-  labelColor: "#08519C",
-  scale: { range: (_u, dataMin, dataMax) => [dataMin - 0.5, dataMax + 0.5] },
-  axis: {
-    scale: "y",
-    stroke: "#08519C",
-    grid: { show: false },
-    ticks: { show: false },
-    splits: seasonSplits,
-    values: (_u, splits) => splits.map((season) => String(season)),
-  },
-});
-
-/** The right y axis: the calendar year each season ends in. */
-const seasonEndAxis: uPlot.Axis = {
-  scale: "y",
-  side: 1,
-  stroke: "#08519C",
-  grid: { show: false },
-  ticks: { show: false },
-  splits: seasonSplits,
-  values: (_u, splits) => splits.map((season) => String(season + 1)),
-};
-
-/**
  * The x axis of the heatmap: the calendar days of the reference season. Only
  * the month is labelled, the reference year itself is meaningless.
  */
@@ -281,72 +271,127 @@ const seasonDayAxis: uPlot.Axis = {
   values: (_u, splits) => splits.map((s) => i18n.time(s, { month: "short" })),
 };
 
+/** The quantity a heatmap maps onto its tile colours. */
+export interface HeatmapParameter {
+  /** the localised parameter name, used as axis label and as legend column */
+  name: string;
+  /** the unit of the values, appended to the colour scale and the legend */
+  unit: Unit;
+  /** the colour of the axis label and ticks, matching the line chart of the parameter */
+  color: string;
+  /** the colour classes the values are mapped to */
+  thresholds: Threshold[];
+}
+
 /**
- * uPlot options for the snow-height heatmap: calendar days (October 1st to
- * July 1st) on the x axis, seasons on the y axis, snow height as tile colour.
+ * Builds the uPlot options for a heatmap of the given parameter: calendar days
+ * (October 1st to July 1st) on the x axis, seasons on the y axis, the value as
+ * tile colour.
+ *
+ * A season spans two calendar years, so it is labelled twice: the left axis
+ * shows the year it starts in, the right axis the year it ends in.
  */
-export const opts_HS_heatmap_year: uPlot.Options = {
-  mode: 2,
-  ms: 1,
-  width: 1040,
-  height: 200,
-  padding: [46, 3, 0, -10],
-  cursor: {
-    // the crosshair ties the hovered cell back to the calendar day and the season
-    x: true,
-    y: true,
-    points: { show: false },
-    // the heatmap always shows the whole season and all years, so it is not zoomable
-    drag: { setScale: false, x: false, y: false },
-    dataIdx: heatmapDataIdx,
-  },
-  legend: { show: true, live: true, markers: { show: false } },
-  hooks: {
-    drawAxes: [
-      (u) => {
-        LineaOptsHelper.UpdateAxisLabelsForParameters(u, HS_HEATMAP);
-        drawColorScale(u);
-      },
-    ],
-  },
-
-  scales: {
-    x: {
-      time: true,
-      // half a day of padding so that the outermost tiles are fully visible
-      range: (_u, dataMin, dataMax) => [dataMin - DAY / 2, dataMax + DAY / 2],
+export function heatmapOptions({ name, unit, color, thresholds }: HeatmapParameter): uPlot.Options {
+  const parameter = new LineaChartParameter({
+    label: `${name} (${unit})`,
+    labelColor: color,
+    scale: { range: (_u, dataMin, dataMax) => [dataMin - 0.5, dataMax + 0.5] },
+    axis: {
+      scale: "y",
+      stroke: color,
+      grid: { show: false },
+      ticks: { show: false },
+      splits: seasonSplits,
+      values: (_u, splits) => splits.map((season) => String(season)),
     },
-    [HS_HEATMAP.axis.scale]: HS_HEATMAP.scale!,
-  },
+  });
 
-  axes: [seasonDayAxis, HS_HEATMAP.axis, seasonEndAxis],
+  /** The right y axis: the calendar year each season ends in. */
+  const seasonEndAxis: uPlot.Axis = {
+    ...parameter.axis,
+    side: 1,
+    values: (_u, splits) => splits.map((season) => String(season + 1)),
+  };
 
-  series: [
-    {},
-    {
-      label: i18n.message("linea:parameter:HS"),
-      stroke: "#08519C",
-      paths: heatmapPaths(),
-      // a multi-value legend: one column per dimension of the hovered cell
-      values: (u, seriesIdx, idx) => {
-        const [xs, ys, values] = (u.data?.[seriesIdx] ?? []) as unknown as [
-          number[],
-          number[],
-          (number | null)[],
-        ];
-        const day = xs?.[idx];
-        const season = ys?.[idx];
-        return {
-          [i18n.message("linea:heatmap:day")]:
-            day == null ? "–" : i18n.time(day, { day: "numeric", month: "short" }),
-          [i18n.message("linea:heatmap:season")]: season == null ? "–" : formatSeason(season),
-          [i18n.message("linea:parameter:HS")]: i18n.number(values?.[idx], {}, "cm"),
-        };
-      },
-      facets: [
-        { scale: "x", auto: true, sorted: 1 },
-        { scale: "y", auto: true },
+  return {
+    mode: 2,
+    ms: 1,
+    width: 1040,
+    height: 200,
+    padding: [46, 3, 0, -10],
+    cursor: {
+      // the crosshair ties the hovered cell back to the calendar day and the season
+      x: true,
+      y: true,
+      points: { show: false },
+      // the heatmap always shows the whole season and all years, so it is not zoomable
+      drag: { setScale: false, x: false, y: false },
+      dataIdx: heatmapDataIdx,
+    },
+    legend: { show: true, live: true, markers: { show: false } },
+    hooks: {
+      drawAxes: [
+        (u) => {
+          LineaOptsHelper.UpdateAxisLabelsForParameters(u, parameter);
+          drawColorScale(u, thresholds, ` ${unit}`);
+        },
       ],
     },
-  ],
-};
+
+    scales: {
+      x: {
+        time: true,
+        // half a day of padding so that the outermost tiles are fully visible
+        range: (_u, dataMin, dataMax) => [dataMin - DAY / 2, dataMax + DAY / 2],
+      },
+      [parameter.axis.scale]: parameter.scale!,
+    },
+
+    axes: [seasonDayAxis, parameter.axis, seasonEndAxis],
+
+    series: [
+      {},
+      {
+        label: name,
+        stroke: color,
+        paths: heatmapPaths(thresholds),
+        // a multi-value legend: one column per dimension of the hovered cell
+        values: (u, seriesIdx, idx) => {
+          const [xs, ys, values] = (u.data?.[seriesIdx] ?? []) as unknown as [
+            number[],
+            number[],
+            (number | null)[],
+          ];
+          const day = xs?.[idx];
+          const season = ys?.[idx];
+          return {
+            [i18n.message("linea:heatmap:day")]:
+              day == null ? "–" : i18n.time(day, { day: "numeric", month: "short" }),
+            [i18n.message("linea:heatmap:season")]: season == null ? "–" : formatSeason(season),
+            [name]: i18n.number(values?.[idx], {}, unit),
+          };
+        },
+        facets: [
+          { scale: "x", auto: true, sorted: 1 },
+          { scale: "y", auto: true },
+        ],
+      },
+    ],
+  };
+}
+
+/** uPlot options for the snow-height heatmap. */
+export const opts_HS_heatmap_year = heatmapOptions({
+  name: i18n.message("linea:parameter:HS"),
+  unit: "cm",
+  color: "#08519C",
+  thresholds: HS_THRESHOLDS,
+});
+
+/** uPlot options for the air-temperature heatmap. */
+export const opts_TA_heatmap_year = heatmapOptions({
+  name: i18n.message("linea:parameter:TA"),
+  unit: "℃",
+  color: "#DE2D26",
+  thresholds: TA_THRESHOLDS,
+});

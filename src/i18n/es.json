@@ -68,6 +68,7 @@
   "linea:plotnames:datapoints": "Datapoints",
   "linea:plotnames:newsnow": "Nieve reciente",
   "linea:plotnames:snowheightheatmap": "Espesor de nieve (mapa de calor)",
+  "linea:plotnames:temperatureheatmap": "Temperatura (mapa de calor)",
   "linea:heatmap:day": "Día",
   "linea:heatmap:season": "Temporada",
   "linea:title:since": "since",

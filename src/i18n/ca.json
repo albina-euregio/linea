@@ -68,6 +68,7 @@
   "linea:plotnames:datapoints": "Punts de dades",
   "linea:plotnames:newsnow": "Neu recent",
   "linea:plotnames:snowheightheatmap": "Alçada de la neu (mapa de calor)",
+  "linea:plotnames:temperatureheatmap": "Temperatura (mapa de calor)",
   "linea:heatmap:day": "Dia",
   "linea:heatmap:season": "Temporada",
   "linea:title:since": "des de",

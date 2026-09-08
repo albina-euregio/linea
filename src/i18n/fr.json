@@ -68,6 +68,7 @@
   "linea:plotnames:datapoints": "points de données",
   "linea:plotnames:newsnow": "Neige fraîche",
   "linea:plotnames:snowheightheatmap": "Hauteur de neige (carte de chaleur)",
+  "linea:plotnames:temperatureheatmap": "Température (carte de chaleur)",
   "linea:heatmap:day": "Jour",
   "linea:heatmap:season": "Saison",
   "linea:title:since": "depuis",

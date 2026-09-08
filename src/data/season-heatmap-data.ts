@@ -13,6 +13,13 @@ const SEASON_END = Temporal.PlainDate.from("2001-07-01");
 
 const DAY_COUNT = SEASON_START.until(SEASON_END, { largestUnit: "day" }).days + 1;
 
+/** Reduces the measurements of one calendar day to their maximum. */
+export const dailyMax = (values: number[]): number => Math.max(...values);
+
+/** Reduces the measurements of one calendar day to their mean. */
+export const dailyMean = (values: number[]): number =>
+  values.reduce((sum, value) => sum + value, 0) / values.length;
+
 /**
  * One value per (calendar day, season) cell, laid out for a uPlot `mode: 2`
  * heatmap series: the cells are ordered x-major, i.e. all seasons of one
@@ -37,21 +44,23 @@ export class SeasonHeatmapData {
   /**
    * Folds a measurement series onto the October–July reference season. Days
    * outside the season (July 2nd to September 30th) and February 29th are
-   * dropped, several measurements of the same calendar day are reduced to
-   * their maximum.
+   * dropped, several measurements of the same calendar day are reduced by
+   * {@link reduce}.
    *
    * @param timeZone the time zone the timestamps are assigned to calendar days in
    * @param timestamps the measurement timestamps in milliseconds
    * @param values the measured values, one per timestamp
+   * @param reduce reduces the measurements of one calendar day to its cell value
    */
   static from(
     timeZone: string,
     timestamps: number[],
     values: (number | null)[],
+    reduce: (values: number[]) => number = dailyMax,
   ): SeasonHeatmapData {
     const heatmap = new SeasonHeatmapData();
     // season start year -> one value per day of the reference season
-    const bySeason = new Map<number, (number | null)[]>();
+    const bySeason = new Map<number, (number[] | undefined)[]>();
 
     for (let i = 0; i < timestamps.length; i++) {
       const value = values[i];
@@ -75,10 +84,10 @@ export class SeasonHeatmapData {
 
       let days = bySeason.get(season);
       if (!days) {
-        days = Array.from<number | null>({ length: DAY_COUNT }).fill(null);
+        days = Array.from({ length: DAY_COUNT });
         bySeason.set(season, days);
       }
-      days[day] = Math.max(days[day] ?? -Infinity, value);
+      (days[day] ??= []).push(value);
     }
 
     if (bySeason.size === 0) return heatmap;
@@ -99,7 +108,8 @@ export class SeasonHeatmapData {
       for (const season of heatmap.seasons) {
         heatmap.xs.push(heatmap.days[day]);
         heatmap.ys.push(season);
-        heatmap.values.push(bySeason.get(season)?.[day] ?? null);
+        const cell = bySeason.get(season)?.[day];
+        heatmap.values.push(cell?.length ? reduce(cell) : null);
       }
     }
     return heatmap;

@@ -68,6 +68,7 @@
   "linea:plotnames:datapoints": "Ponti dati",
   "linea:plotnames:newsnow": "Neve fresca",
   "linea:plotnames:snowheightheatmap": "Altezza neve (heatmap)",
+  "linea:plotnames:temperatureheatmap": "Temperatura (heatmap)",
   "linea:heatmap:day": "Giorno",
   "linea:heatmap:season": "Stagione",
   "linea:title:since": "partendo da",
