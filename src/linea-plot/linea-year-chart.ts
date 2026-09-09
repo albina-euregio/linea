@@ -4,7 +4,9 @@ import * as opts_HS_PSUM_year from "./opts_HS_PSUM_year";
 import * as opts_TEMP_year from "./opts_TEMP_year";
 import * as opts_NS_year from "./opts_NS_year";
 import * as opts_datapoints_year from "./opts_datapoints_year";
+import { opts_HS_heatmap_year, opts_TA_heatmap_year } from "./opts_heatmap_year";
 import { YearData } from "../data/year-data";
+import { dailyMean, SeasonHeatmapData } from "../data/season-heatmap-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import type { StationData } from "../data/station-data";
 import { TouchZoom } from "../shared/touch-zoom";
@@ -29,6 +31,9 @@ import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 export class LineaYearChart extends AbstractLineaChart {
   public startDate: Temporal.PlainDate;
   public endDate: Temporal.PlainDate;
+  /** the heatmaps, which always show all seasons and hence ignore the selected one */
+  #heatmapPlotHS: uPlot | undefined;
+  #heatmapPlotTA: uPlot | undefined;
 
   private withFreshPlugins(opts: uPlot.Options): uPlot.Options {
     return {
@@ -154,7 +159,61 @@ export class LineaYearChart extends AbstractLineaChart {
       }
       i += 1;
     }
+    if (this.result.values.HS) {
+      this.#updateHeatmap(this.#heatmapPlotHS, LineaYearChart.heatmapHS(timestamps, values.HS));
+    }
+    if (this.result.values.TA) {
+      this.#updateHeatmap(this.#heatmapPlotTA, LineaYearChart.heatmapTA(timestamps, values.TA));
+    }
     this.resizePlots(this.clientWidth, this.style);
+  }
+
+  /** The snow-height heatmap shows the highest snow height measured on a day. */
+  private static heatmapHS(timestamps: number[], values: (number | null)[]): SeasonHeatmapData {
+    return SeasonHeatmapData.from(i18n.timezone(), timestamps, values);
+  }
+
+  /** The air-temperature heatmap shows the mean temperature of a day. */
+  private static heatmapTA(timestamps: number[], values: (number | null)[]): SeasonHeatmapData {
+    return SeasonHeatmapData.from(i18n.timezone(), timestamps, values, dailyMean);
+  }
+
+  /**
+   * (Re-)fills a heatmap with all seasons of the given series and adapts its
+   * height to the number of seasons.
+   */
+  #updateHeatmap(plot: uPlot | undefined, heatmap: SeasonHeatmapData) {
+    if (!plot) return;
+    plot.setData([null, [heatmap.xs, heatmap.ys, heatmap.values]] as unknown as uPlot.AlignedData);
+    plot.setSize({ width: plot.width, height: LineaYearChart.heatmapHeight(heatmap) });
+  }
+
+  /** Creates a heatmap plot and registers it for resizing and exporting. */
+  #createHeatmap(
+    opts: uPlot.Options,
+    heatmap: SeasonHeatmapData,
+    target: HTMLDivElement,
+    plotname: string,
+  ): uPlot {
+    const plot = new uPlot(
+      {
+        ...opts,
+        height: LineaYearChart.heatmapHeight(heatmap),
+        ...this.getStationTitle(),
+      },
+      [null, [heatmap.xs, heatmap.ys, heatmap.values]] as unknown as uPlot.AlignedData,
+      target,
+    );
+    this.drawedTitle = true;
+    this.plots.push(plot);
+    this.modifyDrawHook(plot, this.backgroundColor);
+    this.plotnames.push(plotname);
+    return plot;
+  }
+
+  /** The heatmap needs one row per season, so its height grows with the data. */
+  private static heatmapHeight(heatmap: SeasonHeatmapData): number {
+    return Math.min(600, Math.max(160, heatmap.seasons.length * 18 + 90));
   }
 
   async createPlots() {
@@ -166,10 +225,19 @@ export class LineaYearChart extends AbstractLineaChart {
     this.resizeObserver.unobserve(this);
 
     const plot_HS_year = document.createElement("div");
+    const plot_HS_heatmap_year = document.createElement("div");
+    const plot_TA_heatmap_year = document.createElement("div");
     const plot_NS_year = document.createElement("div");
     const plot_TEMP_year = document.createElement("div");
     const plot_DATAPOINTS_year = document.createElement("div");
-    this.replaceChildren(plot_HS_year, plot_NS_year, plot_TEMP_year, plot_DATAPOINTS_year);
+    this.replaceChildren(
+      plot_HS_year,
+      plot_NS_year,
+      plot_TEMP_year,
+      plot_HS_heatmap_year,
+      plot_TA_heatmap_year,
+      plot_DATAPOINTS_year,
+    );
 
     const timeZone = i18n.timezone();
 
@@ -294,6 +362,24 @@ export class LineaYearChart extends AbstractLineaChart {
       }
       this.modifyDrawHook(pTemp, this.backgroundColor);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
+    }
+
+    if (values.HS) {
+      this.#heatmapPlotHS = this.#createHeatmap(
+        opts_HS_heatmap_year,
+        LineaYearChart.heatmapHS(timestamps, values.HS),
+        plot_HS_heatmap_year,
+        i18n.message("linea:plotnames:snowheightheatmap"),
+      );
+    }
+
+    if (values.TA) {
+      this.#heatmapPlotTA = this.#createHeatmap(
+        opts_TA_heatmap_year,
+        LineaYearChart.heatmapTA(timestamps, values.TA),
+        plot_TA_heatmap_year,
+        i18n.message("linea:plotnames:temperatureheatmap"),
+      );
     }
 
     this.resizePlots(this.clientWidth, this.style);
