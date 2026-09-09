@@ -288,8 +288,8 @@ export interface HeatmapParameter {
  * (October 1st to July 1st) on the x axis, seasons on the y axis, the value as
  * tile colour.
  *
- * A season spans two calendar years, so it is labelled twice: the left axis
- * shows the year it starts in, the right axis the year it ends in.
+ * A season spans two calendar years, so the rows are labelled with the season
+ * itself, e.g. `2023/24`, on both the left and the right axis.
  */
 export function heatmapOptions({ name, unit, color, thresholds }: HeatmapParameter): uPlot.Options {
   const parameter = new LineaChartParameter({
@@ -302,7 +302,7 @@ export function heatmapOptions({ name, unit, color, thresholds }: HeatmapParamet
       grid: { show: false },
       ticks: { show: false },
       splits: seasonSplits,
-      values: (_u, splits) => splits.map((season) => String(season)),
+      values: (_u, splits) => splits.map(formatSeason),
     },
   });
 
@@ -310,7 +310,7 @@ export function heatmapOptions({ name, unit, color, thresholds }: HeatmapParamet
   const seasonEndAxis: uPlot.Axis = {
     ...parameter.axis,
     side: 1,
-    values: (_u, splits) => splits.map((season) => String(season + 1)),
+    values: (_u, splits) => splits.map(formatSeason),
   };
 
   return {
@@ -318,7 +318,9 @@ export function heatmapOptions({ name, unit, color, thresholds }: HeatmapParamet
     ms: 1,
     width: 1040,
     height: 200,
-    padding: [46, 3, 0, -10],
+    // unlike the line charts the season axes are sized to their labels, so the
+    // left padding must not eat into them
+    padding: [46, 3, 0, 3],
     cursor: {
       // the crosshair ties the hovered cell back to the calendar day and the season
       x: true,
