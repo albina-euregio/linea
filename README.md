@@ -48,7 +48,7 @@ Examples: https://static.avalanche.report/weather_stations/linea.geojson, https:
 
 ```sh
 > pnpm build:cli
-> node src/cli/dist/cli.mjs
+> node dist/cli.mjs
 Writing 1302 features to linea.geojson
 ```
 
@@ -65,6 +65,7 @@ Writing 1302 features to linea.geojson
 | AT-08           | AT-08                     | https://lawinen.at/smet/vor/stations_vor.geojson                                                                            |
 | DE-BY           | DE-BY                     | https://lawinen.at/smet/bay/stations_bay.geojson                                                                            |
 | GEOSPHERE       | AT-01 … AT-09             | built dynamically from https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min (`output_format: geojson`) |
+| IT-32-BZ        | IT-32-BZ                  | https://test-api-weather.services.siag.it/api/v2/station/data/geojson/stations.geojson                                      |
 | IT-34 (Belluno) | IT-34                     | no GeoJSON — XML source https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml                                      |
 | IT-36           | IT-36                     | https://smet.hydrographie.info/stations_fvg_destiny.geojson                                                                 |
 | OEBB            | AT                        | https://oebb.infra.tbbm.at/smet/linea.geojson                                                                               |

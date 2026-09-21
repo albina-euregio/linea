@@ -103,6 +103,13 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
   ALBINA,
 
   new SmetDataProvider(
+    "IT-32-BZ",
+    ["IT-32-BZ"],
+    "https://test-api-weather.services.siag.it/api/v2/station/data/geojson/stations.geojson",
+    (id) => [`https://test-api-weather.services.siag.it/api/v2/station/data/smetweek/${id}.smet`],
+  ),
+
+  new SmetDataProvider(
     "AT-02",
     ["AT-02"],
     "https://smet.hydrographie.info/stations_ktn_destiny.geojson",
