@@ -177,7 +177,7 @@ export class LineaChart extends AbstractLineaChart {
       // Forecast series will be added after forecast data is loaded
     }
 
-    if (this.result.values.TA) {
+    if (this.result.values.TA || this.result.values.TD || this.result.values.TSS) {
       const TD =
         this.result.values.TD ??
         (this.result.values.TA && this.result.values.RH
@@ -404,7 +404,7 @@ export class LineaChart extends AbstractLineaChart {
     }
 
     // TA/TD/TSS plot
-    if (this.result.values.TA) {
+    if (this.result.values.TA || this.result.values.TD || this.result.values.TSS) {
       const plot = this.plots[plotIdx];
       const forecastTd = this.#calculateDewPointSeries(
         this.result.forecast.values.TA,
