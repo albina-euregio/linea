@@ -26,6 +26,7 @@ export const HS = new LineaChartParameter({
     stroke: "#08519C",
     scale: "y",
     width: 1.5,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => i18n.number(v, {}, "cm"),
   },
 });
@@ -56,6 +57,7 @@ export const PSUM = new LineaChartParameter({
     fill: "rgba(106, 175, 213, 0.3)",
     scale: "y2",
     width: 1.5,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => i18n.number(v, {}, "mm"),
   },
 });

@@ -39,6 +39,7 @@ export const VW = new LineaChartParameter({
     stroke: "#00E2B6",
     scale: "y",
     width: 1.5,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km∕h"),
   },
 });
@@ -119,6 +120,7 @@ export const opts_VW_MAX: uPlot.Series = {
   stroke: "#00A484",
   scale: "y",
   width: 1.5,
+  gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
   value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "km∕h"),
 };
 

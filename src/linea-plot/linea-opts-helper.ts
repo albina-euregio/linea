@@ -99,6 +99,36 @@ export class LineaOptsHelper extends OptsHelper {
     }
   }
 
+  /**
+   * Bridges nodata gaps caused by a parameter being sampled less often than the SMET raster
+   * (e.g. TA every 10 min in a 5-min file), but keeps real outages as a break. uPlot measures
+   * a gap from the last value before it to the first after, so an expected gap is exactly as
+   * wide as the series' own sampling interval; wider than 1.5x means readings are missing.
+   */
+  static spanSamplingIntervalGaps(): uPlot.Series.GapsRefiner {
+    return (u, seriesIdx, idx0, idx1, nullGaps) => {
+      const xs = u.data[0];
+      const ys = u.data[seriesIdx];
+      let nativeStep = Infinity;
+      let lastRealIdx = -1;
+      for (let i = idx0; i <= idx1; i++) {
+        if (ys[i] == null) continue;
+        if (lastRealIdx >= 0) {
+          const step = xs[i]! - xs[lastRealIdx]!;
+          if (step > 0 && step < nativeStep) nativeStep = step;
+        }
+        lastRealIdx = i;
+      }
+      if (!Number.isFinite(nativeStep)) return nullGaps;
+
+      const x0 = xs[idx0]!;
+      const maxSpannablePx =
+        u.valToPos(x0 + nativeStep * 1.5, "x", true) - u.valToPos(x0, "x", true);
+
+      return nullGaps.filter((gap) => gap[1] - gap[0] > maxSpannablePx);
+    };
+  }
+
   static getLineaOptions(): Omit<uPlot.Options, "series"> {
     return {
       ms: 1, // timestamp multiplier that yields 1 millisecond
