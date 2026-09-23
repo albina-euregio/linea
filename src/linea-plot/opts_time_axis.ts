@@ -10,6 +10,7 @@ const ms = 1,
   y = d * 365;
 
 export const timeAxis: uPlot.Axis = {
+  space: 70,
   values(_self, splits, _axisIdx, _foundSpace, foundIncr) {
     let opts:
       | [Intl.DateTimeFormatOptions]
@@ -29,9 +30,24 @@ export const timeAxis: uPlot.Axis = {
         { weekday: "short", month: "2-digit", day: "2-digit" },
       ];
     }
-    return splits.map((s) =>
-      opts.map((o) => i18n.time(s % 100_000 === 99_999 ? s + 1 : s, o)).join("\n"),
-    );
+    splits = splits.map((s) => (s % 100_000 === 99_999 ? s + 1 : s));
+    const labels = splits.map((s) => opts.map((o) => i18n.time(s, o)));
+    if (foundIncr < d) {
+      // show the date only once per day, on the tick closest to noon
+      const distanceToNoon = (s: number) =>
+        Math.abs(parseInt(i18n.time(s, { hour: "numeric", hourCycle: "h23" })) - 12);
+      const noonTick = new Map<string, number>();
+      labels.forEach(([, date], i) => {
+        const best = noonTick.get(date);
+        if (best === undefined || distanceToNoon(splits[i]) < distanceToNoon(splits[best])) {
+          noonTick.set(date, i);
+        }
+      });
+      labels.forEach((l, i) => {
+        if (noonTick.get(l[1]) !== i) l.pop();
+      });
+    }
+    return labels.map((l) => l.join("\n"));
   },
   grid: {
     show: false,
