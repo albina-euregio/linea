@@ -3,7 +3,7 @@ stages:
   - deploy
 
 .build:
-  image: node:26.8.2
+  image: node:26.10.0
   stage: build
   cache:
     key:
@@ -12,7 +12,7 @@ stages:
     paths:
       - .pnpm-store
   before_script:
-    - command -v pnpm || npm install --global pnpm@12.4.1
+    - command -v pnpm || npm install --global pnpm@12.9.1
     - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
 
