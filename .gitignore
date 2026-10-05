@@ -8,3 +8,4 @@
 /albina-euregio-linea*tgz
 .yarn/install-state.gz
 *linea.geojson*
+.vitest/
