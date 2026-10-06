@@ -284,6 +284,14 @@ export const FeatureCollectionSchema = v.pipe(
     type: v.picklist(["FeatureCollection"]),
     features: v.array(FeatureSchema),
     properties: v.nullish(v.any()),
+    generator: v.optional(
+      v.object({
+        name: v.string(),
+        version: v.string(),
+        url: v.pipe(v.string(), v.url()),
+        license: v.string(),
+      }),
+    ),
   }),
   v.description("A GeoJSON FeatureCollection of weather stations"),
 );

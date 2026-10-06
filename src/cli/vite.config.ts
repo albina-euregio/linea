@@ -1,4 +1,6 @@
+import { execSync } from "node:child_process";
 import { defineConfig } from "vite-plus";
+import packageJson from "../../package.json" with { type: "json" };
 
 export default defineConfig({
   pack: {
@@ -14,5 +16,11 @@ export default defineConfig({
     dts: false,
     sourcemap: false,
     outDir: "../../dist/",
+    env: {
+      VITE_GIT_DESCRIBE: execSync("git describe --always").toString().trim(),
+      VITE_NAME: packageJson.name,
+      VITE_HOMEPAGE: packageJson.homepage,
+      VITE_LICENSE: packageJson.license,
+    },
   },
 });

@@ -12,6 +12,12 @@ async function main() {
   global.DOMParser = DOMParser;
 
   const collection = await PROVIDERS.fetchStationListing();
+  collection.generator = {
+    name: import.meta.env.VITE_NAME,
+    version: import.meta.env.VITE_GIT_DESCRIBE,
+    url: import.meta.env.VITE_HOMEPAGE,
+    license: import.meta.env.VITE_LICENSE,
+  };
   const json = JSON.stringify(collection, undefined, 2);
   v.parse(FeatureCollectionSchema, JSON.parse(json));
 

@@ -1,6 +1,7 @@
 {
   "name": "@albina-euregio/linea",
   "version": "0.0.0",
+  "homepage": "https://gitlab.com/albina-euregio/linea",
   "license": "LGPL-3.0-or-later",
   "files": [
     "demo.html",
