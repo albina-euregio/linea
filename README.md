@@ -54,25 +54,27 @@ Writing 1302 features to linea.geojson
 
 ## Weather station providers
 
-| Provider ID     | Region ID(s)              | GeoJSON URL                                                                                                                 |
-| --------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| ALBINA          | AT-07, IT-32-BZ, IT-32-TN | https://static.avalanche.report/weather_stations/linea.geojson.gz                                                           |
-| AT-02           | AT-02                     | https://smet.hydrographie.info/stations_ktn_destiny.geojson                                                                 |
-| AT-02-GEOSPHERE | AT-02                     | https://lawinen.at/smet/ktn/stations_ktn.geojson                                                                            |
-| AT-03           | AT-03                     | https://lawinen.at/smet/noe/stations_noe.geojson                                                                            |
-| AT-04           | AT-04                     | https://lawinen.at/smet/ooe/stations_ooe.geojson                                                                            |
-| AT-05           | AT-05                     | https://lawinen.at/smet/sbg/stations_sbg.geojson                                                                            |
-| AT-06           | AT-06                     | https://lawinen.at/smet/stm/stations_stm.geojson                                                                            |
-| AT-07-GEOSPHERE | AT-07                     | https://lawinen.at/smet/tir/stations_tir.geojson                                                                            |
-| AT-08           | AT-08                     | https://lawinen.at/smet/vor/stations_vor.geojson                                                                            |
-| DE-BY           | DE-BY                     | https://lawinen.at/smet/bay/stations_bay.geojson                                                                            |
-| GEOSPHERE       | AT-01 … AT-09             | built dynamically from https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min (`output_format: geojson`) |
-| IT-32-BZ        | IT-32-BZ                  | https://test-api-weather.services.siag.it/api/v2/station/data/geojson/stations.geojson                                      |
-| IT-34 (Belluno) | IT-34                     | no GeoJSON — XML source https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml                                      |
-| IT-36           | IT-36                     | https://smet.hydrographie.info/stations_fvg_destiny.geojson                                                                 |
-| OEBB            | AT                        | https://oebb.infra.tbbm.at/smet/linea.geojson                                                                               |
-| SI              | SI                        | https://lawinen.at/smet/slo/stations_slo.geojson                                                                            |
-| SLF             | CH, LI                    | multiple, e.g. https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson                 |
+Station counts as of 2026-10-06.
+
+| Provider ID     | Region ID(s)              | Stations | GeoJSON URL                                                                                                                 |
+| --------------- | ------------------------- | -------: | --------------------------------------------------------------------------------------------------------------------------- |
+| ALBINA          | AT-07, IT-32-BZ, IT-32-TN |      405 | https://static.avalanche.report/weather_stations/linea.geojson.gz                                                           |
+| AT-02           | AT-02                     |       27 | https://smet.hydrographie.info/stations_ktn_destiny.geojson                                                                 |
+| AT-02-GEOSPHERE | AT-02                     |       37 | https://lawinen.at/smet/ktn/stations_ktn.geojson                                                                            |
+| AT-03           | AT-03                     |       81 | https://lawinen.at/smet/noe/stations_noe.geojson                                                                            |
+| AT-04           | AT-04                     |       55 | https://lawinen.at/smet/ooe/stations_ooe.geojson                                                                            |
+| AT-05           | AT-05                     |       89 | https://lawinen.at/smet/sbg/stations_sbg.geojson                                                                            |
+| AT-06           | AT-06                     |      131 | https://lawinen.at/smet/stm/stations_stm.geojson                                                                            |
+| AT-07-GEOSPHERE | AT-07                     |       69 | https://lawinen.at/smet/tir/stations_tir.geojson                                                                            |
+| AT-08           | AT-08                     |       58 | https://lawinen.at/smet/vor/stations_vor.geojson                                                                            |
+| DE-BY           | DE-BY                     |       37 | https://lawinen.at/smet/bay/stations_bay.geojson                                                                            |
+| GEOSPHERE       | AT-01 … AT-09             |      288 | built dynamically from https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min (`output_format: geojson`) |
+| IT-32-BZ        | IT-32-BZ                  |      120 | https://test-api-weather.services.siag.it/api/v2/station/data/geojson/stations.geojson                                      |
+| IT-34 (Belluno) | IT-34                     |      192 | no GeoJSON — XML source https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/stazioni.xml                                      |
+| IT-36           | IT-36                     |        8 | https://smet.hydrographie.info/stations_fvg_destiny.geojson                                                                 |
+| OEBB            | AT                        |       81 | https://oebb.infra.tbbm.at/smet/linea.geojson                                                                               |
+| SI              | SI                        |       32 | https://lawinen.at/smet/slo/stations_slo.geojson                                                                            |
+| SLF             | CH, LI                    |      208 | multiple, e.g. https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson                 |
 
 ## Contributing
 
