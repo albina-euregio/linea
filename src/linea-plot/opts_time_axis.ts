@@ -85,13 +85,25 @@ export const timeScale: uPlot.Scale = {
   },
 };
 
+/** Formats the cursor timestamp, localized (uPlot's `{MMM}` template only knows English month names). */
+export const timeValue: uPlot.Series.Value = (_self, rawValue) =>
+  rawValue == null
+    ? "–"
+    : i18n.time(rawValue, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
 /** The shared x dimension for linea charts: time scale, axis and series. */
 export const time = new LineaChartParameter({
   scale: timeScale,
   axis: timeAxis,
   series: {
     label: i18n.message("linea:unit:time"),
-    value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
+    value: timeValue,
   },
 });
 

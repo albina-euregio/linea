@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { AwsStatsOptsHelper } from "./aws-stats-opts-helper";
 import { i18n } from "../../i18n";
-import { timeAxis, timeScale } from "../../linea-plot/opts_time_axis";
+import { timeAxis, timeScale, timeValue } from "../../linea-plot/opts_time_axis";
 
 export const opts_danger_patterns_micro_regions: uPlot.Options = {
   ...AwsStatsOptsHelper.getDefaultOptions(),
@@ -42,7 +42,7 @@ export const opts_danger_patterns_micro_regions: uPlot.Options = {
   series: [
     {
       label: i18n.message("linea:axis:time"),
-      value: "{DD}. {MMM}. {YYYY} {HH}:{mm}",
+      value: timeValue,
     },
   ],
 };
