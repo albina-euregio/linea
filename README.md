@@ -58,6 +58,7 @@ Writing 1302 features to linea.geojson
 | --------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | ALBINA          | AT-07, IT-32-BZ, IT-32-TN | https://static.avalanche.report/weather_stations/linea.geojson.gz                                                           |
 | AT-02           | AT-02                     | https://smet.hydrographie.info/stations_ktn_destiny.geojson                                                                 |
+| AT-02-GEOSPHERE | AT-02                     | https://lawinen.at/smet/ktn/stations_ktn.geojson                                                                            |
 | AT-03           | AT-03                     | https://lawinen.at/smet/noe/stations_noe.geojson                                                                            |
 | AT-04           | AT-04                     | https://lawinen.at/smet/ooe/stations_ooe.geojson                                                                            |
 | AT-05           | AT-05                     | https://lawinen.at/smet/sbg/stations_sbg.geojson                                                                            |
