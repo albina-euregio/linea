@@ -63,6 +63,7 @@ Writing 1302 features to linea.geojson
 | AT-04           | AT-04                     | https://lawinen.at/smet/ooe/stations_ooe.geojson                                                                            |
 | AT-05           | AT-05                     | https://lawinen.at/smet/sbg/stations_sbg.geojson                                                                            |
 | AT-06           | AT-06                     | https://lawinen.at/smet/stm/stations_stm.geojson                                                                            |
+| AT-07-GEOSPHERE | AT-07                     | https://lawinen.at/smet/tir/stations_tir.geojson                                                                            |
 | AT-08           | AT-08                     | https://lawinen.at/smet/vor/stations_vor.geojson                                                                            |
 | DE-BY           | DE-BY                     | https://lawinen.at/smet/bay/stations_bay.geojson                                                                            |
 | GEOSPHERE       | AT-01 … AT-09             | built dynamically from https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min (`output_format: geojson`) |

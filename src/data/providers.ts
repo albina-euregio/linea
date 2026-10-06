@@ -130,6 +130,16 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
   ),
 
   new SmetDataProvider(
+    "AT-07-GEOSPHERE",
+    ["AT-07"],
+    "https://lawinen.at/smet/tir/stations_tir.geojson",
+    (id) => [
+      `https://lawinen.at/smet/tir/woche/${id}.smet.gz`,
+      `https://lawinen.at/smet/tir/jahr/${id}.smet.gz`,
+    ],
+  ),
+
+  new SmetDataProvider(
     "AT-05",
     ["AT-05"],
     "https://lawinen.at/smet/sbg/stations_sbg.geojson",
