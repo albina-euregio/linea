@@ -91,6 +91,7 @@ linea-plot {
 
       .daterange-loading > input {
         width: 100%;
+        min-width: calc(22ch + 2 * 14px + 2 * 1px);
       }
 
       input,
