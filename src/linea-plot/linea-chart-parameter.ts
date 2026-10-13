@@ -1,5 +1,5 @@
 import type uPlot from "uplot";
-import type { SplitOptions } from "../shared/opts-helper";
+import { OptsHelper, type SplitOptions } from "../shared/opts-helper";
 
 /** Adaptive split config (reuses {@link SplitOptions}, minus the runtime `uplot`). */
 export type LineaSplitSpec = Omit<SplitOptions, "uplot">;
@@ -37,6 +37,12 @@ export class LineaChartParameter {
     p: Pick<LineaChartParameter, "scale" | "axis" | "series" | "forecast" | "label" | "labelColor">,
   ) {
     Object.assign(this, p);
+    const stroke = this.axis.stroke;
+    if (typeof stroke === "string") {
+      this.axis.stroke = (u) => OptsHelper.legibleColor(u, stroke);
+    }
+    this.axis.grid = { stroke: OptsHelper.gridColor, ...this.axis.grid };
+    this.axis.ticks = { stroke: OptsHelper.gridColor, ...this.axis.ticks };
   }
 
   /**

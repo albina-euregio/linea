@@ -102,7 +102,7 @@ export const opts_TA_TD_TSS: uPlot.Options = {
         LineaOptsHelper.UpdateAxisLabelsForParameters(u, TA, TD);
 
         // Draw reference line at 0℃
-        LineaOptsHelper.drawReferenceLine(u, 0, "#000");
+        LineaOptsHelper.drawReferenceLine(u, 0);
         LineaOptsHelper.drawForecastInformation(u);
         ctx.restore();
       },
