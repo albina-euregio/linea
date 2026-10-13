@@ -81,9 +81,9 @@ export class YearData {
       }
     }
     const lastDate = yearData.dates.at(-1);
-    if (Temporal.PlainDate.compare(lastDate, endDate) < 0) {
+    if (!lastDate || Temporal.PlainDate.compare(lastDate, endDate) < 0) {
       for (
-        let d = lastDate.add({ days: 1 });
+        let d = lastDate ? lastDate.add({ days: 1 }) : startDate;
         Temporal.PlainDate.compare(d, endDate) <= 0;
         d = d.add({ days: 1 })
       ) {
