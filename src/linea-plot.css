@@ -146,6 +146,11 @@ linea-plot {
       line-height: 1.35;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
       white-space: pre-line;
+
+      /* translations set a light kbd background inline, so keep its text dark */
+      kbd {
+        color: #2f2f2f;
+      }
     }
 
     .linea-help-hint.visible {
