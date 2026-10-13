@@ -18,6 +18,29 @@ export class OptsHelper {
   }
 
   /**
+   * Lightens a dark `#rrggbb` colour on a dark page (light {@link textColor})
+   * until it is legible, i.e. reaches a relative luminance of 0.22 — a contrast
+   * of 4.5:1 against a near-black background.
+   */
+  static legibleColor(u: uPlot, color: string): string {
+    const rgb = (c: string) =>
+      c
+        .match(/[\da-f]{2}/gi)
+        ?.slice(0, 3)
+        .map((h) => parseInt(h, 16));
+    const text = OptsHelper.textColor(u).match(/\d+/g)?.map(Number);
+    const luminance = (c: number[]) =>
+      c
+        .map((v) => v / 255)
+        .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+        .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+    let c = /^#[\da-f]{6}/i.test(color) ? rgb(color) : undefined;
+    if (!c || !text || luminance(text) < 0.5) return color;
+    while (luminance(c) < 0.22) c = c.map((v) => v + (255 - v) * 0.1);
+    return `rgb(${c.map(Math.round).join(", ")})`;
+  }
+
+  /**
    *
    * @param plot the uPlot instance to resolve the series stroke for
    * @param seriesIdx the index of the series to resolve the stroke for, starting with 1 for the first y-series (0 is x-series)

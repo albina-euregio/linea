@@ -41,8 +41,8 @@ export class LineaOptsHelper extends OptsHelper {
       right?.label ?? "",
       u.bbox.left,
       u.bbox.width,
-      left.labelColor ?? this.textColor(u),
-      right?.labelColor ?? "",
+      left.labelColor ? this.legibleColor(u, left.labelColor) : this.textColor(u),
+      right?.labelColor ? this.legibleColor(u, right.labelColor) : "",
     );
   }
 
