@@ -216,7 +216,7 @@ function drawColorScale(u: uPlot, thresholds: Threshold[], unit: string) {
   ctx.lineWidth = 1;
   ctx.strokeRect(left, boxTop, scaleWidth, boxHeight);
 
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = LineaOptsHelper.textColor(u);
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   ctx.fillText(unit, left + scaleWidth, boxTop + boxHeight / 2);
@@ -256,6 +256,7 @@ const seasonSplits: uPlot.Axis["splits"] = (u) => {
  */
 const seasonDayAxis: uPlot.Axis = {
   scale: "x",
+  stroke: LineaOptsHelper.textColor,
   grid: { show: false },
   splits: (_u, _axisIdx, scaleMin, scaleMax) => {
     const splits: number[] = [];

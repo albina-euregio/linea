@@ -41,12 +41,17 @@ export class LineaOptsHelper extends OptsHelper {
       right?.label ?? "",
       u.bbox.left,
       u.bbox.width,
-      left.labelColor ?? "#000",
+      left.labelColor ?? this.textColor(u),
       right?.labelColor ?? "",
     );
   }
 
-  static drawReferenceLine(u: uPlot, yValue: number, color: string, dash: number[] = [5, 5]) {
+  static drawReferenceLine(
+    u: uPlot,
+    yValue: number,
+    color = this.textColor(u),
+    dash: number[] = [5, 5],
+  ) {
     const width = 1;
     const offset = (width % 2) / 2;
     const x0 = u.bbox.left;
@@ -71,7 +76,9 @@ export class LineaOptsHelper extends OptsHelper {
     const lastData = u.data[0][u.data[0].length - 1];
     if (lastData != null && lastData > now) {
       const forecastX = u.valToPos(now, "x", true);
-      ctx.strokeStyle = "#00000056";
+      ctx.save();
+      ctx.strokeStyle = this.textColor(u);
+      ctx.globalAlpha = 0.34;
       ctx.setLineDash([10, 5]);
       ctx.lineWidth = width;
       ctx.beginPath();
@@ -79,7 +86,8 @@ export class LineaOptsHelper extends OptsHelper {
       ctx.lineTo(forecastX + offset, u.bbox.top + u.bbox.height);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = "#00000025";
+      ctx.fillStyle = this.textColor(u);
+      ctx.globalAlpha = 0.15;
 
       const labelForecast = i18n.message("linea:forecast:arome");
       const indexOfG = labelForecast.indexOf("(G");
@@ -87,6 +95,7 @@ export class LineaOptsHelper extends OptsHelper {
       const labelGeosphere = labelForecast.slice(indexOfG);
       ctx.fillText(labelArome, forecastX + 5, u.bbox.top - 10);
       ctx.fillText(labelGeosphere, forecastX + 5, u.bbox.top + 10);
+      ctx.restore();
     }
   }
 

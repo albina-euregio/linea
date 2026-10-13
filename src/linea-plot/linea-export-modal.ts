@@ -406,6 +406,9 @@ export class LineaExportModal extends AbstractExportModal {
       (width * this.lineaPlot.view.charts[0].clientWidth) /
       this.lineaPlot.view.charts[0].plots[0].root.querySelector("canvas").width;
 
+    // the export is drawn with black text, regardless of the page's (dark) colour scheme
+    const oldColor = this.lineaPlot.style.color;
+    this.lineaPlot.style.color = "#000";
     let oldBackgroundColor = "";
     if (activeLinecharts.length == 1) {
       oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
@@ -441,6 +444,7 @@ export class LineaExportModal extends AbstractExportModal {
     });
 
     if (Object.keys(legendItems).length == 0) {
+      this.lineaPlot.style.color = oldColor;
       alert(i18n.message("linea:message:noplotselected"));
       return Promise.resolve("");
     }
@@ -491,6 +495,7 @@ export class LineaExportModal extends AbstractExportModal {
     const totalHeight = titleHeight + chartsHeight + legendHeight;
     const outputWidth = canvases[0].width;
     if (outputWidth * totalHeight > this.maxCanvasPixels) {
+      this.lineaPlot.style.color = oldColor;
       alert(i18n.message("linea:message:exporttobig"));
       return Promise.resolve("");
     }
@@ -564,6 +569,7 @@ export class LineaExportModal extends AbstractExportModal {
     if (activeLinecharts.length == 1) {
       activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
     }
+    this.lineaPlot.style.color = oldColor;
     for (const lineachart of this.lineaPlot.view.charts) {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);
       lineachart.resizeObserver.observe(lineachart);

@@ -10,6 +10,14 @@ export interface SplitOptions {
 
 export class OptsHelper {
   /**
+   * The text colour inherited from the surrounding page, so that canvas text
+   * stays legible in dark mode (uPlot defaults to black).
+   */
+  static textColor(u: uPlot): string {
+    return getComputedStyle(u.root).color || "#000";
+  }
+
+  /**
    *
    * @param plot the uPlot instance to resolve the series stroke for
    * @param seriesIdx the index of the series to resolve the stroke for, starting with 1 for the first y-series (0 is x-series)
