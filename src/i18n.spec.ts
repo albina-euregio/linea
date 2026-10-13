@@ -38,6 +38,11 @@ describe("i18n.message", () => {
     expect(i18n.message("linea:parameter:HS")).toBe("Snow Height");
   });
 
+  test("falls back to en.json for untranslated (empty) message", () => {
+    documentElement.lang = "ca";
+    expect(i18n.message("linea:parameter:P")).toBe("Air Pressure");
+  });
+
   test("returns id when message not found", () => {
     documentElement.lang = "en";
     expect(i18n.message("linea:unknown:key" as any)).toBe("linea:unknown:key");

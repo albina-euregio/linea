@@ -35,6 +35,7 @@
   },
   "scripts": {
     "prepare": "vp config",
+    "tx-pull-json": "tx pull --use-git-timestamps --mode onlytranslated",
     "openapi": "openapi-ts && vp fmt -- src/api/",
     "ci": "vp run lint && vp run test && vp run build",
     "test": "vp test run",

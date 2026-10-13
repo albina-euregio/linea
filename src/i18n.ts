@@ -20,7 +20,7 @@ class I18n {
   }
 
   message(id: messagesEN_t): string {
-    return this.messages?.[id] ?? messagesEN[id] ?? id;
+    return this.messages?.[id] || messagesEN[id] || id;
   }
 
   number(
