@@ -141,14 +141,13 @@ export class StationData {
    *
    * @returns The surface hoar data for the charts data
    */
-  generateSurfaceHoarData(): number[] {
+  generateSurfaceHoarData(TD: (number | null)[] = this.values.TD ?? []): number[] {
     if (this.values.SurfaceHoar) {
       return this.values.SurfaceHoar;
     }
     this.values.SurfaceHoar = [];
 
     const timestamps = this.timestamps;
-    const TD = this.values.TD ?? [];
     const TSS = this.values.TSS ?? [];
 
     let i = 0;

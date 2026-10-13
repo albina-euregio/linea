@@ -85,34 +85,17 @@ export class LineaChart extends AbstractLineaChart {
     }
     if (values.TA || values.TD || values.TSS) {
       const forecastTd = this.#calculateDewPointSeries(forecastValues?.TA, forecastValues?.RH);
-      if (this.showSurfaceHoarSeries && values.TD && values.TSS) {
-        this.updateData(
-          this.plots[i],
-          [
-            timestamps,
-            values.TD ??
-              (values.TA && values.RH
-                ? this.#calculateDewPointSeries(values.TA, values.RH)
-                : undefined),
-            values.TSS,
-            data.generateSurfaceHoarData(),
-            values.TA,
-          ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
-        );
-      } else {
-        this.updateData(
-          this.plots[i],
-          [
-            timestamps,
-            values.TD ??
-              (values.TA && values.RH
-                ? this.#calculateDewPointSeries(values.TA, values.RH)
-                : undefined),
-            values.TSS,
-            values.TA,
-          ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
-        );
-      }
+      const TD = values.TD ?? this.#calculateDewPointSeries(values.TA, values.RH);
+      this.updateData(
+        this.plots[i],
+        [
+          timestamps,
+          TD,
+          values.TSS,
+          ...(this.showSurfaceHoarSeries && values.TSS ? [data.generateSurfaceHoarData(TD)] : []),
+          values.TA,
+        ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
+      );
       i += 1;
     }
     if (values.RH || values.ISWR) {
@@ -180,9 +163,7 @@ export class LineaChart extends AbstractLineaChart {
     if (this.result.values.TA || this.result.values.TD || this.result.values.TSS) {
       const TD =
         this.result.values.TD ??
-        (this.result.values.TA && this.result.values.RH
-          ? this.#calculateDewPointSeries(this.result.values.TA, this.result.values.RH)
-          : undefined);
+        this.#calculateDewPointSeries(this.result.values.TA, this.result.values.RH);
       const p = new uPlot(
         this.withFreshPlugins({
           ...opts_TA_TD_TSS.opts_TA_TD_TSS,
@@ -201,7 +182,7 @@ export class LineaChart extends AbstractLineaChart {
       if (this.result.values.TSS) {
         this.addSeries(p, opts_TA_TD_TSS.TSS.series, this.result.values.TSS);
         if (this.showSurfaceHoarSeries) {
-          const surfacehoar = this.result.generateSurfaceHoarData();
+          const surfacehoar = this.result.generateSurfaceHoarData(TD);
           this.addSeries(p, opts_TA_TD_TSS.SurfaceHoar.series, surfacehoar);
         }
       } else {
