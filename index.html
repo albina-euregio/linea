@@ -7,9 +7,35 @@
     <meta name="color-scheme" content="light dark" />
     <style>
       body {
-        font-family: Helvetica, sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+          "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+        color: light-dark(#565f61, CanvasText);
         margin: 20px;
         overflow-y: scroll;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 20px;
+      }
+      nav button {
+        padding: 4px 8px;
+        background: transparent;
+        color: inherit;
+        border: 1px solid #b1c1c7;
+        border-radius: 0;
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      nav button:hover {
+        border-color: #19abff;
+        color: #19abff;
       }
     </style>
   </head>

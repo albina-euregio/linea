@@ -24,8 +24,8 @@ linea-plot {
     justify-content: center;
 
     &:hover {
-      border-color: #19aaff;
-      color: #19aaff;
+      border-color: #19abff;
+      color: #19abff;
     }
 
     &:active {
@@ -138,7 +138,7 @@ linea-plot {
       z-index: 20;
       max-width: 22rem;
       padding: 0.75rem 0.9rem;
-      border: 1px solid #19aaff;
+      border: 1px solid #19abff;
       background: Canvas;
       color: CanvasText;
       font-size: 0.85rem;
