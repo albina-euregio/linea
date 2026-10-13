@@ -216,7 +216,7 @@ linea-plot {
   .winterview-btn-spinner {
     width: 1em;
     height: 1em;
-    border: 2px solid #000;
+    border: 2px solid currentColor;
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
@@ -228,6 +228,10 @@ linea-plot {
   .u-under,
   .u-over {
     touch-action: pan-y;
+  }
+
+  .u-select {
+    background: color-mix(in srgb, currentColor 7%, transparent);
   }
 }
 

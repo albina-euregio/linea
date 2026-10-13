@@ -17,6 +17,11 @@ export class OptsHelper {
     return getComputedStyle(u.root).color || "#000";
   }
 
+  /** Grid and tick lines: a faint {@link textColor} (uPlot defaults to faint black). */
+  static gridColor(u: uPlot): string {
+    return OptsHelper.textColor(u).replace(/^rgb\((.*)\)$/, "rgba($1, 0.1)");
+  }
+
   /**
    * Lightens a dark `#rrggbb` colour on a dark page (light {@link textColor})
    * until it is legible, i.e. reaches a relative luminance of 0.22 — a contrast

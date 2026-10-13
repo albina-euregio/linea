@@ -257,6 +257,7 @@ const seasonSplits: uPlot.Axis["splits"] = (u) => {
 const seasonDayAxis: uPlot.Axis = {
   scale: "x",
   stroke: LineaOptsHelper.textColor,
+  ticks: { stroke: LineaOptsHelper.gridColor },
   grid: { show: false },
   splits: (_u, _axisIdx, scaleMin, scaleMax) => {
     const splits: number[] = [];

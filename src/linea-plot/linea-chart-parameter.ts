@@ -41,6 +41,8 @@ export class LineaChartParameter {
     if (typeof stroke === "string") {
       this.axis.stroke = (u) => OptsHelper.legibleColor(u, stroke);
     }
+    this.axis.grid = { stroke: OptsHelper.gridColor, ...this.axis.grid };
+    this.axis.ticks = { stroke: OptsHelper.gridColor, ...this.axis.ticks };
   }
 
   /**

@@ -13,6 +13,7 @@ const ms = 1,
 export const timeAxis: uPlot.Axis = {
   space: 70,
   stroke: OptsHelper.textColor,
+  ticks: { stroke: OptsHelper.gridColor },
   values(_self, splits, _axisIdx, _foundSpace, foundIncr) {
     let opts:
       | [Intl.DateTimeFormatOptions]
@@ -111,6 +112,7 @@ export const time = new LineaChartParameter({
 
 export const dailyBarChartTimeAxis: uPlot.Axis = {
   stroke: OptsHelper.textColor,
+  ticks: { stroke: OptsHelper.gridColor },
   splits(_self, _axisIdx, scaleMin, scaleMax, foundIncr, _foundSpace) {
     const splits: number[] = [];
     const increment = Math.max(foundIncr, d);
