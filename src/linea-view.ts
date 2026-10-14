@@ -1,5 +1,10 @@
 import * as v from "valibot";
-import { type StationData, StationDataArray, type Units, type Values } from "./data/station-data";
+import {
+  type StationData,
+  StationDataArray,
+  type Units,
+  type ValuesInput,
+} from "./data/station-data";
 import type { AbstractLineaChart } from "./abstract-linea-chart";
 import type AirDatepicker from "air-datepicker";
 import { LineaPlot } from "./linea-plot";
@@ -96,7 +101,7 @@ export abstract class LineaView {
       altitude: number;
       timestamps: number[];
       units: Units;
-      values: Values;
+      values: ValuesInput;
     }[] = JSON.parse(this.lineaplot.getAttribute("data") ?? "");
     this.results = StationDataArray.from(results);
     this.results.generalize();

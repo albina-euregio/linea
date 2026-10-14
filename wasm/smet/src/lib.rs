@@ -83,10 +83,8 @@ fn data_offset_of(bytes: &[u8]) -> usize {
 #[derive(Default)]
 struct Parsed {
     timestamps: Vec<f64>,
-    /// one column per field, column 0 (timestamp) stays empty
+    /// one column per field, column 0 (timestamp) stays empty, NaN for `nodata`
     columns: Vec<Vec<f64>>,
-    /// 1 where the value is `nodata`, i.e. `null` in JavaScript
-    missing: Vec<Vec<u8>>,
 }
 
 /// Parses all data lines of the input into timestamps (epoch milliseconds) and one column per field.
@@ -100,7 +98,6 @@ fn parse(bytes: &[u8], ncols: usize, tz_minutes: f64, nodata: &[u8]) -> Parsed {
     let mut parsed = Parsed {
         timestamps: Vec::new(),
         columns: vec![Vec::new(); ncols],
-        missing: vec![Vec::new(); ncols],
     };
     for line in bytes.split(|&b| b == b'\n') {
         if !is_data_line(line) {
@@ -112,12 +109,11 @@ fn parse(bytes: &[u8], ncols: usize, tz_minutes: f64, nodata: &[u8]) -> Parsed {
         let Some(date) = cells.next() else { continue };
         parsed.timestamps.push(parse_timestamp(date, tz_minutes));
         for i in 1..ncols {
-            let (value, missing) = match cells.next() {
-                Some(cell) if cell != nodata => (parse_number(cell), 0),
-                _ => (f64::NAN, 1),
+            let value = match cells.next() {
+                Some(cell) if cell != nodata => parse_number(cell),
+                _ => f64::NAN,
             };
             parsed.columns[i].push(value);
-            parsed.missing[i].push(missing);
         }
     }
     parsed
@@ -218,11 +214,6 @@ pub extern "C" fn parsed_column(i: usize) -> *const f64 {
     with_state(|s| s.parsed.columns[i].as_ptr())
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn parsed_missing(i: usize) -> *const u8 {
-    with_state(|s| s.parsed.missing[i].as_ptr())
-}
-
 // ---------------------------------------------------------------------------
 // Timestamp union for merging stations
 // ---------------------------------------------------------------------------
@@ -321,7 +312,7 @@ mod tests {
         let parsed = parse(smet, 3, 0.0, b"-777");
         assert_eq!(parsed.timestamps, [1764183600000.0]);
         assert_eq!(parsed.columns[1], [273.15]);
-        assert_eq!(parsed.missing[2], [1]);
+        assert!(parsed.columns[2][0].is_nan());
     }
 
     #[test]

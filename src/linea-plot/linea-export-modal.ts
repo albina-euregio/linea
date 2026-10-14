@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
-import { StationData } from "../data/station-data";
+import { StationData, toSeries } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { WinterView } from "./winter-view";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
@@ -121,13 +121,13 @@ export class LineaExportModal extends AbstractExportModal {
       if (this.lineaPlot.view instanceof WinterView) {
         activeplots.forEach((index) => {
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
-            result.values.TA = lc.result.values.TA ?? [];
-            result.values.TD = lc.result.values.TD ?? [];
+            result.values.TA = lc.result.values.TA ?? new Float64Array();
+            result.values.TD = lc.result.values.TD ?? new Float64Array();
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:newsnow")) {
-            result.values.NS = lc.result.values.NS ?? [];
+            result.values.NS = lc.result.values.NS ?? new Float64Array();
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
-            result.values.HS = lc.result.values.HS ?? [];
-            result.values.PSUM = lc.result.values.PSUM ?? [];
+            result.values.HS = lc.result.values.HS ?? new Float64Array();
+            result.values.PSUM = lc.result.values.PSUM ?? new Float64Array();
           }
         });
       } else {
@@ -136,49 +136,49 @@ export class LineaExportModal extends AbstractExportModal {
             const airTempIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:TA"),
             );
-            result.values.TA = lc.plots[index].data[airTempIndex] as (number | null)[];
+            result.values.TA = toSeries(lc.plots[index].data[airTempIndex]);
             const dewPointIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:TD"),
             );
-            result.values.TD = lc.plots[index].data[dewPointIndex] as (number | null)[];
+            result.values.TD = toSeries(lc.plots[index].data[dewPointIndex]);
             const surfaceIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:TSS"),
             );
-            result.values.TSS = lc.plots[index].data[surfaceIndex] as (number | null)[];
+            result.values.TSS = toSeries(lc.plots[index].data[surfaceIndex]);
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:wind")) {
             const windIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:VW"),
             );
-            result.values.VW = lc.plots[index].data[windIndex] as (number | null)[];
+            result.values.VW = toSeries(lc.plots[index].data[windIndex]);
             const windMaxIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:VW_MAX"),
             );
-            result.values.VW_MAX = lc.plots[index].data[windMaxIndex] as (number | null)[];
+            result.values.VW_MAX = toSeries(lc.plots[index].data[windMaxIndex]);
             const windDirectionIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:DW"),
             );
-            result.values.DW = lc.plots[index].data[windDirectionIndex] as (number | null)[];
+            result.values.DW = toSeries(lc.plots[index].data[windDirectionIndex]);
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:humidity_gr")) {
             const humidityIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:RH"),
             );
-            result.values.RH = lc.plots[index].data[humidityIndex] as (number | null)[];
+            result.values.RH = toSeries(lc.plots[index].data[humidityIndex]);
             const globalRadiationIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:ISWR"),
             );
             result.values.ISWR = lc.result.values.ISWR
-              ? (lc.plots[index].data[globalRadiationIndex] as (number | null)[])
-              : [];
+              ? toSeries(lc.plots[index].data[globalRadiationIndex])
+              : new Float64Array();
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
             const snowHeightIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:HS"),
             );
-            result.values.HS = lc.plots[index].data[snowHeightIndex] as (number | null)[];
+            result.values.HS = toSeries(lc.plots[index].data[snowHeightIndex]);
             const precipitationIndex = lc.plots[index].series.findIndex(
               (s) => s.label === i18n.message("linea:parameter:PSUM"),
             );
             const cumulativePSUM = lc.plots[index].data[precipitationIndex] as (number | null)[];
-            result.values.PSUM = this.#reconstructPSUMSeries(cumulativePSUM);
+            result.values.PSUM = toSeries(this.#reconstructPSUMSeries(cumulativePSUM));
           }
         });
       }

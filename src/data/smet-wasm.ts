@@ -21,7 +21,6 @@ interface SmetExports {
   parsed_rows(): number;
   parsed_timestamps(): Ptr;
   parsed_column(i: number): Ptr;
-  parsed_missing(i: number): Ptr;
   union_timestamps(n: number): void;
   union_len(): number;
   union_timestamps_ptr(): Ptr;
@@ -84,7 +83,7 @@ export interface SMETDataHeader {
 export async function parseSMETBytes<H extends SMETDataHeader>(
   bytes: Uint8Array,
   parseHeader: (text: string) => H,
-): Promise<{ header: H; timestamps: number[]; columns: (number | null)[][] }> {
+): Promise<{ header: H; timestamps: number[]; columns: Float64Array[] }> {
   const w = await loadSmetWasm();
   try {
     write(w, w.input, bytes);
@@ -96,12 +95,13 @@ export async function parseSMETBytes<H extends SMETDataHeader>(
     const rows = w.parsed_rows();
     const timestamps = Array.from(new Float64Array(w.memory.buffer, w.parsed_timestamps(), rows));
     const converters = header.converters();
-    const columns = Array.from({ length: ncols }, (_, i): (number | null)[] => {
-      if (i === 0) return []; // timestamp
-      const values = new Float64Array(w.memory.buffer, w.parsed_column(i), rows);
-      const missing = new Uint8Array(w.memory.buffer, w.parsed_missing(i), rows);
+    const columns = Array.from({ length: ncols }, (_, i) => {
+      if (i === 0) return new Float64Array(); // timestamp
+      // copy out of the module memory, NaN marks nodata
+      const values = new Float64Array(w.memory.buffer, w.parsed_column(i), rows).slice();
       const convert = converters[i];
-      return Array.from(values, (v, j) => (missing[j] ? null : convert(v)));
+      for (let j = 0; j < rows; j++) values[j] = convert(values[j]);
+      return values;
     });
     return { header, timestamps, columns };
   } finally {

@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import { dewPoint } from "../linea-plot/dew-point";
 import * as listing from "../schema/listing";
-import { StationData, type ParameterType, type Units, type Values } from "./station-data";
+import { StationData, type ParameterType, type Units } from "./station-data";
 import type { LineaDataProvider } from "./provider";
 import { fetchOrThrow } from "./fetchOrThrow";
 import type { Unit } from "./units";
@@ -210,7 +210,7 @@ export class BellunoDataProvider implements LineaDataProvider {
       throw new Error("No valid rows found in Belluno CSV");
     }
 
-    const values: Values = {};
+    const values: Partial<Record<ParameterType, (number | null)[]>> = {};
     const units: Units = {};
 
     for (const [parameter, series] of seriesByParameter.entries()) {

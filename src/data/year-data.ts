@@ -56,7 +56,7 @@ export class YearData {
     startDate: Temporal.PlainDate,
     endDate: Temporal.PlainDate,
     timestamps: number[],
-    values: (number | null)[],
+    values: ArrayLike<number | null>,
   ): YearData {
     const yearData = new YearData();
     yearData.timeZone = timeZone;

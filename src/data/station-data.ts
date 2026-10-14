@@ -57,7 +57,46 @@ export type ParameterType = v.InferOutput<typeof ParameterTypeSchema>;
 
 export type Units = Partial<Record<ParameterType, Unit>>;
 
-export type Values = Partial<Record<ParameterType, (number | null)[]>>;
+/**
+ * One value per timestamp, `NaN` where no value exists (missing measurement or timestamp).
+ */
+export type Series = Float64Array;
+
+export type Values = Partial<Record<ParameterType, Series>>;
+
+/**
+ * Creates a series of `length` values computed by `value` (a plain loop is considerably
+ * faster than `Float64Array.from` with a mapping function).
+ */
+export function seriesOf(length: number, value: (i: number) => number): Series {
+  const series = new Float64Array(length);
+  for (let i = 0; i < length; i++) {
+    series[i] = value(i);
+  }
+  return series;
+}
+
+/**
+ * Converts the values to a {@link Series}, `null` and `undefined` become `NaN`.
+ */
+export function toSeries(values: ArrayLike<number | null | undefined>): Series {
+  return values instanceof Float64Array ? values : seriesOf(values.length, (i) => values[i] ?? NaN);
+}
+
+/** values as plain arrays (e.g. from providers or JSON), `null` marks missing values */
+export type ValuesInput = Partial<Record<ParameterType, ArrayLike<number | null | undefined>>>;
+
+/**
+ * Converts all values to {@link Series}, see {@link toSeries}.
+ */
+export function toValues(values: ValuesInput): Values {
+  const converted: Values = {};
+  let key: ParameterType;
+  for (key in values) {
+    if (values[key]) converted[key] = toSeries(values[key]);
+  }
+  return converted;
+}
 
 export type ForecastValues = {
   timestamps: number[];
@@ -65,14 +104,40 @@ export type ForecastValues = {
 };
 
 export class StationData {
+  values: Values;
+  forecast?: ForecastValues;
+
   constructor(
     public station: string,
     public altitude: number,
     public timestamps: number[],
     public units: Units,
-    public values: Values,
-    public forecast?: ForecastValues,
-  ) {}
+    values: ValuesInput,
+    forecast?: { timestamps: number[]; values: ValuesInput },
+  ) {
+    this.values = toValues(values);
+    this.forecast = forecast && {
+      timestamps: forecast.timestamps,
+      values: toValues(forecast.values),
+    };
+  }
+
+  /**
+   * Serializes the series as plain arrays, `NaN` becomes `null`.
+   */
+  toJSON() {
+    const { station, altitude, timestamps, units, values, forecast } = this;
+    const toArrays = (values: Values) =>
+      Object.fromEntries(Object.entries(values).map(([key, series]) => [key, Array.from(series)]));
+    return {
+      station,
+      altitude,
+      timestamps,
+      units,
+      values: toArrays(values),
+      forecast: forecast && { timestamps: forecast.timestamps, values: toArrays(forecast.values) },
+    };
+  }
 
   /**
    * Filters the Results for each LineaChart for the given timespan.
@@ -119,14 +184,14 @@ export class StationData {
    *
    * @returns The surface hoar data for the charts data
    */
-  generateSurfaceHoarData(TD: (number | null)[] = this.values.TD ?? []): number[] {
+  generateSurfaceHoarData(TD: Series = this.values.TD ?? new Float64Array()): Series {
     if (this.values.SurfaceHoar) {
       return this.values.SurfaceHoar;
     }
-    this.values.SurfaceHoar = [];
+    this.values.SurfaceHoar = new Float64Array(TD.length);
 
     const timestamps = this.timestamps;
-    const TSS = this.values.TSS ?? [];
+    const TSS = this.values.TSS ?? new Float64Array(TD.length).fill(NaN);
 
     let i = 0;
     while (i < TD.length) {
@@ -172,16 +237,16 @@ export class StationData {
    * @see Threshold wet-bulb temperature ~0.3 °C for the rain/snow transition:
    * Nature Communications 9, 1148 (2018), https://doi.org/10.1038/s41467-018-03629-7
    */
-  generateDrySnowfallLevelData(tpsyThreshold = 0.3): number[] {
+  generateDrySnowfallLevelData(tpsyThreshold = 0.3): Series {
     if (this.values.DrySnowfallLevel) {
       return this.values.DrySnowfallLevel;
     }
 
-    this.values.DrySnowfallLevel = this.timestamps.map((_, i) => {
+    this.values.DrySnowfallLevel = seriesOf(this.timestamps.length, (i) => {
       const ta = this.values.TA?.[i];
       const rh = this.values.RH?.[i];
       if (ta == null || rh == null || !isFinite(ta) || !isFinite(rh)) {
-        return null;
+        return NaN;
       }
       const tpsy = calculateWetBulb(ta, rh);
       return Math.round((tpsy - tpsyThreshold) / 0.006 + this.altitude);
@@ -220,7 +285,7 @@ export class StationDataArray extends Array<StationData> {
       altitude: number;
       timestamps: number[];
       units: Units;
-      values: Values;
+      values: ValuesInput;
     }[],
   ) {
     return new StationDataArray(
@@ -257,11 +322,10 @@ export class StationDataArray extends Array<StationData> {
       let key: ParameterType;
       for (key in oldResult.values) {
         const oldSeries = oldResult.values[key];
-        const newSeries = newResult?.values[key] ?? [];
-        oldResult.values[key] = allTimestamps.map((_, t) => {
-          // NaN marks timestamps without data for this station, null marks missing values
-          const oldValue = oldIndices[t] < 0 ? NaN : (oldSeries[oldIndices[t]] ?? null);
-          const newValue = newIndices[t] < 0 ? NaN : (newSeries[newIndices[t]] ?? null);
+        const newSeries = newResult?.values[key];
+        oldResult.values[key] = seriesOf(allTimestamps.length, (t) => {
+          const oldValue = oldIndices[t] < 0 ? NaN : oldSeries[oldIndices[t]];
+          const newValue = newIndices[t] < 0 || !newSeries ? NaN : newSeries[newIndices[t]];
           // existing values take precedence over newly loaded ones
           return Number.isNaN(oldValue) ? newValue : oldValue;
         });
@@ -275,7 +339,7 @@ export class StationDataArray extends Array<StationData> {
    * Generalizes the data stored in the results list:
    * ensures that all Results objects have the same timestamps and fill up missing data.
    * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
-   * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
+   * both will have data from 03:00 to 06:00 with NaN values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
    * so we can show all available data
    */
   generalize(): void {

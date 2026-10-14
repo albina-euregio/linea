@@ -1,7 +1,7 @@
 import { fetchOrThrow } from "./fetchOrThrow";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
-import { type ParameterType, type Units, type Values, StationData } from "./station-data";
+import { type ParameterType, type Units, type ValuesInput, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 import { profileAsync } from "../shared/profiler";
 import { tryLoadSmetWasm, parseSMETBytes } from "./smet-wasm";
@@ -134,14 +134,14 @@ class SMETHeader {
     return this.units.map((u) => UNIT_MAPPING[u]?.convert ?? ((v) => v));
   }
 
-  toStationData(timestamps: number[], values: (number | null)[][]): StationData {
+  toStationData(timestamps: number[], values: ArrayLike<number | null>[]): StationData {
     const units = this.units.map((u) => UNIT_MAPPING[u]?.to ?? u);
     return new StationData(
       this.station,
       this.altitude,
       timestamps,
       Object.fromEntries(this.fields.map((f, i) => [f, units[i]])) as Units,
-      Object.fromEntries(this.fields.map((f, i) => [f, values[i]])) as Values,
+      Object.fromEntries(this.fields.map((f, i) => [f, values[i]])) as ValuesInput,
     );
   }
 }
