@@ -95,6 +95,8 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   let tz = 0;
   const timestamps = [] as number[];
   let dataIndex = 0;
+  /** unit conversion per column, resolved once on the first data line */
+  let converters: ((v: number) => number)[] | undefined;
 
   const reader = lines.getReader();
   while (true) {
@@ -139,15 +141,15 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
         }
       }
       timestamps[dataIndex] = Date.parse(dateString);
-      values.forEach((values0, i) => {
-        if (i == 0) return; // timestamp
+      converters ??= units.map((u) => UNIT_MAPPING[u]?.convert ?? ((v) => v));
+      for (let i = 1; i < values.length; i++) {
         if (cells[i] === nodata) {
-          values0[dataIndex] = null;
-          return;
+          values[i][dataIndex] = null;
+          continue;
         }
         const value = +cells[i].replace(",", ".");
-        values0[dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
-      });
+        values[i][dataIndex] = converters[i](value);
+      }
       dataIndex++;
     }
   }
