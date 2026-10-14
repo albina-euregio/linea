@@ -16,10 +16,31 @@ stages:
     - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
 
+build:wasm:
+  image: rust:1.99.0-slim
+  stage: build
+  cache:
+    key:
+      files:
+        - wasm/smet/Cargo.lock
+    paths:
+      - wasm/smet/target
+  script:
+    - rustup target add wasm32-unknown-unknown
+    - cargo test --manifest-path wasm/smet/Cargo.toml
+    - cargo build --release --target wasm32-unknown-unknown --manifest-path wasm/smet/Cargo.toml
+    - cp wasm/smet/target/wasm32-unknown-unknown/release/smet.wasm src/data/smet.wasm
+  artifacts:
+    paths:
+      - src/data/smet.wasm
+
 build:
   extends: .build
+  needs:
+    - build:wasm
   script:
     - pnpm run ci
+    - LINEA_WASM=1 pnpm run test
     - pnpm pack
   artifacts:
     paths:
