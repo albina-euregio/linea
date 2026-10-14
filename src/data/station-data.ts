@@ -288,6 +288,22 @@ export class StationDataArray extends Array<StationData> {
       // set the common timeline to all results
       oldResult.timestamps = allTimestamps.slice();
     }
+
+    /**
+     * Returns the sorted, de-duplicated timestamps of all given results.
+     */
+    function unionTimestamps(results: { timestamps: number[] }[]): number[] {
+      return [...new Set(results.flatMap((res) => res.timestamps))].sort((a, b) => a - b);
+    }
+
+    /**
+     * Returns for each target timestamp its index in the source timestamps (or undefined if absent).
+     * Computed once per station so that each parameter series is aligned by a plain array lookup.
+     */
+    function sourceIndices(source: number[], target: number[]): (number | undefined)[] {
+      const indexByTimestamp = new Map(source.map((t, i) => [t, i]));
+      return target.map((t) => indexByTimestamp.get(t));
+    }
   }
 
   /**
@@ -312,20 +328,4 @@ export class StationDataArray extends Array<StationData> {
       Math.max(...this.map((v) => v.timestamps.at(-1))),
     ];
   }
-}
-
-/**
- * Returns the sorted, de-duplicated timestamps of all given results.
- */
-function unionTimestamps(results: { timestamps: number[] }[]): number[] {
-  return [...new Set(results.flatMap((res) => res.timestamps))].sort((a, b) => a - b);
-}
-
-/**
- * Returns for each target timestamp its index in the source timestamps (or undefined if absent).
- * Computed once per station so that each parameter series is aligned by a plain array lookup.
- */
-function sourceIndices(source: number[], target: number[]): (number | undefined)[] {
-  const indexByTimestamp = new Map(source.map((t, i) => [t, i]));
-  return target.map((t) => indexByTimestamp.get(t));
 }
