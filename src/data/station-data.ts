@@ -84,46 +84,23 @@ export class StationData {
     const startTimestamp = startDate.toInstant().epochMilliseconds;
     const endTimestamp = endDate.toInstant().epochMilliseconds;
 
-    let filteredValues: Values = {};
-
-    let key: ParameterType;
-    for (key in this.values) {
-      const series = this.values[key];
-      if (!series) {
-        continue;
+    /** slices timestamps and values to the timespan, timestamps are sorted ascending */
+    const slice = (timestamps: number[], values: Values) => {
+      const from = partitionPoint(timestamps, (t) => t < startTimestamp);
+      const to = partitionPoint(timestamps, (t) => t <= endTimestamp);
+      const sliced: Values = {};
+      let key: ParameterType;
+      for (key in values) {
+        if (values[key]) sliced[key] = values[key].slice(from, to);
       }
-      filteredValues[key] = series.filter(
-        (_, j) => this.timestamps[j] >= startTimestamp && this.timestamps[j] <= endTimestamp,
-      );
-    }
-    const filteredTimestamps = this.timestamps.filter(
-      (t) => t >= startTimestamp && t <= endTimestamp,
+      return { timestamps: timestamps.slice(from, to), values: sliced };
+    };
+
+    const { timestamps: filteredTimestamps, values: filteredValues } = slice(
+      this.timestamps,
+      this.values,
     );
-
-    let filteredForecast: ForecastValues | undefined = undefined;
-    if (this.forecast) {
-      const forecastTimestamps = this.forecast.timestamps.filter(
-        (t) => t >= startTimestamp && t <= endTimestamp,
-      );
-      const forecastValues: Values = {};
-      let forecastKey: ParameterType;
-      for (forecastKey in this.forecast.values) {
-        const series = this.forecast.values[forecastKey];
-        if (!series) {
-          continue;
-        }
-        forecastValues[forecastKey] = series.filter(
-          (_, j) =>
-            this.forecast &&
-            this.forecast.timestamps[j] >= startTimestamp &&
-            this.forecast.timestamps[j] <= endTimestamp,
-        );
-      }
-      filteredForecast = {
-        timestamps: forecastTimestamps,
-        values: forecastValues,
-      };
-    }
+    const filteredForecast = this.forecast && slice(this.forecast.timestamps, this.forecast.values);
 
     return new StationData(
       this.station,
@@ -332,4 +309,22 @@ function alignTimestamps(inputs: number[][]): { timestamps: number[]; indices: I
     return Int32Array.from(timestamps, (t) => indexByTimestamp.get(t) ?? -1);
   });
   return { timestamps, indices };
+}
+
+/**
+ * Returns the index of the first element of the partitioned `array` not satisfying `predicate`,
+ * i.e. all elements before satisfy it and all from there on do not. Uses binary search.
+ */
+function partitionPoint<T>(array: T[], predicate: (value: T) => boolean): number {
+  let lo = 0;
+  let hi = array.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (predicate(array[mid])) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  return lo;
 }

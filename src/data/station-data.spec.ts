@@ -1,3 +1,4 @@
+import "temporal-polyfill/global";
 import { beforeAll, expect, test } from "vite-plus/test";
 import { tryLoadSmetWasm } from "./smet-wasm";
 import { StationData, StationDataArray } from "./station-data";
@@ -54,4 +55,26 @@ test("mergeWith aligns all stations and fills gaps from previous alignment", () 
   expect(results[0].values).toEqual({ TA: [0, 1, 2, NaN] });
   expect(results[1].timestamps).toEqual([2, 3, 4, 5]);
   expect(results[1].values).toEqual({ TA: [NaN, 30, 40, 50] });
+});
+
+test("filter keeps measurements and forecast within the timespan", () => {
+  const data = new StationData(
+    "A",
+    1000,
+    [1, 2, 3, 4, 5],
+    {},
+    { TA: [10, 20, null, 40, 50] },
+    {
+      timestamps: [4, 5, 6],
+      values: { TA: [-4, -5, -6] },
+    },
+  );
+  const at = (ms: number) => Temporal.Instant.fromEpochMilliseconds(ms).toZonedDateTimeISO("UTC");
+
+  const filtered = data.filter(at(2), at(5));
+
+  expect(filtered.timestamps).toEqual([2, 3, 4, 5]);
+  expect(filtered.values).toEqual({ TA: [20, null, 40, 50] });
+  expect(filtered.forecast).toEqual({ timestamps: [4, 5], values: { TA: [-4, -5] } });
+  expect(data.filter(at(6), at(9)).timestamps).toEqual([]);
 });
