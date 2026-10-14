@@ -10,15 +10,6 @@ const messages = import.meta.glob("./i18n/*.json", {
 
 export type messagesEN_t = keyof typeof messagesEN;
 
-declare global {
-  namespace Intl {
-    interface DateTimeFormat {
-      // Temporal extends Intl.DateTimeFormat to format Temporal objects (missing in lib.esnext.temporal.d.ts)
-      format(date?: Temporal.PlainDate | Date | number): string;
-    }
-  }
-}
-
 class I18n {
   get lang(): string {
     return document.documentElement.lang.slice(0, 2) || "en";
