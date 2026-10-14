@@ -3,7 +3,7 @@ import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
-import { profileAsync } from "../shared/profiler";
+import { profile, profileAsync } from "../shared/profiler";
 
 export const DEFAULT_UNITS: Units = {
   P: "Pa",
@@ -54,33 +54,11 @@ export async function fetchSMET(url: string): Promise<StationData> {
     stream = stream.pipeThrough(new DecompressionStream("gzip"));
   }
 
-  const lines = stream.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream());
-
-  return profileAsync(`fetch:download+parse ${file}`, () => parseSMET(lines));
+  const text = await profileAsync(`fetch:download ${file}`, () => new Response(stream).text());
+  return profile(`parse ${file}`, () => parseSMET(text));
 }
 
-class TextLineStream extends TransformStream<string, string> {
-  constructor() {
-    let buffer = "";
-    super({
-      transform(chunk, controller) {
-        buffer += chunk;
-        const lines = buffer.split(/\r?\n/);
-        buffer = lines.pop()!;
-        for (const line of lines) {
-          controller.enqueue(line);
-        }
-      },
-      flush(controller) {
-        if (buffer) {
-          controller.enqueue(buffer);
-        }
-      },
-    });
-  }
-}
-
-async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
+function parseSMET(text: string): StationData {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
   let values: number[][] = [];
@@ -96,12 +74,7 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   const timestamps = [] as number[];
   let dataIndex = 0;
 
-  const reader = lines.getReader();
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    const line0 = value;
-
+  for (const line0 of text.split(/\r?\n/)) {
     function parseHeader(prefix: string) {
       let line = line0;
       if (!line.startsWith(prefix)) return "";
