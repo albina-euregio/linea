@@ -80,7 +80,6 @@ export abstract class LineaView {
     results.push(...data);
     const detail = { points: data.map((d) => d.timestamps.length) };
     profile(`mergeWith ${attribute}`, () => this.results.mergeWith(results), detail);
-    profile(`generalize ${attribute}`, () => this.results.generalize(), detail);
     [this.minTime, this.maxTime] = profile("minMaxTime", () => this.results.minMaxTime);
     profile("updateValidDateInputs", () => this.lineaplot.updateValidDateInputs());
   }

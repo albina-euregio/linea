@@ -251,7 +251,8 @@ export class StationDataArray extends Array<StationData> {
   }
 
   /**
-   * Merges the results from the new fetch with the existing results in the view.
+   * Merges the results from the new fetch with the existing results in the view
+   * and generalizes them, see {@link generalize}.
    * Mainly implemented to integrate the lazy source data into the existing one.
    * The first loaded data decides about the keys to show.
    * @param newResults The results to integrate into the existing.
@@ -262,34 +263,30 @@ export class StationDataArray extends Array<StationData> {
   mergeWith(newResults: StationDataArray): void {
     if (this.length === 0) {
       this.push(...newResults);
-      return;
+      newResults = new StationDataArray();
     }
+    const allTimestamps = unionTimestamps([...this, ...newResults]);
 
     for (let i = 0; i < this.length; i++) {
       const oldResult = this[i];
       const newResult = newResults[i];
-      if (oldResult === undefined || newResult === undefined) {
-        continue;
-      }
-      const mergedTimestamps = unionTimestamps([oldResult, newResult]);
-      const oldIndices = sourceIndices(oldResult.timestamps, mergedTimestamps);
-      const newIndices = sourceIndices(newResult.timestamps, mergedTimestamps);
+      const oldIndices = sourceIndices(oldResult.timestamps, allTimestamps);
+      const newIndices = sourceIndices(newResult?.timestamps ?? [], allTimestamps);
 
-      const mergedValues: Values = {};
       let key: ParameterType;
       for (key in oldResult.values) {
         const oldSeries = oldResult.values[key];
-        const newSeries = newResult.values[key] ?? [];
-        // existing values take precedence over newly loaded ones
-        mergedValues[key] = mergedTimestamps.map((_, t) =>
-          oldIndices[t] !== undefined
-            ? oldSeries[oldIndices[t]]
-            : (newSeries[newIndices[t]] ?? null),
-        );
+        const newSeries = newResult?.values[key] ?? [];
+        oldResult.values[key] = allTimestamps.map((_, t) => {
+          // NaN marks timestamps without data for this station, null marks missing values
+          const oldValue = oldIndices[t] === undefined ? NaN : (oldSeries[oldIndices[t]] ?? null);
+          const newValue = newIndices[t] === undefined ? NaN : (newSeries[newIndices[t]] ?? null);
+          // existing values take precedence over newly loaded ones
+          return Number.isNaN(oldValue) ? newValue : oldValue;
+        });
       }
-
-      oldResult.timestamps = mergedTimestamps;
-      oldResult.values = mergedValues;
+      // set the common timeline to all results
+      oldResult.timestamps = allTimestamps.slice();
     }
   }
 
@@ -306,19 +303,7 @@ export class StationDataArray extends Array<StationData> {
       console.warn("No results to generalize");
       return;
     }
-    const allTimestamps = unionTimestamps(this);
-
-    for (const res of this) {
-      const indices = sourceIndices(res.timestamps, allTimestamps);
-
-      let key: ParameterType;
-      for (key in res.values) {
-        const series = res.values[key];
-        res.values[key] = indices.map((i) => (i === undefined ? NaN : (series[i] ?? null)));
-      }
-      // set the common timeline to all results
-      res.timestamps = allTimestamps.slice();
-    }
+    this.mergeWith(new StationDataArray());
   }
 
   get minMaxTime(): [number, number] {

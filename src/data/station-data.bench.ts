@@ -54,13 +54,11 @@ function clone(d: StationData): StationData {
 function loadSrc(): StationDataArray {
   const results = new StationDataArray();
   results.mergeWith(new StationDataArray(clone(week)));
-  results.generalize();
   return results;
 }
 
 function mergeLazySrc(results: StationDataArray): StationDataArray {
   results.mergeWith(new StationDataArray(clone(winter)));
-  results.generalize();
   return results;
 }
 
@@ -76,13 +74,10 @@ test("parse", async ({ bench }) => {
 
 test("merge lazysrc into src", async ({ bench }) => {
   await bench.compare(
-    bench("loadSrc (baseline: mergeWith + generalize woche)", () => {
+    bench("loadSrc (baseline: mergeWith woche)", () => {
       loadSrc();
     }),
     bench("loadSrc + mergeWith lazysrc", () => {
-      loadSrc().mergeWith(new StationDataArray(clone(winter)));
-    }),
-    bench("loadSrc + mergeWith lazysrc + generalize", () => {
       mergeLazySrc(loadSrc());
     }),
   );

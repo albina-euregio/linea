@@ -29,3 +29,24 @@ test("mergeWith merges new timestamps, keeping existing values", () => {
   expect(results[0].timestamps).toEqual([1, 2, 3, 4]);
   expect(results[0].values).toEqual({ TA: [-1, null, 1, 2], HS: [8, 9, 10, null] });
 });
+
+test("mergeWith aligns all stations and fills gaps from previous alignment", () => {
+  const results = new StationDataArray(
+    new StationData("A", 1000, [3, 4], {}, { TA: [1, 2] }),
+    new StationData("B", 2000, [4], {}, { TA: [40] }),
+  );
+  results.generalize();
+  expect(results[1].values).toEqual({ TA: [NaN, 40] });
+
+  results.mergeWith(
+    new StationDataArray(
+      new StationData("A", 1000, [2], {}, { TA: [0] }),
+      new StationData("B", 2000, [3, 5], {}, { TA: [30, 50] }),
+    ),
+  );
+
+  expect(results[0].timestamps).toEqual([2, 3, 4, 5]);
+  expect(results[0].values).toEqual({ TA: [0, 1, 2, NaN] });
+  expect(results[1].timestamps).toEqual([2, 3, 4, 5]);
+  expect(results[1].values).toEqual({ TA: [NaN, 30, 40, 50] });
+});
