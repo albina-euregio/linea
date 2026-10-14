@@ -6,6 +6,7 @@ import { LineaPlot } from "./linea-plot";
 import { i18n } from "./i18n";
 import { FeatureSchema, type Feature } from "./schema/listing";
 import { PROVIDERS } from "./data/providers";
+import { profile, profileAsync, profileUntilPaint } from "./shared/profiler";
 
 /**
  * Abstract base class for view implementations (Station view and Winter view)
@@ -75,12 +76,13 @@ export abstract class LineaView {
 
     const results = new StationDataArray();
     const data$ = this.#features.map((f) => PROVIDERS.fetchStationData(f, dataURLsIndex));
-    const data = await Promise.all(data$);
+    const data = await profileAsync(`fetch ${attribute}`, () => Promise.all(data$));
     results.push(...data);
-    this.results.mergeWith(results);
-    this.results.generalize();
-    [this.minTime, this.maxTime] = this.results.minMaxTime;
-    this.lineaplot.updateValidDateInputs();
+    const detail = { points: data.map((d) => d.timestamps.length) };
+    profile(`mergeWith ${attribute}`, () => this.results.mergeWith(results), detail);
+    profile(`generalize ${attribute}`, () => this.results.generalize(), detail);
+    [this.minTime, this.maxTime] = profile("minMaxTime", () => this.results.minMaxTime);
+    profile("updateValidDateInputs", () => this.lineaplot.updateValidDateInputs());
   }
 
   /**
@@ -113,14 +115,19 @@ export abstract class LineaView {
     startDate: Temporal.ZonedDateTime = this.getDatePickerStartDate(),
     endDate: Temporal.ZonedDateTime = this.getDatePickerEndDate(),
   ) {
+    profileUntilPaint("filterAndUpdateData→paint");
     for (let i = 0; i < this.charts.length; i++) {
       const res: StationData | undefined = this.results[i];
       if (!res) {
         continue;
       }
       try {
-        const filtered = res.filter(startDate, endDate);
-        this.charts[i].setData(filtered);
+        const filtered = profile("filter", () => res.filter(startDate, endDate), {
+          points: res.timestamps.length,
+        });
+        profile("setData", () => this.charts[i].setData(filtered), {
+          points: filtered.timestamps.length,
+        });
       } catch (e) {
         console.error("Error filtering data for chart", i, e);
         this.charts[i].setData(res);

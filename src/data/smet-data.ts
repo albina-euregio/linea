@@ -3,6 +3,7 @@ import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
+import { profileAsync } from "../shared/profiler";
 
 export const DEFAULT_UNITS: Units = {
   P: "Pa",
@@ -33,7 +34,8 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
 };
 
 export async function fetchSMET(url: string): Promise<StationData> {
-  let response = await fetchOrThrow(url);
+  const file = url.split("/").slice(-2).join("/");
+  let response = await profileAsync(`fetch:headers ${file}`, () => fetchOrThrow(url));
 
   if (url.startsWith(geosphere.URL)) {
     throw new Error();
@@ -54,7 +56,7 @@ export async function fetchSMET(url: string): Promise<StationData> {
 
   const lines = stream.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream());
 
-  return parseSMET(lines);
+  return profileAsync(`fetch:download+parse ${file}`, () => parseSMET(lines));
 }
 
 class TextLineStream extends TransformStream<string, string> {

@@ -5,6 +5,7 @@ import type { LineaPlot } from "../linea-plot";
 import type { AirDatepickerOptions } from "air-datepicker";
 import { fetchGeosphereForecast, GEOSPHERE_BBOX_OUTER } from "../data/geosphere-forecast";
 import { type ParameterType, type Values } from "../data/station-data";
+import { profileAsync } from "../shared/profiler";
 
 /**
  * Station View - displays non-winter station data with interactive filtering
@@ -111,7 +112,7 @@ export class StationView extends LineaView {
     if (this.lineaplot.hasAttribute("data")) {
       this.loadFromDataAttribute();
     } else {
-      await this.fetchData("src");
+      await profileAsync("fetchSrc", () => this.fetchData("src"));
     }
 
     this.measuredMaxTime = this.maxTime;
@@ -366,7 +367,7 @@ export class StationView extends LineaView {
   async fetchLazySrc() {
     if (this.lazySrcLoaded) return;
     try {
-      await this.fetchData("lazysrc");
+      await profileAsync("fetchLazySrc", () => this.fetchData("lazysrc"));
     } catch (e) {
       if (e === "Empty src array!") return;
       throw e;
