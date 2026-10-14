@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import type { Unit } from "./units";
+import { alignTimestampsWasm } from "./smet-wasm";
 
 /**
  * Parameter type following the [SMET specification](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf)
@@ -265,15 +266,16 @@ export class StationDataArray extends Array<StationData> {
       this.push(...newResults);
       newResults = new StationDataArray();
     }
-    const allTimestamps = [
-      ...new Set([...this, ...newResults].flatMap((res) => res.timestamps)),
-    ].sort((a, b) => a - b);
+    const { timestamps: allTimestamps, indices } = alignTimestamps([
+      ...this.map((res) => res.timestamps),
+      ...this.map((_, i) => newResults[i]?.timestamps ?? []),
+    ]);
 
     for (let i = 0; i < this.length; i++) {
       const oldResult = this[i];
       const newResult = newResults[i];
-      const oldIndices = sourceIndices(oldResult.timestamps, allTimestamps);
-      const newIndices = sourceIndices(newResult?.timestamps ?? [], allTimestamps);
+      const oldIndices = indices[i];
+      const newIndices = indices[this.length + i];
 
       let key: ParameterType;
       for (key in oldResult.values) {
@@ -281,23 +283,14 @@ export class StationDataArray extends Array<StationData> {
         const newSeries = newResult?.values[key] ?? [];
         oldResult.values[key] = allTimestamps.map((_, t) => {
           // NaN marks timestamps without data for this station, null marks missing values
-          const oldValue = oldIndices[t] === undefined ? NaN : (oldSeries[oldIndices[t]] ?? null);
-          const newValue = newIndices[t] === undefined ? NaN : (newSeries[newIndices[t]] ?? null);
+          const oldValue = oldIndices[t] < 0 ? NaN : (oldSeries[oldIndices[t]] ?? null);
+          const newValue = newIndices[t] < 0 ? NaN : (newSeries[newIndices[t]] ?? null);
           // existing values take precedence over newly loaded ones
           return Number.isNaN(oldValue) ? newValue : oldValue;
         });
       }
       // set the common timeline to all results
       oldResult.timestamps = allTimestamps.slice();
-    }
-
-    /**
-     * Returns for each target timestamp its index in the source timestamps (or undefined if absent).
-     * Computed once per station so that each parameter series is aligned by a plain array lookup.
-     */
-    function sourceIndices(source: number[], target: number[]): (number | undefined)[] {
-      const indexByTimestamp = new Map(source.map((t, i) => [t, i]));
-      return target.map((t) => indexByTimestamp.get(t));
     }
   }
 
@@ -323,4 +316,20 @@ export class StationDataArray extends Array<StationData> {
       Math.max(...this.map((v) => v.timestamps.at(-1))),
     ];
   }
+}
+
+/**
+ * Returns the sorted, de-duplicated union of the given timestamp arrays, and for each input
+ * the index of each union timestamp in that input (or -1 if absent).
+ * Computed once per station so that each parameter series is aligned by a plain array lookup.
+ */
+function alignTimestamps(inputs: number[][]): { timestamps: number[]; indices: Int32Array[] } {
+  const wasm = alignTimestampsWasm(inputs);
+  if (wasm) return wasm;
+  const timestamps = [...new Set(inputs.flat())].sort((a, b) => a - b);
+  const indices = inputs.map((source) => {
+    const indexByTimestamp = new Map(source.map((t, i) => [t, i]));
+    return Int32Array.from(timestamps, (t) => indexByTimestamp.get(t) ?? -1);
+  });
+  return { timestamps, indices };
 }

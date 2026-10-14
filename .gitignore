@@ -9,3 +9,5 @@
 .yarn/install-state.gz
 *linea.geojson*
 .vitest/
+/wasm/smet/target
+/src/data/smet.wasm
