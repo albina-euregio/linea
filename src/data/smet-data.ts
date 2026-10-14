@@ -91,8 +91,9 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   let altitude = NaN;
   /**
    * SMET: timezone of the measurements, decimal number positive going east. If not provided, utc is assumed.
+   * Stored as ISO 8601 offset, e.g. `tz = 1` -> `+01:00`.
    */
-  let tz = 0;
+  let tzOffset = "Z";
   const timestamps = [] as number[];
   let dataIndex = 0;
   /** unit conversion per column, resolved once on the first data line */
@@ -123,7 +124,7 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
     } else if ((header = parseHeader("nodata"))) {
       nodata = header;
     } else if ((header = parseHeader("tz"))) {
-      tz = +header;
+      tzOffset = formatTimezoneOffset(+header);
     } else if ((header = parseHeader("station_name"))) {
       station = header;
     } else if ((header = parseHeader("altitude"))) {
@@ -132,13 +133,7 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
       const cells = line0.split(separator);
       let dateString = cells[0];
       if (dateString.length === "2025-11-26T19:00:00".length) {
-        if (tz === 0) {
-          dateString += "Z";
-        } else if (tz > 0) {
-          dateString += `+${String(tz).padStart(2, "0")}:00`; // `tz = 1` -> `+01:00`
-        } else {
-          dateString += `-${String(tz).padStart(2, "0")}:00`;
-        }
+        dateString += tzOffset;
       }
       timestamps[dataIndex] = Date.parse(dateString);
       converters ??= units.map((u) => UNIT_MAPPING[u]?.convert ?? ((v) => v));
@@ -162,4 +157,15 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
     Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
     Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,
   );
+}
+
+/**
+ * Formats a SMET timezone (decimal hours) as ISO 8601 offset, e.g. `1` -> `+01:00`, `-3.5` -> `-03:30`.
+ */
+function formatTimezoneOffset(tz: number): string {
+  if (!tz) return "Z";
+  const minutes = Math.round(Math.abs(tz) * 60);
+  const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const mm = String(minutes % 60).padStart(2, "0");
+  return `${tz < 0 ? "-" : "+"}${hh}:${mm}`;
 }

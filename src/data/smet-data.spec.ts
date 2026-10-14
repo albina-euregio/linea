@@ -338,3 +338,20 @@ fields           = timestamp TA RH VW_MAX VW DW
   const data = await fetchSMET(url);
   expect(data).toMatchSnapshot();
 });
+
+test("parse negative and fractional tz", async () => {
+  for (const [tz, expected] of [
+    ["-1", "2025-11-26T19:00:00-01:00"],
+    ["5.5", "2025-11-26T19:00:00+05:30"],
+  ]) {
+    const url = mockFetch(`
+[HEADER]
+fields = timestamp TA
+tz = ${tz}
+[DATA]
+2025-11-26T19:00:00 273.15
+`);
+    const data = await fetchSMET(url);
+    expect(data.timestamps).toEqual([Date.parse(expected)]);
+  }
+});
