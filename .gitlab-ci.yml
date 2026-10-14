@@ -40,7 +40,7 @@ build:
     - build:wasm
   script:
     - pnpm run ci
-    - LINEA_WASM=1 pnpm run test
+    - VITE_LINEA_WASM=0 pnpm run test
     - pnpm pack
   artifacts:
     paths:

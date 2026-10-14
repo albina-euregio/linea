@@ -4,7 +4,7 @@ import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 import { profileAsync } from "../shared/profiler";
-import { WASM_ENABLED, parseSMETBytes } from "./smet-wasm";
+import { tryLoadSmetWasm, parseSMETBytes } from "./smet-wasm";
 
 export const DEFAULT_UNITS: Units = {
   P: "Pa",
@@ -55,7 +55,7 @@ export async function fetchSMET(url: string): Promise<StationData> {
     stream = stream.pipeThrough(new DecompressionStream("gzip"));
   }
 
-  if (WASM_ENABLED) {
+  if (await tryLoadSmetWasm()) {
     const bytes = await profileAsync(
       `fetch:download ${file}`,
       async () => new Uint8Array(await new Response(stream).arrayBuffer()),

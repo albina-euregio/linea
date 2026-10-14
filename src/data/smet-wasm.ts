@@ -1,15 +1,14 @@
 /**
- * Experimental WebAssembly implementation of the hot loops of SMET parsing and
- * timestamp merging, see `wasm/smet/src/lib.rs`. Build with `pnpm run build:wasm`.
+ * WebAssembly implementation of the hot loops of SMET parsing and timestamp merging,
+ * see `wasm/smet/src/lib.rs`. Build with `pnpm run build:wasm`.
  *
  * The module owns its input and result buffers: JavaScript writes into the buffer
  * returned by `input()` and reads the results of the last call via the getters.
  *
- * Opt-in via the URL parameter `?linea-wasm` (or `LINEA_WASM=1` in Node).
+ * Used by default, with a fallback to the TypeScript implementation if the module cannot be loaded.
+ * Tests opt out via `VITE_LINEA_WASM=0` to cover the TypeScript implementation.
  */
-export const WASM_ENABLED: boolean =
-  (typeof location !== "undefined" && new URLSearchParams(location.search).has("linea-wasm")) ||
-  (typeof process !== "undefined" && process.env?.LINEA_WASM === "1");
+const WASM_ENABLED: boolean = import.meta.env?.VITE_LINEA_WASM !== "0";
 
 type Ptr = number;
 interface SmetExports {
@@ -45,6 +44,22 @@ export function loadSmetWasm(): Promise<SmetExports> {
   })();
   return wasm$;
 }
+
+/**
+ * Loads the WebAssembly implementation if enabled, returns whether it could be loaded.
+ */
+export async function tryLoadSmetWasm(): Promise<boolean> {
+  if (!WASM_ENABLED) return false;
+  try {
+    await loadSmetWasm();
+    return true;
+  } catch (e) {
+    if (!wasmWarned) console.warn("Failed to load smet.wasm, falling back to TypeScript", e);
+    wasmWarned = true;
+    return false;
+  }
+}
+let wasmWarned = false;
 
 /**
  * Copies `bytes` into the module buffer obtained by `buffer(len)`.

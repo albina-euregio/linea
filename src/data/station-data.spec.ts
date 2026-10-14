@@ -1,9 +1,9 @@
 import { beforeAll, expect, test } from "vite-plus/test";
-import { WASM_ENABLED, loadSmetWasm } from "./smet-wasm";
+import { tryLoadSmetWasm } from "./smet-wasm";
 import { StationData, StationDataArray } from "./station-data";
 
 beforeAll(async () => {
-  if (WASM_ENABLED) await loadSmetWasm();
+  await tryLoadSmetWasm();
 });
 
 test("generalize aligns all stations to a common timeline", () => {

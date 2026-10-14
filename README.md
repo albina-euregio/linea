@@ -78,11 +78,12 @@ Station counts as of 2026-10-06.
 
 ## Contributing
 
-1. Install [NodeJS](https://nodejs.org/en/) and [pnpm](https://pnpm.io/)
+1. Install [NodeJS](https://nodejs.org/en/), [pnpm](https://pnpm.io/) and [Rust](https://rust-lang.org/) (e.g. `mise install` using `.tool-versions`, then `rustup target add wasm32-unknown-unknown`)
 2. Run `pnpm install`
-3. Run `pnpm dev`
-4. Open browser at http://localhost:5173/
-5. Run `pnpm build`
+3. Run `pnpm build:wasm` (without it, SMET parsing falls back to TypeScript)
+4. Run `pnpm dev`
+5. Open browser at http://localhost:5173/
+6. Run `pnpm build`
 
 ## Deployment
 
