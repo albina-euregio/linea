@@ -2,6 +2,9 @@
  * Experimental WebAssembly implementation of the hot loops of SMET parsing and
  * timestamp merging, see `wasm/smet/src/lib.rs`. Build with `pnpm run build:wasm`.
  *
+ * The module owns its input and result buffers: JavaScript writes into the buffer
+ * returned by `input()` and reads the results of the last call via the getters.
+ *
  * Opt-in via the URL parameter `?linea-wasm` (or `LINEA_WASM=1` in Node).
  */
 export const WASM_ENABLED: boolean =
@@ -11,27 +14,19 @@ export const WASM_ENABLED: boolean =
 type Ptr = number;
 interface SmetExports {
   memory: WebAssembly.Memory;
-  alloc(len: number): Ptr;
-  dealloc(ptr: Ptr, len: number): void;
-  data_offset(ptr: Ptr, len: number): number;
-  parse_data(
-    ptr: Ptr,
-    len: number,
-    ncols: number,
-    tzMinutes: number,
-    nodataPtr: Ptr,
-    nodataLen: number,
-  ): Ptr;
-  parsed_rows(parsed: Ptr): number;
-  parsed_timestamps(parsed: Ptr): Ptr;
-  parsed_column(parsed: Ptr, i: number): Ptr;
-  parsed_missing(parsed: Ptr, i: number): Ptr;
-  parsed_free(parsed: Ptr): void;
-  union_timestamps(ptr: Ptr, lensPtr: Ptr, n: number): Ptr;
-  union_len(union: Ptr): number;
-  union_timestamps_ptr(union: Ptr): Ptr;
-  union_indices(union: Ptr, k: number): Ptr;
-  union_free(union: Ptr): void;
+  input(len: number): Ptr;
+  nodata(len: number): Ptr;
+  clear(): void;
+  data_offset(): number;
+  parse_data(ncols: number, tzMinutes: number): void;
+  parsed_rows(): number;
+  parsed_timestamps(): Ptr;
+  parsed_column(i: number): Ptr;
+  parsed_missing(i: number): Ptr;
+  union_timestamps(n: number): void;
+  union_len(): number;
+  union_timestamps_ptr(): Ptr;
+  union_indices(k: number): Ptr;
 }
 
 let wasm: SmetExports | undefined;
@@ -52,60 +47,51 @@ export function loadSmetWasm(): Promise<SmetExports> {
 }
 
 /**
- * Copies `bytes` into the module memory and passes the pointer to `fn`.
+ * Copies `bytes` into the module buffer obtained by `buffer(len)`.
  */
-function withBytes<T>(w: SmetExports, bytes: Uint8Array, fn: (ptr: Ptr) => T): T {
-  const ptr = w.alloc(bytes.length);
+function write(w: SmetExports, buffer: (len: number) => Ptr, bytes: Uint8Array): void {
+  const ptr = buffer(bytes.length);
   new Uint8Array(w.memory.buffer, ptr, bytes.length).set(bytes);
-  try {
-    return fn(ptr);
-  } finally {
-    w.dealloc(ptr, bytes.length);
-  }
+}
+
+/** the parts of the SMET header needed to parse the data lines */
+export interface SMETDataHeader {
+  fields: string[];
+  tz: number;
+  nodata: string;
+  converters(): ((v: number) => number)[];
 }
 
 /**
- * Parses the SMET data lines into timestamps and unit-converted columns,
- * the header is parsed by the caller (see {@link headerLength}).
+ * Parses a SMET file: the header with `parseHeader`, the data lines in WebAssembly
+ * into timestamps and unit-converted columns.
  */
-export async function parseSMETData(
+export async function parseSMETBytes<H extends SMETDataHeader>(
   bytes: Uint8Array,
-  ncols: number,
-  tzMinutes: number,
-  nodata: string,
-  converters: ((v: number) => number)[],
-): Promise<{ timestamps: number[]; columns: (number | null)[][] }> {
+  parseHeader: (text: string) => H,
+): Promise<{ header: H; timestamps: number[]; columns: (number | null)[][] }> {
   const w = await loadSmetWasm();
-  const nodataBytes = new TextEncoder().encode(nodata);
-  const parsed = withBytes(w, bytes, (ptr) =>
-    withBytes(w, nodataBytes, (nodataPtr) =>
-      w.parse_data(ptr, bytes.length, ncols, tzMinutes, nodataPtr, nodataBytes.length),
-    ),
-  );
   try {
-    const rows = w.parsed_rows(parsed);
-    const timestamps = Array.from(
-      new Float64Array(w.memory.buffer, w.parsed_timestamps(parsed), rows),
-    );
+    write(w, w.input, bytes);
+    const header = parseHeader(new TextDecoder().decode(bytes.subarray(0, w.data_offset())));
+    write(w, w.nodata, new TextEncoder().encode(header.nodata));
+    const ncols = header.fields.length;
+    w.parse_data(ncols, header.tz * 60);
+
+    const rows = w.parsed_rows();
+    const timestamps = Array.from(new Float64Array(w.memory.buffer, w.parsed_timestamps(), rows));
+    const converters = header.converters();
     const columns = Array.from({ length: ncols }, (_, i): (number | null)[] => {
       if (i === 0) return []; // timestamp
-      const values = new Float64Array(w.memory.buffer, w.parsed_column(parsed, i), rows);
-      const missing = new Uint8Array(w.memory.buffer, w.parsed_missing(parsed, i), rows);
+      const values = new Float64Array(w.memory.buffer, w.parsed_column(i), rows);
+      const missing = new Uint8Array(w.memory.buffer, w.parsed_missing(i), rows);
       const convert = converters[i];
       return Array.from(values, (v, j) => (missing[j] ? null : convert(v)));
     });
-    return { timestamps, columns };
+    return { header, timestamps, columns };
   } finally {
-    w.parsed_free(parsed);
+    w.clear();
   }
-}
-
-/**
- * Returns the byte length of the SMET header, i.e. the offset of the first data line.
- */
-export async function headerLength(bytes: Uint8Array): Promise<number> {
-  const w = await loadSmetWasm();
-  return withBytes(w, bytes, (ptr) => w.data_offset(ptr, bytes.length));
 }
 
 /**
@@ -117,22 +103,22 @@ export function alignTimestampsWasm(
 ): { timestamps: number[]; indices: Int32Array[] } | undefined {
   if (!WASM_ENABLED || !wasm) return undefined;
   const w = wasm;
-  const all = new Float64Array(inputs.flat());
-  const lens = new Uint32Array(inputs.map((ts) => ts.length));
-  const union = withBytes(w, new Uint8Array(all.buffer), (ptr) =>
-    withBytes(w, new Uint8Array(lens.buffer), (lensPtr) =>
-      w.union_timestamps(ptr, lensPtr, inputs.length),
-    ),
-  );
+  // timestamps of all inputs back to back, followed by their lengths
+  const all = inputs.flat();
+  const bytes = new Uint8Array(8 * all.length + 4 * inputs.length);
+  new Float64Array(bytes.buffer, 0, all.length).set(all);
+  new Uint32Array(bytes.buffer, 8 * all.length, inputs.length).set(inputs.map((ts) => ts.length));
   try {
-    const len = w.union_len(union);
+    write(w, w.input, bytes);
+    w.union_timestamps(inputs.length);
+    const len = w.union_len();
     return {
-      timestamps: Array.from(new Float64Array(w.memory.buffer, w.union_timestamps_ptr(union), len)),
+      timestamps: Array.from(new Float64Array(w.memory.buffer, w.union_timestamps_ptr(), len)),
       indices: inputs.map((_, k) =>
-        new Int32Array(w.memory.buffer, w.union_indices(union, k), len).slice(),
+        new Int32Array(w.memory.buffer, w.union_indices(k), len).slice(),
       ),
     };
   } finally {
-    w.union_free(union);
+    w.clear();
   }
 }

@@ -1,30 +1,52 @@
 //! Hot loops of linea's SMET parsing and timestamp merging, compiled to WebAssembly.
 //!
-//! Plain `extern "C"` exports operating on the module's linear memory, see `src/data/smet-wasm.ts`.
+//! Plain `extern "C"` exports operating on buffers owned by the module, see `src/data/smet-wasm.ts`.
 //! Header parsing and unit conversion stay in TypeScript.
 
-use std::alloc::{Layout, alloc as std_alloc, dealloc as std_dealloc};
-use std::slice;
+use std::cell::RefCell;
 
-fn layout(len: usize) -> Layout {
-    Layout::from_size_align(len, 8).unwrap()
+/// Buffers shared with JavaScript. JavaScript writes its input into the buffers returned by
+/// [`input`] and [`nodata`], and reads the results of the last call via the getters.
+/// Calls are synchronous and the module is single-threaded, so one state suffices.
+#[derive(Default)]
+struct State {
+    input: Vec<u8>,
+    nodata: Vec<u8>,
+    parsed: Parsed,
+    union: Union,
 }
 
-/// Allocates `len` bytes (8-byte aligned) for input buffers written by JavaScript.
-#[unsafe(no_mangle)]
-pub extern "C" fn alloc(len: usize) -> *mut u8 {
-    if len == 0 {
-        return std::ptr::NonNull::dangling().as_ptr();
-    }
-    unsafe { std_alloc(layout(len)) }
+thread_local! {
+    static STATE: RefCell<State> = RefCell::default();
 }
 
-/// Frees a buffer obtained from [`alloc`].
+fn with_state<T>(f: impl FnOnce(&mut State) -> T) -> T {
+    STATE.with_borrow_mut(f)
+}
+
+/// Resizes `buffer` to `len` zero bytes and returns its address for JavaScript to write into.
+fn resize(buffer: &mut Vec<u8>, len: usize) -> *mut u8 {
+    buffer.clear();
+    buffer.resize(len, 0);
+    buffer.as_mut_ptr()
+}
+
+/// Returns the address of the input buffer resized to `len` bytes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn dealloc(ptr: *mut u8, len: usize) {
-    if len != 0 {
-        unsafe { std_dealloc(ptr, layout(len)) }
-    }
+pub extern "C" fn input(len: usize) -> *mut u8 {
+    with_state(|s| resize(&mut s.input, len))
+}
+
+/// Returns the address of the `nodata` buffer resized to `len` bytes.
+#[unsafe(no_mangle)]
+pub extern "C" fn nodata(len: usize) -> *mut u8 {
+    with_state(|s| resize(&mut s.nodata, len))
+}
+
+/// Frees all buffers and results.
+#[unsafe(no_mangle)]
+pub extern "C" fn clear() {
+    with_state(|s| *s = State::default());
 }
 
 // ---------------------------------------------------------------------------
@@ -41,10 +63,13 @@ fn is_data_line(line: &[u8]) -> bool {
         && line[8..10].iter().all(u8::is_ascii_digit)
 }
 
-/// Returns the byte offset of the first data line, i.e. the length of the header.
+/// Returns the byte offset of the first data line in the input, i.e. the length of the header.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn data_offset(ptr: *const u8, len: usize) -> usize {
-    let bytes = unsafe { slice::from_raw_parts(ptr, len) };
+pub extern "C" fn data_offset() -> usize {
+    with_state(|s| data_offset_of(&s.input))
+}
+
+fn data_offset_of(bytes: &[u8]) -> usize {
     let mut offset = 0;
     for line in bytes.split_inclusive(|&b| b == b'\n') {
         if is_data_line(line) {
@@ -55,7 +80,8 @@ pub unsafe extern "C" fn data_offset(ptr: *const u8, len: usize) -> usize {
     bytes.len()
 }
 
-pub struct Parsed {
+#[derive(Default)]
+struct Parsed {
     timestamps: Vec<f64>,
     /// one column per field, column 0 (timestamp) stays empty
     columns: Vec<Vec<f64>>,
@@ -63,25 +89,19 @@ pub struct Parsed {
     missing: Vec<Vec<u8>>,
 }
 
-/// Parses all data lines into timestamps (epoch milliseconds) and one column per field.
+/// Parses all data lines of the input into timestamps (epoch milliseconds) and one column per field.
 /// Timestamps without explicit offset are interpreted in `tz_minutes` east of UTC.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn parse_data(
-    ptr: *const u8,
-    len: usize,
-    ncols: usize,
-    tz_minutes: f64,
-    nodata_ptr: *const u8,
-    nodata_len: usize,
-) -> *mut Parsed {
-    let bytes = unsafe { slice::from_raw_parts(ptr, len) };
-    let nodata = unsafe { slice::from_raw_parts(nodata_ptr, nodata_len) };
+pub extern "C" fn parse_data(ncols: usize, tz_minutes: f64) {
+    with_state(|s| s.parsed = parse(&s.input, ncols, tz_minutes, &s.nodata));
+}
+
+fn parse(bytes: &[u8], ncols: usize, tz_minutes: f64, nodata: &[u8]) -> Parsed {
     let mut parsed = Parsed {
         timestamps: Vec::new(),
         columns: vec![Vec::new(); ncols],
         missing: vec![Vec::new(); ncols],
     };
-
     for line in bytes.split(|&b| b == b'\n') {
         if !is_data_line(line) {
             continue;
@@ -100,7 +120,7 @@ pub unsafe extern "C" fn parse_data(
             parsed.missing[i].push(missing);
         }
     }
-    Box::into_raw(Box::new(parsed))
+    parsed
 }
 
 /// Parses a decimal number, accepting `,` as decimal separator. Invalid input yields NaN.
@@ -184,61 +204,65 @@ fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn parsed_rows(p: &Parsed) -> usize {
-    p.timestamps.len()
+pub extern "C" fn parsed_rows() -> usize {
+    with_state(|s| s.parsed.timestamps.len())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn parsed_timestamps(p: &Parsed) -> *const f64 {
-    p.timestamps.as_ptr()
+pub extern "C" fn parsed_timestamps() -> *const f64 {
+    with_state(|s| s.parsed.timestamps.as_ptr())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn parsed_column(p: &Parsed, i: usize) -> *const f64 {
-    p.columns[i].as_ptr()
+pub extern "C" fn parsed_column(i: usize) -> *const f64 {
+    with_state(|s| s.parsed.columns[i].as_ptr())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn parsed_missing(p: &Parsed, i: usize) -> *const u8 {
-    p.missing[i].as_ptr()
-}
-
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn parsed_free(p: *mut Parsed) {
-    drop(unsafe { Box::from_raw(p) });
+pub extern "C" fn parsed_missing(i: usize) -> *const u8 {
+    with_state(|s| s.parsed.missing[i].as_ptr())
 }
 
 // ---------------------------------------------------------------------------
 // Timestamp union for merging stations
 // ---------------------------------------------------------------------------
 
-pub struct Union {
+#[derive(Default)]
+struct Union {
     timestamps: Vec<f64>,
     /// per input: for each union timestamp the index in that input, or -1 if absent
     indices: Vec<Vec<i32>>,
 }
 
-/// Computes the sorted, de-duplicated union of `n` timestamp arrays stored back to back at `ptr`
-/// (with lengths at `lens_ptr`), and for each input the source index of each union timestamp.
+/// Computes the sorted, de-duplicated union of `n` timestamp arrays, and for each input the
+/// source index of each union timestamp. The input holds the little-endian f64 timestamps of all
+/// arrays back to back, followed by their `n` little-endian u32 lengths.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn union_timestamps(
-    ptr: *const f64,
-    lens_ptr: *const u32,
-    n: usize,
-) -> *mut Union {
-    let lens = unsafe { slice::from_raw_parts(lens_ptr, n) };
-    let total = lens.iter().map(|&l| l as usize).sum();
-    let all = unsafe { slice::from_raw_parts(ptr, total) };
+pub extern "C" fn union_timestamps(n: usize) {
+    with_state(|s| {
+        let (all, lens) = s.input.split_at(s.input.len() - 4 * n);
+        let lens: Vec<usize> = lens
+            .chunks_exact(4)
+            .map(|b| u32::from_le_bytes(b.try_into().unwrap()) as usize)
+            .collect();
+        let all: Vec<f64> = all
+            .chunks_exact(8)
+            .map(|b| f64::from_le_bytes(b.try_into().unwrap()))
+            .collect();
+        s.union = union(&lens, &all);
+    });
+}
 
+fn union(lens: &[usize], all: &[f64]) -> Union {
     let mut timestamps = all.to_vec();
     timestamps.sort_unstable_by(f64::total_cmp);
     timestamps.dedup();
 
-    let mut indices = Vec::with_capacity(n);
+    let mut indices = Vec::with_capacity(lens.len());
     let mut offset = 0;
     for &len in lens {
-        let source = &all[offset..offset + len as usize];
-        offset += len as usize;
+        let source = &all[offset..offset + len];
+        offset += len;
         let mut index = vec![-1; timestamps.len()];
         for (i, t) in source.iter().enumerate() {
             if let Ok(pos) = timestamps.binary_search_by(|x| x.total_cmp(t)) {
@@ -247,30 +271,25 @@ pub unsafe extern "C" fn union_timestamps(
         }
         indices.push(index);
     }
-    Box::into_raw(Box::new(Union {
+    Union {
         timestamps,
         indices,
-    }))
+    }
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn union_len(u: &Union) -> usize {
-    u.timestamps.len()
+pub extern "C" fn union_len() -> usize {
+    with_state(|s| s.union.timestamps.len())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn union_timestamps_ptr(u: &Union) -> *const f64 {
-    u.timestamps.as_ptr()
+pub extern "C" fn union_timestamps_ptr() -> *const f64 {
+    with_state(|s| s.union.timestamps.as_ptr())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn union_indices(u: &Union, k: usize) -> *const i32 {
-    u.indices[k].as_ptr()
-}
-
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn union_free(u: *mut Union) {
-    drop(unsafe { Box::from_raw(u) });
+pub extern "C" fn union_indices(k: usize) -> *const i32 {
+    with_state(|s| s.union.indices[k].as_ptr())
 }
 
 #[cfg(test)]
@@ -293,5 +312,22 @@ mod tests {
         assert_eq!(parse_number(b"273.15"), 273.15);
         assert_eq!(parse_number(b"0,5"), 0.5);
         assert!(parse_number(b"abc").is_nan());
+    }
+
+    #[test]
+    fn data() {
+        let smet = b"fields = timestamp TA HS\n[DATA]\n2025-11-26T19:00:00Z 273.15 -777\r\n";
+        assert_eq!(data_offset_of(smet), 32);
+        let parsed = parse(smet, 3, 0.0, b"-777");
+        assert_eq!(parsed.timestamps, [1764183600000.0]);
+        assert_eq!(parsed.columns[1], [273.15]);
+        assert_eq!(parsed.missing[2], [1]);
+    }
+
+    #[test]
+    fn unions() {
+        let u = union(&[2, 2], &[3.0, 4.0, 2.0, 3.0]);
+        assert_eq!(u.timestamps, [2.0, 3.0, 4.0]);
+        assert_eq!(u.indices, [vec![-1, 0, 1], vec![0, 1, -1]]);
     }
 }

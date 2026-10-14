@@ -4,7 +4,7 @@ import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 import { profileAsync } from "../shared/profiler";
-import { WASM_ENABLED, headerLength, parseSMETData } from "./smet-wasm";
+import { WASM_ENABLED, parseSMETBytes } from "./smet-wasm";
 
 export const DEFAULT_UNITS: Units = {
   P: "Pa",
@@ -201,18 +201,13 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
  * Parses SMET with the WebAssembly implementation of the data lines, see `smet-wasm.ts`.
  */
 async function parseSMETWasm(bytes: Uint8Array): Promise<StationData> {
-  const header = new SMETHeader();
-  const headerText = new TextDecoder().decode(bytes.subarray(0, await headerLength(bytes)));
-  for (const line of headerText.split(/\r?\n/)) {
-    header.parse(line);
-  }
-  const { timestamps, columns } = await parseSMETData(
-    bytes,
-    header.fields.length,
-    header.tz * 60,
-    header.nodata,
-    header.converters(),
-  );
+  const { header, timestamps, columns } = await parseSMETBytes(bytes, (text) => {
+    const header = new SMETHeader();
+    for (const line of text.split(/\r?\n/)) {
+      header.parse(line);
+    }
+    return header;
+  });
   return header.toStationData(timestamps, columns);
 }
 
