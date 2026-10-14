@@ -6,6 +6,7 @@ const { features } = await PROVIDERS.filtered((c) =>
 ).fetchStationListing();
 features.sort((f1, f2) => f1.properties.name.localeCompare(f2.properties.name));
 const preselectedStation = new URLSearchParams(location.search).get("station");
+document.querySelector("nav details")!.toggleAttribute("open", !preselectedStation);
 features.forEach((feature) => {
   const button = document.createElement("button");
   button.innerText = feature.properties.shortName ?? feature.properties.name.slice(0, 8);
@@ -21,7 +22,7 @@ features.forEach((feature) => {
       plot.setAttribute(LineaPlot.FEATURES, JSON.stringify(features));
     });
   };
-  document.querySelector("nav")!.append(button);
+  document.querySelector("nav .stations")!.append(button);
   if (preselectedStation && preselectedStation === (feature.properties.shortName ?? feature.id)) {
     button.click();
   }

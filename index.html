@@ -15,10 +15,16 @@
         overflow-y: scroll;
       }
       nav {
+        margin-bottom: 20px;
+      }
+      nav summary {
+        cursor: pointer;
+        margin-bottom: 4px;
+      }
+      nav .stations {
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
-        margin-bottom: 20px;
       }
       nav button {
         padding: 4px 8px;
@@ -40,7 +46,12 @@
     </style>
   </head>
   <body>
-    <nav></nav>
+    <nav>
+      <details open>
+        <summary>Stations</summary>
+        <div class="stations"></div>
+      </details>
+    </nav>
     <linea-plot
       features="[]"
       showsurfacehoarseries
