@@ -265,7 +265,9 @@ export class StationDataArray extends Array<StationData> {
       this.push(...newResults);
       newResults = new StationDataArray();
     }
-    const allTimestamps = unionTimestamps([...this, ...newResults]);
+    const allTimestamps = [
+      ...new Set([...this, ...newResults].flatMap((res) => res.timestamps)),
+    ].sort((a, b) => a - b);
 
     for (let i = 0; i < this.length; i++) {
       const oldResult = this[i];
@@ -287,13 +289,6 @@ export class StationDataArray extends Array<StationData> {
       }
       // set the common timeline to all results
       oldResult.timestamps = allTimestamps.slice();
-    }
-
-    /**
-     * Returns the sorted, de-duplicated timestamps of all given results.
-     */
-    function unionTimestamps(results: { timestamps: number[] }[]): number[] {
-      return [...new Set(results.flatMap((res) => res.timestamps))].sort((a, b) => a - b);
     }
 
     /**
