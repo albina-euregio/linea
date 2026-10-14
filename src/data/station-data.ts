@@ -327,22 +327,17 @@ export class StationDataArray extends Array<StationData> {
       console.warn("No results to generalize");
       return;
     }
-    const tsSet = new Set<number>();
-    for (const res of this) {
-      for (const t of res.timestamps) {
-        tsSet.add(t);
-      }
-    }
-    const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
+    const allTimestamps = [...new Set(this.flatMap((res) => res.timestamps))].sort((a, b) => a - b);
 
     for (const res of this) {
+      // look up the source index of each timestamp once per station, not once per parameter
+      const indexByTimestamp = new Map(res.timestamps.map((t, i) => [t, i]));
+      const sourceIndices = allTimestamps.map((t) => indexByTimestamp.get(t));
+
       let key: ParameterType;
       for (key in res.values) {
-        const map = new Map<number, number>();
-        for (let i = 0; i < res.timestamps.length; i++) {
-          map.set(res.timestamps[i], res.values[key][i]);
-        }
-        res.values[key] = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : NaN));
+        const series = res.values[key];
+        res.values[key] = sourceIndices.map((i) => (i === undefined ? NaN : (series[i] ?? null)));
       }
       // set the common timeline to all results
       res.timestamps = allTimestamps.slice();
