@@ -4,6 +4,7 @@ import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider, ProviderIdentifier } from "./provider";
 export type { LineaDataProvider, ProviderIdentifier } from "./provider";
 import { fetchSMET } from "./smet-data";
+import { fetchSMETInWorker, USE_SMET_WORKER } from "./smet-worker-client";
 export { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
 import { SLFDataProvider } from "./slf-data";
@@ -44,7 +45,7 @@ export class SmetDataProvider implements LineaDataProvider {
 
   fetchStationData(f: Feature, dataURLsIndex: number): Promise<StationData> {
     const dataURL = f.properties.dataURLs[dataURLsIndex];
-    return fetchSMET(dataURL);
+    return USE_SMET_WORKER ? fetchSMETInWorker(dataURL) : fetchSMET(dataURL);
   }
 }
 
