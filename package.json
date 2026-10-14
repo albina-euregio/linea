@@ -44,6 +44,7 @@
     "build:cli": "cd src/cli/ && vp pack",
     "build:wasm": "cargo build --release --target wasm32-unknown-unknown --manifest-path wasm/smet/Cargo.toml && cp wasm/smet/target/wasm32-unknown-unknown/release/smet.wasm src/data/smet.wasm",
     "preview": "vp preview",
+    "predev": "pnpm run build:wasm",
     "dev": "vp dev"
   },
   "dependencies": {
