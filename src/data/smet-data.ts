@@ -3,7 +3,7 @@ import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
 import { type ParameterType, type Units, type Values, StationData } from "./station-data";
 import { unitTransformer } from "./units";
-import { profile, profileAsync } from "../shared/profiler";
+import { profileAsync } from "../shared/profiler";
 
 export const DEFAULT_UNITS: Units = {
   P: "Pa",
@@ -54,11 +54,33 @@ export async function fetchSMET(url: string): Promise<StationData> {
     stream = stream.pipeThrough(new DecompressionStream("gzip"));
   }
 
-  const text = await profileAsync(`fetch:download ${file}`, () => new Response(stream).text());
-  return profile(`parse ${file}`, () => parseSMET(text));
+  const lines = stream.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream());
+
+  return profileAsync(`fetch:download+parse ${file}`, () => parseSMET(lines));
 }
 
-function parseSMET(text: string): StationData {
+class TextLineStream extends TransformStream<string, string> {
+  constructor() {
+    let buffer = "";
+    super({
+      transform(chunk, controller) {
+        buffer += chunk;
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop()!;
+        for (const line of lines) {
+          controller.enqueue(line);
+        }
+      },
+      flush(controller) {
+        if (buffer) {
+          controller.enqueue(buffer);
+        }
+      },
+    });
+  }
+}
+
+async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
   const separator = /\s+/;
   let values: number[][] = [];
@@ -74,7 +96,12 @@ function parseSMET(text: string): StationData {
   const timestamps = [] as number[];
   let dataIndex = 0;
 
-  for (const line0 of text.split(/\r?\n/)) {
+  const reader = lines.getReader();
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    const line0 = value;
+
     function parseHeader(prefix: string) {
       let line = line0;
       if (!line.startsWith(prefix)) return "";
