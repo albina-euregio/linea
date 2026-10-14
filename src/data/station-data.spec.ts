@@ -14,3 +14,18 @@ test("generalize aligns all stations to a common timeline", () => {
   expect(results[1].timestamps).toEqual([3, 4, 5, 6]);
   expect(results[1].values).toEqual({ TA: [NaN, 40, NaN, 60] });
 });
+
+test("mergeWith merges new timestamps, keeping existing values", () => {
+  const results = new StationDataArray(
+    new StationData("A", 1000, [3, 4], {}, { TA: [1, 2], HS: [10, null] }),
+  );
+
+  results.mergeWith(
+    new StationDataArray(
+      new StationData("A", 1000, [1, 2, 3], {}, { TA: [-1, null, 99], HS: [8, 9, 99] }),
+    ),
+  );
+
+  expect(results[0].timestamps).toEqual([1, 2, 3, 4]);
+  expect(results[0].values).toEqual({ TA: [-1, null, 1, 2], HS: [8, 9, 10, null] });
+});

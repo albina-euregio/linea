@@ -271,42 +271,21 @@ export class StationDataArray extends Array<StationData> {
       if (oldResult === undefined || newResult === undefined) {
         continue;
       }
-      const oldTimestamps = oldResult.timestamps;
-      const newTimestamps = newResult.timestamps;
-      const mergedTimestamps = [...new Set([...oldTimestamps, ...newTimestamps])].sort(
-        (a, b) => a - b,
-      );
-
-      const oldIndexMap = new Map<number, number>();
-      for (let j = 0; j < oldTimestamps.length; j++) {
-        oldIndexMap.set(oldTimestamps[j], j);
-      }
-      const newIndexMap = new Map<number, number>();
-      for (let j = 0; j < newTimestamps.length; j++) {
-        newIndexMap.set(newTimestamps[j], j);
-      }
+      const mergedTimestamps = unionTimestamps([oldResult, newResult]);
+      const oldIndices = sourceIndices(oldResult.timestamps, mergedTimestamps);
+      const newIndices = sourceIndices(newResult.timestamps, mergedTimestamps);
 
       const mergedValues: Values = {};
-
       let key: ParameterType;
       for (key in oldResult.values) {
-        mergedValues[key] = Array.from({ length: mergedTimestamps.length });
-      }
-
-      for (let t = 0; t < mergedTimestamps.length; t++) {
-        const timestamp = mergedTimestamps[t];
-        const oldIndex = oldIndexMap.get(timestamp);
-        const newIndex = newIndexMap.get(timestamp);
-
-        for (key in newResult.values) {
-          if (oldIndex !== undefined) {
-            mergedValues[key][t] = oldResult.values[key][oldIndex];
-          } else if (newIndex !== undefined) {
-            mergedValues[key][t] = newResult.values[key][newIndex];
-          } else {
-            mergedValues[key][t] = null;
-          }
-        }
+        const oldSeries = oldResult.values[key];
+        const newSeries = newResult.values[key] ?? [];
+        // existing values take precedence over newly loaded ones
+        mergedValues[key] = mergedTimestamps.map((_, t) =>
+          oldIndices[t] !== undefined
+            ? oldSeries[oldIndices[t]]
+            : (newSeries[newIndices[t]] ?? null),
+        );
       }
 
       oldResult.timestamps = mergedTimestamps;
@@ -327,17 +306,15 @@ export class StationDataArray extends Array<StationData> {
       console.warn("No results to generalize");
       return;
     }
-    const allTimestamps = [...new Set(this.flatMap((res) => res.timestamps))].sort((a, b) => a - b);
+    const allTimestamps = unionTimestamps(this);
 
     for (const res of this) {
-      // look up the source index of each timestamp once per station, not once per parameter
-      const indexByTimestamp = new Map(res.timestamps.map((t, i) => [t, i]));
-      const sourceIndices = allTimestamps.map((t) => indexByTimestamp.get(t));
+      const indices = sourceIndices(res.timestamps, allTimestamps);
 
       let key: ParameterType;
       for (key in res.values) {
         const series = res.values[key];
-        res.values[key] = sourceIndices.map((i) => (i === undefined ? NaN : (series[i] ?? null)));
+        res.values[key] = indices.map((i) => (i === undefined ? NaN : (series[i] ?? null)));
       }
       // set the common timeline to all results
       res.timestamps = allTimestamps.slice();
@@ -350,4 +327,20 @@ export class StationDataArray extends Array<StationData> {
       Math.max(...this.map((v) => v.timestamps.at(-1))),
     ];
   }
+}
+
+/**
+ * Returns the sorted, de-duplicated timestamps of all given results.
+ */
+function unionTimestamps(results: { timestamps: number[] }[]): number[] {
+  return [...new Set(results.flatMap((res) => res.timestamps))].sort((a, b) => a - b);
+}
+
+/**
+ * Returns for each target timestamp its index in the source timestamps (or undefined if absent).
+ * Computed once per station so that each parameter series is aligned by a plain array lookup.
+ */
+function sourceIndices(source: number[], target: number[]): (number | undefined)[] {
+  const indexByTimestamp = new Map(source.map((t, i) => [t, i]));
+  return target.map((t) => indexByTimestamp.get(t));
 }
