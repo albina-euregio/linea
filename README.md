@@ -78,11 +78,16 @@ Station counts as of 2026-10-06.
 
 ## Contributing
 
-1. Install [NodeJS](https://nodejs.org/en/), [pnpm](https://pnpm.io/) and [Rust](https://rust-lang.org/) (e.g. `mise install` using `.tool-versions`, then `rustup target add wasm32-unknown-unknown`)
-2. Run `pnpm install`
-3. Run `pnpm dev` (builds the WebAssembly module via `pnpm build:wasm` first)
-4. Open browser at http://localhost:5173/
-5. Run `pnpm build`
+1. Install [NodeJS](https://nodejs.org/en/), [pnpm](https://pnpm.io/) and [Rust](https://rust-lang.org/) in the versions of `.tool-versions`, e.g. via [mise](https://mise.jdx.dev/) (`mise install`) or [rustup](https://rustup.rs/) (`rustup toolchain install 1.99.0`)
+2. Add the WebAssembly target: `rustup target add wasm32-unknown-unknown`
+3. Run `pnpm install`
+4. Run `pnpm dev` (builds the WebAssembly module via `pnpm build:wasm` first)
+5. Open browser at http://localhost:5173/
+6. Run `pnpm run ci` (lint, test, build) before committing
+
+The SMET parsing hot loops are implemented in Rust (`wasm/smet/`) and compiled to `src/data/smet.wasm` (not committed) via `pnpm build:wasm`.
+Run `pnpm build:wasm` again after changing the Rust code, and `cargo test --manifest-path wasm/smet/Cargo.toml` for its unit tests.
+Without `smet.wasm`, LINEA falls back to the TypeScript implementation; `VITE_LINEA_WASM=0 pnpm test` tests that fallback.
 
 ## Deployment
 
