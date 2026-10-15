@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import type { Unit } from "./units";
+import { alignTimestampsWasm } from "./smet-wasm";
 
 /**
  * Parameter type following the [SMET specification](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf)
@@ -56,7 +57,46 @@ export type ParameterType = v.InferOutput<typeof ParameterTypeSchema>;
 
 export type Units = Partial<Record<ParameterType, Unit>>;
 
-export type Values = Partial<Record<ParameterType, (number | null)[]>>;
+/**
+ * One value per timestamp, `NaN` where no value exists (missing measurement or timestamp).
+ */
+export type Series = Float64Array;
+
+export type Values = Partial<Record<ParameterType, Series>>;
+
+/**
+ * Creates a series of `length` values computed by `value` (a plain loop is considerably
+ * faster than `Float64Array.from` with a mapping function).
+ */
+export function seriesOf(length: number, value: (i: number) => number): Series {
+  const series = new Float64Array(length);
+  for (let i = 0; i < length; i++) {
+    series[i] = value(i);
+  }
+  return series;
+}
+
+/**
+ * Converts the values to a {@link Series}, `null` and `undefined` become `NaN`.
+ */
+export function toSeries(values: ArrayLike<number | null | undefined>): Series {
+  return values instanceof Float64Array ? values : seriesOf(values.length, (i) => values[i] ?? NaN);
+}
+
+/** values as plain arrays (e.g. from providers or JSON), `null` marks missing values */
+export type ValuesInput = Partial<Record<ParameterType, ArrayLike<number | null | undefined>>>;
+
+/**
+ * Converts all values to {@link Series}, see {@link toSeries}.
+ */
+export function toValues(values: ValuesInput): Values {
+  const converted: Values = {};
+  let key: ParameterType;
+  for (key in values) {
+    if (values[key]) converted[key] = toSeries(values[key]);
+  }
+  return converted;
+}
 
 export type ForecastValues = {
   timestamps: number[];
@@ -64,14 +104,40 @@ export type ForecastValues = {
 };
 
 export class StationData {
+  values: Values;
+  forecast?: ForecastValues;
+
   constructor(
     public station: string,
     public altitude: number,
     public timestamps: number[],
     public units: Units,
-    public values: Values,
-    public forecast?: ForecastValues,
-  ) {}
+    values: ValuesInput,
+    forecast?: { timestamps: number[]; values: ValuesInput },
+  ) {
+    this.values = toValues(values);
+    this.forecast = forecast && {
+      timestamps: forecast.timestamps,
+      values: toValues(forecast.values),
+    };
+  }
+
+  /**
+   * Serializes the series as plain arrays, `NaN` becomes `null`.
+   */
+  toJSON() {
+    const { station, altitude, timestamps, units, values, forecast } = this;
+    const toArrays = (values: Values) =>
+      Object.fromEntries(Object.entries(values).map(([key, series]) => [key, Array.from(series)]));
+    return {
+      station,
+      altitude,
+      timestamps,
+      units,
+      values: toArrays(values),
+      forecast: forecast && { timestamps: forecast.timestamps, values: toArrays(forecast.values) },
+    };
+  }
 
   /**
    * Filters the Results for each LineaChart for the given timespan.
@@ -83,46 +149,23 @@ export class StationData {
     const startTimestamp = startDate.toInstant().epochMilliseconds;
     const endTimestamp = endDate.toInstant().epochMilliseconds;
 
-    let filteredValues: Values = {};
-
-    let key: ParameterType;
-    for (key in this.values) {
-      const series = this.values[key];
-      if (!series) {
-        continue;
+    /** slices timestamps and values to the timespan, timestamps are sorted ascending */
+    const slice = (timestamps: number[], values: Values) => {
+      const from = partitionPoint(timestamps, (t) => t < startTimestamp);
+      const to = partitionPoint(timestamps, (t) => t <= endTimestamp);
+      const sliced: Values = {};
+      let key: ParameterType;
+      for (key in values) {
+        if (values[key]) sliced[key] = values[key].slice(from, to);
       }
-      filteredValues[key] = series.filter(
-        (_, j) => this.timestamps[j] >= startTimestamp && this.timestamps[j] <= endTimestamp,
-      );
-    }
-    const filteredTimestamps = this.timestamps.filter(
-      (t) => t >= startTimestamp && t <= endTimestamp,
+      return { timestamps: timestamps.slice(from, to), values: sliced };
+    };
+
+    const { timestamps: filteredTimestamps, values: filteredValues } = slice(
+      this.timestamps,
+      this.values,
     );
-
-    let filteredForecast: ForecastValues | undefined = undefined;
-    if (this.forecast) {
-      const forecastTimestamps = this.forecast.timestamps.filter(
-        (t) => t >= startTimestamp && t <= endTimestamp,
-      );
-      const forecastValues: Values = {};
-      let forecastKey: ParameterType;
-      for (forecastKey in this.forecast.values) {
-        const series = this.forecast.values[forecastKey];
-        if (!series) {
-          continue;
-        }
-        forecastValues[forecastKey] = series.filter(
-          (_, j) =>
-            this.forecast &&
-            this.forecast.timestamps[j] >= startTimestamp &&
-            this.forecast.timestamps[j] <= endTimestamp,
-        );
-      }
-      filteredForecast = {
-        timestamps: forecastTimestamps,
-        values: forecastValues,
-      };
-    }
+    const filteredForecast = this.forecast && slice(this.forecast.timestamps, this.forecast.values);
 
     return new StationData(
       this.station,
@@ -141,14 +184,14 @@ export class StationData {
    *
    * @returns The surface hoar data for the charts data
    */
-  generateSurfaceHoarData(TD: (number | null)[] = this.values.TD ?? []): number[] {
+  generateSurfaceHoarData(TD: Series = this.values.TD ?? new Float64Array()): Series {
     if (this.values.SurfaceHoar) {
       return this.values.SurfaceHoar;
     }
-    this.values.SurfaceHoar = [];
+    this.values.SurfaceHoar = new Float64Array(TD.length);
 
     const timestamps = this.timestamps;
-    const TSS = this.values.TSS ?? [];
+    const TSS = this.values.TSS ?? new Float64Array(TD.length).fill(NaN);
 
     let i = 0;
     while (i < TD.length) {
@@ -194,16 +237,16 @@ export class StationData {
    * @see Threshold wet-bulb temperature ~0.3 °C for the rain/snow transition:
    * Nature Communications 9, 1148 (2018), https://doi.org/10.1038/s41467-018-03629-7
    */
-  generateDrySnowfallLevelData(tpsyThreshold = 0.3): number[] {
+  generateDrySnowfallLevelData(tpsyThreshold = 0.3): Series {
     if (this.values.DrySnowfallLevel) {
       return this.values.DrySnowfallLevel;
     }
 
-    this.values.DrySnowfallLevel = this.timestamps.map((_, i) => {
+    this.values.DrySnowfallLevel = seriesOf(this.timestamps.length, (i) => {
       const ta = this.values.TA?.[i];
       const rh = this.values.RH?.[i];
       if (ta == null || rh == null || !isFinite(ta) || !isFinite(rh)) {
-        return null;
+        return NaN;
       }
       const tpsy = calculateWetBulb(ta, rh);
       return Math.round((tpsy - tpsyThreshold) / 0.006 + this.altitude);
@@ -242,7 +285,7 @@ export class StationDataArray extends Array<StationData> {
       altitude: number;
       timestamps: number[];
       units: Units;
-      values: Values;
+      values: ValuesInput;
     }[],
   ) {
     return new StationDataArray(
@@ -251,7 +294,8 @@ export class StationDataArray extends Array<StationData> {
   }
 
   /**
-   * Merges the results from the new fetch with the existing results in the view.
+   * Merges the results from the new fetch with the existing results in the view
+   * and generalizes them, see {@link generalize}.
    * Mainly implemented to integrate the lazy source data into the existing one.
    * The first loaded data decides about the keys to show.
    * @param newResults The results to integrate into the existing.
@@ -262,55 +306,32 @@ export class StationDataArray extends Array<StationData> {
   mergeWith(newResults: StationDataArray): void {
     if (this.length === 0) {
       this.push(...newResults);
-      return;
+      newResults = new StationDataArray();
     }
+    const { timestamps: allTimestamps, indices } = alignTimestamps([
+      ...this.map((res) => res.timestamps),
+      ...this.map((_, i) => newResults[i]?.timestamps ?? []),
+    ]);
 
     for (let i = 0; i < this.length; i++) {
       const oldResult = this[i];
       const newResult = newResults[i];
-      if (oldResult === undefined || newResult === undefined) {
-        continue;
-      }
-      const oldTimestamps = oldResult.timestamps;
-      const newTimestamps = newResult.timestamps;
-      const mergedTimestamps = [...new Set([...oldTimestamps, ...newTimestamps])].sort(
-        (a, b) => a - b,
-      );
-
-      const oldIndexMap = new Map<number, number>();
-      for (let j = 0; j < oldTimestamps.length; j++) {
-        oldIndexMap.set(oldTimestamps[j], j);
-      }
-      const newIndexMap = new Map<number, number>();
-      for (let j = 0; j < newTimestamps.length; j++) {
-        newIndexMap.set(newTimestamps[j], j);
-      }
-
-      const mergedValues: Values = {};
+      const oldIndices = indices[i];
+      const newIndices = indices[this.length + i];
 
       let key: ParameterType;
       for (key in oldResult.values) {
-        mergedValues[key] = Array.from({ length: mergedTimestamps.length });
+        const oldSeries = oldResult.values[key];
+        const newSeries = newResult?.values[key];
+        oldResult.values[key] = seriesOf(allTimestamps.length, (t) => {
+          const oldValue = oldIndices[t] < 0 ? NaN : oldSeries[oldIndices[t]];
+          const newValue = newIndices[t] < 0 || !newSeries ? NaN : newSeries[newIndices[t]];
+          // existing values take precedence over newly loaded ones
+          return Number.isNaN(oldValue) ? newValue : oldValue;
+        });
       }
-
-      for (let t = 0; t < mergedTimestamps.length; t++) {
-        const timestamp = mergedTimestamps[t];
-        const oldIndex = oldIndexMap.get(timestamp);
-        const newIndex = newIndexMap.get(timestamp);
-
-        for (key in newResult.values) {
-          if (oldIndex !== undefined) {
-            mergedValues[key][t] = oldResult.values[key][oldIndex];
-          } else if (newIndex !== undefined) {
-            mergedValues[key][t] = newResult.values[key][newIndex];
-          } else {
-            mergedValues[key][t] = null;
-          }
-        }
-      }
-
-      oldResult.timestamps = mergedTimestamps;
-      oldResult.values = mergedValues;
+      // set the common timeline to all results
+      oldResult.timestamps = allTimestamps.slice();
     }
   }
 
@@ -318,7 +339,7 @@ export class StationDataArray extends Array<StationData> {
    * Generalizes the data stored in the results list:
    * ensures that all Results objects have the same timestamps and fill up missing data.
    * if the first chart has data from e.g. 03:00 to 05:00 and the second from 04:00 to 06:00 after this function
-   * both will have data from 03:00 to 06:00 with null values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
+   * both will have data from 03:00 to 06:00 with NaN values in 03:00 to 04:00 for the second and from 05:00 to 06:00 for the first
    * so we can show all available data
    */
   generalize(): void {
@@ -327,26 +348,7 @@ export class StationDataArray extends Array<StationData> {
       console.warn("No results to generalize");
       return;
     }
-    const tsSet = new Set<number>();
-    for (const res of this) {
-      for (const t of res.timestamps) {
-        tsSet.add(t);
-      }
-    }
-    const allTimestamps = Array.from(tsSet).sort((a, b) => a - b);
-
-    for (const res of this) {
-      let key: ParameterType;
-      for (key in res.values) {
-        const map = new Map<number, number>();
-        for (let i = 0; i < res.timestamps.length; i++) {
-          map.set(res.timestamps[i], res.values[key][i]);
-        }
-        res.values[key] = allTimestamps.map((t) => (map.has(t) ? (map.get(t) ?? null) : NaN));
-      }
-      // set the common timeline to all results
-      res.timestamps = allTimestamps.slice();
-    }
+    this.mergeWith(new StationDataArray());
   }
 
   get minMaxTime(): [number, number] {
@@ -355,4 +357,38 @@ export class StationDataArray extends Array<StationData> {
       Math.max(...this.map((v) => v.timestamps.at(-1))),
     ];
   }
+}
+
+/**
+ * Returns the sorted, de-duplicated union of the given timestamp arrays, and for each input
+ * the index of each union timestamp in that input (or -1 if absent).
+ * Computed once per station so that each parameter series is aligned by a plain array lookup.
+ */
+function alignTimestamps(inputs: number[][]): { timestamps: number[]; indices: Int32Array[] } {
+  const wasm = alignTimestampsWasm(inputs);
+  if (wasm) return wasm;
+  const timestamps = [...new Set(inputs.flat())].sort((a, b) => a - b);
+  const indices = inputs.map((source) => {
+    const indexByTimestamp = new Map(source.map((t, i) => [t, i]));
+    return Int32Array.from(timestamps, (t) => indexByTimestamp.get(t) ?? -1);
+  });
+  return { timestamps, indices };
+}
+
+/**
+ * Returns the index of the first element of the partitioned `array` not satisfying `predicate`,
+ * i.e. all elements before satisfy it and all from there on do not. Uses binary search.
+ */
+function partitionPoint<T>(array: T[], predicate: (value: T) => boolean): number {
+  let lo = 0;
+  let hi = array.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (predicate(array[mid])) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  return lo;
 }

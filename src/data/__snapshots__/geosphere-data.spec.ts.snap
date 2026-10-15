@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`geosphere > parseGeosphereData 1`] = `
-StationData {
+{
   "altitude": 1464,
   "forecast": undefined,
   "station": "Schmirn",

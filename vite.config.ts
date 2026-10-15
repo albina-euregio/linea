@@ -21,6 +21,8 @@ export default defineConfig({
       "src/aws-stats/aws-stats-plot-config.ts",
     ],
     clean: false,
+    // referenced as new URL("./smet.wasm", import.meta.url) by the packed chunks
+    copy: ["src/data/smet.wasm"],
     dts: true,
     sourcemap: true,
   },

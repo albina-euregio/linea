@@ -4,7 +4,14 @@ import { LineaView } from "../linea-view";
 import type { LineaPlot } from "../linea-plot";
 import type { AirDatepickerOptions } from "air-datepicker";
 import { fetchGeosphereForecast, GEOSPHERE_BBOX_OUTER } from "../data/geosphere-forecast";
-import { type ParameterType, type Values } from "../data/station-data";
+import {
+  type ParameterType,
+  seriesOf,
+  type Series,
+  type Values,
+  type ValuesInput,
+} from "../data/station-data";
+import { profileAsync } from "../shared/profiler";
 
 /**
  * Station View - displays non-winter station data with interactive filtering
@@ -111,7 +118,7 @@ export class StationView extends LineaView {
     if (this.lineaplot.hasAttribute("data")) {
       this.loadFromDataAttribute();
     } else {
-      await this.fetchData("src");
+      await profileAsync("fetchSrc", () => this.fetchData("src"));
     }
 
     this.measuredMaxTime = this.maxTime;
@@ -260,32 +267,33 @@ export class StationView extends LineaView {
 
   private alignValuesToTimeline(
     sourceTimestamps: number[],
-    sourceValues: Values,
+    sourceValues: ValuesInput,
     targetTimestamps: number[],
   ): Values {
     const aligned: Values = {};
+    const indexByTimestamp = new Map(sourceTimestamps.map((t, i) => [t, i]));
 
     for (const key of Object.keys(sourceValues) as ParameterType[]) {
-      const sourceSeries = sourceValues[key] ?? [];
-      const byTime = new Map<number, number | null>();
-      for (let i = 0; i < sourceTimestamps.length; i++) {
-        byTime.set(sourceTimestamps[i], sourceSeries[i] ?? null);
-      }
-      aligned[key] = targetTimestamps.map((t) => (byTime.has(t) ? (byTime.get(t) ?? null) : NaN));
+      const sourceSeries = sourceValues[key];
+      if (!sourceSeries) continue;
+      aligned[key] = seriesOf(targetTimestamps.length, (j) => {
+        const i = indexByTimestamp.get(targetTimestamps[j]);
+        return i === undefined ? NaN : (sourceSeries[i] ?? NaN);
+      });
     }
 
     return aligned;
   }
 
   private createForecastSnowHeight(
-    measuredHs: (number | null)[] | undefined,
-    accumulatedSnow: (number | null)[] | undefined,
-  ): (number | null)[] | undefined {
+    measuredHs: Series | undefined,
+    accumulatedSnow: Series | undefined,
+  ): Series | undefined {
     if (!measuredHs || !accumulatedSnow) {
       return undefined;
     }
 
-    const firstForecastIdx = accumulatedSnow.findIndex((v) => v !== null && !Number.isNaN(v));
+    const firstForecastIdx = accumulatedSnow.findIndex((v) => !Number.isNaN(v));
     if (firstForecastIdx < 0) {
       return undefined;
     }
@@ -293,7 +301,7 @@ export class StationView extends LineaView {
     let hsBaseline: number | undefined = undefined;
     for (let i = firstForecastIdx; i >= 0; i--) {
       const hs = measuredHs[i];
-      if (hs !== null && !Number.isNaN(hs)) {
+      if (!Number.isNaN(hs)) {
         hsBaseline = hs;
         break;
       }
@@ -302,15 +310,7 @@ export class StationView extends LineaView {
       return undefined;
     }
 
-    return accumulatedSnow.map((snow) => {
-      if (snow === null) {
-        return null;
-      }
-      if (Number.isNaN(snow)) {
-        return NaN;
-      }
-      return hsBaseline + snow;
-    });
+    return accumulatedSnow.map((snow) => hsBaseline + snow);
   }
 
   private enableForecastRange(): void {
@@ -366,7 +366,7 @@ export class StationView extends LineaView {
   async fetchLazySrc() {
     if (this.lazySrcLoaded) return;
     try {
-      await this.fetchData("lazysrc");
+      await profileAsync("fetchLazySrc", () => this.fetchData("lazysrc"));
     } catch (e) {
       if (e === "Empty src array!") return;
       throw e;

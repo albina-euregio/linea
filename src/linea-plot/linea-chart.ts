@@ -4,20 +4,25 @@ import * as opts_VW_VWG_DW from "./opts_VW_VWG_DW";
 import * as opts_HS_PSUM from "./opts_HS_PSUM";
 import * as opts_RH_GR from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
-import type { StationData } from "../data/station-data";
+import { type Series, seriesOf, type StationData } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { TouchZoom } from "../shared/touch-zoom";
 import { MeasurementDatesPlugin } from "../shared/measurement-dates";
+import { profilerPlugin } from "../shared/profiler";
 
 export class LineaChart extends AbstractLineaChart {
   private showSurfaceHoarSeries: boolean;
   private forecastEnabled: boolean;
 
-  private withFreshPlugins(opts: uPlot.Options): uPlot.Options {
+  private withFreshPlugins(opts: uPlot.Options, name: string): uPlot.Options {
     return {
       ...opts,
-      plugins: [TouchZoom.touchZoomPlugin(), new MeasurementDatesPlugin().plugin()],
+      plugins: [
+        TouchZoom.touchZoomPlugin(),
+        new MeasurementDatesPlugin().plugin(),
+        profilerPlugin(name),
+      ],
     };
   }
 
@@ -119,10 +124,13 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.HS || this.result.values.PSUM) {
       const p = new uPlot(
-        this.withFreshPlugins({
-          ...opts_HS_PSUM.opts_HS_PSUM,
-          ...this.getStationTitle(),
-        }),
+        this.withFreshPlugins(
+          {
+            ...opts_HS_PSUM.opts_HS_PSUM,
+            ...this.getStationTitle(),
+          },
+          "HS_PSUM",
+        ),
         [this.result.timestamps],
         plot_HS_PSUM,
       );
@@ -144,10 +152,13 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.VW || this.result.values.VW_MAX || this.result.values.DW) {
       const p = new uPlot(
-        this.withFreshPlugins({
-          ...opts_VW_VWG_DW.opts_VW_VWG_DW,
-          ...this.getStationTitle(),
-        }),
+        this.withFreshPlugins(
+          {
+            ...opts_VW_VWG_DW.opts_VW_VWG_DW,
+            ...this.getStationTitle(),
+          },
+          "VW_VWG_DW",
+        ),
         [this.result.timestamps],
         plot_VW_VWG_DW,
       );
@@ -165,10 +176,13 @@ export class LineaChart extends AbstractLineaChart {
         this.result.values.TD ??
         this.#calculateDewPointSeries(this.result.values.TA, this.result.values.RH);
       const p = new uPlot(
-        this.withFreshPlugins({
-          ...opts_TA_TD_TSS.opts_TA_TD_TSS,
-          ...this.getStationTitle(),
-        }),
+        this.withFreshPlugins(
+          {
+            ...opts_TA_TD_TSS.opts_TA_TD_TSS,
+            ...this.getStationTitle(),
+          },
+          "TA_TD_TSS",
+        ),
         [this.result.timestamps],
         plot_TA_TD_TSS,
       );
@@ -194,10 +208,13 @@ export class LineaChart extends AbstractLineaChart {
 
     if (this.result.values.RH || this.result.values.ISWR) {
       const p = new uPlot(
-        this.withFreshPlugins({
-          ...opts_RH_GR.opts_RH_GR,
-          ...this.getStationTitle(),
-        }),
+        this.withFreshPlugins(
+          {
+            ...opts_RH_GR.opts_RH_GR,
+            ...this.getStationTitle(),
+          },
+          "RH_GR",
+        ),
         [this.result.timestamps],
         plot_RH_GR,
       );
@@ -213,13 +230,12 @@ export class LineaChart extends AbstractLineaChart {
     this.resizeObserver.observe(this);
   }
 
-  #filterDWData(values: (number | null)[] | undefined): (number | null)[] {
+  #filterDWData(values: Series | undefined): (number | null)[] {
     if (!values) {
       return [];
     }
     let density = Math.ceil(values.length / 7500);
-    let out = values.map((o, i) => (i % density == 0 ? o : null));
-    return out;
+    return Array.from(values, (o, i) => (i % density == 0 ? o : null));
   }
 
   /**
@@ -227,7 +243,7 @@ export class LineaChart extends AbstractLineaChart {
    *
    * Handles missing data inside the precipitation data by treating them as zero.
    */
-  #sumupPrecipitation(timestamps: number[], psum: (number | null)[]): number[] {
+  #sumupPrecipitation(timestamps: number[], psum: Series): number[] {
     const result: number[] = [];
     let lastWasBefore7 = true;
     let sum = 0;
@@ -239,11 +255,11 @@ export class LineaChart extends AbstractLineaChart {
       );
       if (date.hour >= 7 && lastWasBefore7) {
         lastWasBefore7 = false;
-        sum = psum[i] ?? 0;
+        sum = Number.isNaN(psum[i]) ? 0 : psum[i];
         result[i] = sum;
       } else {
         lastWasBefore7 = date.hour < 7;
-        sum += psum[i] ?? 0;
+        sum += Number.isNaN(psum[i]) ? 0 : psum[i];
         result[i] = sum;
       }
     }
@@ -252,7 +268,7 @@ export class LineaChart extends AbstractLineaChart {
 
   #sumupForecastPrecipitation(
     timestamps: number[],
-    forecastPsum: (number | null)[],
+    forecastPsum: Series,
     measuredAccum: number[],
   ): (number | null)[] {
     const result: (number | null)[] = [];
@@ -308,13 +324,13 @@ export class LineaChart extends AbstractLineaChart {
   }
 
   #calculateDewPointSeries(
-    temperature: (number | null)[] | undefined,
-    humidity: (number | null)[] | undefined,
-  ): (number | null)[] | undefined {
+    temperature: Series | undefined,
+    humidity: Series | undefined,
+  ): Series | undefined {
     if (!temperature || !humidity) {
       return undefined;
     }
-    return temperature.map((temp, i) => dewPoint(temp, humidity[i] ?? null));
+    return seriesOf(temperature.length, (i) => dewPoint(temperature[i], humidity[i]) ?? NaN);
   }
 
   protected getStationTitle(): {} {

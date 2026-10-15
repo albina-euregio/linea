@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import type { Values } from "./station-data";
+import type { ValuesInput } from "./station-data";
 import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
 
 // GeoSphere Austria
@@ -20,7 +20,7 @@ export const GEOSPHERE_BBOX_OUTER = {
 
 type ForecastData = {
   timestamps: number[];
-  values: Values;
+  values: ValuesInput;
 };
 
 function vectorToSpeedKmH(u: number | null, v: number | null): number | null {

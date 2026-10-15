@@ -51,7 +51,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
     }
   }
 
-  protected updateData(plot: uPlot, values: (number | null)[][]) {
+  protected updateData(plot: uPlot, values: (ArrayLike<number | null> | undefined)[]) {
     let data = [] as unknown as [xValues: number[], ...yValues: (number | null | undefined)[][]];
     for (const element of values) {
       data.push(this.#normalizePlotSeriesData(element ?? this.#createNullArray()));
@@ -158,16 +158,18 @@ export abstract class AbstractLineaChart extends HTMLElement {
     return nulls;
   }
 
-  #normalizePlotSeriesData(series: (number | null | undefined)[]): (number | null | undefined)[] {
-    return series.map((value) => {
-      if (typeof value === "number" && Number.isNaN(value)) {
-        return null;
-      }
-      return value;
-    });
+  /**
+   * Converts a series to the data uPlot expects, `NaN` becomes `null` to be drawn as gap.
+   */
+  #normalizePlotSeriesData(
+    series: ArrayLike<number | null | undefined>,
+  ): (number | null | undefined)[] {
+    return Array.from(series, (value) =>
+      typeof value === "number" && Number.isNaN(value) ? null : value,
+    );
   }
 
-  addSeries(plot: uPlot, series: uPlot.Series, data: (number | null)[]) {
+  addSeries(plot: uPlot, series: uPlot.Series, data: ArrayLike<number | null> | undefined) {
     if (!this.plots.includes(plot)) {
       this.plots.push(plot);
     }

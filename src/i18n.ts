@@ -15,6 +15,18 @@ class I18n {
     return document.documentElement.lang.slice(0, 2) || "en";
   }
 
+  #timeLocale(): string {
+    switch (this.lang) {
+      case navigator.language.slice(0, 2):
+        return navigator.language;
+      case "en":
+        return "en-GB";
+      case "de":
+        return "de-AT";
+    }
+    return this.lang;
+  }
+
   get messages(): typeof messagesEN | undefined {
     return messages[`./i18n/${this.lang}.json`] as typeof messagesEN;
   }
@@ -29,7 +41,7 @@ class I18n {
     unit: Unit | AnalyzerUnit | AnalyzerIntegratedUnit | "" | undefined = undefined,
   ): string {
     if (typeof num !== "number" || !isFinite(num)) return "–";
-    let s = new Intl.NumberFormat(this.lang, {
+    let s = this.#numberFormat(this.lang, {
       useGrouping: "min2",
       minimumFractionDigits: unit === "℃" ? 1 : 0,
       maximumFractionDigits: unit === "℃" ? 1 : 0,
@@ -43,19 +55,33 @@ class I18n {
     if (typeof date === "string") date = Date.parse(date);
     if (date instanceof Date) date = +date;
     if (typeof date === "number" && !isFinite(+date)) return "";
-    switch (this.lang) {
-      case navigator.language.slice(0, 2):
-        return new Intl.DateTimeFormat(navigator.language, opts).format(date);
-      case "en":
-        return new Intl.DateTimeFormat("en-GB", opts).format(date);
-      case "de":
-        return new Intl.DateTimeFormat("de-AT", opts).format(date);
+    return this.#dateTimeFormat(this.#timeLocale(), opts).format(date);
+  }
+
+  #numberFormats = new Map<string, Intl.NumberFormat>();
+  #numberFormat(locale: string, opts: Intl.NumberFormatOptions): Intl.NumberFormat {
+    const key = JSON.stringify([locale, opts]);
+    let format = this.#numberFormats.get(key);
+    if (!format) {
+      format = new Intl.NumberFormat(locale, opts);
+      this.#numberFormats.set(key, format);
     }
-    return new Intl.DateTimeFormat(this.lang, opts).format(date);
+    return format;
+  }
+
+  #dateTimeFormats = new Map<string, Intl.DateTimeFormat>();
+  #dateTimeFormat(locale?: string, opts?: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+    const key = JSON.stringify([locale, opts]);
+    let format = this.#dateTimeFormats.get(key);
+    if (!format) {
+      format = new Intl.DateTimeFormat(locale, opts);
+      this.#dateTimeFormats.set(key, format);
+    }
+    return format;
   }
 
   timezone(): string {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Vienna";
+    return this.#dateTimeFormat().resolvedOptions().timeZone || "Europe/Vienna";
   }
 }
 

@@ -1,8 +1,10 @@
 import { fetchOrThrow } from "./fetchOrThrow";
 import * as geosphere from "./geosphere-data";
 import * as slf from "./slf-data";
-import { type ParameterType, type Units, type Values, StationData } from "./station-data";
+import { type ParameterType, type Units, type ValuesInput, StationData } from "./station-data";
 import { unitTransformer } from "./units";
+import { profileAsync } from "../shared/profiler";
+import { tryLoadSmetWasm, parseSMETBytes } from "./smet-wasm";
 
 export const DEFAULT_UNITS: Units = {
   P: "Pa",
@@ -33,7 +35,8 @@ const UNIT_MAPPING: Record<string, { to: string; convert: (v: number) => number 
 };
 
 export async function fetchSMET(url: string): Promise<StationData> {
-  let response = await fetchOrThrow(url);
+  const file = url.split("/").slice(-2).join("/");
+  let response = await profileAsync(`fetch:headers ${file}`, () => fetchOrThrow(url));
 
   if (url.startsWith(geosphere.URL)) {
     throw new Error();
@@ -52,9 +55,17 @@ export async function fetchSMET(url: string): Promise<StationData> {
     stream = stream.pipeThrough(new DecompressionStream("gzip"));
   }
 
+  if (await tryLoadSmetWasm()) {
+    const bytes = await profileAsync(
+      `fetch:download ${file}`,
+      async () => new Uint8Array(await new Response(stream).arrayBuffer()),
+    );
+    return profileAsync(`parse:wasm ${file}`, () => parseSMETWasm(bytes));
+  }
+
   const lines = stream.pipeThrough(new TextDecoderStream()).pipeThrough(new TextLineStream());
 
-  return parseSMET(lines);
+  return profileAsync(`fetch:download+parse ${file}`, () => parseSMET(lines));
 }
 
 class TextLineStream extends TransformStream<string, string> {
@@ -78,84 +89,135 @@ class TextLineStream extends TransformStream<string, string> {
   }
 }
 
-async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
-  // https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
-  const separator = /\s+/;
-  let values: number[][] = [];
-  let fields: string[] = [];
-  let units: string[] = [];
-  let nodata = "-777";
-  let station = "";
-  let altitude = NaN;
+const separator = /\s+/;
+
+/**
+ * SMET header, see https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf
+ */
+class SMETHeader {
+  fields: string[] = [];
+  units: string[] = [];
+  nodata = "-777";
+  station = "";
+  altitude = NaN;
   /**
    * SMET: timezone of the measurements, decimal number positive going east. If not provided, utc is assumed.
    */
-  let tz = 0;
+  tz = 0;
+
+  /**
+   * Parses a header line, returns false if the line is no known header.
+   */
+  parse(line: string): boolean {
+    let value = "";
+    if ((value = headerValue(line, "fields"))) {
+      this.fields = value.split(separator);
+      this.units = this.fields.map((f) => DEFAULT_UNITS[f as ParameterType] ?? "");
+    } else if ((value = headerValue(line, "#units"))) {
+      this.units = value.split(separator);
+    } else if ((value = headerValue(line, "nodata"))) {
+      this.nodata = value;
+    } else if ((value = headerValue(line, "tz"))) {
+      this.tz = +value;
+    } else if ((value = headerValue(line, "station_name"))) {
+      this.station = value;
+    } else if ((value = headerValue(line, "altitude"))) {
+      this.altitude = +value;
+    } else {
+      return false;
+    }
+    return true;
+  }
+
+  /** unit conversion per column */
+  converters(): ((v: number) => number)[] {
+    return this.units.map((u) => UNIT_MAPPING[u]?.convert ?? ((v) => v));
+  }
+
+  toStationData(timestamps: number[], values: ArrayLike<number | null>[]): StationData {
+    const units = this.units.map((u) => UNIT_MAPPING[u]?.to ?? u);
+    return new StationData(
+      this.station,
+      this.altitude,
+      timestamps,
+      Object.fromEntries(this.fields.map((f, i) => [f, units[i]])) as Units,
+      Object.fromEntries(this.fields.map((f, i) => [f, values[i]])) as ValuesInput,
+    );
+  }
+}
+
+function headerValue(line: string, prefix: string): string {
+  if (!line.startsWith(prefix)) return "";
+  line = line.slice(prefix.length).trim();
+  if (!line.startsWith("=")) return "";
+  return line.slice("=".length).trim();
+}
+
+async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
+  const header = new SMETHeader();
+  let values: (number | null)[][] | undefined;
+  /** ISO 8601 offset of the header timezone, e.g. `tz = 1` -> `+01:00` */
+  let tzOffset: string | undefined;
+  /** unit conversion per column, resolved once on the first data line */
+  let converters: ((v: number) => number)[] | undefined;
   const timestamps = [] as number[];
   let dataIndex = 0;
 
   const reader = lines.getReader();
   while (true) {
-    const { value, done } = await reader.read();
+    const { value: line0, done } = await reader.read();
     if (done) break;
-    const line0 = value;
 
-    function parseHeader(prefix: string) {
-      let line = line0;
-      if (!line.startsWith(prefix)) return "";
-      line = line.slice(prefix.length).trim();
-      if (!line.startsWith("=")) return "";
-      line = line.slice("=".length).trim();
-      return line;
+    if (header.parse(line0)) continue;
+    if (!/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line0)) continue;
+
+    values ??= header.fields.map((): (number | null)[] => []);
+    tzOffset ??= formatTimezoneOffset(header.tz);
+    converters ??= header.converters();
+    const cells = line0.split(separator);
+    let dateString = cells[0];
+    if (dateString.length === "2025-11-26T19:00:00".length) {
+      dateString += tzOffset;
     }
-
-    let header = "";
-    if ((header = parseHeader("fields"))) {
-      fields = header.split(separator);
-      units = fields.map((f) => DEFAULT_UNITS[f as ParameterType] ?? "");
-      values = fields.map(() => [] as number[]);
-    } else if ((header = parseHeader("#units"))) {
-      units = header.split(separator);
-    } else if ((header = parseHeader("nodata"))) {
-      nodata = header;
-    } else if ((header = parseHeader("tz"))) {
-      tz = +header;
-    } else if ((header = parseHeader("station_name"))) {
-      station = header;
-    } else if ((header = parseHeader("altitude"))) {
-      altitude = +header;
-    } else if (/^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/.test(line0)) {
-      const cells = line0.split(separator);
-      let dateString = cells[0];
-      if (dateString.length === "2025-11-26T19:00:00".length) {
-        if (tz === 0) {
-          dateString += "Z";
-        } else if (tz > 0) {
-          dateString += `+${String(tz).padStart(2, "0")}:00`; // `tz = 1` -> `+01:00`
-        } else {
-          dateString += `-${String(tz).padStart(2, "0")}:00`;
-        }
+    timestamps[dataIndex] = Date.parse(dateString);
+    for (let i = 1; i < values.length; i++) {
+      if (cells[i] === header.nodata) {
+        values[i][dataIndex] = null;
+        continue;
       }
-      timestamps[dataIndex] = Date.parse(dateString);
-      values.forEach((values0, i) => {
-        if (i == 0) return; // timestamp
-        if (cells[i] === nodata) {
-          values0[dataIndex] = null;
-          return;
-        }
-        const value = +cells[i].replace(",", ".");
-        values0[dataIndex] = UNIT_MAPPING[units[i]]?.convert(value) ?? value;
-      });
-      dataIndex++;
+      const value = +cells[i].replace(",", ".");
+      values[i][dataIndex] = converters[i](value);
     }
+    dataIndex++;
   }
 
-  units = units.map((u) => UNIT_MAPPING[u]?.to ?? u);
-  return new StationData(
-    station,
-    altitude,
+  return header.toStationData(
     timestamps.slice(0, dataIndex),
-    Object.fromEntries(fields.map((f, i) => [f, units[i]])) as Units,
-    Object.fromEntries(fields.map((f, i) => [f, values[i]])) as Values,
+    values ?? header.fields.map((): (number | null)[] => []),
   );
+}
+
+/**
+ * Parses SMET with the WebAssembly implementation of the data lines, see `smet-wasm.ts`.
+ */
+async function parseSMETWasm(bytes: Uint8Array): Promise<StationData> {
+  const { header, timestamps, columns } = await parseSMETBytes(bytes, (text) => {
+    const header = new SMETHeader();
+    for (const line of text.split(/\r?\n/)) {
+      header.parse(line);
+    }
+    return header;
+  });
+  return header.toStationData(timestamps, columns);
+}
+
+/**
+ * Formats a SMET timezone (decimal hours) as ISO 8601 offset, e.g. `1` -> `+01:00`, `-3.5` -> `-03:30`.
+ */
+function formatTimezoneOffset(tz: number): string {
+  if (!tz) return "Z";
+  const minutes = Math.round(Math.abs(tz) * 60);
+  const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const mm = String(minutes % 60).padStart(2, "0");
+  return `${tz < 0 ? "-" : "+"}${hh}:${mm}`;
 }

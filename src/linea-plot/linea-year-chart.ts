@@ -8,7 +8,7 @@ import { opts_HS_heatmap_year, opts_TA_heatmap_year } from "./opts_heatmap_year"
 import { YearData } from "../data/year-data";
 import { dailyMean, SeasonHeatmapData } from "../data/season-heatmap-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
-import type { StationData } from "../data/station-data";
+import type { Series, StationData } from "../data/station-data";
 import { TouchZoom } from "../shared/touch-zoom";
 import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 
@@ -169,12 +169,12 @@ export class LineaYearChart extends AbstractLineaChart {
   }
 
   /** The snow-height heatmap shows the highest snow height measured on a day. */
-  private static heatmapHS(timestamps: number[], values: (number | null)[]): SeasonHeatmapData {
+  private static heatmapHS(timestamps: number[], values: Series): SeasonHeatmapData {
     return SeasonHeatmapData.from(i18n.timezone(), timestamps, values);
   }
 
   /** The air-temperature heatmap shows the mean temperature of a day. */
-  private static heatmapTA(timestamps: number[], values: (number | null)[]): SeasonHeatmapData {
+  private static heatmapTA(timestamps: number[], values: Series): SeasonHeatmapData {
     return SeasonHeatmapData.from(i18n.timezone(), timestamps, values, dailyMean);
   }
 
@@ -268,7 +268,7 @@ export class LineaYearChart extends AbstractLineaChart {
           this.startDate,
           this.endDate,
           timestamps,
-          values.PSUM.map((v) => (v == 0 ? null : v)),
+          Array.from(values.PSUM, (v) => (v == 0 ? null : v)),
         );
         this.addSeries(p, opts_HS_PSUM_year.PSUM.series, yearDataPSUM.values);
       }

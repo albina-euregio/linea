@@ -1,6 +1,6 @@
 import { StationData } from "./station-data";
 import { dewPoint } from "../linea-plot/dew-point";
-import type { ParameterType, Units, Values } from "./station-data";
+import type { ParameterType, Units, ValuesInput } from "./station-data";
 import * as v from "valibot";
 import * as listing from "../schema/listing";
 import { Length, Scalar, Speed, Temperature, type Unit } from "./units";
@@ -117,7 +117,7 @@ export class SLFDataProvider implements LineaDataProvider {
       VW: "km/h",
     };
 
-    const values: Values = {};
+    const values: ValuesInput = {};
     const units: Units = {};
 
     for (const [parameter, series] of Object.entries(allSeries) as [

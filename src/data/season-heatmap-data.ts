@@ -55,7 +55,7 @@ export class SeasonHeatmapData {
   static from(
     timeZone: string,
     timestamps: number[],
-    values: (number | null)[],
+    values: ArrayLike<number | null>,
     reduce: (values: number[]) => number = dailyMax,
   ): SeasonHeatmapData {
     const heatmap = new SeasonHeatmapData();

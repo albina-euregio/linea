@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`parse AT-02 (2025-12-09) 1`] = `
-StationData {
+{
   "altitude": 2317,
   "forecast": undefined,
   "station": "mallnitz_ankogel_hintere_lucke",
@@ -30,11 +30,11 @@ StationData {
     ],
     "RH": [
       90.9,
-      null,
-      null,
-      null,
+      NaN,
+      NaN,
+      NaN,
       94.1,
-      null,
+      NaN,
     ],
     "TA": [
       -0.4,
@@ -49,10 +49,10 @@ StationData {
 }
 `;
 
-exports[`parse AT-02 (2025-12-09) 2`] = `[]`;
+exports[`parse AT-02 (2025-12-09) 2`] = `Float64Array []`;
 
 exports[`parse AT-02 (assume tz = 0: UTC) 1`] = `
-StationData {
+{
   "altitude": 2317,
   "forecast": undefined,
   "station": "mallnitz_ankogel_hintere_lucke",
@@ -92,10 +92,10 @@ StationData {
 }
 `;
 
-exports[`parse AT-02 (assume tz = 0: UTC) 2`] = `[]`;
+exports[`parse AT-02 (assume tz = 0: UTC) 2`] = `Float64Array []`;
 
 exports[`parse AT-02 (with tz = 1: UTC+1) 1`] = `
-StationData {
+{
   "altitude": 2317,
   "forecast": undefined,
   "station": "mallnitz_ankogel_hintere_lucke",
@@ -135,10 +135,10 @@ StationData {
 }
 `;
 
-exports[`parse AT-02 (with tz = 1: UTC+1) 2`] = `[]`;
+exports[`parse AT-02 (with tz = 1: UTC+1) 2`] = `Float64Array []`;
 
 exports[`parse AT-07 1`] = `
-StationData {
+{
   "altitude": 2180,
   "forecast": undefined,
   "station": "Gallreideschrofen",
@@ -193,10 +193,10 @@ StationData {
       -9.582,
     ],
     "TS.000": [
-      null,
-      null,
-      null,
-      null,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
     ],
     "TS.020": [
       -99.9,
@@ -228,7 +228,7 @@ StationData {
 `;
 
 exports[`parse AT-07 2`] = `
-[
+Float64Array [
   -100,
   -100,
   -100,
@@ -237,7 +237,7 @@ exports[`parse AT-07 2`] = `
 `;
 
 exports[`parse AT-07 with surface hoar 1`] = `
-StationData {
+{
   "altitude": 2103,
   "forecast": undefined,
   "station": "Speicherteich Axamer Lizum",
@@ -789,19 +789,19 @@ StationData {
       174,
       155,
       138,
-      null,
-      null,
-      null,
-      null,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
       83,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
+      NaN,
       0,
       0,
       0,
@@ -1867,7 +1867,7 @@ StationData {
 `;
 
 exports[`parse AT-07 with surface hoar 2`] = `
-[
+Float64Array [
   1000,
   1000,
   1000,
@@ -2016,7 +2016,7 @@ exports[`parse AT-07 with surface hoar 2`] = `
 `;
 
 exports[`parse AT-07 with surface hoar 3`] = `
-[
+Float64Array [
   245,
   245,
   261,
@@ -2165,7 +2165,7 @@ exports[`parse AT-07 with surface hoar 3`] = `
 `;
 
 exports[`parse IT-32-BZ 91180SF 1`] = `
-StationData {
+{
   "altitude": 1907,
   "forecast": undefined,
   "station": "Rotwandwiesen",
@@ -2255,7 +2255,7 @@ StationData {
 `;
 
 exports[`parse IT-32-BZ 91210WS 1`] = `
-StationData {
+{
   "altitude": 2903,
   "forecast": undefined,
   "station": "Hochebenkofel",
