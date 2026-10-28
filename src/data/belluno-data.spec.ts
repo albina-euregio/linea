@@ -67,7 +67,7 @@ test("Belluno station listing", async () => {
   );
 
   const { features } = await PROVIDERS.filtered(
-    (c) => c instanceof belluno.BellunoDataProvider,
+    (c) => c.dataProviderID === "IT-34",
   ).fetchStationListing();
   expect(features).toHaveLength(2);
   expect(features[0].id).toBe("0047");

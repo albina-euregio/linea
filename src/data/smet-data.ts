@@ -1,6 +1,5 @@
 import { fetchOrThrow } from "./fetchOrThrow";
-import * as geosphere from "./geosphere-data";
-import * as slf from "./slf-data";
+import { GEOSPHERE_URL, SLF_URL } from "./provider-urls";
 import { type ParameterType, type Units, type ValuesInput, StationData } from "./station-data";
 import { unitTransformer } from "./units";
 import { profileAsync } from "../shared/profiler";
@@ -38,9 +37,9 @@ export async function fetchSMET(url: string): Promise<StationData> {
   const file = url.split("/").slice(-2).join("/");
   let response = await profileAsync(`fetch:headers ${file}`, () => fetchOrThrow(url));
 
-  if (url.startsWith(geosphere.URL)) {
+  if (url.startsWith(GEOSPHERE_URL)) {
     throw new Error();
-  } else if (url.startsWith(slf.URL.STATION)) {
+  } else if (url.startsWith(SLF_URL.STATION)) {
     throw new Error();
   } else if (url.startsWith("https://meteo.arpa.veneto.it/meteo/dati_meteo/xml/")) {
     throw new Error();

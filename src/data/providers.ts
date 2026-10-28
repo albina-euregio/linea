@@ -6,12 +6,6 @@ export type { LineaDataProvider, ProviderIdentifier } from "./provider";
 import { fetchSMET } from "./smet-data";
 export { fetchSMET } from "./smet-data";
 import type { StationData } from "./station-data";
-import { SLFDataProvider } from "./slf-data";
-import { BellunoDataProvider } from "./belluno-data";
-import { GeoSphereDataProvider } from "./geosphere-data";
-export { SLFDataProvider } from "./slf-data";
-export { BellunoDataProvider } from "./belluno-data";
-export { GeoSphereDataProvider } from "./geosphere-data";
 
 export class SmetDataProvider implements LineaDataProvider {
   constructor(
@@ -45,6 +39,32 @@ export class SmetDataProvider implements LineaDataProvider {
   fetchStationData(f: Feature, dataURLsIndex: number): Promise<StationData> {
     const dataURL = f.properties.dataURLs[dataURLsIndex];
     return fetchSMET(dataURL);
+  }
+}
+
+/**
+ * Defers loading a provider module until its stations are listed or fetched,
+ * so that the LINEA bundle does not contain providers that are never shown.
+ */
+export class LazyDataProvider implements LineaDataProvider {
+  #provider: Promise<LineaDataProvider> | undefined;
+
+  constructor(
+    public readonly dataProviderID: ProviderIdentifier,
+    public readonly regions: string[],
+    private readonly load: () => Promise<LineaDataProvider>,
+  ) {}
+
+  #get(): Promise<LineaDataProvider> {
+    return (this.#provider ??= this.load());
+  }
+
+  async fetchStationListing(): Promise<FeatureCollection> {
+    return (await this.#get()).fetchStationListing();
+  }
+
+  async fetchStationData(f: Feature, dataURLsIndex: number): Promise<StationData> {
+    return (await this.#get()).fetchStationData(f, dataURLsIndex);
   }
 }
 
@@ -205,9 +225,21 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
     `https://lawinen.at/smet/slo/woche/${id}.smet.gz`,
   ]),
 
-  new GeoSphereDataProvider(),
+  new LazyDataProvider(
+    "GEOSPHERE",
+    ["AT-01", "AT-02", "AT-03", "AT-04", "AT-05", "AT-06", "AT-07", "AT-08", "AT-09"],
+    async () => new (await import("./geosphere-data")).GeoSphereDataProvider(),
+  ),
 
-  new SLFDataProvider(),
+  new LazyDataProvider(
+    "SLF",
+    ["CH", "LI"],
+    async () => new (await import("./slf-data")).SLFDataProvider(),
+  ),
 
-  new BellunoDataProvider(),
+  new LazyDataProvider(
+    "IT-34",
+    ["IT-34"],
+    async () => new (await import("./belluno-data")).BellunoDataProvider(),
+  ),
 ]);

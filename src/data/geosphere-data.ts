@@ -5,7 +5,8 @@ import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider } from "./provider";
 import { UnitSchema } from "./units";
 
-export const URL = "https://dataset.api.hub.geosphere.at/v1/station/historical/tawes-v1-10min";
+export { GEOSPHERE_URL as URL } from "./provider-urls";
+import { GEOSPHERE_URL as URL } from "./provider-urls";
 
 export const GeometrySchema = v.object({
   type: v.picklist(["Point"]),

@@ -7,18 +7,8 @@ import { Length, Scalar, Speed, Temperature, type Unit } from "./units";
 import { fetchOrThrow } from "./fetchOrThrow";
 import type { LineaDataProvider } from "./provider";
 
-export const URL = Object.freeze({
-  STATIONS: "https://measurement-api.slf.ch/public/api/imis/stations",
-  STATION: "https://measurement-api.slf.ch/public/api/imis/station/",
-  SNOW_HEIGHT:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/SNOW_HEIGHT/current/geojson",
-  TEMPERATURE_AIR:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_AIR/current/geojson",
-  TEMPERATURE_SNOW_SURFACE:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/TEMPERATURE_SNOW_SURFACE/current/geojson",
-  WIND_MEAN:
-    "https://public-meas-data-v2.slf.ch/public/station-data/timepoint/WIND_MEAN/current/geojson",
-});
+export { SLF_URL as URL } from "./provider-urls";
+import { SLF_URL as URL } from "./provider-urls";
 
 export const SLFStationDataSchema = v.object({
   station_code: v.string(),
