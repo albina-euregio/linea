@@ -1,5 +1,5 @@
 import { i18n } from "../i18n";
-import { LineaYearChart } from "./linea-year-chart";
+import type { LineaYearChart } from "./linea-year-chart";
 import { LineaView } from "../linea-view";
 import type { LineaPlot } from "../linea-plot";
 
@@ -28,6 +28,8 @@ export class WinterView extends LineaView {
       this.minTime = minDate.getTime();
     }
 
+    // the seasonal charts are only needed once the winter view is opened
+    const { LineaYearChart } = await import("./linea-year-chart");
     const [startDate, endDate] = this.#getWinterDates();
     for (const i in this.results) {
       const lcy = new LineaYearChart(
@@ -55,10 +57,8 @@ export class WinterView extends LineaView {
    * Filter and update data in all charts (winter view uses year selection)
    */
   filterAndUpdateData(startDate: Temporal.ZonedDateTime, endDate: Temporal.ZonedDateTime): void {
-    for (const chart of this.charts) {
-      if (chart instanceof LineaYearChart) {
-        chart.updateStartEndDate(startDate, endDate);
-      }
+    for (const chart of this.charts as LineaYearChart[]) {
+      chart.updateStartEndDate(startDate, endDate);
     }
   }
 
