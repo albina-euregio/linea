@@ -33,10 +33,10 @@ let wasm$: Promise<SmetExports> | undefined;
 export function loadSmetWasm(): Promise<SmetExports> {
   wasm$ ??= (async () => {
     const url = new URL("./smet.wasm", import.meta.url);
-    const fs = "node:fs/promises";
+    // getBuiltinModule instead of import("node:fs/promises") which browser bundlers fail to resolve
     const source =
       url.protocol === "file:"
-        ? await (await import(/* @vite-ignore */ fs)).readFile(url)
+        ? await process.getBuiltinModule("node:fs/promises").readFile(url)
         : await (await fetch(url)).arrayBuffer();
     const { instance } = await WebAssembly.instantiate(source);
     return (wasm = instance.exports as unknown as SmetExports);

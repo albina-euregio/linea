@@ -1,17 +1,16 @@
-if (!globalThis.Temporal) {
-  await import("temporal-polyfill/global");
-}
-
 /**
  * The reference season all measurements are folded onto: the x axis of the
  * heatmap runs from October 1st to July 1st. 2000/01 is used because 2001 is
  * not a leap year — February 29th is excluded so that every season contributes
- * the same 274 columns.
+ * the same 274 columns. Created on first use, Temporal might be polyfilled
+ * lazily.
  */
-const SEASON_START = Temporal.PlainDate.from("2000-10-01");
-const SEASON_END = Temporal.PlainDate.from("2001-07-01");
-
-const DAY_COUNT = SEASON_START.until(SEASON_END, { largestUnit: "day" }).days + 1;
+function referenceSeason() {
+  const SEASON_START = Temporal.PlainDate.from("2000-10-01");
+  const SEASON_END = Temporal.PlainDate.from("2001-07-01");
+  const DAY_COUNT = SEASON_START.until(SEASON_END, { largestUnit: "day" }).days + 1;
+  return { SEASON_START, SEASON_END, DAY_COUNT };
+}
 
 /** Reduces the measurements of one calendar day to their maximum. */
 export const dailyMax = (values: number[]): number => Math.max(...values);
@@ -58,6 +57,7 @@ export class SeasonHeatmapData {
     values: ArrayLike<number | null>,
     reduce: (values: number[]) => number = dailyMax,
   ): SeasonHeatmapData {
+    const { SEASON_START, SEASON_END, DAY_COUNT } = referenceSeason();
     const heatmap = new SeasonHeatmapData();
     // season start year -> one value per day of the reference season
     const bySeason = new Map<number, (number[] | undefined)[]>();

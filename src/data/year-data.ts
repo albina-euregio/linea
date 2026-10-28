@@ -1,7 +1,3 @@
-if (!globalThis.Temporal) {
-  await import("temporal-polyfill/global");
-}
-
 export class YearData {
   monthDayData = new Map<ReturnType<Temporal.PlainMonthDay["toString"]>, (number | null)[]>();
   dates: Temporal.PlainDate[] = [];

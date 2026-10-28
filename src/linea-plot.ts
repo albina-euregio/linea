@@ -7,10 +7,6 @@ import { WinterView } from "./linea-plot/winter-view";
 import type { LineaView } from "./linea-view";
 import { StationView } from "./linea-plot/station-view";
 
-if (!globalThis.Temporal) {
-  await import("temporal-polyfill/global");
-}
-
 type LineaViewType = "station" | "winter";
 /**
  * LineaPlot Web Component
@@ -627,4 +623,10 @@ export class LineaPlot extends HTMLElement {
   }
 }
 
-customElements.define("linea-plot", LineaPlot);
+// no top-level await, it is unsupported by consumers such as Angular with zone.js
+void (async () => {
+  if (!globalThis.Temporal) {
+    await import("temporal-polyfill/global");
+  }
+  customElements.define("linea-plot", LineaPlot);
+})();
