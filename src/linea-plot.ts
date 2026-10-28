@@ -7,6 +7,10 @@ import { WinterView } from "./linea-plot/winter-view";
 import type { LineaView } from "./linea-view";
 import { StationView } from "./linea-plot/station-view";
 
+if (!globalThis.Temporal) {
+  await import("temporal-polyfill/global");
+}
+
 type LineaViewType = "station" | "winter";
 /**
  * LineaPlot Web Component
