@@ -1,6 +1,6 @@
 import { i18n } from "./i18n";
 import type { LineaExportModal } from "./linea-plot/linea-export-modal";
-import { AirDatepicker, localizeDatePicker, cssAirDatepicker } from "./datepicker";
+import type { AirDatepicker } from "./datepicker";
 import css from "./linea-plot.css?inline";
 import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import { WinterView } from "./linea-plot/winter-view";
@@ -572,6 +572,7 @@ export class LineaPlot extends HTMLElement {
    * cosntructs the AirDatePicker
    */
   async #constructDatePicker() {
+    const { AirDatepicker, localizeDatePicker, cssAirDatepicker } = await import("./datepicker");
     this.styleTag.textContent += cssAirDatepicker;
 
     this.dp = new AirDatepicker(this.daterange, {
