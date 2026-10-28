@@ -1,5 +1,5 @@
 if (!globalThis.Temporal) {
-  import("temporal-polyfill/global");
+  await import("temporal-polyfill/global");
 }
 
 /**
