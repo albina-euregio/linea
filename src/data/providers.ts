@@ -126,7 +126,11 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
     "IT-32-BZ",
     ["IT-32-BZ"],
     "https://test-api-weather.services.siag.it/api/v2/station/data/geojson/stations.geojson",
-    (id) => [`https://test-api-weather.services.siag.it/api/v2/station/data/smetweek/${id}.smet`],
+    (id) => [
+      `https://test-api-weather.services.siag.it/api/v2/station/data/smetweek/${id}.smet`,
+      `https://test-api-weather.services.siag.it/api/v2/station/data/smetyear/${id}.smet`,
+      `https://test-api-weather.services.siag.it/api/v2/station/data/smetwinterstats/${id}.smet`,
+    ],
   ),
 
   new SmetDataProvider(
