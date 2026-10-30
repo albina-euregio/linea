@@ -63,6 +63,16 @@ build:cli:
       - package.json
       - README.md
 
+osv-scanner:
+  stage: build
+  image:
+    name: ghcr.io/google/osv-scanner:latest
+    entrypoint: [""]
+  allow_failure: true
+  script:
+    - /osv-scanner --version
+    - /osv-scanner scan source --recursive .
+
 publish-npm:
   extends: .build
   stage: deploy
