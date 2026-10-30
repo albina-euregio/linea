@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.99.0",
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.6.6",
     "@valibot/to-json-schema": "^1.8.0",
     "jsdom": "^29.0.2",
     "typescript": "^6.0.2",
