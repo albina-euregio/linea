@@ -140,6 +140,57 @@ export abstract class LineaView {
   }
 
   /**
+   * Keeps the y-axis limits of the plots of the same kind (e.g. temperature) equal across all stations,
+   * so that the stations can be compared: whenever a y scale changes, all plots of that kind get the
+   * union of their limits. Call after the charts have been created.
+   */
+  protected syncAxisLimits() {
+    let scheduled = false;
+    for (const chart of this.charts) {
+      for (const plot of chart.plots) {
+        plot.hooks.setScale ??= [];
+        plot.hooks.setScale.push((_u, key) => {
+          if (key === "x" || scheduled) return;
+          // a microtask runs after the other plots updated their scales, e.g. in filterAndUpdateData
+          scheduled = true;
+          queueMicrotask(() => {
+            scheduled = false;
+            this.#applyAxisLimits();
+          });
+        });
+      }
+    }
+  }
+
+  #applyAxisLimits() {
+    const plotsByName = Map.groupBy(
+      this.charts.flatMap((chart) =>
+        chart.plots.map((plot, i) => ({ plot, name: chart.plotnames[i] })),
+      ),
+      ({ name }) => name,
+    );
+    for (const entries of plotsByName.values()) {
+      const plots = entries.map(({ plot }) => plot);
+      if (plots.length < 2) continue;
+      const keys = new Set(
+        plots
+          .flatMap((p) => p.axes.filter((a) => a.show !== false && a.scale !== "x"))
+          .map((a) => a.scale!),
+      );
+      for (const key of keys) {
+        const scaled = plots.filter(
+          (p) => p.scales[key]?.min != null && p.scales[key]?.max != null,
+        );
+        const min = Math.min(...scaled.map((p) => p.scales[key].min!));
+        const max = Math.max(...scaled.map((p) => p.scales[key].max!));
+        scaled
+          .filter((p) => p.scales[key].min !== min || p.scales[key].max !== max)
+          .forEach((p) => p.setScale(key, { min, max }));
+      }
+    }
+  }
+
+  /**
    * Clean up and remove all charts
    */
   clearCharts() {
