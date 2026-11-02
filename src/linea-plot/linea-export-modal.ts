@@ -109,8 +109,8 @@ export class LineaExportModal extends AbstractExportModal {
   async #generateInteractiveExportData(): Promise<StationData[]> {
     const resultsFiltered: StationData[] = [];
 
-    this.#getActiveLineacharts().forEach((lc, index) => {
-      const activeplots = this.getCheckedSeriesIndices(index);
+    this.#getActiveLineacharts().forEach((lc) => {
+      const activeplots = this.#getCheckedSeriesIndices(lc);
       let result = new StationData(
         lc.result.station,
         lc.result.altitude,
@@ -408,8 +408,8 @@ export class LineaExportModal extends AbstractExportModal {
       await new Promise((r) => setTimeout(r, 1));
     }
 
-    activeLinecharts.forEach((lineachart, index) => {
-      const plotindices = this.getCheckedSeriesIndices(index);
+    activeLinecharts.forEach((lineachart) => {
+      const plotindices = this.#getCheckedSeriesIndices(lineachart);
       if (plotindices.length == 0) {
         return;
       }
@@ -576,6 +576,14 @@ export class LineaExportModal extends AbstractExportModal {
       return dataUrl;
     }
     return dataUrl;
+  }
+
+  /**
+   * Retrieves the checked plot indices of the given LineaChart.
+   * The checkboxes are numbered by the chart's position in the view, not among the active charts.
+   */
+  #getCheckedSeriesIndices(lineachart: AbstractLineaChart): number[] {
+    return this.getCheckedSeriesIndices(this.lineaPlot.view.charts.indexOf(lineachart));
   }
 
   /**
