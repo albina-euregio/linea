@@ -35,7 +35,7 @@ export abstract class LineaView {
     this.showTitle = lineaplot.hasAttribute("showtitle");
     this.#features = v.parse(
       v.array(FeatureSchema),
-      JSON.parse(this.lineaplot.getAttribute(LineaPlot.FEATURES)),
+      JSON.parse(this.lineaplot.getAttribute(LineaPlot.FEATURES) ?? "[]"),
     );
   }
 
