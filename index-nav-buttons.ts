@@ -1,9 +1,17 @@
+import * as v from "valibot";
 import { LineaPlot } from "./src/linea-plot";
 import { PROVIDERS } from "./src/data/providers";
+import { fetchOrThrow } from "./src/data/fetchOrThrow";
+import { FeatureCollectionSchema } from "./src/schema/listing";
 
-const { features } = await PROVIDERS.filtered((c) =>
-  c.regions.includes("AT-07"),
-).fetchStationListing();
+// proxied to dev.avalanche.report by the dev server, see vite.config.ts
+const response = await fetchOrThrow("/eaws_weather_stations/linea.geojson");
+const providerIDs = PROVIDERS.filtered((c) => c.regions.includes("AT-07")).providers.map(
+  (p) => p.dataProviderID,
+);
+const features = v
+  .parse(FeatureCollectionSchema, await response.json())
+  .features.filter((f) => providerIDs.includes(f.properties.dataProviderID!));
 features.sort((f1, f2) => f1.properties.name.localeCompare(f2.properties.name));
 const preselectedStation = new URLSearchParams(location.search).get("station");
 document.querySelector("nav details")!.toggleAttribute("open", !preselectedStation);

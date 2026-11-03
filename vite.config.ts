@@ -56,6 +56,15 @@ export default defineConfig({
     },
   },
   plugins: [valibotToJsonSchemaPlugin("listing.schema.json")],
+  server: {
+    proxy: {
+      // station listing built by the linea CLI, used by index-nav-buttons.ts
+      "/eaws_weather_stations": {
+        target: "https://dev.avalanche.report/",
+        changeOrigin: true,
+      },
+    },
+  },
   fmt: {
     ignorePatterns: ["pnpm-lock.yaml", "pnpm-workspace.yaml"],
   },
