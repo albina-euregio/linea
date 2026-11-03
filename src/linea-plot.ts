@@ -176,9 +176,7 @@ export class LineaPlot extends HTMLElement {
       const stationView = new StationView(this.backgroundColors, this);
       if (this.hasAttribute("showdatepicker") && this.daterange) {
         this.daterange.addEventListener("focus", async () => {
-          await this.runWithButtonLoading(this.daterangeContainer, () =>
-            stationView.fetchLazySrc(),
-          );
+          await this.#fetchLazySrc();
           if (this.dp && !this.dp.visible && document.activeElement === this.daterange) {
             this.dp.show();
           }
@@ -585,14 +583,25 @@ export class LineaPlot extends HTMLElement {
     });
 
     //AirDatepicker on mobile devices has problems with focusing the input field, so we add a touchstart listener
-    this.daterange.addEventListener("touchstart", (e) => {
+    this.daterange.addEventListener("touchstart", async (e) => {
       e.preventDefault();
       if (this.dp.visible) {
         this.dp.hide();
-      } else {
-        this.dp.show();
+        return;
       }
+      await this.#fetchLazySrc();
+      this.dp.show();
     });
+  }
+
+  /**
+   * Loads the lazysrc data of the station view, so that the datepicker offers the full date range
+   */
+  async #fetchLazySrc() {
+    const stationView = this.lineaViews.get("station");
+    if (stationView instanceof StationView) {
+      await this.runWithButtonLoading(this.daterangeContainer, () => stationView.fetchLazySrc());
+    }
   }
 
   /**
