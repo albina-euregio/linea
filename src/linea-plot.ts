@@ -8,6 +8,28 @@ import type { LineaView } from "./linea-view";
 import { StationView } from "./linea-plot/station-view";
 
 type LineaViewType = "station" | "winter";
+
+const winterDataCache = new Map<string, Promise<boolean>>();
+
+/**
+ * Checks (via HEAD request) whether the winter statistics file exists.
+ * Results are cached per URL for the lifetime of the page.
+ */
+function hasWinterData(url: string | undefined): Promise<boolean> {
+  if (!url) {
+    return Promise.resolve(false);
+  }
+  let exists = winterDataCache.get(url);
+  if (!exists) {
+    exists = fetch(url, { method: "HEAD" }).then(
+      (r) => r.ok,
+      () => false,
+    );
+    winterDataCache.set(url, exists);
+  }
+  return exists;
+}
+
 /**
  * LineaPlot Web Component
  *
@@ -143,7 +165,9 @@ export class LineaPlot extends HTMLElement {
     await this.#addControls();
     this.#addExportModal();
 
-    this.#loadViews();
+    this.#loadViews().then(() => {
+      this.#updateWinterViewButton();
+    });
 
     this.tabIndex = 0;
     this.focus();
@@ -232,8 +256,7 @@ export class LineaPlot extends HTMLElement {
         await view.initialize();
       } catch (error: any) {
         console.error(error);
-        this.#updateWinterViewButton();
-        this.winterviewBtn.disabled = true;
+        this.winterviewBtn.style.display = "none";
         return;
       }
     }
@@ -403,8 +426,8 @@ export class LineaPlot extends HTMLElement {
     }
     this.winterviewBtn = document.createElement("button");
     this.winterviewBtn.id = "winterviewbtn";
-    this.winterviewBtn.style.display =
-      !this.#isWinterSrcsEmpty() && !this.hasAttribute("showonlywinter") ? "block" : "none";
+    // hidden until #updateWinterViewButton confirms that winter data exists
+    this.winterviewBtn.style.display = "none";
     this.winterviewBtn.classList.add("toggle-btn");
     this.winterviewBtn.classList.add("winterview-btn");
     this.winterviewBtn.classList.add("loading-btn");
@@ -604,12 +627,12 @@ export class LineaPlot extends HTMLElement {
     }
   }
 
+  #winterProbeSeq = 0;
+
   /**
-   * Checks if the winter view is available based on attributes
+   * Checks if the winter view is available based on attributes and existing winter data
    */
-  #updateWinterViewButton() {
-    this.winterviewBtn.style.display =
-      !this.#isWinterSrcsEmpty() && !this.hasAttribute("showonlywinter") ? "block" : "none";
+  async #updateWinterViewButton() {
     if (this.#getCurrentViewKey() === "winter") {
       this.winterviewBtnLabel.textContent = i18n.message("linea:controls:value:winterview:station");
     } else {
@@ -617,18 +640,34 @@ export class LineaPlot extends HTMLElement {
     }
     this.winterviewBtn.classList.remove("loading");
     this.winterviewBtn.disabled = false;
+
+    const seq = ++this.#winterProbeSeq;
+    const hasWinterSrcs = await this.#hasWinterSrcs();
+    if (seq !== this.#winterProbeSeq) {
+      // a newer check (e.g. after changed features) is responsible for the button
+      return;
+    }
+    this.winterviewBtn.style.display = hasWinterSrcs ? "block" : "none";
   }
 
   /**
-   * Check for empty wintersrc attribute
-   * @returns true if wintersrc is empty or invalid, false otherwise
+   * Check that winter data exists for every station
+   * @returns true if all wintersrc files exist, false otherwise
    */
-  #isWinterSrcsEmpty() {
-    const stationView = this.lineaViews?.get("station");
-    if (stationView instanceof StationView) {
-      return !stationView.getDataURLs("wintersrc").some(Boolean);
+  async #hasWinterSrcs(): Promise<boolean> {
+    if (this.hasAttribute("showonlywinter")) {
+      return false;
     }
-    return false;
+    const stationView = this.lineaViews?.get("station");
+    if (!(stationView instanceof StationView)) {
+      return false;
+    }
+    const urls = stationView.getDataURLs("wintersrc");
+    if (!urls.length) {
+      return false;
+    }
+    const exists = await Promise.all(urls.map((url) => hasWinterData(url)));
+    return exists.every(Boolean);
   }
 }
 
