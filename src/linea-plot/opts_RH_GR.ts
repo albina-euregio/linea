@@ -19,6 +19,7 @@ export const RH = new LineaChartParameter({
     stroke: "#8a7474",
     scale: "y",
     width: 1.5,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "%"),
   },
 });
@@ -41,6 +42,7 @@ export const ISWR = new LineaChartParameter({
     fill: "rgba(255,0,0,0.1)",
     scale: "y2",
     width: 1.5,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
   },
 });

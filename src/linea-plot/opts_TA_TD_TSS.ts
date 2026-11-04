@@ -33,6 +33,7 @@ export const TA = new LineaChartParameter({
     scale: "y",
     width: 1.5,
     spanGaps: false,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
   },
 });
@@ -55,6 +56,7 @@ export const TD = new LineaChartParameter({
     scale: "y",
     width: 1.5,
     spanGaps: false,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
   },
 });
@@ -67,6 +69,7 @@ export const TSS: { series: uPlot.Series } = {
     scale: "y",
     width: 1.5,
     spanGaps: false,
+    gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
     value: (_u, v) => (v === null || Number.isNaN(v) ? "-" : i18n.number(v, {}, "℃")),
   },
 };
