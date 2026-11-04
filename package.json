@@ -56,12 +56,12 @@
     "@hey-api/openapi-ts": "^0.99.0",
     "@types/node": "^26.6.6",
     "@valibot/to-json-schema": "^1.8.0",
+    "@xmldom/xmldom": "^0.9.12",
     "jsdom": "^30.1.3",
     "typescript": "^6.0.3",
     "valibot": "^1.5.0",
     "vite": "catalog:",
-    "vite-plus": "catalog:",
-    "xmldom": "^0.6.0"
+    "vite-plus": "catalog:"
   },
   "peerDependencies": {
     "valibot": "^1.5.0"

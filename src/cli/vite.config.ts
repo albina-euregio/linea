@@ -10,7 +10,7 @@ export default defineConfig({
       // Remove to preserve subpath imports as written (the new default).
       // https://tsdown.dev/options/dependencies#deps-resolvedepsubpath
       resolveDepSubpath: true,
-      alwaysBundle: ["xmldom", "temporal-polyfill/global", "valibot"],
+      alwaysBundle: ["@xmldom/xmldom", "temporal-polyfill/global", "valibot"],
       onlyBundle: false,
     },
     dts: false,

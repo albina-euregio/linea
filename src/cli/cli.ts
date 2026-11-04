@@ -8,7 +8,7 @@ main();
 
 async function main() {
   // @ts-ignore// @ts-ignore
-  const { DOMParser } = await import("xmldom");
+  const { DOMParser } = await import("@xmldom/xmldom");
   global.DOMParser = DOMParser;
 
   const collection = await PROVIDERS.fetchStationListing();
