@@ -48,33 +48,19 @@ export class LineaChart extends AbstractLineaChart {
       const measuredPsumAccum = values.PSUM
         ? this.#sumupPrecipitation(timestamps, values.PSUM)
         : undefined;
-      const forecastPsumAccum =
-        forecastValues?.PSUM && measuredPsumAccum
-          ? this.#sumupForecastPrecipitation(timestamps, forecastValues.PSUM, measuredPsumAccum)
-          : [];
+      // without measured precipitation, the forecast is accumulated from zero
+      const forecastPsumAccum = forecastValues?.PSUM
+        ? this.#sumupForecastPrecipitation(timestamps, forecastValues.PSUM, measuredPsumAccum ?? [])
+        : undefined;
 
-      if (values.HS && values.PSUM) {
-        this.updateData(
-          this.plots[i],
-          [timestamps, values.HS, measuredPsumAccum].concat(
-            forecastValues?.HS ? [forecastValues.HS] : [],
-            forecastPsumAccum ? [forecastPsumAccum] : [],
-          ),
-        );
-      } else if (values.HS) {
-        this.updateData(
-          this.plots[i],
-          [timestamps, values.HS].concat(
-            forecastValues?.HS ? [forecastValues.HS] : [],
-            forecastPsumAccum ? [forecastPsumAccum] : [],
-          ),
-        );
-      } else if (values.PSUM) {
-        this.updateData(
-          this.plots[i],
-          [timestamps, measuredPsumAccum].concat(forecastPsumAccum ? [forecastPsumAccum] : []),
-        );
-      }
+      // same order as the series added in createPlots and addForecastSeries
+      this.updateData(this.plots[i], [
+        timestamps,
+        ...(values.HS ? [values.HS] : []),
+        ...(measuredPsumAccum ? [measuredPsumAccum] : []),
+        ...(forecastValues?.HS ? [forecastValues.HS] : []),
+        ...(forecastPsumAccum ? [forecastPsumAccum] : []),
+      ]);
       i += 1;
     }
     if (values.VW || values.VW_MAX || values.DW) {
@@ -316,7 +302,7 @@ export class LineaChart extends AbstractLineaChart {
   #findLastMeasuredAccum(measuredAccum: number[], atIndex: number): number {
     for (let i = atIndex; i >= 0; i--) {
       const value = measuredAccum[i];
-      if (!Number.isNaN(value)) {
+      if (value !== undefined && !Number.isNaN(value)) {
         return value;
       }
     }

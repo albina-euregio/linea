@@ -135,6 +135,7 @@ export class StationView extends LineaView {
       );
       this.charts.push(lc);
     }
+    this.syncAxisLimits();
   }
 
   /**

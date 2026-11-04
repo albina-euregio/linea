@@ -1,7 +1,7 @@
 import uPlot from "uplot";
 import { i18n } from "../i18n";
 import { LineaPlot } from "../linea-plot";
-import { StationData, toSeries } from "../data/station-data";
+import { type ParameterType, StationData, toSeries } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { WinterView } from "./winter-view";
 import { AbstractExportModal } from "../shared/abstract-export-modal";
@@ -109,8 +109,8 @@ export class LineaExportModal extends AbstractExportModal {
   async #generateInteractiveExportData(): Promise<StationData[]> {
     const resultsFiltered: StationData[] = [];
 
-    this.#getActiveLineacharts().forEach((lc, index) => {
-      const activeplots = this.getCheckedSeriesIndices(index);
+    this.#getActiveLineacharts().forEach((lc) => {
+      const activeplots = this.#getCheckedSeriesIndices(lc);
       let result = new StationData(
         lc.result.station,
         lc.result.altitude,
@@ -118,67 +118,45 @@ export class LineaExportModal extends AbstractExportModal {
         {},
         {},
       );
+      // export only parameters with data, stations may lack series (e.g. PSUM) present at other stations
+      const set = (
+        key: ParameterType,
+        values: ArrayLike<number | null | undefined> | undefined,
+      ) => {
+        if (values && Array.from(values).some((v) => v != null && !Number.isNaN(v))) {
+          result.values[key] = toSeries(values);
+        }
+      };
       if (this.lineaPlot.view instanceof WinterView) {
         activeplots.forEach((index) => {
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
-            result.values.TA = lc.result.values.TA ?? new Float64Array();
-            result.values.TD = lc.result.values.TD ?? new Float64Array();
+            set("TA", lc.result.values.TA);
+            set("TD", lc.result.values.TD);
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:newsnow")) {
-            result.values.NS = lc.result.values.NS ?? new Float64Array();
+            set("NS", lc.result.values.NS);
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
-            result.values.HS = lc.result.values.HS ?? new Float64Array();
-            result.values.PSUM = lc.result.values.PSUM ?? new Float64Array();
+            set("HS", lc.result.values.HS);
+            set("PSUM", lc.result.values.PSUM);
           }
         });
       } else {
         activeplots.forEach((index) => {
+          const plot = lc.plots[index];
           if (lc.plotnames[index] === i18n.message("linea:plotnames:temperature")) {
-            const airTempIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:TA"),
-            );
-            result.values.TA = toSeries(lc.plots[index].data[airTempIndex]);
-            const dewPointIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:TD"),
-            );
-            result.values.TD = toSeries(lc.plots[index].data[dewPointIndex]);
-            const surfaceIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:TSS"),
-            );
-            result.values.TSS = toSeries(lc.plots[index].data[surfaceIndex]);
+            set("TA", this.#getSeriesData(plot, i18n.message("linea:parameter:TA")));
+            set("TD", this.#getSeriesData(plot, i18n.message("linea:parameter:TD")));
+            set("TSS", this.#getSeriesData(plot, i18n.message("linea:parameter:TSS")));
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:wind")) {
-            const windIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:VW"),
-            );
-            result.values.VW = toSeries(lc.plots[index].data[windIndex]);
-            const windMaxIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:VW_MAX"),
-            );
-            result.values.VW_MAX = toSeries(lc.plots[index].data[windMaxIndex]);
-            const windDirectionIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:DW"),
-            );
-            result.values.DW = toSeries(lc.plots[index].data[windDirectionIndex]);
+            set("VW", this.#getSeriesData(plot, i18n.message("linea:parameter:VW")));
+            set("VW_MAX", this.#getSeriesData(plot, i18n.message("linea:parameter:VW_MAX")));
+            set("DW", this.#getSeriesData(plot, i18n.message("linea:parameter:DW")));
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:humidity_gr")) {
-            const humidityIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:RH"),
-            );
-            result.values.RH = toSeries(lc.plots[index].data[humidityIndex]);
-            const globalRadiationIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:ISWR"),
-            );
-            result.values.ISWR = lc.result.values.ISWR
-              ? toSeries(lc.plots[index].data[globalRadiationIndex])
-              : new Float64Array();
+            set("RH", this.#getSeriesData(plot, i18n.message("linea:parameter:RH")));
+            set("ISWR", this.#getSeriesData(plot, i18n.message("linea:parameter:ISWR")));
           } else if (lc.plotnames[index] === i18n.message("linea:plotnames:precipitation")) {
-            const snowHeightIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:HS"),
-            );
-            result.values.HS = toSeries(lc.plots[index].data[snowHeightIndex]);
-            const precipitationIndex = lc.plots[index].series.findIndex(
-              (s) => s.label === i18n.message("linea:parameter:PSUM"),
-            );
-            const cumulativePSUM = lc.plots[index].data[precipitationIndex] as (number | null)[];
-            result.values.PSUM = toSeries(this.#reconstructPSUMSeries(cumulativePSUM));
+            set("HS", this.#getSeriesData(plot, i18n.message("linea:parameter:HS")));
+            const cumulativePSUM = this.#getSeriesData(plot, i18n.message("linea:parameter:PSUM"));
+            set("PSUM", cumulativePSUM && this.#reconstructPSUMSeries(cumulativePSUM));
           }
         });
       }
@@ -186,6 +164,14 @@ export class LineaExportModal extends AbstractExportModal {
     });
 
     return resultsFiltered;
+  }
+
+  /**
+   * Returns the data of the series with the given label, or `undefined` if the plot has no such series.
+   */
+  #getSeriesData(plot: uPlot, label: string): (number | null)[] | undefined {
+    const seriesIndex = plot.series.findIndex((s) => s.label === label);
+    return seriesIndex > 0 ? (plot.data[seriesIndex] as (number | null)[]) : undefined;
   }
 
   /**
@@ -422,8 +408,8 @@ export class LineaExportModal extends AbstractExportModal {
       await new Promise((r) => setTimeout(r, 1));
     }
 
-    activeLinecharts.forEach((lineachart, index) => {
-      const plotindices = this.getCheckedSeriesIndices(index);
+    activeLinecharts.forEach((lineachart) => {
+      const plotindices = this.#getCheckedSeriesIndices(lineachart);
       if (plotindices.length == 0) {
         return;
       }
@@ -590,6 +576,14 @@ export class LineaExportModal extends AbstractExportModal {
       return dataUrl;
     }
     return dataUrl;
+  }
+
+  /**
+   * Retrieves the checked plot indices of the given LineaChart.
+   * The checkboxes are numbered by the chart's position in the view, not among the active charts.
+   */
+  #getCheckedSeriesIndices(lineachart: AbstractLineaChart): number[] {
+    return this.getCheckedSeriesIndices(this.lineaPlot.view.charts.indexOf(lineachart));
   }
 
   /**
