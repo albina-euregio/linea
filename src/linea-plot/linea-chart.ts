@@ -54,15 +54,13 @@ export class LineaChart extends AbstractLineaChart {
         : undefined;
 
       // same order as the series added in createPlots and addForecastSeries
-      this.updateData(
-        this.plots[i],
-        [timestamps].concat(
-          values.HS ? [values.HS] : [],
-          measuredPsumAccum ? [measuredPsumAccum] : [],
-          forecastValues?.HS ? [forecastValues.HS] : [],
-          forecastPsumAccum ? [forecastPsumAccum] : [],
-        ),
-      );
+      this.updateData(this.plots[i], [
+        timestamps,
+        ...(values.HS ? [values.HS] : []),
+        ...(measuredPsumAccum ? [measuredPsumAccum] : []),
+        ...(forecastValues?.HS ? [forecastValues.HS] : []),
+        ...(forecastPsumAccum ? [forecastPsumAccum] : []),
+      ]);
       i += 1;
     }
     if (values.VW || values.VW_MAX || values.DW) {
