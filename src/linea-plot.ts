@@ -52,7 +52,15 @@ function hasWinterData(url: string | undefined): Promise<boolean> {
  * - `showsurfacehoarseries` {boolean} - When present, display a series which shows the surface hoar potential
  * - `showexport` - toggles if the export button is shown
  * - `showinteractiveblogexport` - toggles if the export for the interactive blog button is shown, just in combination with `showexport`
- * - `forecast-latlon` {string} - Optional forecast coordinates. Supports two formats:
+ * - `forecast` {string} - Optional JSON-encoded forecast object, or an array of them with one entry per station. A single object
+ *    or an array with one entry applies to all stations. Use `null` in an array to skip forecast for specific stations. A forecast object has:
+ *    - `latlong` - coordinates (`"lat,lon"` or `[lat, lon]`) to fetch the GeoSphere forecast for, which loads lazily when navigating past
+ *      the measured data range. Without it nothing is fetched, for stations whose SMET file contains the forecast.
+ *    - `model` - `{"t0": "2026-02-20T20:00:00Z", "label": {"upper": "My model", "lower": "(ACME)"}}` is shown at the forecast marker, `lower` is optional.
+ *      `label` can be omitted with `latlong`, the GeoSphere AROME label is shown then. `t0` is the position of the line, per default now.
+ *      `labelOffset` (e.g. `{"x": 10, "y": 20}`) moves the label from its default position, in pixels.
+ *    Either `latlong` or `model.label` is required.
+ * - `forecast-latlon` {string} - Deprecated, use `forecast`, which takes precedence. Optional forecast coordinates. Supports two formats:
  *    - Single value: `"lat,lon"` applies forecast to all stations
  *    - Array format: `'["lat1,lon1", "lat2,lon2", ...]'` one coordinate per station. Use `null` or empty string to skip forecast for specific stations.
  *    Forecast data loads lazily when navigating past the measured data range.
@@ -64,7 +72,7 @@ function hasWinterData(url: string | undefined): Promise<boolean> {
  * <linea-plot
  *   src='["data/station1.smet", "data/station2.smet"]'
  *   backgroundcolors = '["#b31c1c2b", "rgba(0, 0, 0, 0.05)"]'
- *   forecast-latlon="48.5,11.3"
+ *   forecast='{"latlong": "48.5,11.3"}'
  *   showdatepicker
  *   showsurfacehoarseries
  *   showtitle
@@ -74,7 +82,15 @@ function hasWinterData(url: string | undefined): Promise<boolean> {
  * <!-- Multiple stations with individual forecasts -->
  * <linea-plot
  *   src='["data/station1.smet", "data/station2.smet"]'
- *   forecast-latlon='["48.5,11.3", "47.2,10.8"]'
+ *   forecast='[{"latlong": "48.5,11.3"}, {"latlong": "47.2,10.8"}]'
+ *   showdatepicker
+ *   showtitle>
+ * </linea-plot>
+ *
+ * <!-- Forecast contained in the SMET file -->
+ * <linea-plot
+ *   src='["data/station1.smet"]'
+ *   forecast='{"model": {"label": {"upper": "My model", "lower": "(ACME)"}}}'
  *   showdatepicker
  *   showtitle>
  * </linea-plot>

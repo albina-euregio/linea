@@ -3,7 +3,8 @@ import { LineaChart } from "./linea-chart";
 import { LineaView } from "../linea-view";
 import type { LineaPlot } from "../linea-plot";
 import type { AirDatepickerOptions } from "air-datepicker";
-import { fetchGeosphereForecast, GEOSPHERE_BBOX_OUTER } from "../data/geosphere-forecast";
+import { fetchGeosphereForecast } from "../data/geosphere-forecast";
+import { parseForecast, parseForecastLatLon, type ForecastOption } from "./forecast-option";
 import {
   type ParameterType,
   seriesOf,
@@ -25,90 +26,14 @@ export class StationView extends LineaView {
   private forecastMaxTime: number = -Infinity;
   private forecastLoaded: boolean = false;
   private forecastLoadPromise: Promise<void> | undefined;
-  private forecastLatLons: (string | undefined)[] = [];
+  private forecastOptions: (ForecastOption | undefined)[] = [];
 
   constructor(backgroundColors: string[] = [], lineaplot: LineaPlot) {
     super(backgroundColors, lineaplot);
     this.showSurfaceHoarSeries = this.lineaplot.hasAttribute("showsurfacehoarseries");
-    this.forecastLatLons = this.#parseForecastLatLons(
-      this.lineaplot.getAttribute("forecast-latlon"),
-    );
-  }
-
-  /**
-   * Parse forecast-latlon attribute which can be:
-   * - A single value: "48.5,11.3" (applies to all stations)
-   * - An array: '["48.5,11.3", "47.2,10.8"]' (one per station)
-   * - Mixed array: '[["48.5,11.3"], undefined]' (undefined for stations without forecast)
-   */
-  #parseForecastLatLons(raw: string | null): (string | undefined)[] {
-    if (!raw) {
-      return [];
-    }
-
-    const value = raw.trim();
-    if (!value) {
-      return [];
-    }
-
-    let parsed: unknown;
-    try {
-      // Try to parse as JSON (array format)
-      if (value.startsWith("[")) {
-        parsed = JSON.parse(value);
-        if (Array.isArray(parsed)) {
-          return parsed.map((item) => this.#validateAndFormatLatLon(item));
-        }
-      }
-    } catch {
-      // Fall through to single value parsing
-    }
-
-    // Try to parse as single lat,lon value
-    const singleValue = this.#validateAndFormatLatLon(value);
-    if (singleValue) {
-      return [singleValue]; // Return as array with single element
-    }
-
-    return [];
-  }
-
-  /**
-   * Validate and format a single lat,lon coordinate pair
-   * @returns formatted "lat,lon" string or undefined if invalid
-   */
-  #validateAndFormatLatLon(value: unknown): string | undefined {
-    if (typeof value !== "string") {
-      return undefined;
-    }
-
-    const trimmed = value.trim();
-    if (!trimmed) {
-      return undefined;
-    }
-
-    const parts = trimmed.split(",").map((part) => part.trim());
-    if (parts.length !== 2) {
-      console.warn("Invalid forecast-latlon format. Expected 'lat,lon'.", trimmed);
-      return undefined;
-    }
-
-    const lat = Number(parts[0]);
-    const lon = Number(parts[1]);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      console.warn("Invalid forecast-latlon coordinates. Expected numeric values.", trimmed);
-      return undefined;
-    }
-
-    const bbox = GEOSPHERE_BBOX_OUTER;
-    const isInsideBbox =
-      lat >= bbox.minLat && lat <= bbox.maxLat && lon >= bbox.minLon && lon <= bbox.maxLon;
-    if (!isInsideBbox) {
-      console.warn("forecast-latlon is outside coverage bbox and will be ignored.", trimmed);
-      return undefined;
-    }
-
-    return `${lat},${lon}`;
+    this.forecastOptions = this.lineaplot.hasAttribute("forecast")
+      ? parseForecast(this.lineaplot.getAttribute("forecast"))
+      : parseForecastLatLon(this.lineaplot.getAttribute("forecast-latlon"));
   }
 
   /**
@@ -125,13 +50,12 @@ export class StationView extends LineaView {
 
     for (const i in this.results) {
       const result = this.results[i];
-      const hasForecast = this.#getForecastLatLonForStation(Number(i)) !== undefined;
       let lc = new LineaChart(
         result,
         this.showTitle,
         this.showSurfaceHoarSeries,
         this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
-        hasForecast,
+        this.#getForecastOptionForStation(Number(i)),
       );
       this.charts.push(lc);
     }
@@ -139,19 +63,19 @@ export class StationView extends LineaView {
   }
 
   /**
-   * Get the forecast lat/lon for a specific station index
+   * Get the forecast option for a specific station index
    * Handles:
    * - Array format: returns value at index, or undefined if not available
    * - Empty array: returns undefined for all
    */
-  #getForecastLatLonForStation(stationIndex: number): string | undefined {
-    if (this.forecastLatLons.length === 0) {
+  #getForecastOptionForStation(stationIndex: number): ForecastOption | undefined {
+    if (this.forecastOptions.length === 0) {
       return undefined;
     }
-    if (this.forecastLatLons.length === 1) {
-      return this.forecastLatLons[0];
+    if (this.forecastOptions.length === 1) {
+      return this.forecastOptions[0];
     }
-    return this.forecastLatLons[stationIndex];
+    return this.forecastOptions[stationIndex];
   }
 
   public show() {
@@ -169,11 +93,11 @@ export class StationView extends LineaView {
   }
 
   private hasForecastRange(): boolean {
-    return this.forecastLatLons.length > 0 && this.forecastMaxTime > this.measuredMaxTime;
+    return this.forecastOptions.length > 0 && this.forecastMaxTime > this.measuredMaxTime;
   }
 
   private async ensureForecastLoaded(): Promise<void> {
-    if (this.forecastLatLons.length === 0) {
+    if (this.forecastOptions.length === 0) {
       return;
     }
     if (this.forecastLoaded) {
@@ -189,7 +113,7 @@ export class StationView extends LineaView {
         // Determine which forecast lat/lon to use for each station
         const forecastsToLoad: [number, string][] = [];
         for (let i = 0; i < this.results.length; i++) {
-          const latLon = this.#getForecastLatLonForStation(i);
+          const latLon = this.#getForecastOptionForStation(i)?.latlong;
           if (latLon) {
             forecastsToLoad.push([i, latLon]);
           }

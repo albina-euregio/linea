@@ -95,7 +95,6 @@ export const opts_VW_VWG_DW: uPlot.Options = {
         LineaOptsHelper.UpdateAxisLabelsForParameters(u, VW, DW);
         // Draw reference line at 25 km∕h (working group decision)
         LineaOptsHelper.drawReferenceLine(u, 25);
-        LineaOptsHelper.drawForecastInformation(u);
 
         ctx.restore();
       },

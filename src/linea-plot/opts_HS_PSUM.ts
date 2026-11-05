@@ -72,7 +72,6 @@ export const opts_HS_PSUM: uPlot.Options = {
     drawAxes: [
       (u) => {
         LineaOptsHelper.UpdateAxisLabelsForParameters(u, HS, PSUM);
-        LineaOptsHelper.drawForecastInformation(u);
       },
     ],
     setSelect: [

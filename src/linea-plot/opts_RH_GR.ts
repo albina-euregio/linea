@@ -57,7 +57,6 @@ export const opts_RH_GR: uPlot.Options = {
     drawAxes: [
       (u) => {
         LineaOptsHelper.UpdateAxisLabelsForParameters(u, RH, ISWR);
-        LineaOptsHelper.drawForecastInformation(u);
       },
     ],
   },
