@@ -10,10 +10,12 @@ import { AbstractLineaChart } from "../abstract-linea-chart";
 import { TouchZoom } from "../shared/touch-zoom";
 import { MeasurementDatesPlugin } from "../shared/measurement-dates";
 import { profilerPlugin } from "../shared/profiler";
+import { LineaOptsHelper } from "./linea-opts-helper";
+import type { ForecastOption } from "./forecast-option";
 
 export class LineaChart extends AbstractLineaChart {
   private showSurfaceHoarSeries: boolean;
-  private forecastEnabled: boolean;
+  private forecastOption: ForecastOption | undefined;
 
   private withFreshPlugins(opts: uPlot.Options, name: string): uPlot.Options {
     return {
@@ -22,6 +24,9 @@ export class LineaChart extends AbstractLineaChart {
         TouchZoom.touchZoomPlugin(),
         new MeasurementDatesPlugin().plugin(),
         profilerPlugin(name),
+        ...(this.forecastOption
+          ? [LineaOptsHelper.forecastInformationPlugin(this.forecastOption)]
+          : []),
       ],
     };
   }
@@ -31,11 +36,11 @@ export class LineaChart extends AbstractLineaChart {
     showTitle: boolean,
     showSurfaceHoarSeries: boolean,
     backgroundColor: string,
-    forecastEnabled: boolean,
+    forecastOption: ForecastOption | undefined,
   ) {
     super(backgroundColor, showTitle, result);
     this.showSurfaceHoarSeries = showSurfaceHoarSeries;
-    this.forecastEnabled = forecastEnabled;
+    this.forecastOption = forecastOption;
     this.createPlots().catch((e) => console.error(e));
   }
 
@@ -332,7 +337,7 @@ export class LineaChart extends AbstractLineaChart {
    * This is called after ensureForecastLoaded() completes.
    */
   addForecastSeries(): void {
-    if (!this.forecastEnabled || !this.result.forecast) {
+    if (!this.forecastOption?.latlong || !this.result.forecast) {
       return;
     }
 

@@ -1,8 +1,8 @@
 import uPlot from "uplot";
 import { OptsHelper } from "../shared/opts-helper";
 import { cursorOpts } from "../shared/cursor-opts";
-import { i18n } from "../i18n";
 import type { LineaChartParameter } from "./linea-chart-parameter";
+import type { ForecastOption } from "./forecast-option";
 
 // Create a single sync instance for all charts
 const syncCursor = uPlot.sync("weather-charts");
@@ -68,14 +68,19 @@ export class LineaOptsHelper extends OptsHelper {
     ctx.setLineDash([]);
   }
 
-  static drawForecastInformation(u: uPlot) {
+  /** Marks the start of the forecast in a chart, see {@link drawForecastInformation}. */
+  static forecastInformationPlugin(forecastOptions: ForecastOption): uPlot.Plugin {
+    return { hooks: { drawAxes: (u) => this.drawForecastInformation(u, forecastOptions) } };
+  }
+
+  static drawForecastInformation(u: uPlot, forecastOptions: ForecastOption) {
     const ctx = u.ctx;
     const width = 1;
     const offset = (width % 2) / 2;
-    const now = new Date().getTime();
+    const t0 = (forecastOptions.model.t0 ?? new Date()).getTime();
     const lastData = u.data[0][u.data[0].length - 1];
-    if (lastData != null && lastData > now) {
-      const forecastX = u.valToPos(now, "x", true);
+    if (lastData != null && lastData > t0) {
+      const forecastX = u.valToPos(t0, "x", true);
       ctx.save();
       ctx.strokeStyle = this.textColor(u);
       ctx.globalAlpha = 0.34;
@@ -88,13 +93,16 @@ export class LineaOptsHelper extends OptsHelper {
       ctx.setLineDash([]);
       ctx.fillStyle = this.textColor(u);
       ctx.globalAlpha = 0.15;
-
-      const labelForecast = i18n.message("linea:forecast:arome");
-      const indexOfG = labelForecast.indexOf("(G");
-      const labelArome = labelForecast.slice(0, indexOfG);
-      const labelGeosphere = labelForecast.slice(indexOfG);
-      ctx.fillText(labelArome, forecastX + 5, u.bbox.top - 10);
-      ctx.fillText(labelGeosphere, forecastX + 5, u.bbox.top + 10);
+      ctx.textBaseline = "top";
+      const { label, labelOffset } = forecastOptions.model;
+      const { upper, lower } = label;
+      const labelX = forecastX + (5 + (labelOffset?.x ?? 0)) * uPlot.pxRatio;
+      const labelY = u.bbox.top + (labelOffset?.y ?? 0) * uPlot.pxRatio;
+      const lineOffset = 10 * uPlot.pxRatio;
+      ctx.fillText(upper, labelX, labelY - (lower ? lineOffset : 0));
+      if (lower) {
+        ctx.fillText(lower, labelX, labelY + lineOffset);
+      }
       ctx.restore();
     }
   }
