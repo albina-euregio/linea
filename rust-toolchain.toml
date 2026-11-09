@@ -1,0 +1,5 @@
+# picked up by rustup from the repository root (also for `cargo --manifest-path wasm/smet/Cargo.toml`)
+# keep in sync with .tool-versions and the build:wasm image in .gitlab-ci.yml
+[toolchain]
+channel = "1.99.0"
+targets = ["wasm32-unknown-unknown"]
