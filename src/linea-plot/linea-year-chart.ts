@@ -206,7 +206,7 @@ export class LineaYearChart extends AbstractLineaChart {
     );
     this.drawedTitle = true;
     this.plots.push(plot);
-    this.modifyDrawHook(plot, this.backgroundColor);
+    this.modifyDrawHook(plot);
     this.plotnames.push(plotname);
     return plot;
   }
@@ -272,7 +272,7 @@ export class LineaYearChart extends AbstractLineaChart {
         );
         this.addSeries(p, opts_HS_PSUM_year.PSUM.series, yearDataPSUM.values);
       }
-      this.modifyDrawHook(p, this.backgroundColor);
+      this.modifyDrawHook(p);
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
 
       const pDatapoints = new uPlot(
@@ -285,7 +285,7 @@ export class LineaYearChart extends AbstractLineaChart {
       );
       this.drawedTitle = true;
       this.addSeries(pDatapoints, opts_datapoints_year.DATAPOINTS.series, yearDataHS.amount);
-      this.modifyDrawHook(pDatapoints, this.backgroundColor);
+      this.modifyDrawHook(pDatapoints);
       this.plotnames.push(i18n.message("linea:plotnames:datapoints"));
     }
 
@@ -325,7 +325,7 @@ export class LineaYearChart extends AbstractLineaChart {
         opts_NS_year.NS.series,
         yearDataNS.values.map((v) => (v == 0 ? null : v)),
       );
-      this.modifyDrawHook(pNewSnow, this.backgroundColor);
+      this.modifyDrawHook(pNewSnow);
       this.plotnames.push(i18n.message("linea:plotnames:newsnow"));
     }
 
@@ -360,7 +360,7 @@ export class LineaYearChart extends AbstractLineaChart {
         );
         this.addSeries(pTemp, opts_TEMP_year.opts_DEW_year_current, yearDataTSS.values);
       }
-      this.modifyDrawHook(pTemp, this.backgroundColor);
+      this.modifyDrawHook(pTemp);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
     }
 

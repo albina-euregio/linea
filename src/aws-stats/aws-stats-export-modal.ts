@@ -1,6 +1,10 @@
 import { i18n } from "../i18n";
 import { AbstractChart } from "./abstract-chart";
-import { AbstractExportModal } from "../shared/abstract-export-modal";
+import {
+  AbstractExportModal,
+  type ExportSettings,
+  type PngExportSettings,
+} from "../shared/abstract-export-modal";
 import type { AwsStats } from "./aws-stats-wrapper";
 import { OptsHelper } from "../shared/opts-helper";
 
@@ -81,7 +85,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     titleInput.labels.forEach((l) => (l.style.display = "none"));
   }
 
-  protected override getExportSettings() {
+  protected override getExportSettings(): ExportSettings {
     const settings = super.getExportSettings();
     const includePlotTitlesInput = this.modal.querySelector(
       "#exportIncludePlotTitles",
@@ -228,6 +232,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
         width: 750,
         heightPerCanvas: 200,
         title: exports.title,
+        backgroundColor: exports.backgroundColor,
         includePlotTitles: exports.includePlotTitles,
       },
       true,
@@ -361,13 +366,9 @@ export class AwsStatsExportModal extends AbstractExportModal {
       width,
       heightPerCanvas,
       title,
+      backgroundColor = "transparent",
       includePlotTitles = true,
-    }: {
-      width: number;
-      heightPerCanvas: number;
-      title: string;
-      includePlotTitles?: boolean;
-    },
+    }: PngExportSettings,
     noshow: boolean = false,
   ): Promise<string> {
     if (!noshow) {
@@ -510,6 +511,10 @@ export class AwsStatsExportModal extends AbstractExportModal {
       const ctx = outCanvas.getContext("2d")!;
       ctx.imageSmoothingEnabled = false;
       ctx.imageSmoothingQuality = "high";
+      if (backgroundColor !== "transparent") {
+        ctx.fillStyle = backgroundColor;
+        ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+      }
 
       let y = 0;
       for (const section of sections) {
