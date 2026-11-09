@@ -95,7 +95,7 @@ export class AvalancheActivityIndexChart extends AbstractChart {
       },
     ];
 
-    const { data: stackedData, bands } = stack2(series2, (_: number) => false);
+    const { data: stackedData, bands } = stack2(series2);
 
     const opts: uPlot.Options = {
       ...opts_avalanche_activity_index,
