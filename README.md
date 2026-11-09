@@ -86,7 +86,7 @@ Station counts as of 2026-10-06.
 
 The SMET parsing hot loops are implemented in Rust (`wasm/smet/`) and compiled to `src/data/smet.wasm` via `pnpm build:wasm`.
 The compiled `smet.wasm` is committed, so Rust is only needed when changing the Rust code:
-install [Rust](https://rust-lang.org/) in the version of `.tool-versions` (e.g. `rustup toolchain install 1.99.0`), add the WebAssembly target (`rustup target add wasm32-unknown-unknown`),
+install [Rust](https://rust-lang.org/) via [rustup](https://rustup.rs/), which picks up the pinned toolchain and WebAssembly target from `rust-toolchain.toml` (without custom `RUSTFLAGS`, as the build has to be byte-identical to the CI build),
 then run `pnpm build:wasm` and commit the updated `src/data/smet.wasm` together with the Rust changes; CI fails if they do not match.
 Run `cargo test --manifest-path wasm/smet/Cargo.toml` for its unit tests.
 Without `smet.wasm`, LINEA falls back to the TypeScript implementation; `VITE_LINEA_WASM=0 pnpm test` tests that fallback.
