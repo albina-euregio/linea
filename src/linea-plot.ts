@@ -9,25 +9,25 @@ import { StationView } from "./linea-plot/station-view";
 
 type LineaViewType = "station" | "winter";
 
-const winterDataCache = new Map<string, Promise<boolean>>();
+const dataAvailabilityCache = new Map<string, Promise<boolean>>();
 
 /**
- * Checks (via HEAD request) whether the winter statistics file exists.
+ * Checks (via HEAD request) whether a data file is available to this browser.
  * Results are cached per URL for the lifetime of the page.
  */
-function hasWinterData(url: string | undefined): Promise<boolean> {
+function isDataAvailable(url: string | undefined): Promise<boolean> {
   if (!url) {
     return Promise.resolve(false);
   }
-  let exists = winterDataCache.get(url);
-  if (!exists) {
-    exists = fetch(url, { method: "HEAD" }).then(
+  let available = dataAvailabilityCache.get(url);
+  if (!available) {
+    available = fetch(url, { method: "HEAD" }).then(
       (r) => r.ok,
       () => false,
     );
-    winterDataCache.set(url, exists);
+    dataAvailabilityCache.set(url, available);
   }
-  return exists;
+  return available;
 }
 
 /**
@@ -42,8 +42,8 @@ function hasWinterData(url: string | undefined): Promise<boolean> {
  * @attributes
  * - `data` {string} - JSON-encoded array of @class Result objects (optional, either this or the `src` attribute)
  * - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute)
- * - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to lazy fetch data from after loading the component and the data from `src` (optional)
- * - `wintersrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch winter data from (optional)
+ * - `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to lazy fetch data from after loading the component and the data from `src` (optional; each URL is checked with a HEAD request before loading)
+ * - `wintersrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch winter data from (optional; each URL is checked with a HEAD request before showing the winter statistics button)
  * - `showonlywinter` {string} - When present, just the winter view is shown. Just in combination with `wintersrc`.
  * - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
  * - `showtitle` {boolean} - When present, display the station name and altitude as title
@@ -639,8 +639,24 @@ export class LineaPlot extends HTMLElement {
   async #fetchLazySrc() {
     const stationView = this.lineaViews.get("station");
     if (stationView instanceof StationView) {
+      if (!(await this.hasLazySrcs())) {
+        return;
+      }
       await this.runWithButtonLoading(this.daterangeContainer, () => stationView.fetchLazySrc());
     }
+  }
+
+  async hasLazySrcs(): Promise<boolean> {
+    const stationView = this.lineaViews?.get("station");
+    if (!(stationView instanceof StationView)) {
+      return false;
+    }
+    const urls = stationView.getDataURLs("lazysrc");
+    if (!urls.length) {
+      return false;
+    }
+    const available = await Promise.all(urls.map((url) => isDataAvailable(url)));
+    return available.every(Boolean);
   }
 
   #winterProbeSeq = 0;
@@ -682,8 +698,8 @@ export class LineaPlot extends HTMLElement {
     if (!urls.length) {
       return false;
     }
-    const exists = await Promise.all(urls.map((url) => hasWinterData(url)));
-    return exists.every(Boolean);
+    const available = await Promise.all(urls.map((url) => isDataAvailable(url)));
+    return available.every(Boolean);
   }
 }
 

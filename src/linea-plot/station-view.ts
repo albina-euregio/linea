@@ -290,6 +290,7 @@ export class StationView extends LineaView {
   private lazySrcLoaded = false;
   async fetchLazySrc() {
     if (this.lazySrcLoaded) return;
+    if (!(await this.lineaplot.hasLazySrcs())) return;
     try {
       await profileAsync("fetchLazySrc", () => this.fetchData("lazysrc"));
     } catch (e) {

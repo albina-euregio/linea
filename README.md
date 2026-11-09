@@ -133,8 +133,8 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
 
 - `data` {string} - JSON-encoded array of Result objects (optional, either this or the `src` attribute)
 - `src` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from (optional, either this or the `data` attribute or `wintersrc` in combination with `showonlywinter`)
-- `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from Happens after the component is rendered and has the data from the `src` attribute (data from `src`attribute is replaced by data from `lazysrc` attribute). The data from `src` should be a subset from `lazysrc`. (optional)
-- `wintersrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch winter data from (optional). If missing, or if any of the files does not exist (checked via `HEAD` request), there is no option to switch to the yearly overviews.
+- `lazysrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch data from after the component is rendered and has data from the `src` attribute (data from `src` is replaced by data from `lazysrc`). The data from `src` should be a subset of `lazysrc`. Each URL is checked with a HEAD request before loading; if any URL is unavailable to the browser, the additional historical data is not loaded. (optional)
+- `wintersrc` {string} - JSON-encoded array (or single url) of SMET file URLs to fetch winter data from (optional). Each URL is checked with a HEAD request; if missing or unavailable to the browser, the option to switch to yearly overviews is hidden.
 - `showonlywinter` {string} - When present, just the winter view is shown. Just in combination with `wintersrc`.
 - `showdatepicker` {boolean} - When present, displays date range picker controls for filtering data
 - `showtitle` {boolean} - When present, display the station name and altitude as title
