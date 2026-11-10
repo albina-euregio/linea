@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from "vite-plus/test";
 
-import { i18n } from "./i18n";
+import { i18n, type messagesEN_t } from "./i18n";
+import messagesCA from "./i18n/ca.json";
+import messagesEN from "./i18n/en.json";
 
 const documentElement = { lang: "en" };
 
@@ -39,8 +41,10 @@ describe("i18n.message", () => {
   });
 
   test("falls back to en.json for untranslated (empty) message", () => {
+    // pick any key that is still untranslated in ca.json, so that translation updates don't break this test
+    const [id] = Object.entries(messagesCA).find(([, msg]) => !msg) as [messagesEN_t, string];
     documentElement.lang = "ca";
-    expect(i18n.message("linea:parameter:P")).toBe("Air Pressure");
+    expect(i18n.message(id)).toBe(messagesEN[id]);
   });
 
   test("returns id when message not found", () => {
