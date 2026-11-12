@@ -13,6 +13,7 @@ import { FeatureSchema, type Feature } from "./schema/listing";
 import { PROVIDERS } from "./data/providers";
 import { profile, profileAsync, profileUntilPaint } from "./shared/profiler";
 import { MeasurementSelection } from "./shared/measurement-dates";
+import { KeyDispatcher, type KeyHandler } from "./shared/key-dispatcher";
 
 /**
  * Abstract base class for view implementations (Station view and Winter view)
@@ -33,6 +34,7 @@ export abstract class LineaView {
    * Each (re)load of the views creates a new one, which resets the analyzer for the new stations.
    */
   readonly measurementSelection = new MeasurementSelection();
+  readonly #keyDispatcher = new KeyDispatcher();
 
   constructor(backgroundColors: string[], lineaplot: LineaPlot) {
     this.backgroundColors = backgroundColors;
@@ -43,6 +45,26 @@ export abstract class LineaView {
       v.array(FeatureSchema),
       JSON.parse(this.lineaplot.getAttribute(LineaPlot.FEATURES) ?? "[]"),
     );
+    this.onKeyDown((e) => this.measurementSelection.handleKeyEvent(e));
+  }
+
+  /**
+   * Subscribes to the key events of the `linea-plot` while this view is the current one.
+   * View handlers run before the handlers of the `linea-plot` itself.
+   *
+   * @returns a function to unsubscribe the handler
+   */
+  onKeyDown(handler: KeyHandler): () => void {
+    return this.#keyDispatcher.subscribe(handler);
+  }
+
+  /**
+   * Called by the `linea-plot` for key events while this view is the current one.
+   *
+   * @returns `true` if a handler consumed the event
+   */
+  handleKeyEvent(e: KeyboardEvent): boolean {
+    return this.#keyDispatcher.dispatch(e);
   }
 
   /**

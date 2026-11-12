@@ -10,6 +10,26 @@ enum Mode {
   Max = "Max",
 }
 
+const modeByKey: Record<string, Mode | undefined> = {
+  d: Mode.Delta,
+  i: Mode.Integral,
+  m: Mode.Median,
+  s: Mode.Mean,
+  k: Mode.Min,
+  l: Mode.Max,
+};
+
+/**
+ * The x value (timestamp) of the data point under the cursor, or `null` if the cursor is outside of the plot.
+ */
+function cursorX(u: uPlot | null): number | null {
+  const idx = u?.cursor.idx;
+  if (u == null || idx == null || (u.cursor.left ?? -1) < 0) {
+    return null;
+  }
+  return u.data[0][idx] ?? null;
+}
+
 /**
  * The analyzer selection shared by all plots of one view (e.g. all stations of the station view).
  *
@@ -23,13 +43,57 @@ export class MeasurementSelection {
   mode: Mode = Mode.Delta;
   isKeyboardSelection: boolean = false;
   readonly #plots = new Set<uPlot>();
+  /** the plot the mouse was over last, its cursor determines the borders set by keyboard */
+  #activePlot: uPlot | null = null;
 
   register(u: uPlot) {
     this.#plots.add(u);
+    u.over.addEventListener("mouseenter", () => (this.#activePlot = u), { passive: true });
   }
 
   unregister(u: uPlot) {
     this.#plots.delete(u);
+    if (this.#activePlot === u) {
+      this.#activePlot = null;
+    }
+  }
+
+  /**
+   * Handles the analyzer keybindings, see {@link MeasurementDatesPlugin}.
+   *
+   * @returns `true` if the event was consumed, i.e. a border was set with the cursor inside a plot
+   */
+  handleKeyEvent(e: KeyboardEvent): boolean {
+    const hasBorder = this.x1 != null || this.x2 != null;
+    const mode = modeByKey[e.key];
+    if (e.key == "Escape" || e.key == "x") {
+      if (hasBorder) {
+        this.clear();
+      }
+      // don't consume, Escape also closes other popups
+      return false;
+    } else if (mode) {
+      this.mode = mode;
+      if (hasBorder) {
+        this.redraw();
+      }
+      return true;
+    } else if (e.key == "1" || e.key == "2") {
+      const x = cursorX(this.#activePlot);
+      if (x == null) {
+        // not over a plot, leave the key to the date range shortcuts
+        return false;
+      }
+      this.isKeyboardSelection = true;
+      if (e.key == "1") {
+        this.x1 = x;
+      } else {
+        this.x2 = x;
+      }
+      this.redraw();
+      return true;
+    }
+    return false;
   }
 
   clear() {
@@ -52,14 +116,11 @@ export class MeasurementSelection {
  * - Integration of parameters over time
  * - Different modes of measurement (delta, integral, mean, series mean)
  *
- * Keybindings:
- * - Click on the chart to move the cursor to set border '1' (blue) and border '2' (orange)
- * - Press 'd' to switch to delta mode
- * - Press 'i' to switch to integral mode
- * - Press 'm' to switch to mean mode
- * - Press 's' to switch to series mean mode
- * - Press 'x' to clear datums
- * - Press 'Escape' to clear datums
+ * Keybindings, handled by {@link MeasurementSelection.handleKeyEvent} via the key listener of `linea-plot`:
+ * - Ctrl + drag to select a time range
+ * - Press '1' (red) or '2' (blue) to set a border at the cursor
+ * - Press 'd' for delta, 'i' for integral, 'm' for median, 's' for mean, 'k' for min and 'l' for max
+ * - Press 'x' or 'Escape' to clear the borders
  */
 export class MeasurementDatesPlugin {
   private readonly modeFunctions: Record<
@@ -217,8 +278,6 @@ export class MeasurementDatesPlugin {
         init: (u: uPlot) => {
           this.u = u;
           this.selection.register(u);
-          u.over.tabIndex = -1; // required for key handlers
-          u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
 
           const legend = document.createElement("table");
           legend.classList.add("u-legend");
@@ -392,7 +451,7 @@ export class MeasurementDatesPlugin {
               u.cursor.drag.x = false; // disable default zooming behavior when dragging with ctrl
               this.isDragging = true;
               this.selection.isKeyboardSelection = false;
-              const x = this.cursorX();
+              const x = cursorX(this.u);
               if (x != null) {
                 this.selection.x1 = x;
               }
@@ -403,7 +462,7 @@ export class MeasurementDatesPlugin {
             "mousemove",
             (e: MouseEvent) => {
               if (this.isDragging && (e.ctrlKey || e.metaKey)) {
-                const x = this.cursorX();
+                const x = cursorX(this.u);
                 if (x != null && x !== this.selection.x2) {
                   this.selection.x2 = x;
                   this.selection.redraw();
@@ -424,34 +483,6 @@ export class MeasurementDatesPlugin {
               }
             },
             { passive: true },
-          );
-
-          u.over.addEventListener(
-            "keydown",
-            (e) => {
-              const mode = MeasurementDatesPlugin.modeByKey[e.key];
-              if (e.key == "Escape" || e.key == "x") {
-                this.selection.clear();
-                return;
-              } else if (mode) {
-                this.selection.mode = mode;
-              } else if (e.key == "1" || e.key == "2") {
-                const x = this.cursorX();
-                if (x == null) {
-                  return;
-                }
-                this.selection.isKeyboardSelection = true;
-                if (e.key == "1") {
-                  this.selection.x1 = x;
-                } else {
-                  this.selection.x2 = x;
-                }
-              } else {
-                return;
-              }
-              this.selection.redraw();
-            },
-            true,
           );
         },
         draw: (u: uPlot) => {
@@ -491,31 +522,11 @@ export class MeasurementDatesPlugin {
     };
   }
 
-  /**
-   * The x value (timestamp) of the data point under the cursor, or `null` if the cursor is outside of the plot.
-   */
-  private cursorX(): number | null {
-    const idx = this.u?.cursor.idx;
-    if (this.u == null || idx == null || this.u.cursor.left < 0) {
-      return null;
-    }
-    return this.u.data[0][idx] ?? null;
-  }
-
   private hideTooltip() {
     if (this.tooltipTable) {
       this.tooltipTable.style.display = "none";
     }
   }
-
-  private static readonly modeByKey: Record<string, Mode | undefined> = {
-    d: Mode.Delta,
-    i: Mode.Integral,
-    m: Mode.Median,
-    s: Mode.Mean,
-    k: Mode.Min,
-    l: Mode.Max,
-  };
 
   delta(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
     if (this.u == null) {
