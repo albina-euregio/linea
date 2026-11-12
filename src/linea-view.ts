@@ -12,6 +12,7 @@ import { i18n } from "./i18n";
 import { FeatureSchema, type Feature } from "./schema/listing";
 import { PROVIDERS } from "./data/providers";
 import { profile, profileAsync, profileUntilPaint } from "./shared/profiler";
+import { MeasurementSelection } from "./shared/measurement-dates";
 
 /**
  * Abstract base class for view implementations (Station view and Winter view)
@@ -27,6 +28,11 @@ export abstract class LineaView {
   results = new StationDataArray();
   protected lineaplot: LineaPlot;
   #features: Feature[] = [];
+  /**
+   * The analyzer selection of this view, shared by all of its charts.
+   * Each (re)load of the views creates a new one, which resets the analyzer for the new stations.
+   */
+  readonly measurementSelection = new MeasurementSelection();
 
   constructor(backgroundColors: string[], lineaplot: LineaPlot) {
     this.backgroundColors = backgroundColors;

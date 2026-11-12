@@ -11,6 +11,41 @@ enum Mode {
 }
 
 /**
+ * The analyzer selection shared by all plots of one view (e.g. all stations of the station view).
+ *
+ * The borders are stored as x values (timestamps) and not as data indices: the data of a plot is
+ * replaced whenever the date range changes, and synced plots of different stations have different
+ * timestamps, so each plot resolves the indices from its own data when drawing.
+ */
+export class MeasurementSelection {
+  x1: number | null = null;
+  x2: number | null = null;
+  mode: Mode = Mode.Delta;
+  isKeyboardSelection: boolean = false;
+  readonly #plots = new Set<uPlot>();
+
+  register(u: uPlot) {
+    this.#plots.add(u);
+  }
+
+  unregister(u: uPlot) {
+    this.#plots.delete(u);
+  }
+
+  clear() {
+    this.x1 = this.x2 = null;
+    this.isKeyboardSelection = false;
+    this.redraw();
+  }
+
+  redraw() {
+    for (const u of this.#plots) {
+      u.redraw(false, false);
+    }
+  }
+}
+
+/**
  *  inspired by https://leeoniya.github.io/uPlot/demos/measure-datums.html
  *  enhanced:
  * - supports two datums to measure delta between them
@@ -41,20 +76,13 @@ export class MeasurementDatesPlugin {
   };
 
   private u: uPlot | null = null;
-  private syncKey: string | null = null;
   private isDragging: boolean = false;
-  public static x1: number | null = null;
-  public static x2: number | null = null;
-  public static y1: number | null = null;
-  public static y2: number | null = null;
-  public static dataIdxs1: (number | null)[] = null;
-  public static dataIdxs2: (number | null)[] = null;
-  public static mode: Mode = Mode.Delta;
-  public static isKeyboardSelection: boolean = false;
-  public mode: Mode = Mode.Delta;
   private tooltip: HTMLTableSectionElement | null = null;
   private tooltipTable: HTMLTableElement | null = null;
   private select: HTMLSelectElement | null = null;
+  private helpModal: HTMLDivElement | null = null;
+
+  constructor(private readonly selection: MeasurementSelection) {}
 
   // Helper object with mode information: formula and keybinding
   private readonly modeInfo: Record<Mode, { formula: string; keybinding: string }> = {
@@ -88,20 +116,22 @@ export class MeasurementDatesPlugin {
     if (!this.select) {
       return;
     }
-    this.select.value = MeasurementDatesPlugin.mode;
+    this.select.value = this.selection.mode;
   }
 
-  private drawDelta() {
-    let cxleft = this.u.valToPos(
-      Math.min(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
-      "x",
-      true,
-    );
-    let cxright = this.u.valToPos(
-      Math.max(MeasurementDatesPlugin.x1, MeasurementDatesPlugin.x2),
-      "x",
-      true,
-    );
+  private drawDelta(x1: number, x2: number) {
+    const xs = this.u.data[0];
+    if (xs.length === 0 || Math.max(x1, x2) < xs[0] || Math.min(x1, x2) > xs[xs.length - 1]) {
+      // the selection lies outside of the currently loaded data of this plot
+      this.hideTooltip();
+      return;
+    }
+    // resolve the indices from the data of this plot, see MeasurementSelection
+    const idx1 = this.u.valToIdx(x1);
+    const idx2 = this.u.valToIdx(x2);
+
+    let cxleft = this.u.valToPos(Math.min(x1, x2), "x", true);
+    let cxright = this.u.valToPos(Math.max(x1, x2), "x", true);
 
     this.u.ctx.fillStyle = "#c0c0c038";
     this.u.ctx.beginPath();
@@ -117,7 +147,7 @@ export class MeasurementDatesPlugin {
     let labels: { seriesLabel: string; value: string; color: string }[] = [
       {
         seriesLabel: i18n.message("linea:measurement-dates:timerange"),
-        value: i18n.number((MeasurementDatesPlugin.x2 - MeasurementDatesPlugin.x1) / 3_600_000, {
+        value: i18n.number((x2 - x1) / 3_600_000, {
           style: "unit",
           unit: "hour",
         }),
@@ -133,25 +163,18 @@ export class MeasurementDatesPlugin {
         return;
       }
 
-      const idx1 = MeasurementDatesPlugin.dataIdxs1[i];
-      const idx2 = MeasurementDatesPlugin.dataIdxs2[i];
-
-      if (idx1 == null || idx2 == null) {
-        return;
-      }
-
       const seriesY1 = this.u.data[i][idx1] as number | null;
       const seriesY2 = this.u.data[i][idx2] as number | null;
 
       if (seriesY1 == null || seriesY2 == null) {
         return;
       }
-      const labelValue = this.modeFunctions[MeasurementDatesPlugin.mode](idx1, idx2, i);
+      const labelValue = this.modeFunctions[this.selection.mode](idx1, idx2, i);
       let color = "#00000000";
       if (typeof s.stroke === "string") {
         color = s.stroke;
       } else if (typeof s.stroke === "function") {
-        const c = s.stroke(this.u, i + 1);
+        const c = s.stroke(this.u, i);
         if (typeof c === "string") color = c;
       }
       labels.push({ seriesLabel: `${s.label}`, value: labelValue, color });
@@ -193,7 +216,7 @@ export class MeasurementDatesPlugin {
       hooks: {
         init: (u: uPlot) => {
           this.u = u;
-          this.syncKey = u.cursor.sync.key;
+          this.selection.register(u);
           u.over.tabIndex = -1; // required for key handlers
           u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
 
@@ -236,11 +259,11 @@ export class MeasurementDatesPlugin {
             this.select.appendChild(option);
           });
 
-          this.select.value = MeasurementDatesPlugin.mode;
+          this.select.value = this.selection.mode;
           this.select.addEventListener("change", (e) => {
             const newMode = (e.target as HTMLSelectElement).value as Mode;
-            MeasurementDatesPlugin.mode = newMode;
-            this.redraw();
+            this.selection.mode = newMode;
+            this.selection.redraw();
           });
           headerContainer.appendChild(this.select);
 
@@ -339,11 +362,12 @@ export class MeasurementDatesPlugin {
           modalContent.appendChild(closeBtn);
 
           helpModal.appendChild(modalContent);
+          this.helpModal = helpModal;
           const modalHost = (u.root.closest("linea-plot") as HTMLElement | null) ?? u.root;
           modalHost.appendChild(helpModal);
 
           closeAnalyzerBtn.addEventListener("click", () => {
-            MeasurementDatesPlugin.clearDatums(u);
+            this.selection.clear();
           });
 
           helpBtn.addEventListener("click", () => {
@@ -367,12 +391,10 @@ export class MeasurementDatesPlugin {
             if ((e.ctrlKey || e.metaKey) && e.button === 0) {
               u.cursor.drag.x = false; // disable default zooming behavior when dragging with ctrl
               this.isDragging = true;
-              MeasurementDatesPlugin.isKeyboardSelection = false;
-              const { left, top } = u.cursor;
-              if (left >= 0 && top >= 0) {
-                MeasurementDatesPlugin.x1 = u.posToVal(left, "x");
-                MeasurementDatesPlugin.y1 = u.posToVal(top, "y");
-                MeasurementDatesPlugin.dataIdxs1 = [...u.cursor.idxs];
+              this.selection.isKeyboardSelection = false;
+              const x = this.cursorX();
+              if (x != null) {
+                this.selection.x1 = x;
               }
             }
           });
@@ -381,12 +403,10 @@ export class MeasurementDatesPlugin {
             "mousemove",
             (e: MouseEvent) => {
               if (this.isDragging && (e.ctrlKey || e.metaKey)) {
-                const { left, top } = u.cursor;
-                if (left >= 0 && top >= 0) {
-                  MeasurementDatesPlugin.x2 = u.posToVal(left, "x");
-                  MeasurementDatesPlugin.y2 = u.posToVal(top, "y");
-                  MeasurementDatesPlugin.dataIdxs2 = [...u.cursor.idxs];
-                  this.redraw();
+                const x = this.cursorX();
+                if (x != null && x !== this.selection.x2) {
+                  this.selection.x2 = x;
+                  this.selection.redraw();
                 }
               }
             },
@@ -409,96 +429,93 @@ export class MeasurementDatesPlugin {
           u.over.addEventListener(
             "keydown",
             (e) => {
-              if (e.key == "Escape") {
-                MeasurementDatesPlugin.clearDatums(u);
-              } else if (e.key == "x") {
-                MeasurementDatesPlugin.clearDatums(u);
-              } else if (e.key == "m") {
-                MeasurementDatesPlugin.mode = Mode.Median;
-                this.updateSelectValue();
-              } else if (e.key == "i") {
-                MeasurementDatesPlugin.mode = Mode.Integral;
-                this.updateSelectValue();
-              } else if (e.key == "d") {
-                MeasurementDatesPlugin.mode = Mode.Delta;
-                this.updateSelectValue();
-              } else if (e.key == "s") {
-                MeasurementDatesPlugin.mode = Mode.Mean;
-                this.updateSelectValue();
-              } else if (e.key == "k") {
-                MeasurementDatesPlugin.mode = Mode.Min;
-                this.updateSelectValue();
-              } else if (e.key == "l") {
-                MeasurementDatesPlugin.mode = Mode.Max;
-                this.updateSelectValue();
-              } else {
-                const { left, top } = u.cursor;
-
-                if (left >= 0 && top >= 0) {
-                  if (e.key == "1") {
-                    MeasurementDatesPlugin.isKeyboardSelection = true;
-                    MeasurementDatesPlugin.x1 = u.posToVal(left, "x");
-                    MeasurementDatesPlugin.y1 = u.posToVal(top, "y");
-                    MeasurementDatesPlugin.dataIdxs1 = [...u.cursor.idxs];
-                  } else if (e.key == "2") {
-                    MeasurementDatesPlugin.isKeyboardSelection = true;
-                    MeasurementDatesPlugin.x2 = u.posToVal(left, "x");
-                    MeasurementDatesPlugin.y2 = u.posToVal(top, "y");
-                    MeasurementDatesPlugin.dataIdxs2 = [...u.cursor.idxs];
-                  }
+              const mode = MeasurementDatesPlugin.modeByKey[e.key];
+              if (e.key == "Escape" || e.key == "x") {
+                this.selection.clear();
+                return;
+              } else if (mode) {
+                this.selection.mode = mode;
+              } else if (e.key == "1" || e.key == "2") {
+                const x = this.cursorX();
+                if (x == null) {
+                  return;
                 }
+                this.selection.isKeyboardSelection = true;
+                if (e.key == "1") {
+                  this.selection.x1 = x;
+                } else {
+                  this.selection.x2 = x;
+                }
+              } else {
+                return;
               }
-              this.redraw();
+              this.selection.redraw();
             },
             true,
           );
         },
         draw: (u: uPlot) => {
-          if (MeasurementDatesPlugin.x1 != null || MeasurementDatesPlugin.x2 != null) {
-            u.ctx.save();
+          const { x1, x2, isKeyboardSelection } = this.selection;
+          if (x1 == null && x2 == null) {
+            this.hideTooltip();
+            return;
+          }
+          u.ctx.save();
+          u.ctx.lineWidth = 2;
 
-            u.ctx.lineWidth = 2;
-
-            if (MeasurementDatesPlugin.isKeyboardSelection) {
-              if (MeasurementDatesPlugin.x1 != null) {
-                MeasurementDatesPlugin.drawDatumLine(u, MeasurementDatesPlugin.x1, "#fd0000");
-              }
-
-              if (MeasurementDatesPlugin.x2 != null) {
-                MeasurementDatesPlugin.drawDatumLine(u, MeasurementDatesPlugin.x2, "#0026ff");
-              }
+          if (isKeyboardSelection) {
+            if (x1 != null) {
+              MeasurementDatesPlugin.drawDatumLine(u, x1, "#fd0000");
             }
-
-            if (
-              MeasurementDatesPlugin.x1 != null &&
-              MeasurementDatesPlugin.x2 != null &&
-              MeasurementDatesPlugin.dataIdxs1 != null &&
-              MeasurementDatesPlugin.dataIdxs2 != null
-            ) {
-              this.updateSelectValue();
-              this.drawDelta();
-            }
-
-            u.ctx.restore();
-          } else {
-            if (this.tooltipTable) {
-              this.tooltipTable.style.display = "none";
+            if (x2 != null) {
+              MeasurementDatesPlugin.drawDatumLine(u, x2, "#0026ff");
             }
           }
+
+          if (x1 != null && x2 != null) {
+            this.updateSelectValue();
+            this.drawDelta(x1, x2);
+          } else {
+            this.hideTooltip();
+          }
+
+          u.ctx.restore();
+        },
+        destroy: (u: uPlot) => {
+          this.selection.unregister(u);
+          this.helpModal?.remove();
+          this.helpModal = null;
+          this.u = null;
         },
       },
     };
   }
 
-  redraw() {
-    if (this.syncKey) {
-      for (const u0 of uPlot.sync(this.syncKey).plots) {
-        u0.redraw();
-      }
-    } else {
-      this.u.redraw();
+  /**
+   * The x value (timestamp) of the data point under the cursor, or `null` if the cursor is outside of the plot.
+   */
+  private cursorX(): number | null {
+    const idx = this.u?.cursor.idx;
+    if (this.u == null || idx == null || this.u.cursor.left < 0) {
+      return null;
+    }
+    return this.u.data[0][idx] ?? null;
+  }
+
+  private hideTooltip() {
+    if (this.tooltipTable) {
+      this.tooltipTable.style.display = "none";
     }
   }
+
+  private static readonly modeByKey: Record<string, Mode | undefined> = {
+    d: Mode.Delta,
+    i: Mode.Integral,
+    m: Mode.Median,
+    s: Mode.Mean,
+    k: Mode.Min,
+    l: Mode.Max,
+  };
 
   delta(dataIdx1: number | null, dataIdx2: number | null, seriesIdx: number | null): string {
     if (this.u == null) {
@@ -583,7 +600,7 @@ export class MeasurementDatesPlugin {
     }
     const dataMinIdx = Math.min(dataIdx1, dataIdx2);
     const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
-    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1);
 
     // Simple numerical integration using the Riemann sum
     const seriesLabel = this.u.series[seriesIdx].label as string;
@@ -630,7 +647,7 @@ export class MeasurementDatesPlugin {
       case Mode.Max:
         return i18n.message("linea:measurement-dates:max");
       default:
-        return MeasurementDatesPlugin.mode;
+        return mode;
     }
   }
 
@@ -646,18 +663,6 @@ export class MeasurementDatesPlugin {
     u.ctx.lineTo(cx, top);
 
     u.ctx.stroke();
-  };
-
-  private static clearDatums = (u: uPlot) => {
-    for (const u0 of uPlot.sync(u.cursor.sync.key).plots) {
-      MeasurementDatesPlugin.x1 =
-        MeasurementDatesPlugin.x2 =
-        MeasurementDatesPlugin.y1 =
-        MeasurementDatesPlugin.y2 =
-          null;
-      MeasurementDatesPlugin.dataIdxs1 = MeasurementDatesPlugin.dataIdxs2 = null;
-      u0.redraw();
-    }
   };
 
   static integrateUnit(
