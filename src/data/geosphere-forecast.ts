@@ -1,21 +1,67 @@
 import * as v from "valibot";
-import type { ValuesInput } from "./station-data";
-import { GeosphereForecastSchema } from "../schema/geosphere-forecast";
+import type { ParameterType, ValuesInput } from "./station-data";
+import { createGeosphereForecastSchema } from "../schema/geosphere-forecast";
 
-// GeoSphere Austria
-// https://data.hub.geosphere.at/dataset/nwp-v1-1h-2500m
-// https://doi.org/10.60669/9zm8-s664
+// GeoSphere Austria – C-LAEF ensemble forecast (median / 50th percentile)
+// https://data.hub.geosphere.at/dataset/ensemble-v2-1h-1km
 // Lizenz: CC BY 4.0 https://creativecommons.org/licenses/by/4.0/legalcode
 
 const GEOSPHERE_FORECAST_BASE_URL =
-  "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m";
-const GEOSPHERE_FORECAST_PARAMETERS = "t2m,u10m,ugust,v10m,vgust,rh2m,rr_acc,snow_acc,grad";
+  "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/ensemble-v2-1h-1km";
+
+type Series = (number | null)[];
+
+/** Assumed density of fresh snow [kg/m³] to convert snow water equivalent to snow height. */
+const NEW_SNOW_DENSITY = 100;
+
+/** Converts snow water equivalent [kg/m²] to snow height [cm]. */
+function sweToSnowHeightCm(swe: number): number {
+  return (swe / NEW_SNOW_DENSITY) * 100;
+}
+
+/**
+ * Direct mapping from GeoSphere forecast parameters to SMET parameters.
+ * Wind direction is derived separately from the u/v components.
+ */
+const GEOSPHERE_FORECAST_MAPPING = {
+  /** 2m temperature [°C] */
+  "2t_p50": { smet: "TA" },
+  /** relative humidity 2m [%] */
+  "2r_p50": { smet: "RH" },
+  /** 10m wind eastward [m/s] */
+  "10u_p50": {},
+  /** 10m wind northward [m/s] */
+  "10v_p50": {},
+  /** maximum 10m wind gust in the last interval [m/s] → km/h */
+  "10fg_p50": {
+    smet: "VW_MAX",
+    convert: (s) => s.map((x) => (x === null ? null : x * 3.6)),
+  },
+  /** total precipitation in the last interval [kg/m² = mm] */
+  tp_p50: { smet: "PSUM" },
+  /** snowfall in the last interval [kg/m² snow water equivalent] → accumulated new snow height [cm] */
+  sf_p50: {
+    smet: "NS",
+    convert: (s) =>
+      incrementToAccumulated(s).map((x) => (x === null ? null : sweToSnowHeightCm(x))),
+  },
+  /** surface global radiation [W/m²] */
+  ssrd_p50: { smet: "ISWR" },
+} as const satisfies Record<string, { smet?: ParameterType; convert?: (s: Series) => Series }>;
+
+type GeosphereForecastParameter = keyof typeof GEOSPHERE_FORECAST_MAPPING;
+
+const GEOSPHERE_FORECAST_PARAMETERS = Object.keys(
+  GEOSPHERE_FORECAST_MAPPING,
+) as GeosphereForecastParameter[];
+
+const GeosphereForecastSchema = createGeosphereForecastSchema(GEOSPHERE_FORECAST_PARAMETERS);
 
 export const GEOSPHERE_BBOX_OUTER = {
-  minLat: 42.96974998874999,
-  minLon: 5.486749988749989,
-  maxLat: 51.83025001125035,
-  maxLon: 22.113250011249765,
+  minLat: 42.9975,
+  minLon: 5.02495,
+  maxLat: 51.5025,
+  maxLon: 22.57495,
 };
 
 type ForecastData = {
@@ -35,31 +81,24 @@ function vectorToDirectionDeg(u: number | null, v: number | null): number | null
     return null;
   }
   // Meteorological wind direction: where wind comes from, clockwise from north.
-  const deg = (270 - (Math.atan2(v, u) * 180) / Math.PI + 360) % 360;
-  return deg;
+  return (270 - (Math.atan2(v, u) * 180) / Math.PI + 360) % 360;
 }
 
-function accumulatedToIncrement(values: (number | null)[]): (number | null)[] {
-  if (values.length === 0) {
-    return [];
-  }
-  const out: (number | null)[] = [values[0] ?? 0];
-  for (let i = 1; i < values.length; i++) {
-    const prev = values[i - 1];
-    const current = values[i];
-    if (prev === null || current === null) {
-      out.push(null);
-      continue;
+function incrementToAccumulated(values: Series): Series {
+  let sum = 0;
+  return values.map((value) => {
+    if (value === null) {
+      return null;
     }
-    out.push(Math.max(0, current - prev));
-  }
-  return out;
+    sum += value;
+    return sum;
+  });
 }
 
 export async function fetchGeosphereForecast(latlon: string): Promise<ForecastData> {
   const url =
     `${GEOSPHERE_FORECAST_BASE_URL}?lat_lon=${encodeURIComponent(latlon)}` +
-    `&parameters=${GEOSPHERE_FORECAST_PARAMETERS}`;
+    `&parameters=${GEOSPHERE_FORECAST_PARAMETERS.join(",")}`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
@@ -68,40 +107,26 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
   }
 
   const parsed = v.parse(GeosphereForecastSchema, await response.json());
-  const feature = parsed.features[0];
-  const parameters = feature.properties.parameters;
-
+  const parameters = parsed.features[0].properties.parameters;
   const timestamps = parsed.timestamps.map((t) => Date.parse(t));
 
-  const ta = parameters.t2m?.data;
-  const rh = parameters.rh2m?.data;
-  const u10m = parameters.u10m?.data;
-  const v10m = parameters.v10m?.data;
-  const ugust = parameters.ugust?.data;
-  const vgust = parameters.vgust?.data;
-  const rrAcc = parameters.rr_acc?.data;
-  const snowAcc = parameters.snow_acc?.data;
-  const grad = parameters.grad?.data;
+  const values: ValuesInput = {};
+  for (const key of GEOSPHERE_FORECAST_PARAMETERS) {
+    const mapping: { smet?: ParameterType; convert?: (s: Series) => Series } =
+      GEOSPHERE_FORECAST_MAPPING[key];
+    const data = parameters[key]?.data;
+    if (!mapping.smet || !data) {
+      continue;
+    }
+    values[mapping.smet] = mapping.convert ? mapping.convert(data) : data;
+  }
 
-  const vw = u10m && v10m ? u10m.map((u, i) => vectorToSpeedKmH(u, v10m[i] ?? null)) : undefined;
-  const vwMax =
-    ugust && vgust ? ugust.map((u, i) => vectorToSpeedKmH(u, vgust[i] ?? null)) : undefined;
-  const dw =
-    u10m && v10m ? u10m.map((u, i) => vectorToDirectionDeg(u, v10m[i] ?? null)) : undefined;
-  return {
-    timestamps,
-    values: {
-      TA: ta,
-      RH: rh,
-      VW: vw,
-      VW_MAX: vwMax,
-      DW: dw,
-      PSUM: rrAcc ? accumulatedToIncrement(rrAcc) : undefined,
-      NS: snowAcc,
-      // convert power to energy
-      ISWR: grad
-        ? accumulatedToIncrement(grad).map((value) => (value ? value / 3600 : null))
-        : undefined,
-    },
-  };
+  const u10 = parameters["10u_p50"]?.data;
+  const v10 = parameters["10v_p50"]?.data;
+  if (u10 && v10) {
+    values.VW = u10.map((u, i) => vectorToSpeedKmH(u, v10[i] ?? null));
+    values.DW = u10.map((u, i) => vectorToDirectionDeg(u, v10[i] ?? null));
+  }
+
+  return { timestamps, values };
 }
