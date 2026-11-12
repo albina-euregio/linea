@@ -553,7 +553,12 @@ export class MeasurementDatesPlugin {
     }
     const dataMinIdx = Math.min(dataIdx1, dataIdx2);
     const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
-    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+    const dataSlice = Array.from(this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1)).filter(
+      (v): v is number => v != null,
+    );
+    if (dataSlice.length === 0) {
+      return "n/a";
+    }
 
     const sum = dataSlice.reduce((acc, val) => acc + val, 0);
     const mean = sum / dataSlice.length;
@@ -567,9 +572,14 @@ export class MeasurementDatesPlugin {
     }
     const dataMinIdx = Math.min(dataIdx1, dataIdx2);
     const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
-    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+    const dataSlice = Array.from(this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1)).filter(
+      (v): v is number => v != null,
+    );
+    if (dataSlice.length === 0) {
+      return "n/a";
+    }
 
-    const min = Math.min(...dataSlice.filter((v): v is number => v != null));
+    const min = dataSlice.reduce((a, b) => Math.min(a, b));
     const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     return `${i18n.number(min, {}, unit)}`;
   }
@@ -580,9 +590,14 @@ export class MeasurementDatesPlugin {
     }
     const dataMinIdx = Math.min(dataIdx1, dataIdx2);
     const dataMaxIdx = Math.max(dataIdx1, dataIdx2);
-    const dataSlice = this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1) as number[];
+    const dataSlice = Array.from(this.u.data[seriesIdx].slice(dataMinIdx, dataMaxIdx + 1)).filter(
+      (v): v is number => v != null,
+    );
+    if (dataSlice.length === 0) {
+      return "n/a";
+    }
 
-    const max = Math.max(...dataSlice.filter((v): v is number => v != null));
+    const max = dataSlice.reduce((a, b) => Math.max(a, b));
     const unit = MeasurementDatesPlugin.resolveUnit(this.u.series[seriesIdx].label as string);
     return `${i18n.number(max, {}, unit)}`;
   }
@@ -610,6 +625,9 @@ export class MeasurementDatesPlugin {
       for (let i = 1; i < dataSlice.length; i++) {
         const y0 = dataSlice[i - 1];
         const y1 = dataSlice[i];
+        if (y0 == null || y1 == null) {
+          continue;
+        }
 
         // PSUM already stores accumulated precipitation since 07:00 local time.
         // Sum positive increments; when the series resets, continue from current value.
@@ -622,6 +640,9 @@ export class MeasurementDatesPlugin {
         const x1 = this.u.data[0][dataMinIdx + i] as number;
         const y0 = dataSlice[i - 1];
         const y1 = dataSlice[i];
+        if (y0 == null || y1 == null) {
+          continue;
+        }
         integral += ((y0 + y1) / 2) * (x1 - x0);
       }
     }
