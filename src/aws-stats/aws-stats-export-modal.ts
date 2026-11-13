@@ -237,7 +237,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     }
     const labelText = AwsStatsExportModal.escapeHtmlAttribute(exports.blogCaption ?? "");
     let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
-      <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
+      <img style="grid-area: 1 / 1; pointer-events: none;" alt="${AwsStatsExportModal.escapeHtmlAttribute(exports.title ?? "")}" src="${dataUrl}"/>
       <div style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;">
         ${elements.join("\n")}
       </div>
