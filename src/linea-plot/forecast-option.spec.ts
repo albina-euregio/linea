@@ -4,7 +4,7 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { parseForecast, parseForecastLatLon } from "./forecast-option";
 
-const aromeModel = { label: { upper: "AROME Forecast", lower: "(GeoSphere Austria)" } };
+const aromeModel = { label: { upper: "C-LAEF Forecast", lower: "(GeoSphere Austria)" } };
 const arome = { model: aromeModel, latlong: "47.18,11.29" };
 const myModel = { label: { upper: "My model", lower: "(ACME)" } };
 

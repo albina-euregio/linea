@@ -156,5 +156,5 @@
   "linea:measurement-dates:usage:keybinding:press": "Press",
   "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings",
   "linea:measurement-dates:usage:exit": "Close Analyzer",
-  "linea:forecast:arome": "AROME Forecast (GeoSphere Austria)"
+  "linea:forecast:arome": "C-LAEF Forecast (GeoSphere Austria)"
 }
