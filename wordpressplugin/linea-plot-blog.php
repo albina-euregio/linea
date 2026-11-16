@@ -40,7 +40,10 @@ function lineaplotblog_store_image( string $mime, string $base64 ): ?string {
     $path     = $dir . '/' . $filename;
 
     if ( ! file_exists( $path ) ) {
-        if ( ! wp_mkdir_p( $dir ) || file_put_contents( $path, $binary, LOCK_EX ) === false ) {
+        // write to a temporary file and rename it, so concurrent requests never serve a partial file
+        $tmp = $path . '.' . uniqid( '', true ) . '.tmp';
+        if ( ! wp_mkdir_p( $dir ) || file_put_contents( $tmp, $binary ) === false || ! rename( $tmp, $path ) ) {
+            @unlink( $tmp );
             error_log( 'LineaPlot shortcode: Could not write ' . $path );
             return null;
         }
