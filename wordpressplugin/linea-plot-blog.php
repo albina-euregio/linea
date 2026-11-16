@@ -16,17 +16,22 @@ const LINEAPLOTBLOG_IMAGE_TYPES = [
     'image/webp' => 'webp',
 ];
 
+// limits for stored images, far above the exported plots (750 px wide, 200 px per plot)
+const LINEAPLOTBLOG_MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const LINEAPLOTBLOG_MAX_IMAGE_PIXELS = 10000;
+
 /**
  * Stores a base64 encoded image in uploads/lineaplot/ and returns its public URL.
  * The file name is the content hash, so every image is written only once.
  */
 function lineaplotblog_store_image( string $mime, string $base64 ): ?string {
     $binary = base64_decode( preg_replace( '/\s+/', '', $base64 ), true );
-    if ( $binary === false ) {
+    if ( $binary === false || strlen( $binary ) > LINEAPLOTBLOG_MAX_IMAGE_BYTES ) {
         return null;
     }
     $info = @getimagesizefromstring( $binary );
-    if ( $info === false || $info['mime'] !== $mime ) {
+    if ( $info === false || $info['mime'] !== $mime
+        || $info[0] > LINEAPLOTBLOG_MAX_IMAGE_PIXELS || $info[1] > LINEAPLOTBLOG_MAX_IMAGE_PIXELS ) {
         return null;
     }
 
