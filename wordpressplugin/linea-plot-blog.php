@@ -48,7 +48,7 @@ function lineaplotblog_store_image( string $mime, string $base64 ): ?string {
             return null;
         }
     }
-    return $uploads['baseurl'] . '/lineaplot/' . $filename;
+    return set_url_scheme( $uploads['baseurl'] . '/lineaplot/' . $filename );
 }
 
 /**
