@@ -30,7 +30,7 @@ function lineaplotblog_store_image( string $mime, string $base64 ): ?string {
         return null;
     }
 
-    $uploads = wp_upload_dir();
+    $uploads = wp_upload_dir( null, false ); // do not create the year/month directory
     if ( ! empty( $uploads['error'] ) ) {
         error_log( 'LineaPlot shortcode: ' . $uploads['error'] );
         return null;
