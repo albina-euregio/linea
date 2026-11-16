@@ -237,7 +237,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
     }
     const labelText = AwsStatsExportModal.escapeHtmlAttribute(exports.blogCaption ?? "");
     let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
-      <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
+      <img style="grid-area: 1 / 1; pointer-events: none;" alt="${AwsStatsExportModal.escapeHtmlAttribute(exports.title ?? "")}" src="${dataUrl}"/>
       <div style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;">
         ${elements.join("\n")}
       </div>
@@ -246,7 +246,7 @@ export class AwsStatsExportModal extends AbstractExportModal {
 
     const binary = AbstractExportModal.toBinary(html);
 
-    const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+    const iframeshortcode = `[lineaplotblog height="auto" title="${AbstractExportModal.escapeShortcodeAttribute(exports.title ?? "")}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
     document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;

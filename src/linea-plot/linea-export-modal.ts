@@ -248,7 +248,7 @@ export class LineaExportModal extends AbstractExportModal {
     const labelText = LineaExportModal.escapeHtmlAttribute(exports.blogCaption ?? "");
     const serializedData = LineaExportModal.escapeHtmlAttribute(JSON.stringify(resultsFiltered));
     let html = `<div style="display: grid; width: 100%;" data-lineaplot-wrapper>
-      <img style="grid-area: 1 / 1; pointer-events: none;" src="${dataUrl}"/>
+      <img style="grid-area: 1 / 1; pointer-events: none;" alt="${LineaExportModal.escapeHtmlAttribute(exports.title ?? "")}" src="${dataUrl}"/>
       <linea-plot class="linea-custom-element" style="grid-area: 1 / 1; max-width: 100%; max-height: 100%; overflow: hidden;" data="${serializedData}" showsurfacehoarseries="" showtitle="" tabindex="0"></linea-plot>
       ${labelText ? `<p class="wp-element-caption">${labelText}</p>` : ""}
     </div>`;
@@ -263,7 +263,7 @@ export class LineaExportModal extends AbstractExportModal {
       totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
-    const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+    const iframeshortcode = `[lineaplotblog height="auto" title="${AbstractExportModal.escapeShortcodeAttribute(exports.title ?? "")}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
     document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;
