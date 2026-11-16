@@ -43,6 +43,15 @@ export abstract class AbstractExportModal {
       .replaceAll(">", "&gt;");
   }
 
+  /**
+   * Escapes a value for a WordPress shortcode attribute, where quotes and brackets terminate the attribute or shortcode.
+   */
+  static escapeShortcodeAttribute(value: string): string {
+    return AbstractExportModal.escapeHtmlAttribute(value)
+      .replaceAll("[", "&#91;")
+      .replaceAll("]", "&#93;");
+  }
+
   protected exportSettings: HTMLDivElement;
   protected exportResult: HTMLDivElement;
   protected exportdata: { blob: Blob; data: string; filename: string; type: string } | null = null;

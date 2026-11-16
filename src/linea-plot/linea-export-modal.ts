@@ -263,7 +263,7 @@ export class LineaExportModal extends AbstractExportModal {
       totalCanvases += this.getCheckedSeriesIndices(index).length;
     });
 
-    const iframeshortcode = `[lineaplotblog height="auto" title="${exports.title}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
+    const iframeshortcode = `[lineaplotblog height="auto" title="${AbstractExportModal.escapeShortcodeAttribute(exports.title ?? "")}"]data:text/html;base64,${btoa(binary)}[/lineaplotblog]`;
 
     this.exportResult.style.display = "block";
     document.getElementById("exportCode")!.innerHTML = `<p>${iframeshortcode}</p>`;
