@@ -165,6 +165,39 @@ h2 {
   max-width: 200px;
 }
 
+.export-background-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-background-control input[type="color"] {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 40px;
+  padding: 4px;
+}
+
+.export-background-presets {
+  display: flex;
+  gap: 6px;
+}
+
+.export-background-presets button {
+  padding: 7px 10px;
+  border: 1px solid #bebebe;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #2f3640;
+  cursor: pointer;
+}
+
+.export-background-presets button.selected {
+  border-color: #19abff;
+  background: #e8f6ff;
+}
+
 .diagram-fieldset {
   border: 1px solid #3498db;
   border-radius: 8px;

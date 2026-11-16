@@ -2,6 +2,26 @@ import type uPlot from "uplot";
 import { i18n } from "../i18n";
 import css from "./export-modal.css?inline";
 import { AbstractLineaChart } from "../abstract-linea-chart";
+
+export interface ExportSettings {
+  width: number;
+  heightPerCanvas: number;
+  title: string;
+  blogCaption: string;
+  backgroundColor: string;
+  includePlotTitles?: boolean;
+}
+
+export type PngExportSettings = Pick<
+  ExportSettings,
+  "width" | "heightPerCanvas" | "title" | "backgroundColor" | "includePlotTitles"
+>;
+
+export type BlogExportSettings = Pick<
+  ExportSettings,
+  "width" | "heightPerCanvas" | "title" | "backgroundColor" | "blogCaption"
+>;
+
 /**
  * ExportModal class handles the export functionality for LineaPlot charts.
  *
@@ -106,6 +126,16 @@ export abstract class AbstractExportModal {
                             <label for="exportTitle">${i18n.message("linea:controls:label:title")}</label>
                             <input type="text" id="exportTitle" value="">
                           </div>
+                          <div>
+                            <label for="exportBackgroundColor">${i18n.message("linea:controls:label:backgroundcolor")}</label>
+                            <div class="export-background-control">
+                              <input type="color" id="exportBackgroundColor" value="#ffffff">
+                              <div class="export-background-presets">
+                                <button type="button" id="exportBackgroundTransparent" class="selected" aria-pressed="true">${i18n.message("linea:controls:button:transparent")}</button>
+                                <button type="button" id="exportBackgroundWhite" aria-pressed="false">${i18n.message("linea:controls:button:white")}</button>
+                              </div>
+                            </div>
+                          </div>
                         </fieldset>
                           <div id="exportBlogCaptionField" style="display: none; flex-direction: column; gap: 6px;">
                             <label for="exportBlogCaption" style="display: block; margin-bottom: 0;">${i18n.message("linea:controls:label:caption")}</label>
@@ -195,6 +225,34 @@ export abstract class AbstractExportModal {
     });
     this.exportSettings.addEventListener("change", () => {
       markActiveExportOptionStale();
+    });
+
+    const backgroundColorInput = this.modal.querySelector(
+      "#exportBackgroundColor",
+    ) as HTMLInputElement;
+    const backgroundTransparentButton = this.modal.querySelector(
+      "#exportBackgroundTransparent",
+    ) as HTMLButtonElement;
+    const backgroundWhiteButton = this.modal.querySelector(
+      "#exportBackgroundWhite",
+    ) as HTMLButtonElement;
+    backgroundColorInput.dataset.mode = "transparent";
+
+    const setBackgroundMode = (mode: "transparent" | "white" | "color") => {
+      backgroundColorInput.dataset.mode = mode;
+      const transparentSelected = mode === "transparent";
+      const whiteSelected = mode === "white";
+      backgroundTransparentButton.classList.toggle("selected", transparentSelected);
+      backgroundTransparentButton.setAttribute("aria-pressed", String(transparentSelected));
+      backgroundWhiteButton.classList.toggle("selected", whiteSelected);
+      backgroundWhiteButton.setAttribute("aria-pressed", String(whiteSelected));
+    };
+
+    backgroundColorInput.addEventListener("input", () => setBackgroundMode("color"));
+    backgroundTransparentButton.addEventListener("click", () => setBackgroundMode("transparent"));
+    backgroundWhiteButton.addEventListener("click", () => {
+      backgroundColorInput.value = "#ffffff";
+      setBackgroundMode("white");
     });
 
     const keyListener = (e: KeyboardEvent) => {
@@ -540,6 +598,7 @@ export abstract class AbstractExportModal {
    * The PNG dimensions are determined by the export settings and canvas heights.
    *
    * @private
+   * @override
    * @async
    * @param {string} [title] - Optional title for the PNG export, defaults to generated title
    * @returns {Promise<void>}
@@ -547,11 +606,7 @@ export abstract class AbstractExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  protected abstract exportAllPlotsToPNG(settings: {
-    width: number;
-    heightPerCanvas: number;
-    title: string;
-  }): Promise<string>;
+  protected abstract exportAllPlotsToPNG(settings: PngExportSettings): Promise<string>;
 
   /**
    * Retrieves the current export settings from the modal input fields.
@@ -561,11 +616,16 @@ export abstract class AbstractExportModal {
    * @returns {number} return.width - Export width in pixels
    * @returns {number} return.height - Export height per canvas in pixels
    * @returns {string} return.title - Export title text
+   * @returns {string} return.blogCaption - Export caption for blog export
+   * @returns {string} return.backgroundColor - Export background color in hex format
    */
-  protected getExportSettings() {
+  protected getExportSettings(): ExportSettings {
     const widthInput = document.getElementById("exportWidth") as HTMLInputElement;
     const heightInput = document.getElementById("exportHeight") as HTMLInputElement;
     const titleInput = document.getElementById("exportTitle") as HTMLInputElement;
+    const backgroundColorInput = document.getElementById(
+      "exportBackgroundColor",
+    ) as HTMLInputElement;
     const blogCaptionInput = document.getElementById(
       "exportBlogCaption",
     ) as HTMLInputElement | null;
@@ -574,6 +634,10 @@ export abstract class AbstractExportModal {
       heightPerCanvas: parseInt(heightInput.value),
       title: titleInput.value,
       blogCaption: blogCaptionInput?.value ?? "",
+      backgroundColor:
+        backgroundColorInput?.dataset.mode === "transparent"
+          ? "transparent"
+          : backgroundColorInput.value,
     };
   }
 

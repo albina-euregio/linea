@@ -193,13 +193,13 @@ export abstract class AbstractLineaChart extends HTMLElement {
     this.#hideForecastLegendRows(plot);
   }
 
-  modifyDrawHook(p: uPlot, backgroundColor: string) {
-    p.hooks.draw = p.hooks.draw || [];
-    p.hooks.draw.unshift((u) => {
+  modifyDrawHook(p: uPlot) {
+    p.hooks.drawClear = p.hooks.drawClear || [];
+    p.hooks.drawClear.unshift((u) => {
       const { left, top, width, height } = u.bbox;
       const ctx = u.ctx;
       ctx.save();
-      ctx.fillStyle = backgroundColor;
+      ctx.fillStyle = this.backgroundColor;
       ctx.fillRect(left, top, width, height);
       ctx.restore();
     });

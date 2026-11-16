@@ -4,7 +4,11 @@ import { LineaPlot } from "../linea-plot";
 import { type ParameterType, StationData, toSeries } from "../data/station-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { WinterView } from "./winter-view";
-import { AbstractExportModal } from "../shared/abstract-export-modal";
+import {
+  AbstractExportModal,
+  type BlogExportSettings,
+  type PngExportSettings,
+} from "../shared/abstract-export-modal";
 import { OptsHelper } from "../shared/opts-helper";
 
 /**
@@ -236,10 +240,15 @@ export class LineaExportModal extends AbstractExportModal {
       alert(i18n.message("linea:message:noplotselected"));
       return;
     }
-    const exports = this.getExportSettings();
+    const exports = this.getExportSettings() as BlogExportSettings;
     const resultsFiltered = await this.#generateInteractiveExportData();
     const dataUrl = await this.exportAllPlotsToPNG(
-      { width: 750, heightPerCanvas: 200, title: this.#generateTitleString() },
+      {
+        width: 750,
+        heightPerCanvas: 200,
+        title: this.#generateTitleString(),
+        backgroundColor: exports.backgroundColor,
+      },
       true,
     );
     if (!dataUrl) {
@@ -375,7 +384,7 @@ export class LineaExportModal extends AbstractExportModal {
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
   protected async exportAllPlotsToPNG(
-    { width, heightPerCanvas, title }: { width: number; heightPerCanvas: number; title: string },
+    { width, heightPerCanvas, title, backgroundColor }: PngExportSettings,
     noshow: boolean = false,
   ): Promise<string> {
     const activeLinecharts = this.#getActiveLineacharts();
@@ -395,11 +404,10 @@ export class LineaExportModal extends AbstractExportModal {
     // the export is drawn with black text, regardless of the page's (dark) colour scheme
     const oldColor = this.lineaPlot.style.color;
     this.lineaPlot.style.color = "#000";
-    let oldBackgroundColor = "";
-    if (activeLinecharts.length == 1) {
-      oldBackgroundColor = activeLinecharts[0].getBackgroundColor();
-      activeLinecharts[0].setBackgroundColor("#00000000");
-    }
+    const oldBackgroundColors = new Map(
+      activeLinecharts.map((lineachart) => [lineachart, lineachart.getBackgroundColor()]),
+    );
+    activeLinecharts.forEach((lineachart) => lineachart.setBackgroundColor(backgroundColor));
     // has to be done after background color change, because uPlot canvas is redrawn on background color change
     const initHeightPerCanvas = this.lineaPlot.view.charts[0].plots[0].height;
     for (const lineachart of this.lineaPlot.view.charts) {
@@ -430,6 +438,7 @@ export class LineaExportModal extends AbstractExportModal {
     });
 
     if (Object.keys(legendItems).length == 0) {
+      oldBackgroundColors.forEach((color, lineachart) => lineachart.setBackgroundColor(color));
       this.lineaPlot.style.color = oldColor;
       alert(i18n.message("linea:message:noplotselected"));
       return Promise.resolve("");
@@ -481,6 +490,7 @@ export class LineaExportModal extends AbstractExportModal {
     const totalHeight = titleHeight + chartsHeight + legendHeight;
     const outputWidth = canvases[0].width;
     if (outputWidth * totalHeight > this.maxCanvasPixels) {
+      oldBackgroundColors.forEach((color, lineachart) => lineachart.setBackgroundColor(color));
       this.lineaPlot.style.color = oldColor;
       alert(i18n.message("linea:message:exporttobig"));
       return Promise.resolve("");
@@ -494,6 +504,10 @@ export class LineaExportModal extends AbstractExportModal {
     const ctx = outCanvas.getContext("2d")!;
     ctx.imageSmoothingEnabled = false;
     ctx.imageSmoothingQuality = "high";
+    if (backgroundColor !== "transparent") {
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, outCanvas.width, outCanvas.height);
+    }
 
     //draw title
     if (title) {
@@ -552,9 +566,7 @@ export class LineaExportModal extends AbstractExportModal {
       lineIndex++;
     }
 
-    if (activeLinecharts.length == 1) {
-      activeLinecharts[0].setBackgroundColor(oldBackgroundColor);
-    }
+    oldBackgroundColors.forEach((color, lineachart) => lineachart.setBackgroundColor(color));
     this.lineaPlot.style.color = oldColor;
     for (const lineachart of this.lineaPlot.view.charts) {
       lineachart.resizePlots(this.lineaPlot.clientWidth, lineachart.style, initHeightPerCanvas);

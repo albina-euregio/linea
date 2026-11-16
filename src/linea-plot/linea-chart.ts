@@ -126,7 +126,7 @@ export class LineaChart extends AbstractLineaChart {
         plot_HS_PSUM,
       );
       this.drawedTitle = true;
-      this.modifyDrawHook(p, this.backgroundColor);
+      this.modifyDrawHook(p);
       this.plotnames.push(i18n.message("linea:plotnames:precipitation"));
       if (this.result.values.HS) {
         this.addSeries(p, opts_HS_PSUM.HS.series, this.result.values.HS);
@@ -154,7 +154,7 @@ export class LineaChart extends AbstractLineaChart {
         plot_VW_VWG_DW,
       );
       this.drawedTitle = true;
-      this.modifyDrawHook(p, this.backgroundColor);
+      this.modifyDrawHook(p);
       this.plotnames.push(i18n.message("linea:plotnames:wind"));
       this.addSeries(p, opts_VW_VWG_DW.VW.series, this.result.values.VW);
       this.addSeries(p, opts_VW_VWG_DW.opts_VW_MAX, this.result.values.VW_MAX);
@@ -179,7 +179,7 @@ export class LineaChart extends AbstractLineaChart {
       );
       this.drawedTitle = true;
 
-      this.modifyDrawHook(p, this.backgroundColor);
+      this.modifyDrawHook(p);
       this.plotnames.push(i18n.message("linea:plotnames:temperature"));
       this.addSeries(p, opts_TA_TD_TSS.TD.series, TD);
 
@@ -210,7 +210,7 @@ export class LineaChart extends AbstractLineaChart {
         plot_RH_GR,
       );
       this.drawedTitle = true;
-      this.modifyDrawHook(p, this.backgroundColor);
+      this.modifyDrawHook(p);
       this.plotnames.push(i18n.message("linea:plotnames:humidity_gr"));
       this.addSeries(p, opts_RH_GR.RH.series, this.result.values.RH);
       this.addSeries(p, opts_RH_GR.ISWR.series, this.result.values.ISWR);
