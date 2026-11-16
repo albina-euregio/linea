@@ -538,13 +538,11 @@ export abstract class AbstractExportModal {
    * @example
    * await this.#exportAllPlotsToPNG("Custom Title");
    */
-  protected async exportAllPlotsToPNG(_: {
+  protected abstract exportAllPlotsToPNG(settings: {
     width: number;
     heightPerCanvas: number;
     title: string;
-  }): Promise<string> {
-    return Promise.resolve("");
-  }
+  }): Promise<string>;
 
   /**
    * Retrieves the current export settings from the modal input fields.
