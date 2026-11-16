@@ -59,11 +59,15 @@ function lineaplotblog_store_image( string $mime, string $base64 ): ?string {
  *                      or the original data URL if the image could not be stored
  */
 function lineaplotblog_externalize_images( string $html, array &$urls ): string {
+    // only store files for authors who may upload media anyway
+    $post      = get_post();
+    $may_store = $post !== null && user_can( (int) $post->post_author, 'upload_files' );
+
     $types = implode( '|', array_map( 'preg_quote', array_keys( LINEAPLOTBLOG_IMAGE_TYPES ) ) );
     return preg_replace_callback(
         '#\bsrc=(["\'])data:(' . $types . ');base64,([A-Za-z0-9+/=\s]+)\1#',
-        function ( $m ) use ( &$urls ) {
-            $url = lineaplotblog_store_image( $m[2], $m[3] );
+        function ( $m ) use ( &$urls, $may_store ) {
+            $url = $may_store ? lineaplotblog_store_image( $m[2], $m[3] ) : null;
             if ( $url === null ) {
                 $urls[] = 'data:' . $m[2] . ';base64,' . preg_replace( '/\s+/', '', $m[3] );
                 return $m[0];
