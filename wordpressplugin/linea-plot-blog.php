@@ -55,7 +55,8 @@ function lineaplotblog_store_image( string $mime, string $base64 ): ?string {
  * Replaces inline data URLs of images by files in the uploads directory,
  * as newsletter tools (e.g. rapidmail) and many mail clients reject data URLs.
  *
- * @param string[] $urls receives the URLs of all stored images
+ * @param string[] $urls receives the sources of all images: the URL of the stored file,
+ *                      or the original data URL if the image could not be stored
  */
 function lineaplotblog_externalize_images( string $html, array &$urls ): string {
     $types = implode( '|', array_map( 'preg_quote', array_keys( LINEAPLOTBLOG_IMAGE_TYPES ) ) );
@@ -64,6 +65,7 @@ function lineaplotblog_externalize_images( string $html, array &$urls ): string 
         function ( $m ) use ( &$urls ) {
             $url = lineaplotblog_store_image( $m[2], $m[3] );
             if ( $url === null ) {
+                $urls[] = 'data:' . $m[2] . ';base64,' . preg_replace( '/\s+/', '', $m[3] );
                 return $m[0];
             }
             $urls[] = $url;
@@ -114,12 +116,14 @@ function lineaplotblog_shortcode( $atts, $content = null ) {
         if ( empty( $imageUrls ) ) {
             return '';
         }
+        // the blog export renders all plots into a single image
+        $src     = $imageUrls[0];
         $caption = '';
         if ( preg_match( '#<p class="wp-element-caption">(.*?)</p>#s', $decodedData, $m ) ) {
             $caption = '<figcaption class="wp-element-caption">' . $m[1] . '</figcaption>';
         }
         return '<figure class="wp-block-image">'
-            . '<img src="' . esc_url( $imageUrls[0] ) . '" alt="' . esc_attr( $atts['title'] ) . '"'
+            . '<img src="' . esc_url( $src, array_merge( wp_allowed_protocols(), [ 'data' ] ) ) . '" alt="' . esc_attr( $atts['title'] ) . '"'
             . ' style="display: block; width: 100%; max-width: 100%; height: auto;"/>'
             . $caption
             . '</figure>';
