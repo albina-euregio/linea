@@ -8,7 +8,7 @@ import { type Series, seriesOf, type StationData } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { TouchZoom } from "../shared/touch-zoom";
-import { MeasurementDatesPlugin } from "../shared/measurement-dates";
+import { MeasurementDatesPlugin, type MeasurementSelection } from "../shared/measurement-dates";
 import { profilerPlugin } from "../shared/profiler";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import type { ForecastOption } from "./forecast-option";
@@ -22,7 +22,7 @@ export class LineaChart extends AbstractLineaChart {
       ...opts,
       plugins: [
         TouchZoom.touchZoomPlugin(),
-        new MeasurementDatesPlugin().plugin(),
+        new MeasurementDatesPlugin(this.measurementSelection).plugin(),
         profilerPlugin(name),
         ...(this.forecastOption
           ? [LineaOptsHelper.forecastInformationPlugin(this.forecastOption)]
@@ -37,8 +37,9 @@ export class LineaChart extends AbstractLineaChart {
     showSurfaceHoarSeries: boolean,
     backgroundColor: string,
     forecastOption: ForecastOption | undefined,
+    measurementSelection: MeasurementSelection,
   ) {
-    super(backgroundColor, showTitle, result);
+    super(backgroundColor, showTitle, result, measurementSelection);
     this.showSurfaceHoarSeries = showSurfaceHoarSeries;
     this.forecastOption = forecastOption;
     this.createPlots().catch((e) => console.error(e));

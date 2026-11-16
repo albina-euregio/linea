@@ -6,6 +6,7 @@ import cssuPlot from "uplot/dist/uPlot.min.css?raw";
 import { WinterView } from "./linea-plot/winter-view";
 import type { LineaView } from "./linea-view";
 import { StationView } from "./linea-plot/station-view";
+import { KeyDispatcher, type KeyHandler } from "./shared/key-dispatcher";
 
 type LineaViewType = "station" | "winter";
 
@@ -130,6 +131,32 @@ export class LineaPlot extends HTMLElement {
   private previousBtn!: HTMLButtonElement;
   private nextBtn!: HTMLButtonElement;
 
+  /** keyboard shortcuts to show the last days */
+  static readonly #daysByKey: Record<string, number | undefined> = {
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 14,
+    "9": 21,
+    "0": 28,
+  };
+
+  async #selectLastDays(days: number) {
+    if (days > 7) {
+      const stationView = this.lineaViews.get("station");
+      if (stationView instanceof StationView) {
+        await stationView.fetchLazySrc();
+      }
+    }
+    const endDate = this.view.getDatePickerEndDate();
+    const startDate = endDate.subtract({ days });
+    this.view.select(startDate, endDate.subtract({ days: 1 }));
+  }
+
   #createLoadingOverlay(): HTMLSpanElement {
     const loader = document.createElement("span");
     loader.className = "loading-btn-loader";
@@ -167,6 +194,42 @@ export class LineaPlot extends HTMLElement {
 
   view!: LineaView;
   private lineaViews!: Map<LineaViewType, LineaView>;
+  readonly #keyDispatcher = new KeyDispatcher();
+
+  constructor() {
+    super();
+    this.addEventListener("keydown", (e) => this.#handleKeyDown(e));
+  }
+
+  /**
+   * Subscribes to the key events of this element. These handlers run after the ones of the
+   * current view (see {@link LineaView.onKeyDown}) and are skipped if a view handler consumed the event.
+   *
+   * @returns a function to unsubscribe the handler
+   */
+  onKeyDown(handler: KeyHandler): () => void {
+    return this.#keyDispatcher.subscribe(handler);
+  }
+
+  #handleKeyDown(e: KeyboardEvent) {
+    // leave browser shortcuts (e.g. Ctrl+C) and typing in form fields alone
+    if (e.ctrlKey || e.metaKey || e.altKey || LineaPlot.#isEditable(e.target)) {
+      return;
+    }
+    if (this.view?.handleKeyEvent(e)) {
+      return;
+    }
+    this.#keyDispatcher.dispatch(e);
+  }
+
+  static #isEditable(target: EventTarget | null): boolean {
+    return (
+      target instanceof HTMLSelectElement ||
+      target instanceof HTMLTextAreaElement ||
+      (target instanceof HTMLInputElement && !target.readOnly) ||
+      (target instanceof HTMLElement && target.isContentEditable)
+    );
+  }
 
   //AirDatePicker, never name it datepicker, it causes a lot of trouble!!!!!
   public dp: AirDatepicker | undefined;
@@ -355,9 +418,10 @@ export class LineaPlot extends HTMLElement {
       this.previousBtn.appendChild(previousTooltip);
       this.previousBtn.appendChild(this.#createLoadingOverlay());
 
-      this.addEventListener("keydown", (e) => {
+      this.onKeyDown((e) => {
         if (e.key === "ArrowLeft" && !this.previousBtn.classList.contains("loading")) {
           this.previousBtn.click();
+          return true;
         }
       });
       this.previousBtn.addEventListener("click", () => {
@@ -379,44 +443,19 @@ export class LineaPlot extends HTMLElement {
       nextTooltip.textContent = i18n.message("linea:controls:tooltips:next");
       this.nextBtn.appendChild(nextTooltip);
       this.nextBtn.appendChild(this.#createLoadingOverlay());
-      this.addEventListener("keydown", (e) => {
+      this.onKeyDown((e) => {
         if (e.key === "ArrowRight") {
           this.nextBtn.click();
+          return true;
         }
       });
-      this.addEventListener("keydown", async (e) => {
-        let days = 0;
-        switch (e.key) {
-          case "1":
-          case "2":
-          case "3":
-          case "4":
-          case "5":
-          case "6":
-          case "7":
-            days = parseInt(e.key);
-            break;
-          case "8":
-            days = 14;
-            break;
-          case "9":
-            days = 21;
-            break;
-          case "0":
-            days = 28;
-            break;
+      this.onKeyDown((e) => {
+        const days = LineaPlot.#daysByKey[e.key];
+        if (!days) {
+          return;
         }
-        if (days > 7) {
-          const stationView = this.lineaViews.get("station");
-          if (stationView instanceof StationView) {
-            await stationView.fetchLazySrc();
-          }
-        }
-        if (days) {
-          const endDate = this.view.getDatePickerEndDate();
-          const startDate = endDate.subtract({ days });
-          this.view.select(startDate, endDate.subtract({ days: 1 }));
-        }
+        void this.#selectLastDays(days);
+        return true;
       });
       this.nextBtn.addEventListener("click", () => {
         this.view.next(this.previousBtn, this.nextBtn);
@@ -502,7 +541,7 @@ export class LineaPlot extends HTMLElement {
       this.helpBtn.setAttribute("aria-expanded", String(isVisible));
     });
 
-    this.addEventListener("keydown", (e) => {
+    this.onKeyDown((e) => {
       if (e.key === "Escape") {
         hideHelpHint();
       }

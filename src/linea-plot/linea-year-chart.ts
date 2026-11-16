@@ -10,7 +10,7 @@ import { dailyMean, SeasonHeatmapData } from "../data/season-heatmap-data";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import type { Series, StationData } from "../data/station-data";
 import { TouchZoom } from "../shared/touch-zoom";
-import { MeasurementDatesPlugin } from "../shared/measurement-dates";
+import { MeasurementDatesPlugin, type MeasurementSelection } from "../shared/measurement-dates";
 
 /**
  * This component creates interactive uPlot diagrams displaying:
@@ -38,7 +38,10 @@ export class LineaYearChart extends AbstractLineaChart {
   private withFreshPlugins(opts: uPlot.Options): uPlot.Options {
     return {
       ...opts,
-      plugins: [TouchZoom.touchZoomPlugin(), new MeasurementDatesPlugin().plugin()],
+      plugins: [
+        TouchZoom.touchZoomPlugin(),
+        new MeasurementDatesPlugin(this.measurementSelection).plugin(),
+      ],
     };
   }
 
@@ -48,8 +51,9 @@ export class LineaYearChart extends AbstractLineaChart {
     backgroundColor: string,
     startDate: Temporal.PlainDate,
     endDate: Temporal.PlainDate,
+    measurementSelection: MeasurementSelection,
   ) {
-    super(backgroundColor, showTitle, result);
+    super(backgroundColor, showTitle, result, measurementSelection);
     this.result = result;
     this.startDate = startDate;
     this.endDate = endDate;

@@ -38,6 +38,7 @@ export class WinterView extends LineaView {
         this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
         startDate.toPlainDate(),
         endDate.toPlainDate(),
+        this.measurementSelection,
       );
       this.charts.push(lcy);
       this.lineaplot.appendChild(lcy);

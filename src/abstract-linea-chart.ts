@@ -1,6 +1,7 @@
 import uPlot from "uplot";
 import type { StationData } from "./data/station-data";
 import { OptsHelper } from "./shared/opts-helper";
+import type { MeasurementSelection } from "./shared/measurement-dates";
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
@@ -12,9 +13,17 @@ export abstract class AbstractLineaChart extends HTMLElement {
   protected showTitle: boolean;
   public result: StationData;
   private forecastCursorValueSync = new WeakMap<uPlot, Set<number>>();
+  /** the analyzer selection shared with the other charts of the same view */
+  protected readonly measurementSelection: MeasurementSelection;
 
-  constructor(backgroundColor: string, showTitle: boolean, result: StationData) {
+  constructor(
+    backgroundColor: string,
+    showTitle: boolean,
+    result: StationData,
+    measurementSelection: MeasurementSelection,
+  ) {
     super();
+    this.measurementSelection = measurementSelection;
     this.backgroundColor = backgroundColor;
     this.showTitle = showTitle;
     this.result = result;

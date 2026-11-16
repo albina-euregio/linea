@@ -56,6 +56,7 @@ export class StationView extends LineaView {
         this.showSurfaceHoarSeries,
         this.results.length > 1 ? (this.backgroundColors[i] ?? "#00000000") : "#00000000",
         this.#getForecastOptionForStation(Number(i)),
+        this.measurementSelection,
       );
       this.charts.push(lc);
     }
