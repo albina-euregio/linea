@@ -1,8 +1,7 @@
 import { time } from "./opts_time_axis";
-import { i18n } from "../i18n";
+import { i18n, type MessageKeySuffix } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
-import type { ParameterType } from "../data/station-data";
 
 const TA = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:TA")} (℃)`,
@@ -88,8 +87,10 @@ export const opts_TEMP_year: uPlot.Options = {
   ],
 };
 
-const baseTempSeries = (key: string, color: string): uPlot.Series => ({
-  label: i18n.message(`linea:parameter:${key as ParameterType}`),
+type ParameterKey = MessageKeySuffix<"linea:parameter:">;
+
+const baseTempSeries = (key: ParameterKey, color: string): uPlot.Series => ({
+  label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
   width: 1.5,
   scale: "y",

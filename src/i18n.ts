@@ -10,6 +10,13 @@ const messages = import.meta.glob("./i18n/*.json", {
 
 export type messagesEN_t = keyof typeof messagesEN;
 
+/** Suffixes of all message keys starting with prefix P, e.g. "HS" for "linea:parameter:HS" */
+export type MessageKeySuffix<P extends string> = messagesEN_t extends infer K
+  ? K extends `${P}${infer S}`
+    ? S
+    : never
+  : never;
+
 class I18n {
   get lang(): string {
     return document.documentElement.lang.slice(0, 2) || "en";

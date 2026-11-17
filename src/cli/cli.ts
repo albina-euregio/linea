@@ -9,7 +9,7 @@ main();
 async function main() {
   // @ts-ignore// @ts-ignore
   const { DOMParser } = await import("@xmldom/xmldom");
-  global.DOMParser = DOMParser;
+  global.DOMParser = DOMParser as unknown as typeof global.DOMParser;
 
   const collection = await PROVIDERS.fetchStationListing();
   collection.generator = {

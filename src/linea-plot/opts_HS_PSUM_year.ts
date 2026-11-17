@@ -1,9 +1,8 @@
 import uPlot from "uplot";
 import { time } from "./opts_time_axis";
-import { i18n } from "../i18n";
+import { i18n, type MessageKeySuffix } from "../i18n";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import { LineaChartParameter } from "./linea-chart-parameter";
-import type { ParameterType } from "../data/station-data";
 
 const HS = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:HS")} (cm)`,
@@ -109,8 +108,10 @@ export const opts_HS_year: uPlot.Options = {
     },
   ],
 };
-const baseHsSeries = (key: string, color: string): uPlot.Series => ({
-  label: i18n.message(`linea:parameter:${key as ParameterType}`),
+type ParameterKey = MessageKeySuffix<"linea:parameter:">;
+
+const baseHsSeries = (key: ParameterKey, color: string): uPlot.Series => ({
+  label: i18n.message(`linea:parameter:${key}`),
   stroke: color,
   width: 1.5,
   scale: "y",
