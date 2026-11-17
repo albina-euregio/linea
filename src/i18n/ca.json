@@ -32,7 +32,7 @@
   "linea:controls:tooltips:previous": "Dia anterior",
   "linea:controls:tooltips:wholetimespan": "Mostra tot el període de temps disponible",
   "linea:controls:value:export": "Exportar",
-  "linea:controls:value:help": "",
+  "linea:controls:value:help": "?",
   "linea:controls:value:winterview:winter": "Estadístiques d'hivern",
   "linea:controls:value:winterview:station": "Vista de l'estació",
   "linea:controls:label:exportsettings": "Exportar configuracions",
