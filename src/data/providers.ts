@@ -167,7 +167,10 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
     "AT-05",
     ["AT-05"],
     "https://lawinen.at/smet/sbg/stations_sbg.geojson",
-    (id) => [`https://lawinen.at/smet/sbg/woche/${id}.smet.gz`],
+    (id) => [
+      `https://lawinen.at/smet/sbg/woche/${id}.smet.gz`,
+      `https://lawinen.at/smet/sbg/jahr/${id}.smet.gz`,
+    ],
   ),
 
   new SmetDataProvider(
@@ -184,28 +187,40 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
     "AT-06",
     ["AT-06"],
     "https://lawinen.at/smet/stm/stations_stm.geojson",
-    (id) => [`https://lawinen.at/smet/stm/woche/${id}.smet.gz`],
+    (id) => [
+      `https://lawinen.at/smet/stm/woche/${id}.smet.gz`,
+      `https://lawinen.at/smet/stm/jahr/${id}.smet.gz`,
+    ],
   ),
 
   new SmetDataProvider(
     "AT-03",
     ["AT-03"],
     "https://lawinen.at/smet/noe/stations_noe.geojson",
-    (id) => [`https://lawinen.at/smet/noe/woche/${id}.smet.gz`],
+    (id) => [
+      `https://lawinen.at/smet/noe/woche/${id}.smet.gz`,
+      `https://lawinen.at/smet/noe/jahr/${id}.smet.gz`,
+    ],
   ),
 
   new SmetDataProvider(
     "AT-04",
     ["AT-04"],
     "https://lawinen.at/smet/ooe/stations_ooe.geojson",
-    (id) => [`https://lawinen.at/smet/ooe/woche/${id}.smet.gz`],
+    (id) => [
+      `https://lawinen.at/smet/ooe/woche/${id}.smet.gz`,
+      `https://lawinen.at/smet/ooe/jahr/${id}.smet.gz`,
+    ],
   ),
 
   new SmetDataProvider(
     "AT-08",
     ["AT-08"],
     "https://lawinen.at/smet/vor/stations_vor.geojson",
-    (id) => [`https://lawinen.at/smet/vor/woche/${id}.smet.gz`],
+    (id) => [
+      `https://lawinen.at/smet/vor/woche/${id}.smet.gz`,
+      `https://lawinen.at/smet/vor/jahr/${id}.smet.gz`,
+    ],
   ),
 
   new SmetDataProvider(
@@ -222,11 +237,15 @@ export const PROVIDERS = new MultiDataProvider("LINEA", [
     "DE-BY",
     ["DE-BY"],
     "https://lawinen.at/smet/bay/stations_bay.geojson",
-    (id) => [`https://lawinen.at/smet/bay/woche/${id}.smet.gz`],
+    (id) => [
+      `https://lawinen.at/smet/bay/woche/${id}.smet.gz`,
+      `https://lawinen.at/smet/bay/jahr/${id}.smet.gz`,
+    ],
   ),
 
   new SmetDataProvider("SI", ["SI"], "https://lawinen.at/smet/slo/stations_slo.geojson", (id) => [
     `https://lawinen.at/smet/slo/woche/${id}.smet.gz`,
+    `https://lawinen.at/smet/slo/jahr/${id}.smet.gz`,
   ]),
 
   new LazyDataProvider(
