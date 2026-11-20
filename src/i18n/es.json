@@ -40,6 +40,9 @@
   "linea:controls:label:caption": "Caption",
   "linea:controls:label:width": "Anchura",
   "linea:controls:label:title": "Título",
+  "linea:controls:label:backgroundcolor": "",
+  "linea:controls:button:transparent": "",
+  "linea:controls:button:white": "",
   "linea:controls:label:exportchart": "Exportar gráfico",
   "linea:controls:label:exportresult": "Exportar resultado",
   "linea:controls:datepicker:today": "Hoy",
@@ -153,5 +156,5 @@
   "linea:measurement-dates:usage:keybinding:press": "Presiona",
   "linea:measurement-dates:usage:title": "Analizador: modos y atajos de teclado",
   "linea:measurement-dates:usage:exit": "Cerrar Analizador",
-  "linea:forecast:arome": "AROME Forecast (GeoSphere Austria)"
+  "linea:forecast:arome": ""
 }

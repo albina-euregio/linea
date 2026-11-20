@@ -40,6 +40,9 @@
   "linea:controls:label:caption": "Legenda",
   "linea:controls:label:width": "Largezza",
   "linea:controls:label:title": "Titolo",
+  "linea:controls:label:backgroundcolor": "",
+  "linea:controls:button:transparent": "",
+  "linea:controls:button:white": "",
   "linea:controls:label:exportchart": "Export grafico",
   "linea:controls:label:exportresult": "Export risultato",
   "linea:controls:datepicker:today": "Oggi",
@@ -153,5 +156,5 @@
   "linea:measurement-dates:usage:keybinding:press": "Premi",
   "linea:measurement-dates:usage:title": "Analyzer Modes & Keybindings",
   "linea:measurement-dates:usage:exit": "Chiudi Analyzer",
-  "linea:forecast:arome": "Previsione a base di AROME (GeoSphere Austria)"
+  "linea:forecast:arome": ""
 }
