@@ -8,7 +8,7 @@ The project is split into two main modules:
 
 - Main component: `<linea-plot>`
 - Data format: SMET ([specification](https://code.wsl.ch/snow-models/meteoio/-/blob/master/doc/SMET_specifications.pdf))
-- Integrates AROME forecasts from the Geosphere Austria
+- Integrates C-LAEF forecasts from the Geosphere Austria
 - Visualize the mesured data and yearly overview
 - Support lazy loading of greater timespans
 
@@ -144,11 +144,11 @@ To use the `<linea-plot>` component, include it in your HTML with the `src` attr
 - `showexport` - toggles if the export button is shown
 - `showinteractiveblogexport` - in combination with `showexport` it shows a button to export a wordpress shortcode, which can be used together with the `linea-plot-blog.php` plugin for Wordpress. See Export options for more details.
 - `forecast` {string} - JSON-encoded forecast object, or an array of them with one entry per station. A single object or an array with one entry applies to all stations. Use `null` in an array to skip forecast for a station. Either `latlong` or `model.label` is required:
-  - `latlong` - coordinates (`"lat,lon"` or `[lat, lon]`) to fetch the AROME forecast from GeoSphere Austria for. Without it nothing is fetched, for stations whose SMET file contains the forecast.
-  - `model` - the forecast model shown at the forecast marker, e.g. `{"t0": "2026-02-20T20:00:00Z", "label": {"upper": "My model", "lower": "(ACME)"}}` (`lower` is optional). If only `latlong` provides the forecast, `label` can be omitted to show the AROME label. The forecast marker is set at `t0`. The optional `labelOffset`, e.g. `{"x": 10, "y": 20}`, moves the label from its default position, in pixels.
+  - `latlong` - coordinates (`"lat,lon"` or `[lat, lon]`) to fetch the C-LAEF forecast from GeoSphere Austria for. Without it nothing is fetched, for stations whose SMET file contains the forecast.
+  - `model` - the forecast model shown at the forecast marker, e.g. `{"t0": "2026-02-20T20:00:00Z", "label": {"upper": "My model", "lower": "(ACME)"}}` (`lower` is optional). If only `latlong` provides the forecast, `label` can be omitted to show the C-LAEF label. The forecast marker is set at `t0`. The optional `labelOffset`, e.g. `{"x": 10, "y": 20}`, moves the label from its default position, in pixels.
 
   ```html
-  <!-- AROME forecast -->
+  <!-- C-LAEF forecast -->
   forecast='{"latlong": "47.180105,11.288011"}'
   <!-- forecast contained in the SMET file -->
   forecast='{"model": {"label": {"upper": "My model", "lower": "(ACME)"}}}'
