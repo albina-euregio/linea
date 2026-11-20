@@ -78,9 +78,9 @@ export class LineaOptsHelper extends OptsHelper {
     const width = 1;
     const offset = (width % 2) / 2;
     const t0 = (forecastOptions.model.t0 ?? new Date()).getTime();
-    const lastData = u.data[0][u.data[0].length - 1];
-    if (lastData != null && lastData > t0) {
-      const forecastX = u.valToPos(t0, "x", true);
+    const firstForecast = u.data[0].find((x) => x != null && x >= t0);
+    if (firstForecast != null) {
+      const forecastX = u.valToPos(firstForecast, "x", true);
       ctx.save();
       ctx.strokeStyle = this.textColor(u);
       ctx.globalAlpha = 0.34;
