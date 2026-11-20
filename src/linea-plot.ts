@@ -123,8 +123,8 @@ export class LineaPlot extends HTMLElement {
   private exportModal!: LineaExportModal;
   private daterange!: HTMLInputElement;
   private styleTag!: HTMLStyleElement;
-  private winterviewBtn!: HTMLButtonElement;
-  private winterviewBtnLabel!: HTMLSpanElement;
+  private winterviewBtn?: HTMLButtonElement;
+  private winterviewBtnLabel?: HTMLSpanElement;
   private helpBtn!: HTMLButtonElement;
   private helpHint!: HTMLDivElement;
   private daterangeContainer!: HTMLDivElement;
@@ -335,7 +335,9 @@ export class LineaPlot extends HTMLElement {
         await view.initialize();
       } catch (error: any) {
         console.error(error);
-        this.winterviewBtn.style.display = "none";
+        if (this.winterviewBtn) {
+          this.winterviewBtn.style.display = "none";
+        }
         return;
       }
     }
@@ -704,6 +706,10 @@ export class LineaPlot extends HTMLElement {
    * Checks if the winter view is available based on attributes and existing winter data
    */
   async #updateWinterViewButton() {
+    if (!this.winterviewBtn) {
+      // controls (and thus the button) are only rendered with showdatepicker or showexport
+      return;
+    }
     if (this.#getCurrentViewKey() === "winter") {
       this.winterviewBtnLabel.textContent = i18n.message("linea:controls:value:winterview:station");
     } else {
