@@ -38,6 +38,7 @@ export const TA = new LineaChartParameter({
   },
 });
 TA.forecast = { ...TA.series, label: "Forecast", dash: [8, 6] };
+TA.forecastBand = LineaChartParameter.forecastBand(TA.series!, "rgba(222, 45, 38, 0.15)");
 
 export const TD = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:TD")} (℃)`,

@@ -2,6 +2,11 @@ import uPlot from "uplot";
 import type { StationData } from "./data/station-data";
 import { OptsHelper } from "./shared/opts-helper";
 import type { MeasurementSelection } from "./shared/measurement-dates";
+/** forecast series and the edges of forecast bands, which follow the visibility of their base series */
+function isForecastLabel(label: uPlot.Series["label"]): boolean {
+  return typeof label === "string" && label.startsWith("Forecast");
+}
+
 export abstract class AbstractLineaChart extends HTMLElement {
   plots: uPlot[] = [];
   plotnames: string[] = [];
@@ -80,7 +85,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
       try {
         for (let seriesIdx = 1; seriesIdx < u.series.length; seriesIdx++) {
           const series = u.series[seriesIdx];
-          if (series.label !== "Forecast") {
+          if (!isForecastLabel(series.label)) {
             continue;
           }
 
@@ -106,7 +111,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
 
     for (let idx = forecastSeriesIdx - 1; idx >= 1; idx--) {
       const candidate = plot.series[idx];
-      if (candidate.label === "Forecast") {
+      if (isForecastLabel(candidate.label)) {
         continue;
       }
 
@@ -187,7 +192,7 @@ export abstract class AbstractLineaChart extends HTMLElement {
       data = [] as number[];
     }
     const isForecastSeries = series.label === "Forecast";
-    plot.addSeries({ ...series, show: isForecastSeries ? true : !!data?.length });
+    plot.addSeries({ ...series, show: isForecastLabel(series.label) ? true : !!data?.length });
     (plot.data as [xValues: number[], ...yValues: (number | null | undefined)[][]]).push(
       this.#normalizePlotSeriesData(data),
     );

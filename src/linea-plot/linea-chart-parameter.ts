@@ -16,6 +16,23 @@ export type LineaSplitSpec = Omit<SplitOptions, "uplot">;
  * zoom) stay in `LineaOptsHelper`. The exotic 10% can still tweak the
  * resulting objects.
  */
+/** labels of the edge series of a {@link LineaForecastBand}, shown in the legend while hovering the forecast */
+export const FORECAST_BAND_LABELS = { upper: "90 %", lower: "10 %" } as const;
+
+/** whether `label` is the label of an edge series of a {@link LineaForecastBand} */
+export function isForecastBandLabel(label: uPlot.Series["label"]): boolean {
+  return label === FORECAST_BAND_LABELS.upper || label === FORECAST_BAND_LABELS.lower;
+}
+
+/** a shaded band between two series, drawn with uPlot's `bands` */
+export type LineaForecastBand = {
+  /** edge series of the 90th percentile */
+  upper: uPlot.Series;
+  /** edge series of the 10th percentile */
+  lower: uPlot.Series;
+  fill: string;
+};
+
 export class LineaChartParameter {
   /** the shared y-scale definition (`range`, …); keyed by `axis.scale`. */
   scale?: uPlot.Scale;
@@ -28,13 +45,18 @@ export class LineaChartParameter {
   series?: uPlot.Series;
   /** optional dashed forecast twin of `series`. */
   forecast?: uPlot.Series;
+  /** optional shaded band between the 10th and 90th percentile of the {@link forecast}. */
+  forecastBand?: LineaForecastBand;
   /** axis label drawn at the top of the chart, incl. unit, e.g. `"HS (cm)"`. */
   label?: string;
   /** fill colour for {@link label} (typically the same as `axis.stroke`). */
   labelColor?: string;
 
   constructor(
-    p: Pick<LineaChartParameter, "scale" | "axis" | "series" | "forecast" | "label" | "labelColor">,
+    p: Pick<
+      LineaChartParameter,
+      "scale" | "axis" | "series" | "forecast" | "forecastBand" | "label" | "labelColor"
+    >,
   ) {
     Object.assign(this, p);
     const stroke = this.axis.stroke;
@@ -43,6 +65,26 @@ export class LineaChartParameter {
     }
     this.axis.grid = { stroke: OptsHelper.gridColor, ...this.axis.grid };
     this.axis.ticks = { stroke: OptsHelper.gridColor, ...this.axis.ticks };
+  }
+
+  /**
+   * The shaded forecast percentile band of `series`: its edges are invisible series in the colour
+   * of `series` (so they follow its visibility, see `AbstractLineaChart`), the band is filled with `fill`.
+   */
+  static forecastBand(series: uPlot.Series, fill: string): LineaForecastBand {
+    const edge = (label: string): uPlot.Series => ({
+      ...series,
+      label,
+      width: 0,
+      fill: undefined,
+      dash: undefined,
+      points: { show: false },
+    });
+    return {
+      upper: edge(FORECAST_BAND_LABELS.upper),
+      lower: edge(FORECAST_BAND_LABELS.lower),
+      fill,
+    };
   }
 
   /**

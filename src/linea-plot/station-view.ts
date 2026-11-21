@@ -156,20 +156,20 @@ export class StationView extends LineaView {
             result.values,
             mergedTimestamps,
           );
+          const align = (values: ValuesInput) =>
+            this.alignValuesToTimeline(forecast.timestamps, values, mergedTimestamps);
           result.forecast = {
             timestamps: mergedTimestamps,
-            values: this.alignValuesToTimeline(
-              forecast.timestamps,
-              forecast.values,
-              mergedTimestamps,
-            ),
+            values: align(forecast.values),
+            p10: align(forecast.p10),
+            p90: align(forecast.p90),
           };
-          const forecastHs = this.createForecastSnowHeight(
-            result.values.HS,
-            result.forecast.values.NS,
-          );
-          if (forecastHs) {
-            result.forecast.values.HS = forecastHs;
+          // snow height forecast (and its percentiles) from the accumulated new snow
+          for (const values of [result.forecast.values, result.forecast.p10, result.forecast.p90]) {
+            const forecastHs = this.createForecastSnowHeight(result.values.HS, values?.NS);
+            if (values && forecastHs) {
+              values.HS = forecastHs;
+            }
           }
           result.timestamps = mergedTimestamps;
         }

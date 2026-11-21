@@ -73,6 +73,8 @@ test("filter keeps measurements and forecast within the timespan", () => {
     {
       timestamps: [4, 5, 6],
       values: { TA: [-4, -5, -6] },
+      p10: { TA: [-6, -7, -8] },
+      p90: { TA: [-2, -3, -4] },
     },
   );
   const at = (ms: number) => Temporal.Instant.fromEpochMilliseconds(ms).toZonedDateTimeISO("UTC");
@@ -84,6 +86,8 @@ test("filter keeps measurements and forecast within the timespan", () => {
   expect(filtered.forecast).toEqual({
     timestamps: [4, 5],
     values: { TA: Float64Array.of(-4, -5) },
+    p10: { TA: Float64Array.of(-6, -7) },
+    p90: { TA: Float64Array.of(-2, -3) },
   });
   expect(data.filter(at(6), at(9)).timestamps).toEqual([]);
 });
