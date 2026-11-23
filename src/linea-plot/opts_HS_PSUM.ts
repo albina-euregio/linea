@@ -31,6 +31,7 @@ export const HS = new LineaChartParameter({
   },
 });
 HS.forecast = { ...HS.series, label: "Forecast", dash: [8, 6] };
+HS.forecastBand = LineaChartParameter.forecastBand(HS.series!, "rgba(8, 81, 156, 0.15)");
 
 export const PSUM = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:PSUM")} (mm)`,

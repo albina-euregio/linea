@@ -100,7 +100,19 @@ export function toValues(values: ValuesInput): Values {
 
 export type ForecastValues = {
   timestamps: number[];
+  /** the forecast (median of an ensemble forecast) */
   values: Values;
+  /** 10th percentile of an ensemble forecast, drawn as band with {@link p90} */
+  p10?: Values;
+  /** 90th percentile of an ensemble forecast, drawn as band with {@link p10} */
+  p90?: Values;
+};
+
+type ForecastValuesInput = {
+  timestamps: number[];
+  values: ValuesInput;
+  p10?: ValuesInput;
+  p90?: ValuesInput;
 };
 
 export class StationData {
@@ -113,12 +125,14 @@ export class StationData {
     public timestamps: number[],
     public units: Units,
     values: ValuesInput,
-    forecast?: { timestamps: number[]; values: ValuesInput },
+    forecast?: ForecastValuesInput,
   ) {
     this.values = toValues(values);
     this.forecast = forecast && {
       timestamps: forecast.timestamps,
       values: toValues(forecast.values),
+      ...(forecast.p10 && { p10: toValues(forecast.p10) }),
+      ...(forecast.p90 && { p90: toValues(forecast.p90) }),
     };
   }
 
@@ -135,7 +149,12 @@ export class StationData {
       timestamps,
       units,
       values: toArrays(values),
-      forecast: forecast && { timestamps: forecast.timestamps, values: toArrays(forecast.values) },
+      forecast: forecast && {
+        timestamps: forecast.timestamps,
+        values: toArrays(forecast.values),
+        ...(forecast.p10 && { p10: toArrays(forecast.p10) }),
+        ...(forecast.p90 && { p90: toArrays(forecast.p90) }),
+      },
     };
   }
 
@@ -149,23 +168,35 @@ export class StationData {
     const startTimestamp = startDate.toInstant().epochMilliseconds;
     const endTimestamp = endDate.toInstant().epochMilliseconds;
 
-    /** slices timestamps and values to the timespan, timestamps are sorted ascending */
-    const slice = (timestamps: number[], values: Values) => {
-      const from = partitionPoint(timestamps, (t) => t < startTimestamp);
-      const to = partitionPoint(timestamps, (t) => t <= endTimestamp);
+    /** the index range of the timespan in the timestamps, which are sorted ascending */
+    const range = (timestamps: number[]) => ({
+      from: partitionPoint(timestamps, (t) => t < startTimestamp),
+      to: partitionPoint(timestamps, (t) => t <= endTimestamp),
+    });
+    const slice = (values: Values, { from, to }: { from: number; to: number }) => {
       const sliced: Values = {};
       let key: ParameterType;
       for (key in values) {
         if (values[key]) sliced[key] = values[key].slice(from, to);
       }
-      return { timestamps: timestamps.slice(from, to), values: sliced };
+      return sliced;
     };
 
-    const { timestamps: filteredTimestamps, values: filteredValues } = slice(
-      this.timestamps,
-      this.values,
-    );
-    const filteredForecast = this.forecast && slice(this.forecast.timestamps, this.forecast.values);
+    const measured = range(this.timestamps);
+    const filteredTimestamps = this.timestamps.slice(measured.from, measured.to);
+    const filteredValues = slice(this.values, measured);
+
+    let filteredForecast: ForecastValuesInput | undefined;
+    if (this.forecast) {
+      const { timestamps, values, p10, p90 } = this.forecast;
+      const forecast = range(timestamps);
+      filteredForecast = {
+        timestamps: timestamps.slice(forecast.from, forecast.to),
+        values: slice(values, forecast),
+        ...(p10 && { p10: slice(p10, forecast) }),
+        ...(p90 && { p90: slice(p90, forecast) }),
+      };
+    }
 
     return new StationData(
       this.station,

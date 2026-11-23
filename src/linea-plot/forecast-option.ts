@@ -10,7 +10,7 @@ export const ForecastLatLonSchema = v.pipe(
 
 export const ForecastOptionSchema = v.pipe(
   v.object({
-    /** Forecast model shown at the forecast marker; `label` defaults to AROME if `latlong` is set */
+    /** Forecast model shown at the forecast marker; `label` defaults to C-LAEF if `latlong` is set */
     model: v.optional(
       v.object({
         t0: v.optional(v.pipe(v.string(), v.toDate())),
@@ -45,7 +45,7 @@ export type ForecastOption = v.InferOutput<typeof ForecastOptionSchema>;
  * - An array: `[{"latlong":"48.5,11.3"}, null, {"model":{"label":{"upper":"My model"}}}]`
  *   (one per station; a single entry applies to all stations; `null` for stations without forecast)
  *
- * Every returned option has a `model`: without one, the GeoSphere AROME model is used.
+ * Every returned option has a `model`: without one, the GeoSphere C-LAEF model is used.
  */
 export function parseForecast(raw: string | null): (ForecastOption | undefined)[] {
   const value = raw?.trim();
@@ -117,12 +117,12 @@ function forecastOptionOfLatLon(value: unknown): ForecastOption | undefined {
   return latlong ? { model: defaultForecastModel(), latlong } : undefined;
 }
 
-/** Fills in the stored GeoSphere AROME label, if the model does not define its own. */
+/** Fills in the stored GeoSphere C-LAEF label, if the model does not define its own. */
 function defaultForecastModel(model?: ForecastOption["model"]): ForecastOption["model"] {
   if (model?.label) {
     return model;
   }
-  const message = i18n.message("linea:forecast:arome");
+  const message = i18n.message("linea:forecast");
   const lowerStart = message.indexOf("(G");
   const label =
     lowerStart < 0

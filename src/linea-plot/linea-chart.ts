@@ -4,7 +4,7 @@ import * as opts_VW_VWG_DW from "./opts_VW_VWG_DW";
 import * as opts_HS_PSUM from "./opts_HS_PSUM";
 import * as opts_RH_GR from "./opts_RH_GR";
 import { dewPoint } from "./dew-point";
-import { type Series, seriesOf, type StationData } from "../data/station-data";
+import { type ParameterType, type Series, seriesOf, type StationData } from "../data/station-data";
 import { i18n } from "../i18n";
 import { AbstractLineaChart } from "../abstract-linea-chart";
 import { TouchZoom } from "../shared/touch-zoom";
@@ -12,6 +12,7 @@ import { MeasurementDatesPlugin, type MeasurementSelection } from "../shared/mea
 import { profilerPlugin } from "../shared/profiler";
 import { LineaOptsHelper } from "./linea-opts-helper";
 import type { ForecastOption } from "./forecast-option";
+import type { LineaChartParameter } from "./linea-chart-parameter";
 
 export class LineaChart extends AbstractLineaChart {
   private showSurfaceHoarSeries: boolean;
@@ -49,6 +50,9 @@ export class LineaChart extends AbstractLineaChart {
     const { timestamps, values, forecast } = data;
     let i = 0;
     const forecastValues = forecast?.values;
+    /** p90 and p10 of the band, in the order of the edge series added in addForecastBand */
+    const band = (key: ParameterType) =>
+      forecast?.p10?.[key] && forecast.p90?.[key] ? [forecast.p90[key], forecast.p10[key]] : [];
 
     if (values.HS || values.PSUM) {
       const measuredPsumAccum = values.PSUM
@@ -66,6 +70,7 @@ export class LineaChart extends AbstractLineaChart {
         ...(measuredPsumAccum ? [measuredPsumAccum] : []),
         ...(forecastValues?.HS ? [forecastValues.HS] : []),
         ...(forecastPsumAccum ? [forecastPsumAccum] : []),
+        ...band("HS"),
       ]);
       i += 1;
     }
@@ -74,7 +79,12 @@ export class LineaChart extends AbstractLineaChart {
         this.plots[i],
         [timestamps, values.VW, values.VW_MAX, this.#filterDWData(values.DW)].concat(
           forecastValues
-            ? [forecastValues.VW, forecastValues.VW_MAX, this.#filterDWData(forecastValues.DW)]
+            ? [
+                forecastValues.VW,
+                forecastValues.VW_MAX,
+                this.#filterDWData(forecastValues.DW),
+                ...band("VW"),
+              ]
             : [],
         ),
       );
@@ -91,7 +101,11 @@ export class LineaChart extends AbstractLineaChart {
           values.TSS,
           ...(this.showSurfaceHoarSeries && values.TSS ? [data.generateSurfaceHoarData(TD)] : []),
           values.TA,
-        ].concat(forecastTd ? [forecastTd] : [], forecastValues?.TA ? [forecastValues.TA] : []),
+        ].concat(
+          forecastTd ? [forecastTd] : [],
+          forecastValues?.TA ? [forecastValues.TA] : [],
+          band("TA"),
+        ),
       );
       i += 1;
     }
@@ -99,7 +113,7 @@ export class LineaChart extends AbstractLineaChart {
       this.updateData(
         this.plots[i],
         [timestamps, values.RH, values.ISWR].concat(
-          forecastValues ? [forecastValues.RH, forecastValues.ISWR] : [],
+          forecastValues ? [forecastValues.RH, forecastValues.ISWR, ...band("RH")] : [],
         ),
       );
     }
@@ -366,6 +380,7 @@ export class LineaChart extends AbstractLineaChart {
               ),
         );
       }
+      this.#addForecastBand(plot, opts_HS_PSUM.HS, "HS");
       plotIdx += 1;
     }
 
@@ -389,6 +404,7 @@ export class LineaChart extends AbstractLineaChart {
           this.#filterDWData(this.result.forecast.values.DW),
         );
       }
+      this.#addForecastBand(plot, opts_VW_VWG_DW.VW, "VW");
       plotIdx += 1;
     }
 
@@ -405,6 +421,7 @@ export class LineaChart extends AbstractLineaChart {
       if (this.result.forecast.values.TA) {
         this.addSeries(plot, opts_TA_TD_TSS.TA.forecast, this.result.forecast.values.TA);
       }
+      this.#addForecastBand(plot, opts_TA_TD_TSS.TA, "TA");
       plotIdx += 1;
     }
 
@@ -417,7 +434,49 @@ export class LineaChart extends AbstractLineaChart {
       if (this.result.forecast.values.ISWR) {
         this.addSeries(plot, opts_RH_GR.ISWR.forecast, this.result.forecast.values.ISWR);
       }
+      this.#addForecastBand(plot, opts_RH_GR.RH, "RH");
     }
+  }
+
+  /**
+   * Adds the shaded band between the 10th and 90th forecast percentile of `key`, if available:
+   * the p90 and p10 edge series (same order as in {@link setData}) and the band between them.
+   */
+  #addForecastBand(plot: uPlot, parameter: LineaChartParameter, key: ParameterType): void {
+    const p10 = this.result.forecast?.p10?.[key];
+    const p90 = this.result.forecast?.p90?.[key];
+    const band = parameter.forecastBand;
+    if (!band || !p10 || !p90) {
+      return;
+    }
+    this.addSeries(plot, band.upper, p90);
+    this.addSeries(plot, band.lower, p10);
+    const upperIdx = plot.series.length - 2;
+    plot.addBand({ series: [upperIdx, upperIdx + 1], fill: () => band.fill });
+    this.#showForecastBandInLegend(plot, [upperIdx, upperIdx + 1]);
+  }
+
+  /**
+   * Shows the legend rows of the band edges only while the cursor is on a forecasted value
+   * of a visible band, so that the measured period is not cluttered with empty 10 % / 90 % rows.
+   */
+  #showForecastBandInLegend(plot: uPlot, edgeIdxs: number[]): void {
+    const update = (u: uPlot) => {
+      const rows = u.root.querySelectorAll<HTMLElement>(".u-legend .u-series");
+      for (const seriesIdx of edgeIdxs) {
+        const series = u.series[seriesIdx];
+        const idx = u.cursor.idx;
+        const value = idx == null ? null : u.data[seriesIdx]?.[idx];
+        const visible = !!series.show && value != null && !Number.isNaN(value);
+        rows.forEach((row) => {
+          if (row.querySelector(".u-label")?.textContent?.trim() === series.label) {
+            row.style.display = visible ? "" : "none";
+          }
+        });
+      }
+    };
+    plot.hooks.setLegend = [...(plot.hooks.setLegend ?? []), update];
+    update(plot);
   }
 }
 

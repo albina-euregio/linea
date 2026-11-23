@@ -44,6 +44,7 @@ export const VW = new LineaChartParameter({
   },
 });
 VW.forecast = { ...VW.series, label: "Forecast", dash: [8, 6] };
+VW.forecastBand = LineaChartParameter.forecastBand(VW.series!, "rgba(0, 226, 182, 0.2)");
 
 export const DW = new LineaChartParameter({
   label: i18n.message("linea:parameter:DW"),

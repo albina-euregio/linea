@@ -24,6 +24,7 @@ export const RH = new LineaChartParameter({
   },
 });
 RH.forecast = { ...RH.series, label: "Forecast", dash: [8, 6] };
+RH.forecastBand = LineaChartParameter.forecastBand(RH.series!, "rgba(138, 116, 116, 0.2)");
 
 export const ISWR = new LineaChartParameter({
   label: `${i18n.message("linea:parameter:ISWR")} (W/m²)`,
@@ -46,7 +47,13 @@ export const ISWR = new LineaChartParameter({
     value: (_u, v) => i18n.number(v, { maximumFractionDigits: 0 }, "W/m²"),
   },
 });
-ISWR.forecast = { ...ISWR.series, label: "Forecast", dash: [8, 6] };
+// hatched instead of the solid fill, so the forecast area is not mistaken for measurements
+ISWR.forecast = {
+  ...ISWR.series,
+  fill: LineaOptsHelper.hatchFill("rgba(222, 44, 44, 0.4)"),
+  dash: [8, 6],
+  label: "Forecast",
+};
 
 /**
  * uPlot options for Relative Luftfeuchtigkeit [%] & Globalstrahlung [W/m²]

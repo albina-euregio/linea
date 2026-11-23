@@ -45,6 +45,38 @@ export class OptsHelper {
     return `rgb(${c.map(Math.round).join(", ")})`;
   }
 
+  static #hatchPatterns = new Map<string, CanvasPattern | null>();
+
+  /**
+   * A series `fill` hatched with diagonal lines of `color`, e.g. to distinguish a
+   * forecast area from the solid fill of the measurements.
+   * @param spacing distance between the lines, in CSS pixels
+   */
+  static hatchFill(color: string, spacing = 5.5, lineWidth = 1.5): uPlot.Series.Fill {
+    return (u) => {
+      const key = `${color}|${spacing}|${lineWidth}|${uPlot.pxRatio}`;
+      if (!OptsHelper.#hatchPatterns.has(key)) {
+        const size = Math.round(spacing * uPlot.pxRatio);
+        const tile = document.createElement("canvas");
+        tile.width = tile.height = size;
+        const ctx = tile.getContext("2d")!;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth * uPlot.pxRatio;
+        ctx.beginPath();
+        // a diagonal through the tile plus the corners, so lines continue seamlessly across tiles
+        ctx.moveTo(0, size);
+        ctx.lineTo(size, 0);
+        ctx.moveTo(-size / 2, size / 2);
+        ctx.lineTo(size / 2, -size / 2);
+        ctx.moveTo(size / 2, size * 1.5);
+        ctx.lineTo(size * 1.5, size / 2);
+        ctx.stroke();
+        OptsHelper.#hatchPatterns.set(key, u.ctx.createPattern(tile, "repeat"));
+      }
+      return OptsHelper.#hatchPatterns.get(key) ?? color;
+    };
+  }
+
   /**
    *
    * @param plot the uPlot instance to resolve the series stroke for

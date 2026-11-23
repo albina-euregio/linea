@@ -58,7 +58,7 @@ function isDataAvailable(url: string | undefined): Promise<boolean> {
  *    - `latlong` - coordinates (`"lat,lon"` or `[lat, lon]`) to fetch the GeoSphere forecast for, which loads lazily when navigating past
  *      the measured data range. Without it nothing is fetched, for stations whose SMET file contains the forecast.
  *    - `model` - `{"t0": "2026-02-20T20:00:00Z", "label": {"upper": "My model", "lower": "(ACME)"}}` is shown at the forecast marker, `lower` is optional.
- *      `label` can be omitted with `latlong`, the GeoSphere AROME label is shown then. `t0` is the position of the line, per default now.
+ *      `label` can be omitted with `latlong`, the GeoSphere C-LAEF label is shown then. `t0` is the position of the line, per default now.
  *      `labelOffset` (e.g. `{"x": 10, "y": 20}`) moves the label from its default position, in pixels.
  *    Either `latlong` or `model.label` is required.
  * - `forecast-latlon` {string} - Deprecated, use `forecast`, which takes precedence. Optional forecast coordinates. Supports two formats:

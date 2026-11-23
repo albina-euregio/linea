@@ -4,8 +4,8 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import { parseForecast, parseForecastLatLon } from "./forecast-option";
 
-const aromeModel = { label: { upper: "C-LAEF Forecast", lower: "(GeoSphere Austria)" } };
-const arome = { model: aromeModel, latlong: "47.18,11.29" };
+const forecastModel = { label: { upper: "C-LAEF Forecast", lower: "(GeoSphere Austria)" } };
+const forecast = { model: forecastModel, latlong: "47.18,11.29" };
 const myModel = { label: { upper: "My model", lower: "(ACME)" } };
 
 afterEach(() => {
@@ -19,8 +19,8 @@ describe("forecast attribute", () => {
   });
 
   test("just latlong loads the stored model", () => {
-    expect(parseForecast('{"latlong":"47.18, 11.29"}')).toEqual([arome]);
-    expect(parseForecast('{"latlong":[47.18,11.29]}')).toEqual([arome]);
+    expect(parseForecast('{"latlong":"47.18, 11.29"}')).toEqual([forecast]);
+    expect(parseForecast('{"latlong":[47.18,11.29]}')).toEqual([forecast]);
   });
 
   test("just model is a forecast contained in the SMET file", () => {
@@ -49,7 +49,7 @@ describe("forecast attribute", () => {
     const value = { model: { t0: "2026-11-05T12:00:00Z" }, latlong: "47.18,11.29" };
     expect(parseForecast(JSON.stringify(value))).toEqual([
       {
-        model: { t0: new Date("2026-11-05T12:00:00Z"), label: aromeModel.label },
+        model: { t0: new Date("2026-11-05T12:00:00Z"), label: forecastModel.label },
         latlong: "47.18,11.29",
       },
     ]);
@@ -59,7 +59,7 @@ describe("forecast attribute", () => {
     const value = { model: { labelOffset: { x: 10, y: -5 } }, latlong: "47.18,11.29" };
     expect(parseForecast(JSON.stringify(value))).toEqual([
       {
-        model: { labelOffset: { x: 10, y: -5 }, label: aromeModel.label },
+        model: { labelOffset: { x: 10, y: -5 }, label: forecastModel.label },
         latlong: "47.18,11.29",
       },
     ]);
@@ -67,7 +67,7 @@ describe("forecast attribute", () => {
 
   test("array with one forecast per station", () => {
     const value = JSON.stringify([{ latlong: "47.18,11.29" }, null, { model: myModel }]);
-    expect(parseForecast(value)).toEqual([arome, undefined, { model: myModel }]);
+    expect(parseForecast(value)).toEqual([forecast, undefined, { model: myModel }]);
   });
 
   test("invalid values are ignored", () => {
@@ -110,11 +110,15 @@ describe("deprecated forecast-latlon attribute", () => {
   });
 
   test("single value", () => {
-    expect(parseForecastLatLon("47.18, 11.29")).toEqual([arome]);
+    expect(parseForecastLatLon("47.18, 11.29")).toEqual([forecast]);
   });
 
   test("array with one coordinate per station", () => {
-    expect(parseForecastLatLon('["47.18,11.29", null, ""]')).toEqual([arome, undefined, undefined]);
+    expect(parseForecastLatLon('["47.18,11.29", null, ""]')).toEqual([
+      forecast,
+      undefined,
+      undefined,
+    ]);
   });
 
   test("objects are not supported", () => {
