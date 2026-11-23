@@ -2,9 +2,11 @@ import uPlot from "uplot";
 import type { StationData } from "./data/station-data";
 import { OptsHelper } from "./shared/opts-helper";
 import type { MeasurementSelection } from "./shared/measurement-dates";
+import { isForecastBandLabel } from "./linea-plot/linea-chart-parameter";
+
 /** forecast series and the edges of forecast bands, which follow the visibility of their base series */
 function isForecastLabel(label: uPlot.Series["label"]): boolean {
-  return typeof label === "string" && label.startsWith("Forecast");
+  return (typeof label === "string" && label.startsWith("Forecast")) || isForecastBandLabel(label);
 }
 
 export abstract class AbstractLineaChart extends HTMLElement {
