@@ -40,7 +40,7 @@ export const ISWR = new LineaChartParameter({
   series: {
     label: i18n.message("linea:parameter:ISWR"),
     stroke: "#DE2D26",
-    fill: LineaOptsHelper.hatchFill("rgba(222, 44, 44, 0.4)"),
+    fill: "rgba(255,0,0,0.1)",
     scale: "y2",
     width: 1.5,
     gaps: LineaOptsHelper.spanSamplingIntervalGaps(),
@@ -50,6 +50,7 @@ export const ISWR = new LineaChartParameter({
 // hatched instead of the solid fill, so the forecast area is not mistaken for measurements
 ISWR.forecast = {
   ...ISWR.series,
+  fill: LineaOptsHelper.hatchFill("rgba(222, 44, 44, 0.4)"),
   dash: [8, 6],
   label: "Forecast",
 };
