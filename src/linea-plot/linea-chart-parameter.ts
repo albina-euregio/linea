@@ -4,18 +4,6 @@ import { OptsHelper, type SplitOptions } from "../shared/opts-helper";
 /** Adaptive split config (reuses {@link SplitOptions}, minus the runtime `uplot`). */
 export type LineaSplitSpec = Omit<SplitOptions, "uplot">;
 
-/**
- * Collects the uPlot options that define one plotted parameter: its scale,
- * its axis (incl. tick `values` formatting) and its series (incl. point
- * `value` formatting). Reuses uPlot's own types verbatim — no new vocabulary.
- *
- * The scale name is taken from `axis.scale` (which must equal `series?.scale`).
- * The adaptive {@link splits} helper lives here so the `opts_*` modules no
- * longer reach into `LineaOptsHelper` for it. Chart-level helpers
- * (getLineaOptions, the drawAxes labels/forecast/reference-line, setSelect
- * zoom) stay in `LineaOptsHelper`. The exotic 10% can still tweak the
- * resulting objects.
- */
 /** labels of the edge series of a {@link LineaForecastBand}, shown in the legend while hovering the forecast */
 export const FORECAST_BAND_LABELS = { upper: "90 %", lower: "10 %" } as const;
 
@@ -33,6 +21,18 @@ export type LineaForecastBand = {
   fill: string;
 };
 
+/**
+ * Collects the uPlot options that define one plotted parameter: its scale,
+ * its axis (incl. tick `values` formatting) and its series (incl. point
+ * `value` formatting). Reuses uPlot's own types verbatim — no new vocabulary.
+ *
+ * The scale name is taken from `axis.scale` (which must equal `series?.scale`).
+ * The adaptive {@link splits} helper lives here so the `opts_*` modules no
+ * longer reach into `LineaOptsHelper` for it. Chart-level helpers
+ * (getLineaOptions, the drawAxes labels/forecast/reference-line, setSelect
+ * zoom) stay in `LineaOptsHelper`. The exotic 10% can still tweak the
+ * resulting objects.
+ */
 export class LineaChartParameter {
   /** the shared y-scale definition (`range`, …); keyed by `axis.scale`. */
   scale?: uPlot.Scale;
