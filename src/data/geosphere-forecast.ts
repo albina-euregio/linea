@@ -179,7 +179,7 @@ export async function fetchGeosphereForecast(latlon: string): Promise<ForecastDa
  * box of the u/v components: from its point closest to calm (0 if the box contains it) to its
  * corner farthest from it [km/h].
  */
-function windSpeedRangeKmH(
+export function windSpeedRangeKmH(
   u10: Series | undefined,
   u90: Series | undefined,
   v10: Series | undefined,
