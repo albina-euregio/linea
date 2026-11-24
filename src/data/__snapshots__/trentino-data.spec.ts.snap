@@ -1,0 +1,56 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Meteotrentino station listing 1`] = `
+[
+  {
+    "geometry": {
+      "coordinates": [
+        11.023828,
+        45.786137,
+      ],
+      "type": "Point",
+    },
+    "id": "T0405",
+    "properties": {
+      "altitude": 170,
+      "dataProviderID": "IT-32-TN",
+      "dataURLs": [
+        "https://dati.meteotrentino.it/Service.asmx/GetSmetData?stazione=T0405&token=Euregio2026",
+      ],
+      "name": "Ala (Maso Le Pozze)",
+      "operator": "Meteotrentino",
+      "operatorLicense": "CC BY 4.0",
+      "operatorLicenseLink": "https://creativecommons.org/licenses/by/4.0/deed.it",
+      "operatorLink": "https://www.meteotrentino.it/",
+      "shortName": "T0405",
+      "startYear": "2012",
+    },
+    "type": "Feature",
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        11.06545,
+        45.73919,
+      ],
+      "type": "Point",
+    },
+    "id": "T0153",
+    "properties": {
+      "altitude": 692,
+      "dataProviderID": "IT-32-TN",
+      "dataURLs": [
+        "https://dati.meteotrentino.it/Service.asmx/GetSmetData?stazione=T0153&token=Euregio2026",
+      ],
+      "name": "Ala (Ronchi)",
+      "operator": "Meteotrentino",
+      "operatorLicense": "CC BY 4.0",
+      "operatorLicenseLink": "https://creativecommons.org/licenses/by/4.0/deed.it",
+      "operatorLink": "https://www.meteotrentino.it/",
+      "shortName": "T0153",
+      "startYear": "1927",
+    },
+    "type": "Feature",
+  },
+]
+`;
