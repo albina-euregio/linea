@@ -47,7 +47,6 @@ export async function fetchSMET(url: string): Promise<StationData> {
 
   let stream = response.body;
   if (
-    response.headers.get("Content-Encoding") === "gzip" ||
     response.headers.get("Content-Type") === "application/gzip" ||
     response.headers.get("Content-Type") === "application/x-gzip"
   ) {
@@ -97,6 +96,10 @@ class SMETHeader {
   fields: string[] = [];
   units: string[] = [];
   nodata = "-777";
+  /** SMET: `units_offset` per column, the SI value is `value * multiplier + offset` */
+  unitsOffset: number[] = [];
+  /** SMET: `units_multiplier` per column */
+  unitsMultiplier: number[] = [];
   station = "";
   altitude = NaN;
   /**
@@ -114,6 +117,10 @@ class SMETHeader {
       this.units = this.fields.map((f) => DEFAULT_UNITS[f as ParameterType] ?? "");
     } else if ((value = headerValue(line, "#units"))) {
       this.units = value.split(separator);
+    } else if ((value = headerValue(line, "units_offset"))) {
+      this.unitsOffset = value.split(separator).map(Number);
+    } else if ((value = headerValue(line, "units_multiplier"))) {
+      this.unitsMultiplier = value.split(separator).map(Number);
     } else if ((value = headerValue(line, "nodata"))) {
       this.nodata = value;
     } else if ((value = headerValue(line, "tz"))) {
@@ -130,7 +137,13 @@ class SMETHeader {
 
   /** unit conversion per column */
   converters(): ((v: number) => number)[] {
-    return this.units.map((u) => UNIT_MAPPING[u]?.convert ?? ((v) => v));
+    return this.fields.map((_, i) => {
+      const convert = UNIT_MAPPING[this.units[i]]?.convert ?? ((v: number) => v);
+      const offset = this.unitsOffset[i] || 0;
+      const multiplier = this.unitsMultiplier[i] ?? 1;
+      if (offset === 0 && multiplier === 1) return convert;
+      return (v: number) => convert(v * multiplier + offset);
+    });
   }
 
   toStationData(timestamps: number[], values: ArrayLike<number | null>[]): StationData {
@@ -159,6 +172,8 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
   let tzOffset: string | undefined;
   /** unit conversion per column, resolved once on the first data line */
   let converters: ((v: number) => number)[] | undefined;
+  /** numeric nodata value, resolved once on the first data line */
+  let nodata: number | undefined;
   const timestamps = [] as number[];
   let dataIndex = 0;
 
@@ -173,6 +188,7 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
     values ??= header.fields.map((): (number | null)[] => []);
     tzOffset ??= formatTimezoneOffset(header.tz);
     converters ??= header.converters();
+    nodata ??= +header.nodata;
     const cells = line0.split(separator);
     let dateString = cells[0];
     if (dateString.length === "2025-11-26T19:00:00".length) {
@@ -180,12 +196,9 @@ async function parseSMET(lines: ReadableStream<string>): Promise<StationData> {
     }
     timestamps[dataIndex] = Date.parse(dateString);
     for (let i = 1; i < values.length; i++) {
-      if (cells[i] === header.nodata) {
-        values[i][dataIndex] = null;
-        continue;
-      }
       const value = +cells[i].replace(",", ".");
-      values[i][dataIndex] = converters[i](value);
+      // compare numerically, `-999.0` is nodata for `nodata = -999`
+      values[i][dataIndex] = value === nodata ? null : converters[i](value);
     }
     dataIndex++;
   }
