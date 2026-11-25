@@ -19,7 +19,7 @@ stages:
 # smet.wasm is committed so that only developers changing the Rust code need Rust;
 # verify that the committed file matches the Rust sources
 build:wasm:
-  image: rust:1.99.0-slim
+  image: rust:1.100.0-slim
   stage: build
   cache:
     key:
