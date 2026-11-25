@@ -3,7 +3,7 @@
 //! Plain `extern "C"` exports operating on buffers owned by the module, see `src/data/smet-wasm.ts`.
 //! Header parsing and unit conversion stay in TypeScript.
 
-use std::cell::RefCell;
+use std::cell::UnsafeCell;
 
 /// Buffers shared with JavaScript. JavaScript writes its input into the buffers returned by
 /// [`input`] and [`nodata`], and reads the results of the last call via the getters.
@@ -16,12 +16,24 @@ struct State {
     union: Union,
 }
 
-thread_local! {
-    static STATE: RefCell<State> = RefCell::default();
-}
+// a plain static instead of `thread_local!`/`Mutex`: their code is expanded/inlined in this crate
+// and embeds the local path of the rust-src component (if installed) in panic locations,
+// making smet.wasm machine-dependent
+struct Global(UnsafeCell<State>);
+
+// SAFETY: wasm32-unknown-unknown is single-threaded
+unsafe impl Sync for Global {}
+
+static STATE: Global = Global(UnsafeCell::new(State {
+    input: Vec::new(),
+    nodata: Vec::new(),
+    parsed: Parsed { timestamps: Vec::new(), columns: Vec::new() },
+    union: Union { timestamps: Vec::new(), indices: Vec::new() },
+}));
 
 fn with_state<T>(f: impl FnOnce(&mut State) -> T) -> T {
-    STATE.with_borrow_mut(f)
+    // SAFETY: single-threaded, and `f` never calls `with_state` again
+    f(unsafe { &mut *STATE.0.get() })
 }
 
 /// Resizes `buffer` to `len` zero bytes and returns its address for JavaScript to write into.
