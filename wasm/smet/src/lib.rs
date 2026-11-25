@@ -95,6 +95,8 @@ pub extern "C" fn parse_data(ncols: usize, tz_minutes: f64) {
 }
 
 fn parse(bytes: &[u8], ncols: usize, tz_minutes: f64, nodata: &[u8]) -> Parsed {
+    // compare numerically, `-999.0` is nodata for `nodata = -999`
+    let nodata = parse_number(nodata);
     let mut parsed = Parsed {
         timestamps: Vec::new(),
         columns: vec![Vec::new(); ncols],
@@ -109,8 +111,8 @@ fn parse(bytes: &[u8], ncols: usize, tz_minutes: f64, nodata: &[u8]) -> Parsed {
         let Some(date) = cells.next() else { continue };
         parsed.timestamps.push(parse_timestamp(date, tz_minutes));
         for i in 1..ncols {
-            let value = match cells.next() {
-                Some(cell) if cell != nodata => parse_number(cell),
+            let value = match cells.next().map(parse_number) {
+                Some(value) if value != nodata => value,
                 _ => f64::NAN,
             };
             parsed.columns[i].push(value);
@@ -313,6 +315,15 @@ mod tests {
         assert_eq!(parsed.timestamps, [1764183600000.0]);
         assert_eq!(parsed.columns[1], [273.15]);
         assert!(parsed.columns[2][0].is_nan());
+    }
+
+    #[test]
+    fn nodata_decimal() {
+        let smet = b"[DATA]\n2026-11-20T09:30:00Z 0.9 -999.0 -999\n";
+        let parsed = parse(smet, 4, 0.0, b"-999");
+        assert_eq!(parsed.columns[1], [0.9]);
+        assert!(parsed.columns[2][0].is_nan());
+        assert!(parsed.columns[3][0].is_nan());
     }
 
     #[test]
