@@ -41,10 +41,16 @@ describe("i18n.message", () => {
   });
 
   test("falls back to en.json for untranslated (empty) message", () => {
-    // pick any key that is still untranslated in ca.json, so that translation updates don't break this test
-    const [id] = Object.entries(messagesCA).find(([, msg]) => !msg) as [messagesEN_t, string];
-    documentElement.lang = "ca";
-    expect(i18n.message(id)).toBe(messagesEN[id]);
+    // blank a message temporarily, so that translation updates don't break this test
+    const id: messagesEN_t = "linea:parameter:HS";
+    const original = messagesCA[id];
+    messagesCA[id] = "";
+    try {
+      documentElement.lang = "ca";
+      expect(i18n.message(id)).toBe(messagesEN[id]);
+    } finally {
+      messagesCA[id] = original;
+    }
   });
 
   test("returns id when message not found", () => {
